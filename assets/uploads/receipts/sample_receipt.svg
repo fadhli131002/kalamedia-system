@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
+  <rect width="600" height="800" fill="#F8FAFC"/>
+  <rect x="30" y="30" width="540" height="740" rx="16" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>
+  
+  <circle cx="300" cy="110" r="35" fill="#10B981"/>
+  <path d="M285 110l10 10 20-20" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <text x="300" y="180" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#0F172A" text-anchor="middle">TRANSFER BERHASIL</text>
+  <text x="300" y="205" font-family="Arial, sans-serif" font-size="13" fill="#64748B" text-anchor="middle">10 Agustus 2026, 14:30 WIB</text>
+  
+  <line x1="60" y1="230" x2="540" y2="230" stroke="#F1F5F9" stroke-width="2"/>
+  
+  <text x="300" y="280" font-family="Arial, sans-serif" font-size="13" fill="#64748B" text-anchor="middle">JUMLAH TRANSFER</text>
+  <text x="300" y="325" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#0F172A" text-anchor="middle">Rp 83.250.000</text>
+  
+  <rect x="60" y="360" width="480" height="280" rx="10" fill="#F8FAFC"/>
+  
+  <text x="80" y="400" font-family="Arial, sans-serif" font-size="13" fill="#64748B">Rekening Penerima</text>
+  <text x="520" y="400" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#0F172A" text-anchor="end">8820 9182 33 (BCA)</text>
+  
+  <text x="80" y="440" font-family="Arial, sans-serif" font-size="13" fill="#64748B">Nama Penerima</text>
+  <text x="520" y="440" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#0F172A" text-anchor="end">PT KALAMEDIA KREATIF</text>
+  
+  <text x="80" y="480" font-family="Arial, sans-serif" font-size="13" fill="#64748B">Pengirim</text>
+  <text x="520" y="480" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#0F172A" text-anchor="end">PT Sumber Makmur Sejahtera</text>
+  
+  <text x="80" y="520" font-family="Arial, sans-serif" font-size="13" fill="#64748B">No. Referensi</text>
+  <text x="520" y="520" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#0F172A" text-anchor="end">TRX-20260810-998811</text>
+  
+  <text x="80" y="560" font-family="Arial, sans-serif" font-size="13" fill="#64748B">Berita Acara</text>
+  <text x="520" y="560" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#0F172A" text-anchor="end">Pelunasan INV/2026/08/001</text>
+  
+  <rect x="60" y="660" width="480" height="50" rx="8" fill="#ECFDF5" stroke="#10B981" stroke-width="1"/>
+  <text x="300" y="692" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="#10B981" text-anchor="middle">STATUS: TRANSAKSI BERHASIL DIVERIFIKASI</text>
+</svg>

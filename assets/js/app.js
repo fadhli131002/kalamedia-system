@@ -1,0 +1,545 @@
+/**
+ * Kalamedia Agency Financial & Project Management System
+ * Core Frontend Interactions & Modal Manager
+ */
+
+// Toast Notifications System
+function showToast(message, type = 'info') {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `
+    <div style="flex:1; font-size:13px; font-weight:500;">${message}</div>
+    <button onclick="this.parentElement.remove()" style="background:transparent;border:none;color:#FFF;cursor:pointer;opacity:0.6">&times;</button>
+  `;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(10px)';
+    toast.style.transition = 'all 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
+}
+
+// Modal Control
+function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (modal) {
+    modal.classList.remove('show');
+    document.body.style.overflow = 'auto';
+  }
+}
+
+// Close modal when clicking outside dialog
+document.addEventListener('click', (e) => {
+  if (e.target.classList.contains('modal-backdrop')) {
+    e.target.classList.remove('show');
+    document.body.style.overflow = 'auto';
+  }
+});
+
+// Fast Table Filter & Search
+function initTableSearch(inputId, tableId) {
+  const searchInput = document.getElementById(inputId);
+  const table = document.getElementById(tableId);
+  if (!searchInput || !table) return;
+
+  searchInput.addEventListener('keyup', () => {
+    const query = searchInput.value.toLowerCase();
+    const rows = table.querySelectorAll('tbody tr');
+
+    rows.forEach(row => {
+      const text = row.innerText.toLowerCase();
+      row.style.display = text.includes(query) ? '' : 'none';
+    });
+  });
+}
+
+// Receipt Upload Modal & Trigger
+function triggerUploadModal(targetType, targetId, title = 'Upload Bukti Pembayaran') {
+  const modal = document.getElementById('modal-upload-receipt');
+  if (!modal) return;
+
+  document.getElementById('upload-target-type').value = targetType;
+  document.getElementById('upload-target-id').value = targetId;
+  document.getElementById('upload-modal-title').innerText = title;
+
+  // Reset file input & preview
+  document.getElementById('receipt-file-input').value = '';
+  document.getElementById('receipt-preview-container').style.display = 'none';
+  document.getElementById('receipt-preview-img').src = '';
+
+  openModal('modal-upload-receipt');
+}
+
+// Handle Receipt File Selection & Preview
+document.addEventListener('DOMContentLoaded', () => {
+  const fileInput = document.getElementById('receipt-file-input');
+  if (fileInput) {
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('Ukuran file melebihi 5MB! Silakan pilih file yang lebih kecil.', 'danger');
+        fileInput.value = '';
+        return;
+      }
+
+      const previewContainer = document.getElementById('receipt-preview-container');
+      const previewImg = document.getElementById('receipt-preview-img');
+
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          previewImg.src = event.target.result;
+          previewContainer.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewContainer.style.display = 'none';
+      }
+    });
+  }
+
+  // Upload Form Submit
+  const uploadForm = document.getElementById('form-upload-receipt');
+  if (uploadForm) {
+    uploadForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(uploadForm);
+      const submitBtn = uploadForm.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Mengunggah...';
+
+      try {
+        const res = await fetch(uploadForm.action, {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          closeModal('modal-upload-receipt');
+          setTimeout(() => window.location.reload(), 800);
+        } else {
+          showToast(data.message || 'Gagal mengunggah bukti', 'danger');
+        }
+      } catch (err) {
+        showToast('Terjadi kesalahan koneksi server', 'danger');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+    });
+  }
+});
+
+// View Receipt Image Lightbox
+function viewReceiptImage(imgUrl, title = 'Bukti Pembayaran') {
+  const modal = document.getElementById('modal-view-receipt');
+  if (!modal) return;
+
+  document.getElementById('view-receipt-img').src = imgUrl;
+  document.getElementById('view-receipt-title').innerText = title;
+  document.getElementById('view-receipt-download').href = imgUrl;
+  openModal('modal-view-receipt');
+}
+
+// Rupiah Input Real-Time Formatter
+function formatRupiahDisplay(value) {
+  if (value === null || value === undefined || value === '') return '';
+  const num = value.toString().replace(/[^0-9]/g, '');
+  if (!num) return '';
+  return Number(num).toLocaleString('id-ID');
+}
+
+function unformatRupiah(value) {
+  if (!value) return 0;
+  return parseFloat(value.toString().replace(/[^0-9]/g, '')) || 0;
+}
+
+function initRupiahInputs() {
+  document.querySelectorAll('.rupiah-input').forEach(input => {
+    if (input.dataset.rupiahInitialized) return;
+    input.dataset.rupiahInitialized = 'true';
+
+    // Format existing initial value if any
+    if (input.value && input.value !== '0') {
+      input.value = formatRupiahDisplay(input.value);
+    }
+
+    input.addEventListener('input', () => {
+      const raw = input.value.replace(/[^0-9]/g, '');
+      if (!raw) {
+        input.value = '';
+        return;
+      }
+      input.value = Number(raw).toLocaleString('id-ID');
+    });
+
+    input.addEventListener('blur', () => {
+      if (!input.value.trim() && input.required) {
+        input.value = '0';
+      }
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initRupiahInputs();
+});
+
+// Generic AJAX Form Handler
+function handleAjaxForm(formId, onSuccess) {
+  const form = document.getElementById(formId);
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn ? submitBtn.innerHTML : '';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Memproses...';
+    }
+
+    try {
+      const formData = new FormData(form);
+
+      // Unformat any rupiah inputs before submitting so backend receives clean floats
+      form.querySelectorAll('.rupiah-input').forEach(input => {
+        if (input.name) {
+          const rawNum = input.value.replace(/[^0-9]/g, '');
+          formData.set(input.name, rawNum);
+        }
+      });
+
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+        if (onSuccess) {
+          onSuccess(data);
+        } else {
+          setTimeout(() => window.location.reload(), 800);
+        }
+      } else {
+        showToast(data.message || 'Operasi gagal', 'danger');
+      }
+    } catch (err) {
+      showToast('Terjadi kesalahan jaringan atau server', 'danger');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
+    }
+  });
+}
+
+// Universal Custom Destructive Confirmation Modal
+window.pendingDeleteCallback = null;
+
+window.showConfirmDeleteModal = function({ title, descriptionHtml, confirmBtnText = 'Hapus', onConfirm }) {
+  const modal = document.getElementById('modal-confirm-delete');
+  if (!modal) {
+    console.error('modal-confirm-delete element not found in DOM');
+    return;
+  }
+
+  const titleEl = document.getElementById('confirm-modal-title');
+  const descEl = document.getElementById('confirm-modal-desc');
+  const confirmBtn = document.getElementById('btn-confirm-delete-action');
+
+  if (titleEl) titleEl.textContent = title || 'Hapus Data?';
+  if (descEl) descEl.innerHTML = descriptionHtml || 'Apakah Anda yakin ingin menghapus data ini? Tindakan ini bersifat permanen dan data yang dihapus tidak dapat dipulihkan.';
+  if (confirmBtn) {
+    const span = confirmBtn.querySelector('span');
+    if (span) span.textContent = confirmBtnText;
+    else confirmBtn.textContent = confirmBtnText;
+  }
+
+  window.pendingDeleteCallback = onConfirm;
+  openModal('modal-confirm-delete');
+};
+
+window.executePendingDelete = async function() {
+  const confirmBtn = document.getElementById('btn-confirm-delete-action');
+  if (typeof window.pendingDeleteCallback === 'function') {
+    const originalHtml = confirmBtn ? confirmBtn.innerHTML : '';
+    if (confirmBtn) {
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '<span>Menghapus...</span>';
+    }
+    try {
+      await window.pendingDeleteCallback();
+    } catch (err) {
+      console.error('Delete execution error:', err);
+      if (typeof showToast === 'function') showToast('Terjadi kesalahan saat menghapus data', 'danger');
+    } finally {
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = originalHtml;
+      }
+      closeModal('modal-confirm-delete');
+    }
+  }
+};
+
+// Invoices Delete Helper
+window.confirmDeleteInvoice = function(id, invoiceNumber) {
+  window.showConfirmDeleteModal({
+    title: 'Hapus Invoice?',
+    descriptionHtml: `Apakah Anda yakin ingin menghapus invoice <strong style="color: #101828;">#${invoiceNumber}</strong>? Tindakan ini bersifat permanen dan data yang dihapus tidak dapat dipulihkan.`,
+    confirmBtnText: 'Hapus Invoice',
+    onConfirm: async () => {
+      const formData = new FormData();
+      formData.append('invoice_id', id);
+
+      try {
+        const res = await fetch('api/invoices.php?action=delete', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message || 'Invoice berhasil dihapus!', 'success');
+          setTimeout(() => window.location.reload(), 600);
+        } else {
+          showToast(data.message || 'Gagal menghapus invoice', 'danger');
+        }
+      } catch (err) {
+        showToast('Gagal menghapus invoice', 'danger');
+      }
+    }
+  });
+};
+
+// Global event delegation for delete button clicks
+document.addEventListener('click', (e) => {
+  const delBtn = e.target.closest('.btn-delete-ghost');
+  if (delBtn && delBtn.dataset.invoiceId) {
+    e.preventDefault();
+    window.confirmDeleteInvoice(delBtn.dataset.invoiceId, delBtn.dataset.invoiceNumber || '');
+  }
+});
+
+// --- Content Calendar Helper Functions ---
+window.setModalContentColor = function(hex) {
+  const input = document.getElementById('cp-color-hex');
+  const dot = document.getElementById('modal-content-color-dot');
+  if (input) input.value = hex;
+  if (dot) dot.style.background = hex;
+};
+
+window.updateAssetUrlButton = function(val) {
+  const btn = document.getElementById('cp-btn-open-asset');
+  if (!btn) return;
+  if (val && (val.startsWith('http://') || val.startsWith('https://'))) {
+    btn.href = val;
+    btn.style.display = 'inline-flex';
+  } else {
+    btn.style.display = 'none';
+  }
+};
+
+window.openCreateContentModal = function(dateStr = '', timeStr = '10:00') {
+  const form = document.getElementById('form-content-planner');
+  if (form) form.reset();
+
+  document.getElementById('cp-id').value = '';
+  document.getElementById('modal-content-title').textContent = '+ Tambah Jadwal Konten';
+  
+  const delBtn = document.getElementById('cp-btn-delete');
+  if (delBtn) delBtn.style.display = 'none';
+
+  if (dateStr) {
+    document.getElementById('cp-publish-date').value = dateStr;
+  } else {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('cp-publish-date').value = today;
+  }
+
+  if (timeStr) {
+    document.getElementById('cp-publish-time').value = timeStr;
+  }
+
+  setModalContentColor('#3B82F6');
+  updateAssetUrlButton('');
+  openModal('modal-content-planner');
+};
+
+window.openEditContentModal = async function(contentId) {
+  try {
+    const res = await fetch(`api/content.php?action=get_details&id=${contentId}`);
+    const data = await res.json();
+    if (!data.success || !data.content) {
+      showToast(data.message || 'Gagal memuat detail konten', 'danger');
+      return;
+    }
+
+    const c = data.content;
+    document.getElementById('cp-id').value = c.id;
+    document.getElementById('modal-content-title').textContent = 'Edit Jadwal Konten';
+    document.getElementById('cp-title').value = c.title || '';
+    document.getElementById('cp-client-id').value = c.client_id || '';
+    
+    // Trigger project dropdown update for client
+    if (typeof loadProjectsForClient === 'function') {
+      loadProjectsForClient(c.client_id, 'cp-project-id');
+    }
+    setTimeout(() => {
+      document.getElementById('cp-project-id').value = c.project_id || '';
+    }, 100);
+
+    document.getElementById('cp-platform').value = c.platform || 'Instagram';
+    document.getElementById('cp-content-type').value = c.content_type || 'Reels / Video';
+    document.getElementById('cp-publish-date').value = c.publish_date || '';
+    document.getElementById('cp-publish-time').value = c.publish_time || '10:00';
+    document.getElementById('cp-status').value = c.status || 'Draft';
+    document.getElementById('cp-assignee-id').value = c.assignee_id || '';
+    document.getElementById('cp-asset-url').value = c.asset_url || '';
+    document.getElementById('cp-notes').value = c.notes || '';
+
+    setModalContentColor(c.color_hex || '#3B82F6');
+    updateAssetUrlButton(c.asset_url || '');
+
+    const delBtn = document.getElementById('cp-btn-delete');
+    if (delBtn) delBtn.style.display = 'inline-flex';
+
+    openModal('modal-content-planner');
+  } catch (err) {
+    console.error('Error fetching content details:', err);
+    showToast('Gagal memuat detail konten', 'danger');
+  }
+};
+
+window.submitContentForm = async function() {
+  const form = document.getElementById('form-content-planner');
+  if (!form) return;
+
+  const formData = new FormData(form);
+  const id = formData.get('id');
+  const action = id ? 'update' : 'create';
+
+  const submitBtn = document.getElementById('cp-btn-submit');
+  const origText = submitBtn ? submitBtn.innerHTML : '';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span>Menyimpan...</span>';
+  }
+
+  try {
+    const res = await fetch(`api/content.php?action=${action}`, {
+      method: 'POST',
+      body: formData
+    });
+    const result = await res.json();
+
+    if (result.success) {
+      showToast(result.message || 'Konten berhasil disimpan!', 'success');
+      closeModal('modal-content-planner');
+      if (typeof window.refreshContentCalendar === 'function') {
+        window.refreshContentCalendar();
+      }
+    } else {
+      showToast(result.message || 'Gagal menyimpan konten', 'danger');
+    }
+  } catch (err) {
+    console.error('Submit error:', err);
+    showToast('Terjadi kesalahan saat menyimpan konten', 'danger');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = origText;
+    }
+  }
+};
+
+window.deleteContentFromModal = function() {
+  const id = document.getElementById('cp-id').value;
+  const title = document.getElementById('cp-title').value || 'Jadwal Konten';
+  if (!id) return;
+
+  window.showConfirmDeleteModal({
+    title: 'Hapus Jadwal Konten?',
+    descriptionHtml: `Apakah Anda yakin ingin menghapus jadwal konten <strong style="color: #101828;">"${title}"</strong>? Data yang dihapus tidak akan ditampilkan lagi di kalender.`,
+    confirmBtnText: 'Hapus Konten',
+    onConfirm: async () => {
+      const formData = new FormData();
+      formData.append('id', id);
+
+      try {
+        const res = await fetch('api/content.php?action=delete', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message || 'Konten berhasil dihapus!', 'success');
+          closeModal('modal-content-planner');
+          if (typeof window.refreshContentCalendar === 'function') {
+            window.refreshContentCalendar();
+          }
+        } else {
+          showToast(data.message || 'Gagal menghapus konten', 'danger');
+        }
+      } catch (err) {
+        showToast('Gagal menghapus konten', 'danger');
+      }
+    }
+  });
+};
+
+window.openExportContentModal = function() {
+  // Sync current calendar month into input if available
+  const monthInput = document.getElementById('export-month-input');
+  if (monthInput) {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    if (!monthInput.value) monthInput.value = `${yyyy}-${mm}`;
+  }
+  openModal('modal-export-content-pdf');
+};
+
+window.toggleExportRangeMode = function(mode) {
+  const monthWrap = document.getElementById('export-month-wrap');
+  const customWrap = document.getElementById('export-custom-date-wrap');
+  const labelMonth = document.getElementById('label-export-mode-month');
+  const labelCustom = document.getElementById('label-export-mode-custom');
+
+  if (mode === 'month') {
+    if (monthWrap) monthWrap.style.display = 'block';
+    if (customWrap) customWrap.style.display = 'none';
+    if (labelMonth) labelMonth.style.borderColor = '#2563EB';
+    if (labelCustom) labelCustom.style.borderColor = '#D0D5DD';
+  } else {
+    if (monthWrap) monthWrap.style.display = 'none';
+    if (customWrap) customWrap.style.display = 'flex';
+    if (labelMonth) labelMonth.style.borderColor = '#D0D5DD';
+    if (labelCustom) labelCustom.style.borderColor = '#2563EB';
+  }
+};
+

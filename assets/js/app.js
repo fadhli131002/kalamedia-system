@@ -471,6 +471,106 @@ window.confirmDeleteProject = function(id, projectName) {
   });
 };
 
+// --- Freelancer Voucher / Invoice CRUD Helpers ---
+window.openFreelancerVoucherModal = async function(payoutId) {
+  try {
+    const res = await fetch(`api/expenses.php?action=get_payout_voucher&id=${payoutId}`);
+    const data = await res.json();
+    if (!data.success || !data.payout) {
+      showToast(data.message || 'Gagal memuat voucher pembayaran', 'danger');
+      return;
+    }
+
+    const p = data.payout;
+    const f = data.formatted;
+
+    const fnEl = document.getElementById('vch-freelancer-name');
+    const fbEl = document.getElementById('vch-freelancer-bank');
+    const vnEl = document.getElementById('vch-display-number');
+    const vdEl = document.getElementById('vch-display-date');
+    const vsEl = document.getElementById('vch-status');
+    const pnEl = document.getElementById('vch-project-name');
+    const ccEl = document.getElementById('vch-client-company');
+    const aiEl = document.getElementById('vch-account-info');
+    const ttEl = document.getElementById('vch-task-title');
+    const tdEl = document.getElementById('vch-task-desc');
+    const acEl = document.getElementById('vch-amount-col');
+    const taEl = document.getElementById('vch-total-amount');
+    const sfEl = document.getElementById('vch-sign-freelancer');
+
+    if (fnEl) fnEl.innerText = p.freelancer_name || '-';
+    if (fbEl) fbEl.innerText = (p.freelancer_bank || 'Bank') + ' - ' + (p.freelancer_account || '-');
+    if (vnEl) vnEl.innerText = 'VOUCHER: #' + f.voucher_number;
+    if (vdEl) vdEl.innerText = 'Tanggal Bayar: ' + f.payment_date;
+    if (vsEl) {
+      vsEl.innerText = p.status === 'Paid' ? 'LUNAS (PAID)' : 'PENDING (MENUNGGU TRANSFER)';
+      vsEl.style.color = p.status === 'Paid' ? '#10B981' : '#F59E0B';
+    }
+
+    if (pnEl) pnEl.innerText = p.project_name || '-';
+    if (ccEl) ccEl.innerText = p.client_company || '-';
+    if (aiEl) aiEl.innerText = (p.freelancer_bank || 'BCA') + ' - ' + (p.freelancer_account || '-');
+
+    if (ttEl) ttEl.innerText = p.task_description || 'Jasa Produksi Konten / Ads Management';
+    if (tdEl) tdEl.innerText = `Pelaksanaan deliverable untuk proyek ${p.project_name} (Klien: ${p.client_company}).`;
+    if (acEl) acEl.innerText = f.amount;
+    if (taEl) taEl.innerText = f.amount;
+    if (sfEl) sfEl.innerText = p.freelancer_name || '(Nama Freelancer)';
+
+    openModal('modal-freelancer-voucher');
+  } catch (err) {
+    showToast('Gagal memuat voucher fee freelancer', 'danger');
+  }
+};
+
+window.printFreelancerVoucher = function() {
+  const printArea = document.getElementById('freelancer-voucher-print-area');
+  if (!printArea) return;
+  const content = printArea.innerHTML;
+  const printWin = window.open('', '', 'width=850,height=900');
+  printWin.document.write(`
+    <html>
+      <head>
+        <title>Voucher Pembayaran Freelancer - Kala Media</title>
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+        <style>
+          body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; background: #fff; padding: 20px; color: #000; }
+          @page { size: A4; margin: 15mm; }
+        </style>
+      </head>
+      <body>${content}</body>
+    </html>
+  `);
+  printWin.document.close();
+  printWin.focus();
+  setTimeout(() => {
+    printWin.print();
+    printWin.close();
+  }, 400);
+};
+
+window.downloadFreelancerVoucherPdf = function() {
+  const element = document.getElementById('freelancer-voucher-print-area');
+  if (!element) return;
+  const flName = (document.getElementById('vch-freelancer-name')?.innerText || 'Freelancer').trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+  const opt = {
+    margin: [8, 8, 8, 8],
+    filename: `Voucher_Fee_${flName}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, logging: false },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  if (typeof html2pdf !== 'undefined') {
+    showToast('Membuat PDF Voucher Fee Freelancer...', 'info');
+    html2pdf().set(opt).from(element).save().then(() => {
+      showToast('PDF Voucher Fee berhasil diunduh!', 'success');
+    });
+  } else {
+    window.printFreelancerVoucher();
+  }
+};
+
 // Global event delegation for delete button clicks
 document.addEventListener('click', (e) => {
   const delBtn = e.target.closest('.btn-delete-ghost');

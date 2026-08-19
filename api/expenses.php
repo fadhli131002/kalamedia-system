@@ -199,4 +199,50 @@ if ($action === 'delete_ads') {
     }
 }
 
+// 6. Get Freelancer Payout Voucher / Invoice Data
+if ($action === 'get_payout_voucher' || $action === 'get_payout') {
+    $id = intval($_GET['id'] ?? $_POST['id'] ?? 0);
+    if ($id <= 0) {
+        echo json_encode(['success' => false, 'message' => 'ID Payout tidak valid.']);
+        exit;
+    }
+
+    try {
+        $stmt = $db->prepare("
+            SELECT p.*, pr.name as project_name, c.company as client_company, c.name as client_pic
+            FROM freelancer_payouts p
+            JOIN projects pr ON p.project_id = pr.id
+            JOIN clients c ON pr.client_id = c.id
+            WHERE p.id = ? AND COALESCE(p.is_deleted, 0) = 0
+        ");
+        $stmt->execute([$id]);
+        $payout = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$payout) {
+            echo json_encode(['success' => false, 'message' => 'Data fee freelancer tidak ditemukan.']);
+            exit;
+        }
+
+        $paidDate = $payout['paid_at'] ?: $payout['created_at'];
+        $voucherNumber = 'VCH-FL-' . date('ym', strtotime($paidDate)) . str_pad($payout['id'], 3, '0', STR_PAD_LEFT);
+
+        $formatted = [
+            'voucher_number' => $voucherNumber,
+            'amount' => format_rupiah($payout['amount']),
+            'payment_date' => format_date($paidDate, true),
+            'created_date' => format_date($payout['created_at'])
+        ];
+
+        echo json_encode([
+            'success' => true,
+            'payout' => $payout,
+            'formatted' => $formatted
+        ]);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        exit;
+    }
+}
+
 echo json_encode(['success' => false, 'message' => 'Invalid action']);

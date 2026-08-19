@@ -1022,7 +1022,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div style="font-weight: 700; color: #000000; border-top: 1px solid #000000; padding-top: 4px;" id="slip-sign-emp">(Nama Karyawan)</div>
         </div>
         <div style="width: 220px;">
-          <div style="color: #4B5563; margin-bottom: 4px;">Head of Finance & Operations,</div>
+          <div style="color: #4B5563; margin-bottom: 4px;">Marketing Manager,</div>
           <div style="height: 48px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px;">
             <img src="assets/Jpg/ttd-ilham.png" alt="TTD Ilham Lanang" style="height: 44px; max-width: 140px; object-fit: contain;">
           </div>
@@ -1049,6 +1049,154 @@ document.addEventListener('DOMContentLoaded', () => {
         <span>Cetak</span>
       </button>
       <button type="button" class="btn btn-primary" id="btn-download-slip-pdf" onclick="downloadSlipPdf()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <span>Unduh PDF</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 11b. Modal Preview & Cetak Voucher Pembayaran / Invoice Fee Freelancer -->
+<div id="modal-freelancer-voucher" class="modal-backdrop">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-header">
+      <h3 class="modal-title">Bukti Pembayaran &amp; Invoice Fee Freelancer</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-freelancer-voucher')">&times;</button>
+    </div>
+    <div class="modal-body" id="freelancer-voucher-print-area" style="background: #FFFFFF; color: #000000; border-radius: 8px; padding: 36px 40px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, Arial, sans-serif;">
+      
+      <!-- Top To / Date Bar -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 1.5px solid #000000; margin-bottom: 24px;">
+        <div>
+          <div style="font-size: 13px; font-weight: 500; color: #000000; margin-bottom: 3px;">Penerima Honor (Talenta / Freelancer):</div>
+          <div style="font-size: 16px; font-weight: 700; color: #000000;" id="vch-freelancer-name">-</div>
+          <div style="font-size: 12px; color: #4B5563; margin-top: 2px;">
+            <span id="vch-freelancer-bank">-</span>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 13px; font-weight: 800; color: #000000; margin-bottom: 3px;" id="vch-display-number">VOUCHER: -</div>
+          <div style="font-size: 12.5px; color: #4B5563;" id="vch-display-date">Tanggal Bayar: -</div>
+        </div>
+      </div>
+
+      <!-- Main Header: Logo & Title -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px;">
+        <div style="width: 260px;">
+          <img src="assets/Jpg/Asset 3.png" alt="Kala Media Creative Agency" style="height: 52px; width: auto; object-fit: contain; margin-bottom: 10px; display: block;">
+          <div style="font-size: 10.5px; line-height: 1.35; color: #6B7280;">
+            Jl. BSD Raya Utama, Pagedangan,<br>
+            Kec. Pagedangan, Kabupaten Tangerang,<br>
+            Banten 15339 &bull; <?= AGENCY_EMAIL ?>
+          </div>
+        </div>
+
+        <div style="text-align: right;">
+          <div style="font-size: 32px; font-weight: 900; color: #000000; letter-spacing: 1.5px; line-height: 1.1; margin-bottom: 8px; text-transform: uppercase;">
+            PAYMENT VOUCHER
+          </div>
+          <div style="font-size: 12px; font-weight: 800; color: #4F46E5; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px;">
+            BUKTI PEMBAYARAN FEE FREELANCER
+          </div>
+          <div style="font-size: 12px; color: #000000;">
+            Status: <span id="vch-status" style="font-weight: 700; color: #10B981;">LUNAS (PAID)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Project & Client Metadata -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px;">
+        <div>
+          <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 110px; display: inline-block;">Proyek Terkait:</span> <strong style="color: #0F172A;" id="vch-project-name">-</strong></div>
+          <div><span style="color: #64748B; width: 110px; display: inline-block;">Klien / Brand:</span> <span id="vch-client-company" style="font-weight: 600; color: #0F172A;">-</span></div>
+        </div>
+        <div>
+          <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 110px; display: inline-block;">Metode Bayar:</span> <strong style="color: #0F172A;">Bank Transfer</strong></div>
+          <div><span style="color: #64748B; width: 110px; display: inline-block;">Akun Rekening:</span> <span id="vch-account-info" style="font-weight: 600; color: #0F172A;">-</span></div>
+        </div>
+      </div>
+
+      <!-- Deliverables & Task Description Table -->
+      <div style="border: 1px solid #E5E7EB; border-radius: 6px; overflow: hidden; margin-bottom: 24px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+          <thead>
+            <tr style="background: #F9FAFB; border-bottom: 1px solid #E5E7EB; text-align: left;">
+              <th style="padding: 10px 14px; font-weight: 700; color: #000000; width: 65%;">URAIAN JASA / TUGAS PEKERJAAN</th>
+              <th style="padding: 10px 14px; font-weight: 700; color: #000000; text-align: right; width: 35%;">NOMINAL HONOR (RP)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 16px 14px; color: #374151; vertical-align: top;">
+                <div style="font-weight: 700; color: #101828; margin-bottom: 4px;" id="vch-task-title">Jasa Pekerjaan Freelance</div>
+                <div style="font-size: 11.5px; color: #6B7280; line-height: 1.4;" id="vch-task-desc">-</div>
+              </td>
+              <td style="padding: 16px 14px; font-weight: 800; font-size: 14px; color: #101828; text-align: right; vertical-align: top;" id="vch-amount-col">
+                Rp 0
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Total Paid Highlight -->
+      <div style="background: #F9FAFB; border: 1.5px solid #000000; border-radius: 6px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+          <div style="font-size: 13px; font-weight: 800; color: #000000; letter-spacing: 0.5px; text-transform: uppercase;">
+            TOTAL DIBAYARKAN (NET PAYOUT)
+          </div>
+          <div style="font-size: 11px; color: #4B5563; margin-top: 3px;">
+            Pembayaran telah ditransfer penuh ke rekening talenta terkait.
+          </div>
+        </div>
+        <div style="font-size: 26px; font-weight: 900; color: #000000; letter-spacing: 0.5px;" id="vch-total-amount">
+          Rp 0
+        </div>
+      </div>
+
+      <!-- Signatures Footer -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 36px; padding-top: 10px; font-size: 12px; text-align: center;">
+        <div style="width: 180px;">
+          <div style="color: #4B5563; margin-bottom: 50px;">Penerima Honor,</div>
+          <div style="font-weight: 700; color: #000000; border-top: 1px solid #000000; padding-top: 4px;" id="vch-sign-freelancer">(Nama Freelancer)</div>
+        </div>
+        <div style="width: 190px;">
+          <div style="color: #4B5563; margin-bottom: 4px;">Disiapkan oleh,</div>
+          <div style="height: 48px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px;">
+            <img src="assets/Jpg/ttd-fadhli.png" alt="TTD Muhammad Fadhli" style="height: 42px; max-width: 120px; object-fit: contain;">
+          </div>
+          <div style="font-weight: 700; color: #000000; border-top: 1px solid #000000; padding-top: 4px;">Muhammad Fadhli</div>
+          <div style="font-size: 10px; color: #6B7280;">Creative Manager</div>
+        </div>
+        <div style="width: 190px;">
+          <div style="color: #4B5563; margin-bottom: 4px;">Disetujui oleh,</div>
+          <div style="height: 48px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px;">
+            <img src="assets/Jpg/ttd-ilham.png" alt="TTD Ilham Lanang" style="height: 42px; max-width: 120px; object-fit: contain;">
+          </div>
+          <div style="font-weight: 700; color: #000000; border-top: 1px solid #000000; padding-top: 4px;">Ilham Lanang</div>
+          <div style="font-size: 10px; color: #6B7280;">Marketing Manager</div>
+        </div>
+      </div>
+
+      <!-- Bottom Tagline & Brand Links -->
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E5E7EB; padding-top: 12px; margin-top: 28px; font-size: 10.5px; color: #6B7280;">
+        <div style="font-weight: 700; color: #000000;">Built to Be Seen.</div>
+        <div style="display: flex; gap: 16px;">
+          <span><?= AGENCY_INSTAGRAM ?></span>
+          <span><?= AGENCY_EMAIL ?></span>
+          <span><?= AGENCY_WEBSITE ?></span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
+      <button type="button" class="btn btn-secondary" onclick="closeModal('modal-freelancer-voucher')">Tutup</button>
+      <button type="button" class="btn btn-secondary" onclick="printFreelancerVoucher()" title="Cetak langsung ke printer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        <span>Cetak Voucher</span>
+      </button>
+      <button type="button" class="btn btn-primary" onclick="downloadFreelancerVoucherPdf()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         <span>Unduh PDF</span>
       </button>

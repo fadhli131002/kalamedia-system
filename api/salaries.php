@@ -278,6 +278,50 @@ if ($action === 'delete_employee') {
 }
 
 // 6. Get Salary Slip Data
+if ($action === 'get_slip_data' || $action === 'get_salary') {
+    $id = intval($_GET['id'] ?? $_POST['id'] ?? 0);
+    if ($id <= 0) {
+        echo json_encode(['success' => false, 'message' => 'ID slip gaji tidak valid.']);
+        exit;
+    }
+
+    try {
+        $stmt = $db->prepare("
+            SELECT s.*, 
+                   e.email as emp_email, e.phone as emp_phone, 
+                   e.department as emp_dept, e.employment_type
+            FROM salaries s
+            LEFT JOIN employees e ON s.employee_id = e.id
+            WHERE s.id = ? AND COALESCE(s.is_deleted, 0) = 0
+        ");
+        $stmt->execute([$id]);
+        $salary = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$salary) {
+            echo json_encode(['success' => false, 'message' => 'Data slip gaji tidak ditemukan.']);
+            exit;
+        }
+
+        $formatted = [
+            'base_salary' => format_rupiah($salary['base_salary']),
+            'allowance' => format_rupiah($salary['allowance']),
+            'deduction' => format_rupiah($salary['deduction']),
+            'net_salary' => format_rupiah($salary['net_salary']),
+            'payment_date' => format_date($salary['payment_date'])
+        ];
+
+        echo json_encode([
+            'success' => true,
+            'salary' => $salary,
+            'formatted' => $formatted
+        ]);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        exit;
+    }
+}
+
 // 7. Download Slip Gaji PDF (Standalone Document)
 if ($action === 'download_slip_pdf') {
     $id = intval($_GET['id'] ?? 0);

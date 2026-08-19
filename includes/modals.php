@@ -197,9 +197,15 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
     <form id="form-input-payout" action="api/expenses.php?action=create_payout" method="POST">
       <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label">Nama Penerima *</label>
-          <input type="text" name="freelancer_name" class="form-control" placeholder="Nama lengkap penerima" required>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nama Penerima *</label>
+            <input type="text" name="freelancer_name" class="form-control" placeholder="Nama lengkap penerima" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">No. WhatsApp / HP</label>
+            <input type="text" name="freelancer_phone" class="form-control" placeholder="Contoh: 081234567890">
+          </div>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -311,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div class="form-group">
             <label class="form-label">ID Akun Iklan</label>
-            <input type="text" name="account_id" class="form-control" placeholder="Misal: act_88992211">
+            <input type="text" name="account_id" class="form-control" placeholder="Misal: 2268451143696057">
           </div>
         </div>
         <div class="form-row">
@@ -343,6 +349,171 @@ document.addEventListener('DOMContentLoaded', () => {
 document.addEventListener('DOMContentLoaded', () => {
   handleAjaxForm('form-catat-ads', () => {
     closeModal('modal-catat-ads');
+    setTimeout(() => window.location.reload(), 800);
+  });
+});
+</script>
+
+<!-- 3b. Modal Edit Pembayaran Vendor & Freelancer -->
+<div id="modal-edit-payout" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">&#9998; Edit Pembayaran Vendor &amp; Freelancer</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-edit-payout')">&times;</button>
+    </div>
+    <form id="form-edit-payout" action="api/expenses.php?action=update_payout" method="POST">
+      <input type="hidden" name="id" id="edit-payout-id">
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nama Penerima *</label>
+            <input type="text" name="freelancer_name" id="edit-payout-name" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">No. WhatsApp / HP</label>
+            <input type="text" name="freelancer_phone" id="edit-payout-phone" class="form-control" placeholder="Contoh: 081234567890">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Bank Penerima</label>
+            <input type="text" name="freelancer_bank" id="edit-payout-bank" class="form-control" placeholder="BCA / Mandiri">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nomor Rekening</label>
+            <input type="text" name="freelancer_account" id="edit-payout-account" class="form-control" placeholder="Nomor rekening transfer">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Klien Terkait *</label>
+            <select name="client_id" id="edit-payout-client-select" class="form-select" onchange="loadProjectsForClient(this.value, 'edit-payout-project-select')" required>
+              <option value="">-- Pilih Klien --</option>
+              <?php foreach ($allClients as $c): ?>
+                <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['company']) ?> (<?= htmlspecialchars($c['name']) ?>)</option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Proyek</label>
+            <select name="project_id" id="edit-payout-project-select" class="form-select">
+              <option value="">-- Terkait Proyek Klien --</option>
+              <?php foreach ($allProjects as $p): ?>
+                <option value="<?= $p['id'] ?>" data-client="<?= $p['client_id'] ?>"><?= htmlspecialchars($p['name']) ?> (<?= htmlspecialchars($p['company']) ?>)</option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Uraian Pekerjaan *</label>
+          <textarea name="task_description" id="edit-payout-task" class="form-control" rows="2" required></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Honorarium (Rp) *</label>
+            <div class="input-group-currency">
+              <span class="currency-addon">Rp</span>
+              <input type="text" name="amount" id="edit-payout-amount" class="form-control rupiah-input" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status Pembayaran</label>
+            <select name="status" id="edit-payout-status" class="form-select">
+              <option value="Pending">Pending (Belum Ditransfer)</option>
+              <option value="Paid">Paid (Sudah Ditransfer)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-edit-payout')">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  handleAjaxForm('form-edit-payout', () => {
+    closeModal('modal-edit-payout');
+    setTimeout(() => window.location.reload(), 800);
+  });
+});
+</script>
+
+<!-- 4b. Modal Edit Pengeluaran Iklan Digital (Ads Spend) -->
+<div id="modal-edit-ads" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">&#9998; Edit Pengeluaran Iklan Digital</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-edit-ads')">&times;</button>
+    </div>
+    <form id="form-edit-ads" action="api/expenses.php?action=update_ads" method="POST">
+      <input type="hidden" name="id" id="edit-ads-id">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Klien Terkait *</label>
+          <select name="client_id" id="edit-ads-client-select" class="form-select" onchange="loadProjectsForClient(this.value, 'edit-ads-project-select')" required>
+            <option value="">-- Pilih Klien --</option>
+            <?php foreach ($allClients as $c): ?>
+              <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['company']) ?> (<?= htmlspecialchars($c['name']) ?>)</option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Proyek</label>
+          <select name="project_id" id="edit-ads-project-select" class="form-select">
+            <option value="">-- Terkait Proyek Klien --</option>
+            <?php foreach ($allProjects as $p): ?>
+              <option value="<?= $p['id'] ?>" data-client="<?= $p['client_id'] ?>"><?= htmlspecialchars($p['name']) ?> (<?= htmlspecialchars($p['company']) ?>)</option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Platform Iklan *</label>
+            <select name="platform" id="edit-ads-platform" class="form-select" required>
+              <option value="Meta Ads">Meta Ads (Facebook &amp; Instagram)</option>
+              <option value="Google Ads">Google Ads (Search &amp; YouTube)</option>
+              <option value="TikTok Ads">TikTok Ads</option>
+              <option value="LinkedIn Ads">LinkedIn Ads</option>
+              <option value="Twitter/X Ads">X (Twitter) Ads</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ID Akun Iklan</label>
+            <input type="text" name="account_id" id="edit-ads-account" class="form-control" placeholder="Misal: 2268451143696057">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nominal Anggaran (Rp) *</label>
+            <div class="input-group-currency">
+              <span class="currency-addon">Rp</span>
+              <input type="text" name="amount" id="edit-ads-amount" class="form-control rupiah-input" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tanggal Transaksi *</label>
+            <input type="date" name="spent_date" id="edit-ads-date" class="form-control" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Keterangan Kampanye</label>
+          <textarea name="notes" id="edit-ads-notes" class="form-control" rows="2" placeholder="Contoh: Top up campaign promo bulanan"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-edit-ads')">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  handleAjaxForm('form-edit-ads', () => {
+    closeModal('modal-edit-ads');
     setTimeout(() => window.location.reload(), 800);
   });
 });
@@ -1213,6 +1384,160 @@ document.addEventListener('DOMContentLoaded', () => {
         <span>Unduh PDF</span>
       </button>
       <button type="button" class="btn" onclick="shareFreelancerVoucherWa()" title="Kirim bukti pembayaran ke WhatsApp Talenta" style="background: #25D366; color: #FFFFFF; border: none; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+        <span>Share ke WA</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 11c. Modal Preview & Cetak Voucher / Invoice Top-Up Ads Resmi -->
+<div id="modal-ads-voucher" class="modal-backdrop">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-header">
+      <h3 class="modal-title">Bukti Transaksi &amp; Invoice Top-Up Saldo Iklan</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-ads-voucher')">&times;</button>
+    </div>
+    <div class="modal-body" id="ads-voucher-print-area" style="background: #FFFFFF; color: #000000; border-radius: 8px; padding: 36px 40px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, Arial, sans-serif;">
+      
+      <!-- Top To / Date Bar -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 1.5px solid #000000; margin-bottom: 24px;">
+        <div>
+          <div style="font-size: 13px; font-weight: 500; color: #000000; margin-bottom: 3px;">Klien / Brand Pengiklan:</div>
+          <div style="font-size: 17px; font-weight: 700; color: #000000;" id="vch-ads-client-company">-</div>
+          <div style="font-size: 12px; color: #4B5563; margin-top: 2px;">
+            PIC: <span id="vch-ads-client-pic">-</span> &bull; <span id="vch-ads-project-name">Proyek</span>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 13px; font-weight: 800; color: #000000; margin-bottom: 3px;" id="vch-ads-number">VOUCHER: -</div>
+          <div style="font-size: 12.5px; color: #4B5563;" id="vch-ads-date">Tanggal Top-Up: -</div>
+        </div>
+      </div>
+
+      <!-- Main Header: Logo & Title -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px;">
+        <div style="width: 260px;">
+          <img src="assets/Jpg/Asset 3.png" alt="Kala Media Creative Agency" style="height: 52px; width: auto; object-fit: contain; margin-bottom: 10px; display: block;">
+          <div style="font-size: 10.5px; line-height: 1.35; color: #6B7280;">
+            Jl. BSD Raya Utama, Pagedangan,<br>
+            Kec. Pagedangan, Kabupaten Tangerang,<br>
+            Banten 15339 &bull; <?= AGENCY_EMAIL ?>
+          </div>
+        </div>
+
+        <div style="text-align: right;">
+          <div style="font-size: 28px; font-weight: 900; color: #000000; letter-spacing: 1.5px; line-height: 1.1; margin-bottom: 6px; text-transform: uppercase;">
+            ADS TOP-UP VOUCHER
+          </div>
+          <div style="font-size: 12px; font-weight: 800; color: #2563EB; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px;">
+            BUKTI TRANSAKSI PENGELUARAN IKLAN DIGITAL
+          </div>
+          <div style="font-size: 12px; color: #000000;">
+            Status Transaksi: <span style="font-weight: 700; color: #10B981;">BERHASIL (PAID / SUCCESS)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ads Account Metadata Grid -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px;">
+        <div>
+          <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 110px; display: inline-block;">Platform Iklan:</span> <strong style="color: #0F172A;" id="vch-ads-platform">Meta Ads</strong></div>
+          <div><span style="color: #64748B; width: 110px; display: inline-block;">ID Akun Iklan:</span> <span id="vch-ads-account-id" style="font-weight: 600; color: #0F172A;">-</span></div>
+        </div>
+        <div>
+          <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 110px; display: inline-block;">Kategori Biaya:</span> <strong style="color: #0F172A;">Media Spend Outflow</strong></div>
+          <div><span style="color: #64748B; width: 110px; display: inline-block;">Akun Pengiklan:</span> <span style="font-weight: 600; color: #0F172A;">Kala Media Business Manager</span></div>
+        </div>
+      </div>
+
+      <!-- Deliverables & Task Description Table -->
+      <div style="border: 1px solid #E5E7EB; border-radius: 6px; overflow: hidden; margin-bottom: 24px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+          <thead>
+            <tr style="background: #F9FAFB; border-bottom: 1px solid #E5E7EB; text-align: left;">
+              <th style="padding: 10px 14px; font-weight: 700; color: #000000; width: 65%;">RINCIAN PENGALOKASIAN ANGGARAN IKLAN</th>
+              <th style="padding: 10px 14px; font-weight: 700; color: #000000; text-align: right; width: 35%;">NOMINAL TOP-UP (RP)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding: 16px 14px; color: #374151; vertical-align: top;">
+                <div style="font-weight: 700; color: #101828; margin-bottom: 4px;" id="vch-ads-item-title">Top-Up Saldo Iklan</div>
+                <div style="font-size: 11.5px; color: #6B7280; line-height: 1.4;" id="vch-ads-item-desc">
+                  Keterangan campaign promosi.
+                </div>
+              </td>
+              <td style="padding: 16px 14px; font-weight: 800; font-size: 14px; color: #101828; text-align: right; vertical-align: top;" id="vch-ads-amount-col">
+                Rp 0
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Total Paid Highlight -->
+      <div style="background: #F9FAFB; border: 1.5px solid #000000; border-radius: 6px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+          <div style="font-size: 13px; font-weight: 800; color: #000000; letter-spacing: 0.5px; text-transform: uppercase;">
+            TOTAL TOP-UP ANGGARAN IKLAN
+          </div>
+          <div style="font-size: 11px; color: #4B5563; margin-top: 3px;">
+            Saldo iklan telah berhasil dialokasikan langsung ke akun iklan resmi.
+          </div>
+        </div>
+        <div style="font-size: 24px; font-weight: 900; color: #000000; letter-spacing: 0.5px;" id="vch-ads-total-amount">
+          Rp 0
+        </div>
+      </div>
+
+      <!-- Signatures Footer -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 36px; padding-top: 10px; font-size: 12px; text-align: center;">
+        <div style="width: 190px;">
+          <div style="color: #4B5563; margin-bottom: 4px;">Disiapkan oleh,</div>
+          <div style="height: 48px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px;">
+            <img src="assets/Jpg/ttd-fadhli.png" alt="TTD Muhammad Fadhli" style="height: 42px; max-width: 120px; object-fit: contain;">
+          </div>
+          <div style="font-weight: 700; color: #000000; border-top: 1px solid #000000; padding-top: 4px;">Muhammad Fadhli</div>
+          <div style="font-size: 10px; color: #6B7280;">Creative Manager</div>
+        </div>
+        <div style="width: 190px;">
+          <div style="color: #4B5563; margin-bottom: 4px;">Disetujui oleh,</div>
+          <div style="height: 48px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px;">
+            <img src="assets/Jpg/ttd-ilham.png" alt="TTD Ilham Lanang" style="height: 42px; max-width: 120px; object-fit: contain;">
+          </div>
+          <div style="font-weight: 700; color: #000000; border-top: 1px solid #000000; padding-top: 4px;">Ilham Lanang</div>
+          <div style="font-size: 10px; color: #6B7280;">Marketing Manager</div>
+        </div>
+      </div>
+
+      <!-- Bottom Tagline & Brand Links -->
+      <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E5E7EB; padding-top: 12px; margin-top: 28px; font-size: 10.5px; color: #6B7280;">
+        <div style="font-weight: 700; color: #000000;">Built to Be Seen.</div>
+        <div style="display: flex; gap: 16px;">
+          <span><?= AGENCY_INSTAGRAM ?></span>
+          <span><?= AGENCY_EMAIL ?></span>
+          <span><?= AGENCY_WEBSITE ?></span>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
+      <button type="button" class="btn btn-secondary" onclick="closeModal('modal-ads-voucher')">Tutup</button>
+      <button type="button" class="btn btn-secondary" onclick="printAdsVoucher()" title="Cetak langsung ke printer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        <span>Cetak Voucher</span>
+      </button>
+      <button type="button" class="btn btn-secondary" onclick="copyAdsVoucherLink()" title="Salin link voucher ads ke clipboard">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        <span>Salin Link</span>
+      </button>
+      <button type="button" class="btn btn-primary" onclick="downloadAdsVoucherPdf()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <span>Unduh PDF</span>
+      </button>
+      <button type="button" class="btn" onclick="shareAdsVoucherWa()" title="Kirim bukti top-up ads ke WhatsApp Klien" style="background: #25D366; color: #FFFFFF; border: none; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
         <span>Share ke WA</span>
       </button>

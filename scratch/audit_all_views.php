@@ -53,6 +53,7 @@ $views = [
     'login' => __DIR__ . '/../views/login.php',
     'voucher_view' => __DIR__ . '/../views/voucher_view.php',
     'salary_view' => __DIR__ . '/../views/salary_view.php',
+    'ads_voucher_view' => __DIR__ . '/../views/ads_voucher_view.php',
 ];
 
 $_GET['id'] = 1;

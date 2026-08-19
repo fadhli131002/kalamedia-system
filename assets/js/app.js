@@ -584,7 +584,13 @@ ${docUrl}
 Terima kasih atas kerja sama dan hasil karya hebat Anda bersama Kala Media Creative.
 _Kala Media Creative • Built to Be Seen._`;
 
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  let phone = (p.freelancer_phone || '').replace(/[^0-9]/g, '');
+  if (phone.startsWith('0')) {
+    phone = '62' + phone.substring(1);
+  }
+
+  const waUrl = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
+  window.open(waUrl, '_blank');
 };
 
 window.printFreelancerVoucher = function() {
@@ -632,6 +638,233 @@ window.downloadFreelancerVoucherPdf = function() {
     });
   } else {
     window.printFreelancerVoucher();
+  }
+};
+
+// Open Edit Payout Modal
+window.openEditPayoutModal = async function(payoutId) {
+  try {
+    const res = await fetch(`api/expenses.php?action=get_payout&id=${payoutId}`);
+    const data = await res.json();
+    if (!data.success) {
+      showToast(data.message || 'Gagal memuat data pembayaran', 'danger');
+      return;
+    }
+    const p = data.payout;
+    document.getElementById('edit-payout-id').value = p.id;
+    document.getElementById('edit-payout-name').value = p.freelancer_name || '';
+    document.getElementById('edit-payout-phone').value = p.freelancer_phone || '';
+    document.getElementById('edit-payout-bank').value = p.freelancer_bank || 'BCA';
+    document.getElementById('edit-payout-account').value = p.freelancer_account || '';
+    
+    const clientSelect = document.getElementById('edit-payout-client-select');
+    if (clientSelect) {
+      clientSelect.value = p.client_id || '';
+      loadProjectsForClient(p.client_id, 'edit-payout-project-select');
+      setTimeout(() => {
+        const projSelect = document.getElementById('edit-payout-project-select');
+        if (projSelect) projSelect.value = p.project_id || '';
+      }, 100);
+    }
+    
+    document.getElementById('edit-payout-task').value = p.task_description || '';
+    document.getElementById('edit-payout-amount').value = formatRupiahInput(p.amount.toString());
+    document.getElementById('edit-payout-status').value = p.status || 'Pending';
+
+    openModal('modal-edit-payout');
+  } catch (err) {
+    showToast('Gagal memuat data fee freelancer', 'danger');
+  }
+};
+
+// Open Edit Ads Modal
+window.openEditAdsModal = async function(adsId) {
+  try {
+    const res = await fetch(`api/expenses.php?action=get_ads&id=${adsId}`);
+    const data = await res.json();
+    if (!data.success) {
+      showToast(data.message || 'Gagal memuat data iklan', 'danger');
+      return;
+    }
+    const a = data.ads;
+    document.getElementById('edit-ads-id').value = a.id;
+    
+    const clientSelect = document.getElementById('edit-ads-client-select');
+    if (clientSelect) {
+      clientSelect.value = a.client_id || '';
+      loadProjectsForClient(a.client_id, 'edit-ads-project-select');
+      setTimeout(() => {
+        const projSelect = document.getElementById('edit-ads-project-select');
+        if (projSelect) projSelect.value = a.project_id || '';
+      }, 100);
+    }
+
+    document.getElementById('edit-ads-platform').value = a.platform || 'Meta Ads';
+    document.getElementById('edit-ads-account').value = a.account_id || '';
+    document.getElementById('edit-ads-amount').value = formatRupiahInput(a.amount.toString());
+    document.getElementById('edit-ads-date').value = a.spent_date || '';
+    document.getElementById('edit-ads-notes').value = a.notes || '';
+
+    openModal('modal-edit-ads');
+  } catch (err) {
+    showToast('Gagal memuat data pengeluaran iklan', 'danger');
+  }
+};
+
+// Open Ads Voucher Modal
+window.openAdsVoucherModal = async function(adsId) {
+  try {
+    const res = await fetch(`api/expenses.php?action=get_ads_voucher&id=${adsId}`);
+    const data = await res.json();
+    if (!data.success) {
+      showToast(data.message || 'Gagal memuat voucher ads', 'danger');
+      return;
+    }
+    window.currentAdsVoucherDataCache = data;
+    const a = data.ads;
+    const f = data.formatted;
+
+    const ccEl = document.getElementById('vch-ads-client-company');
+    const cpEl = document.getElementById('vch-ads-client-pic');
+    const pnEl = document.getElementById('vch-ads-project-name');
+    const vnEl = document.getElementById('vch-ads-number');
+    const vdEl = document.getElementById('vch-ads-date');
+    const plEl = document.getElementById('vch-ads-platform');
+    const acEl = document.getElementById('vch-ads-account-id');
+    const ttEl = document.getElementById('vch-ads-item-title');
+    const tdEl = document.getElementById('vch-ads-item-desc');
+    const amEl = document.getElementById('vch-ads-amount-col');
+    const tmEl = document.getElementById('vch-ads-total-amount');
+
+    if (ccEl) ccEl.innerText = a.client_company || '-';
+    if (cpEl) cpEl.innerText = a.client_pic || '-';
+    if (pnEl) pnEl.innerText = a.project_name || 'Ads Management Campaign';
+    if (vnEl) vnEl.innerText = 'VOUCHER: #' + f.voucher_number;
+    if (vdEl) vdEl.innerText = 'Tanggal Top-Up: ' + f.spent_date;
+    if (plEl) plEl.innerText = a.platform || 'Meta Ads';
+    if (acEl) acEl.innerText = a.account_id || '-';
+    if (ttEl) ttEl.innerText = `Top-Up Saldo Iklan ${a.platform}`;
+    if (tdEl) tdEl.innerText = a.notes || `Alokasi anggaran iklan digital untuk proyek ${a.project_name || a.client_company}`;
+    if (amEl) amEl.innerText = f.amount;
+    if (tmEl) tmEl.innerText = f.amount;
+
+    openModal('modal-ads-voucher');
+  } catch (err) {
+    showToast('Gagal memuat voucher top-up ads', 'danger');
+  }
+};
+
+window.copyAdsVoucherLink = function() {
+  if (!window.currentAdsVoucherDataCache || !window.currentAdsVoucherDataCache.ads) {
+    showToast('Data voucher iklan belum dimuat', 'warning');
+    return;
+  }
+  const a = window.currentAdsVoucherDataCache.ads;
+  const loc = window.location;
+  const basePath = loc.pathname.replace(/\/(expenses|salaries|invoices|clients|reports|settings|content-calendar|owner-dashboard|admin-dashboard).*$/, '').replace(/\/$/, '');
+  const rawUrl = `${loc.origin}${basePath}/ads-voucher-view?id=${a.id}`;
+  const docUrl = typeof window.formatWaClickableUrl === 'function' ? window.formatWaClickableUrl(rawUrl) : rawUrl;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(docUrl).then(() => {
+      showToast('Link Bukti Top-Up Ads berhasil disalin!', 'success');
+    }).catch(() => {
+      prompt('Salin link voucher ads berikut:', docUrl);
+    });
+  } else {
+    prompt('Salin link voucher ads berikut:', docUrl);
+  }
+};
+
+window.shareAdsVoucherWa = function() {
+  if (!window.currentAdsVoucherDataCache || !window.currentAdsVoucherDataCache.ads) {
+    showToast('Data voucher iklan belum dimuat', 'warning');
+    return;
+  }
+  const a = window.currentAdsVoucherDataCache.ads;
+  const f = window.currentAdsVoucherDataCache.formatted;
+
+  const loc = window.location;
+  const basePath = loc.pathname.replace(/\/(expenses|salaries|invoices|clients|reports|settings|content-calendar|owner-dashboard|admin-dashboard).*$/, '').replace(/\/$/, '');
+  const rawUrl = `${loc.origin}${basePath}/ads-voucher-view?id=${a.id}`;
+  const docUrl = typeof window.formatWaClickableUrl === 'function' ? window.formatWaClickableUrl(rawUrl) : rawUrl;
+
+  const text = 
+`*BUKTI TOP-UP ANGGARAN IKLAN DIGITAL*
+*Kala Media Creative*
+
+Halo *${a.client_company}* (PIC: ${a.client_pic || '-'}), berikut rincian bukti transaksi top-up saldo iklan Anda:
+
+- No. Voucher: #${f.voucher_number}
+- Platform Iklan: ${a.platform}
+- ID Akun Iklan: ${a.account_id || '-'}
+- Proyek Terkait: ${a.project_name || '-'}
+- Tanggal Transaksi: ${f.spent_date}
+- Keterangan: ${a.notes || 'Alokasi saldo iklan campaign'}
+------------------------------------
+- TOTAL TOP-UP: *${f.amount}*
+- Status: BERHASIL (PAID / SUCCESS)
+
+Lihat & Unduh Dokumen Resmi:
+${docUrl}
+
+Saldo iklan telah dialokasikan langsung ke akun iklan resmi.
+_Kala Media Creative • Built to Be Seen._`;
+
+  let phone = (a.client_phone || '').replace(/[^0-9]/g, '');
+  if (phone.startsWith('0')) {
+    phone = '62' + phone.substring(1);
+  }
+
+  const waUrl = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(text)}` : `https://wa.me/?text=${encodeURIComponent(text)}`;
+  window.open(waUrl, '_blank');
+};
+
+window.printAdsVoucher = function() {
+  const printArea = document.getElementById('ads-voucher-print-area');
+  if (!printArea) return;
+  const content = printArea.innerHTML;
+  const printWin = window.open('', '', 'width=850,height=900');
+  printWin.document.write(`
+    <html>
+      <head>
+        <title>Voucher Top-Up Ads - Kala Media</title>
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+        <style>
+          body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; background: #fff; padding: 20px; color: #000; }
+          @page { size: A4; margin: 15mm; }
+        </style>
+      </head>
+      <body>${content}</body>
+    </html>
+  `);
+  printWin.document.close();
+  printWin.focus();
+  setTimeout(() => {
+    printWin.print();
+    printWin.close();
+  }, 400);
+};
+
+window.downloadAdsVoucherPdf = function() {
+  const element = document.getElementById('ads-voucher-print-area');
+  if (!element) return;
+  const clientName = (document.getElementById('vch-ads-client-company')?.innerText || 'Klien').trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+  const opt = {
+    margin: [8, 8, 8, 8],
+    filename: `Voucher_TopUp_Ads_${clientName}.pdf`,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, logging: false },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  if (typeof html2pdf !== 'undefined') {
+    showToast('Membuat PDF Bukti Top-Up Ads...', 'info');
+    html2pdf().set(opt).from(element).save().then(() => {
+      showToast('PDF Bukti Top-Up Ads berhasil diunduh!', 'success');
+    });
+  } else {
+    window.printAdsVoucher();
   }
 };
 

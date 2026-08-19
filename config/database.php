@@ -116,6 +116,7 @@ class Database {
             CREATE TABLE IF NOT EXISTS freelancer_payouts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 freelancer_name VARCHAR(150) NOT NULL,
+                freelancer_phone VARCHAR(50) DEFAULT NULL,
                 freelancer_bank VARCHAR(100) DEFAULT NULL,
                 freelancer_account VARCHAR(100) DEFAULT NULL,
                 project_id INTEGER NOT NULL,
@@ -665,6 +666,16 @@ class Database {
             $projCols = $db->query("PRAGMA table_info(projects)")->fetchAll(PDO::FETCH_COLUMN, 1);
             if (!in_array('is_deleted', $projCols)) {
                 $db->exec("ALTER TABLE projects ADD COLUMN is_deleted INTEGER DEFAULT 0");
+            }
+        } catch (Exception $e) {
+            // Ignore
+        }
+
+        // Ensure freelancer_payouts table has freelancer_phone column
+        try {
+            $flCols = $db->query("PRAGMA table_info(freelancer_payouts)")->fetchAll(PDO::FETCH_COLUMN, 1);
+            if (!in_array('freelancer_phone', $flCols)) {
+                $db->exec("ALTER TABLE freelancer_payouts ADD COLUMN freelancer_phone VARCHAR(50) DEFAULT NULL");
             }
         } catch (Exception $e) {
             // Ignore

@@ -23,4 +23,10 @@ include __DIR__ . '/../views/invoice_view.php';
 $iHtml = ob_get_clean();
 echo "3. invoice_view.php (ID: 1): " . (strlen($iHtml) > 500 ? "✔ PASS (Size: " . strlen($iHtml) . " bytes)" : "✖ FAIL") . "\n";
 
+$_GET['id'] = 1;
+ob_start();
+include __DIR__ . '/../views/ads_voucher_view.php';
+$aHtml = ob_get_clean();
+echo "4. ads_voucher_view.php (ID: 1): " . (strlen($aHtml) > 500 ? "✔ PASS (Size: " . strlen($aHtml) . " bytes)" : "✖ FAIL") . "\n";
+
 echo "\n🎉 ALL PUBLIC DOCUMENT VIEWS FUNCTION PERFECTLY!\n";

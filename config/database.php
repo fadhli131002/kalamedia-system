@@ -29,10 +29,9 @@ class Database {
                 
                 // Check if schema or new migrations are needed
                 $hasMeta = self::$instance->query("SELECT name FROM sqlite_master WHERE type='table' AND name='system_meta'")->fetchColumn();
-                $hasPerfReports = self::$instance->query("SELECT name FROM sqlite_master WHERE type='table' AND name='performance_reports'")->fetchColumn();
                 if (!$hasMeta) {
                     self::ensureTablesAndSeed(self::$instance);
-                } elseif (!$hasPerfReports) {
+                } else {
                     self::runMigrations(self::$instance);
                 }
             } catch (PDOException $e) {
@@ -648,11 +647,24 @@ class Database {
             // Ignore
         }
 
-        // Ensure clients table has logo column
+        // Ensure clients table has logo and is_deleted columns
         try {
             $clientCols = $db->query("PRAGMA table_info(clients)")->fetchAll(PDO::FETCH_COLUMN, 1);
             if (!in_array('logo', $clientCols)) {
                 $db->exec("ALTER TABLE clients ADD COLUMN logo VARCHAR(255) DEFAULT NULL");
+            }
+            if (!in_array('is_deleted', $clientCols)) {
+                $db->exec("ALTER TABLE clients ADD COLUMN is_deleted INTEGER DEFAULT 0");
+            }
+        } catch (Exception $e) {
+            // Ignore
+        }
+
+        // Ensure projects table has is_deleted column
+        try {
+            $projCols = $db->query("PRAGMA table_info(projects)")->fetchAll(PDO::FETCH_COLUMN, 1);
+            if (!in_array('is_deleted', $projCols)) {
+                $db->exec("ALTER TABLE projects ADD COLUMN is_deleted INTEGER DEFAULT 0");
             }
         } catch (Exception $e) {
             // Ignore

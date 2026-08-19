@@ -505,6 +505,127 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
+<!-- 8b. Modal Edit Data Klien -->
+<div id="modal-edit-client" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">Edit Data Klien</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-edit-client')">&times;</button>
+    </div>
+    <form id="form-edit-client" action="api/clients.php?action=update_client" method="POST">
+      <input type="hidden" name="id" id="edit-client-id">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Nama Perusahaan / Brand *</label>
+          <input type="text" name="company" id="edit-client-company" class="form-control" placeholder="Contoh: PT Sumber Berkah Abadi" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Penanggung Jawab (PIC) *</label>
+          <input type="text" name="name" id="edit-client-name" class="form-control" placeholder="Contoh: Budi Gunawan" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email PIC *</label>
+            <input type="email" name="email" id="edit-client-email" class="form-control" placeholder="budi@company.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Nomor WhatsApp</label>
+            <input type="text" name="phone" id="edit-client-phone" class="form-control" placeholder="081234567890">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Alamat Kantor</label>
+          <textarea name="address" id="edit-client-address" class="form-control" rows="2" placeholder="Alamat lengkap perusahaan"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-edit-client')">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  handleAjaxForm('form-edit-client', () => {
+    closeModal('modal-edit-client');
+    setTimeout(() => window.location.reload(), 800);
+  });
+});
+</script>
+
+<!-- 8c. Modal Edit Data Proyek -->
+<div id="modal-edit-project" class="modal-backdrop">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3 class="modal-title">Edit Data Proyek</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-edit-project')">&times;</button>
+    </div>
+    <form id="form-edit-project" action="api/clients.php?action=update_project" method="POST">
+      <input type="hidden" name="id" id="edit-project-id">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Klien Terkait *</label>
+          <select name="client_id" id="edit-project-client-id" class="form-select" required>
+            <option value="">-- Pilih Klien --</option>
+            <?php foreach ($allClients as $c): ?>
+              <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['company']) ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nama Proyek *</label>
+          <input type="text" name="name" id="edit-project-name" class="form-control" placeholder="Contoh: Digital Campaign & Branding Q4" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nilai Kontrak (Rp) *</label>
+            <div class="input-group-currency">
+              <span class="currency-addon">Rp</span>
+              <input type="text" name="contract_value" id="edit-project-contract-value" class="form-control rupiah-input" placeholder="0" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Target Margin Profit (%)</label>
+            <input type="number" name="target_margin_percent" id="edit-project-target-margin" class="form-control" value="30.00" min="0" max="100" step="0.5">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status Proyek</label>
+          <select name="status" id="edit-project-status" class="form-select">
+            <option value="Planning">Planning</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+            <option value="On Hold">On Hold</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tanggal Mulai</label>
+            <input type="date" name="start_date" id="edit-project-start-date" class="form-control">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Target Selesai</label>
+            <input type="date" name="end_date" id="edit-project-end-date" class="form-control">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-edit-project')">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  handleAjaxForm('form-edit-project', () => {
+    closeModal('modal-edit-project');
+    setTimeout(() => window.location.reload(), 800);
+  });
+});
+</script>
+
 <!-- 9. Modal Input Gaji Karyawan (Payroll Outflow) -->
 <div id="modal-input-salary" class="modal-backdrop">
   <div class="modal-dialog modal-lg">

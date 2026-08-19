@@ -336,6 +336,141 @@ window.confirmDeleteInvoice = function(id, invoiceNumber) {
   });
 };
 
+// --- Client CRUD Helpers ---
+window.openEditClientModal = function(client) {
+  if (typeof client === 'number' || typeof client === 'string') {
+    fetch(`api/clients.php?action=get_client&id=${client}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.client) {
+          fillClientModal(data.client);
+        } else {
+          showToast(data.message || 'Gagal memuat data klien', 'danger');
+        }
+      })
+      .catch(() => showToast('Gagal menghubungi server', 'danger'));
+  } else if (typeof client === 'object' && client !== null) {
+    fillClientModal(client);
+  }
+};
+
+function fillClientModal(c) {
+  const idEl = document.getElementById('edit-client-id');
+  const compEl = document.getElementById('edit-client-company');
+  const nameEl = document.getElementById('edit-client-name');
+  const emailEl = document.getElementById('edit-client-email');
+  const phoneEl = document.getElementById('edit-client-phone');
+  const addrEl = document.getElementById('edit-client-address');
+
+  if (idEl) idEl.value = c.id || '';
+  if (compEl) compEl.value = c.company || '';
+  if (nameEl) nameEl.value = c.name || '';
+  if (emailEl) emailEl.value = c.email || '';
+  if (phoneEl) phoneEl.value = c.phone || '';
+  if (addrEl) addrEl.value = c.address || '';
+
+  openModal('modal-edit-client');
+}
+
+window.confirmDeleteClient = function(id, companyName) {
+  window.showConfirmDeleteModal({
+    title: 'Hapus Data Klien?',
+    descriptionHtml: `Apakah Anda yakin ingin menghapus data klien <strong style="color: #101828;">${companyName}</strong>? Data klien akan diarsipkan dari daftar aktif.`,
+    confirmBtnText: 'Hapus Klien',
+    onConfirm: async () => {
+      const formData = new FormData();
+      formData.append('id', id);
+
+      try {
+        const res = await fetch('api/clients.php?action=delete_client', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message || 'Data klien berhasil dihapus!', 'success');
+          setTimeout(() => window.location.reload(), 600);
+        } else {
+          showToast(data.message || 'Gagal menghapus data klien', 'danger');
+        }
+      } catch (err) {
+        showToast('Gagal menghapus data klien', 'danger');
+      }
+    }
+  });
+};
+
+// --- Project CRUD Helpers ---
+window.openEditProjectModal = function(project) {
+  if (typeof project === 'number' || typeof project === 'string') {
+    fetch(`api/clients.php?action=get_project&id=${project}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.project) {
+          fillProjectModal(data.project);
+        } else {
+          showToast(data.message || 'Gagal memuat data proyek', 'danger');
+        }
+      })
+      .catch(() => showToast('Gagal menghubungi server', 'danger'));
+  } else if (typeof project === 'object' && project !== null) {
+    fillProjectModal(project);
+  }
+};
+
+function fillProjectModal(p) {
+  const idEl = document.getElementById('edit-project-id');
+  const clientEl = document.getElementById('edit-project-client-id');
+  const nameEl = document.getElementById('edit-project-name');
+  const valEl = document.getElementById('edit-project-contract-value');
+  const marginEl = document.getElementById('edit-project-target-margin');
+  const statusEl = document.getElementById('edit-project-status');
+  const startEl = document.getElementById('edit-project-start-date');
+  const endEl = document.getElementById('edit-project-end-date');
+
+  if (idEl) idEl.value = p.id || '';
+  if (clientEl) clientEl.value = p.client_id || '';
+  if (nameEl) nameEl.value = p.name || '';
+  if (valEl) {
+    const num = Math.round(parseFloat(p.contract_value || 0));
+    valEl.value = num.toLocaleString('id-ID');
+  }
+  if (marginEl) marginEl.value = p.target_margin_percent || '30.00';
+  if (statusEl) statusEl.value = p.status || 'In Progress';
+  if (startEl) startEl.value = p.start_date || '';
+  if (endEl) endEl.value = p.end_date || '';
+
+  openModal('modal-edit-project');
+}
+
+window.confirmDeleteProject = function(id, projectName) {
+  window.showConfirmDeleteModal({
+    title: 'Hapus Data Proyek?',
+    descriptionHtml: `Apakah Anda yakin ingin menghapus proyek <strong style="color: #101828;">${projectName}</strong>? Data proyek akan diarsipkan dari daftar aktif.`,
+    confirmBtnText: 'Hapus Proyek',
+    onConfirm: async () => {
+      const formData = new FormData();
+      formData.append('id', id);
+
+      try {
+        const res = await fetch('api/clients.php?action=delete_project', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message || 'Data proyek berhasil dihapus!', 'success');
+          setTimeout(() => window.location.reload(), 600);
+        } else {
+          showToast(data.message || 'Gagal menghapus data proyek', 'danger');
+        }
+      } catch (err) {
+        showToast('Gagal menghapus data proyek', 'danger');
+      }
+    }
+  });
+};
+
 // Global event delegation for delete button clicks
 document.addEventListener('click', (e) => {
   const delBtn = e.target.closest('.btn-delete-ghost');

@@ -527,6 +527,28 @@ window.openFreelancerVoucherModal = async function(payoutId) {
   }
 };
 
+window.copyFreelancerVoucherLink = function() {
+  if (!window.currentVoucherDataCache || !window.currentVoucherDataCache.payout) {
+    showToast('Data voucher belum dimuat', 'warning');
+    return;
+  }
+  const p = window.currentVoucherDataCache.payout;
+  const loc = window.location;
+  const basePath = loc.pathname.replace(/\/(expenses|salaries|invoices|clients|reports|settings|content-calendar|owner-dashboard|admin-dashboard).*$/, '').replace(/\/$/, '');
+  const rawUrl = `${loc.origin}${basePath}/voucher-view?id=${p.id}`;
+  const docUrl = typeof window.formatWaClickableUrl === 'function' ? window.formatWaClickableUrl(rawUrl) : rawUrl;
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(docUrl).then(() => {
+      showToast('Link Voucher Fee berhasil disalin!', 'success');
+    }).catch(() => {
+      prompt('Salin link voucher fee berikut:', docUrl);
+    });
+  } else {
+    prompt('Salin link voucher fee berikut:', docUrl);
+  }
+};
+
 window.shareFreelancerVoucherWa = function() {
   if (!window.currentVoucherDataCache || !window.currentVoucherDataCache.payout) {
     showToast('Data voucher belum dimuat', 'warning');
@@ -537,7 +559,8 @@ window.shareFreelancerVoucherWa = function() {
 
   const loc = window.location;
   const basePath = loc.pathname.replace(/\/(expenses|salaries|invoices|clients|reports|settings|content-calendar|owner-dashboard|admin-dashboard).*$/, '').replace(/\/$/, '');
-  const docUrl = `${loc.origin}${basePath}/voucher-view?id=${p.id}`;
+  const rawUrl = `${loc.origin}${basePath}/voucher-view?id=${p.id}`;
+  const docUrl = typeof window.formatWaClickableUrl === 'function' ? window.formatWaClickableUrl(rawUrl) : rawUrl;
 
   const text = 
 `*BUKTI PEMBAYARAN & INVOICE FEE TALENTA*

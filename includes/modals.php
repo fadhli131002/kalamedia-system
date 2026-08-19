@@ -1048,6 +1048,10 @@ document.addEventListener('DOMContentLoaded', () => {
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
         <span>Cetak</span>
       </button>
+      <button type="button" class="btn btn-secondary" onclick="copySlipGajiLink()" title="Salin link slip gaji ke clipboard">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        <span>Salin Link</span>
+      </button>
       <button type="button" class="btn btn-primary" id="btn-download-slip-pdf" onclick="downloadSlipPdf()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         <span>Unduh PDF</span>
@@ -1199,6 +1203,10 @@ document.addEventListener('DOMContentLoaded', () => {
       <button type="button" class="btn btn-secondary" onclick="printFreelancerVoucher()" title="Cetak langsung ke printer">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
         <span>Cetak Voucher</span>
+      </button>
+      <button type="button" class="btn btn-secondary" onclick="copyFreelancerVoucherLink()" title="Salin link voucher fee ke clipboard">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        <span>Salin Link</span>
       </button>
       <button type="button" class="btn btn-primary" onclick="downloadFreelancerVoucherPdf()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
@@ -1746,6 +1754,42 @@ async function openSlipGajiModal(salaryId) {
   }
 }
 
+// Helper to make IP-based URLs clickable in WhatsApp Web/Mobile
+window.formatWaClickableUrl = function(rawUrl) {
+  try {
+    const u = new URL(rawUrl);
+    // If hostname is raw IPv4 address (e.g. 31.97.51.101), append .nip.io so WhatsApp recognizes it as a clickable domain
+    if (/^(\d{1,3}\.){3}\d{1,3}$/.test(u.hostname)) {
+      u.hostname = u.hostname + '.nip.io';
+    }
+    return u.toString();
+  } catch (e) {
+    return rawUrl;
+  }
+};
+
+// Copy Slip Gaji Link to Clipboard
+window.copySlipGajiLink = function() {
+  if (!window.currentSlipDataCache || !window.currentSlipDataCache.salary) {
+    showToast('Data slip gaji belum dimuat', 'warning');
+    return;
+  }
+  const s = window.currentSlipDataCache.salary;
+  const loc = window.location;
+  const basePath = loc.pathname.replace(/\/(expenses|salaries|invoices|clients|reports|settings|content-calendar|owner-dashboard|admin-dashboard).*$/, '').replace(/\/$/, '');
+  const docUrl = window.formatWaClickableUrl(`${loc.origin}${basePath}/salary-view?id=${s.id}`);
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(docUrl).then(() => {
+      showToast('Link Slip Gaji berhasil disalin!', 'success');
+    }).catch(() => {
+      prompt('Salin link slip gaji berikut:', docUrl);
+    });
+  } else {
+    prompt('Salin link slip gaji berikut:', docUrl);
+  }
+};
+
 // Share Slip Gaji to WhatsApp
 window.shareSlipGajiWa = function() {
   if (!window.currentSlipDataCache || !window.currentSlipDataCache.salary) {
@@ -1757,7 +1801,7 @@ window.shareSlipGajiWa = function() {
 
   const loc = window.location;
   const basePath = loc.pathname.replace(/\/(expenses|salaries|invoices|clients|reports|settings|content-calendar|owner-dashboard|admin-dashboard).*$/, '').replace(/\/$/, '');
-  const docUrl = `${loc.origin}${basePath}/salary-view?id=${s.id}`;
+  const docUrl = window.formatWaClickableUrl(`${loc.origin}${basePath}/salary-view?id=${s.id}`);
   
   const text = 
 `*SLIP GAJI RESMI KARYAWAN*

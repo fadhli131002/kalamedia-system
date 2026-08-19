@@ -472,6 +472,8 @@ window.confirmDeleteProject = function(id, projectName) {
 };
 
 // --- Freelancer Voucher / Invoice CRUD Helpers ---
+window.currentVoucherDataCache = null;
+
 window.openFreelancerVoucherModal = async function(payoutId) {
   try {
     const res = await fetch(`api/expenses.php?action=get_payout_voucher&id=${payoutId}`);
@@ -480,6 +482,8 @@ window.openFreelancerVoucherModal = async function(payoutId) {
       showToast(data.message || 'Gagal memuat voucher pembayaran', 'danger');
       return;
     }
+
+    window.currentVoucherDataCache = data;
 
     const p = data.payout;
     const f = data.formatted;
@@ -521,6 +525,34 @@ window.openFreelancerVoucherModal = async function(payoutId) {
   } catch (err) {
     showToast('Gagal memuat voucher fee freelancer', 'danger');
   }
+};
+
+window.shareFreelancerVoucherWa = function() {
+  if (!window.currentVoucherDataCache || !window.currentVoucherDataCache.payout) {
+    showToast('Data voucher belum dimuat', 'warning');
+    return;
+  }
+  const p = window.currentVoucherDataCache.payout;
+  const f = window.currentVoucherDataCache.formatted;
+
+  const text = 
+`*BUKTI PEMBAYARAN & INVOICE FEE TALENTA - KALA MEDIA*
+Halo *${p.freelancer_name}*, berikut bukti pembayaran honor/fee resmi Anda:
+
+📄 *No. Voucher:* #${f.voucher_number}
+📌 *Proyek Terkait:* ${p.project_name}
+🏢 *Klien / Brand:* ${p.client_company}
+💼 *Uraian Tugas:* ${p.task_description}
+🗓 *Tanggal Bayar:* ${f.payment_date}
+━━━━━━━━━━━━━━━━━━━━
+💰 *TOTAL DIBAYARKAN:* *${f.amount}*
+💳 *Transfer ke:* ${p.freelancer_bank || 'BCA'} - ${p.freelancer_account || '-'}
+✅ *Status Transaksi:* LUNAS (PAID)
+
+_Terima kasih banyak atas kerja sama dan hasil karya hebatnya bersama tim Kala Media Creative!_
+*Kala Media Creative • Built to Be Seen.*`;
+
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
 };
 
 window.printFreelancerVoucher = function() {

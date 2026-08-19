@@ -1069,15 +1069,21 @@ if ($action === 'export_pdf') {
         <!-- Signatures -->
         <div class="signature-row">
           <div class="sig-box">
-            <div class="sig-title">Disiapkan oleh (Creative Lead),</div>
+            <div class="sig-title">Disiapkan oleh (Creative Manager),</div>
+            <div style="height: 48px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px;">
+              <img src="assets/Jpg/ttd-fadhli.png" alt="TTD Muhammad Fadhli" style="height: 44px; max-width: 130px; object-fit: contain;">
+            </div>
             <div class="sig-line">Muhammad Fadhli</div>
           </div>
           <div class="sig-box">
-            <div class="sig-title">Mengetahui (Head of Operations),</div>
+            <div class="sig-title">Mengetahui (Marketing Manager),</div>
+            <div style="height: 48px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px;">
+              <img src="assets/Jpg/ttd-ilham.png" alt="TTD Ilham Lanang" style="height: 44px; max-width: 130px; object-fit: contain;">
+            </div>
             <div class="sig-line">Ilham Lanang</div>
           </div>
           <div class="sig-box">
-            <div class="sig-title">Disetujui oleh Klien / PIC,</div>
+            <div class="sig-title" style="margin-bottom: 46px;">Disetujui oleh Klien / PIC,</div>
             <div class="sig-line"><?= htmlspecialchars($contents[0]['client_name'] ?? 'Bapak / Ibu PIC Klien') ?></div>
           </div>
         </div>

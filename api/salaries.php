@@ -501,8 +501,10 @@ if ($action === 'download_slip_pdf') {
             <div style="font-size: 13px; font-weight: 700; color: #000000; border-top: 1px solid #000000; padding-top: 6px;"><?= htmlspecialchars($sal['employee_name']) ?></div>
           </div>
           <div style="text-align: center; width: 220px;">
-            <div style="font-size: 12px; color: #4B5563; margin-bottom: 8px;">Head of Finance & Operations,</div>
-            <div style="font-size: 13px; font-weight: 700; color: #2563EB; margin-bottom: 28px;">Kala Media</div>
+            <div style="font-size: 12px; color: #4B5563; margin-bottom: 4px;">Head of Finance & Operations,</div>
+            <div style="height: 52px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px;">
+              <img src="assets/Jpg/ttd-ilham.png" alt="TTD Ilham Lanang" style="height: 48px; max-width: 140px; object-fit: contain;">
+            </div>
             <div style="font-size: 13px; font-weight: 700; color: #000000; border-top: 1px solid #000000; padding-top: 6px;">Ilham Lanang</div>
           </div>
         </div>

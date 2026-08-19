@@ -901,9 +901,9 @@ document.addEventListener('DOMContentLoaded', () => {
           <div style="font-weight: 700; color: #000000; border-top: 1px solid #000000; padding-top: 4px;" id="slip-sign-emp">(Nama Karyawan)</div>
         </div>
         <div style="width: 220px;">
-          <div style="color: #4B5563; margin-bottom: 8px;">Head of Finance & Operations,</div>
-          <div style="height: 42px; display: flex; align-items: center; justify-content: center; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 800; color: #6366F1; letter-spacing: 1px;">
-            Kala Media
+          <div style="color: #4B5563; margin-bottom: 4px;">Head of Finance & Operations,</div>
+          <div style="height: 48px; display: flex; align-items: center; justify-content: center; margin-bottom: 2px;">
+            <img src="assets/Jpg/ttd-ilham.png" alt="TTD Ilham Lanang" style="height: 44px; max-width: 140px; object-fit: contain;">
           </div>
           <div style="font-weight: 700; color: #000000; border-top: 1px solid #000000; padding-top: 4px;">Ilham Lanang</div>
         </div>

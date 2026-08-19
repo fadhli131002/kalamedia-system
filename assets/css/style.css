@@ -1689,3 +1689,57 @@ body {
   font-weight: 600;
 }
 
+/* ==========================================================================
+   CLIENT SOCIAL MEDIA REPORTING & PRINT MEDIA STYLES
+   ========================================================================== */
+.hover-underline:hover {
+  text-decoration: underline !important;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm 12mm 10mm 12mm;
+  }
+  *, *:before, *:after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  body, html {
+    background: #FFFFFF !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .sidebar,
+  .topbar,
+  .invoice-actions-bar,
+  .report-actions-bar,
+  #sidebar-toggle,
+  .btn,
+  .modal-backdrop,
+  .nav-section-title {
+    display: none !important;
+  }
+  .app-container,
+  .main-wrapper,
+  .report-screen-wrapper,
+  .report-container {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #FFFFFF !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .report-paper {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+  }
+}
+
+

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400">
+  <defs>
+    <linearGradient id="bgGradLucere" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#18181B"/>
+      <stop offset="50%" stop-color="#27272A"/>
+      <stop offset="100%" stop-color="#701A75"/>
+    </linearGradient>
+    <linearGradient id="badgeGradLucere" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#A855F7"/>
+      <stop offset="100%" stop-color="#EC4899"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#bgGradLucere)" rx="12"/>
+  
+  <!-- Video Mockup Frame -->
+  <rect x="24" y="24" width="552" height="352" rx="10" fill="#000000" fill-opacity="0.45" stroke="#F472B6" stroke-width="1.5" stroke-dasharray="4 4"/>
+  
+  <!-- Winning Badge -->
+  <rect x="44" y="44" width="180" height="34" rx="17" fill="url(#badgeGradLucere)"/>
+  <text x="56" y="66" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12.5" font-weight="bold" fill="#FFFFFF">🏆 TOP CONVERTING AD</text>
+  
+  <!-- Play Icon -->
+  <circle cx="300" cy="180" r="42" fill="#EC4899" fill-opacity="0.25"/>
+  <circle cx="300" cy="180" r="32" fill="#D946EF"/>
+  <polygon points="292,165 315,180 292,195" fill="#FFFFFF"/>
+  
+  <!-- Video Title & Stats -->
+  <text x="300" y="250" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="800" fill="#FFFFFF" text-anchor="middle">Styling Tutorial Pashmina Silk Shimmer</text>
+  <text x="300" y="278" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" fill="#F5D0FE" text-anchor="middle">Lucere Official &bull; Hook: "Tutorial 3 Style Hijab Segiempat Simple &amp; Mewah"</text>
+  
+  <!-- KPI Pills at Bottom -->
+  <rect x="70" y="315" width="130" height="40" rx="8" fill="#27272A" stroke="#3F3F46"/>
+  <text x="135" y="333" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" fill="#D4D4D8" text-anchor="middle">ROAS SCALE</text>
+  <text x="135" y="349" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="bold" fill="#F472B6" text-anchor="middle">7.00x High</text>
+
+  <rect x="235" y="315" width="130" height="40" rx="8" fill="#27272A" stroke="#3F3F46"/>
+  <text x="300" y="333" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" fill="#D4D4D8" text-anchor="middle">VIDEO VIEWS</text>
+  <text x="300" y="349" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="bold" fill="#38BDF8" text-anchor="middle">1.150.000 Views</text>
+
+  <rect x="400" y="315" width="130" height="40" rx="8" fill="#27272A" stroke="#3F3F46"/>
+  <text x="465" y="333" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" fill="#D4D4D8" text-anchor="middle">ORDERS (CONV)</text>
+  <text x="465" y="349" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="bold" fill="#10B981" text-anchor="middle">1.820 Orders</text>
+</svg>

@@ -87,6 +87,19 @@ switch ($route) {
         require_once __DIR__ . '/views/content_dashboard.php';
         break;
 
+    case 'reports':
+        require_once __DIR__ . '/views/reports.php';
+        break;
+
+    case 'reports-form':
+        require_once __DIR__ . '/views/reports_form.php';
+        break;
+
+    case 'report-view':
+    case 'report-deck':
+        require_once __DIR__ . '/views/report_deck.php';
+        break;
+
     case 'settings':
         require_owner();
         require_once __DIR__ . '/views/settings.php';

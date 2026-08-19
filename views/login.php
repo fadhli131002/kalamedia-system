@@ -96,16 +96,16 @@ if (is_logged_in()) {
         Akses Cepat Demo Akun
       </div>
       <div class="demo-btn-group">
-        <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('owner')" style="justify-content: center; font-size: 11.5px; font-weight: 700;">
-          <span style="color: #B45309;">👑</span> Owner Kala
+        <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('owner')" style="justify-content: center; font-size: 11px; font-weight: 700;">
+          <span style="color: #B45309;">👑</span> Muhammad Fadhli
         </button>
-        <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('admin')" style="justify-content: center; font-size: 11.5px; font-weight: 700;">
-          <span style="color: #101828;">💼</span> Finance Kala
+        <button type="button" class="btn btn-secondary btn-sm" onclick="quickLogin('admin')" style="justify-content: center; font-size: 11px; font-weight: 700;">
+          <span style="color: #101828;">💼</span> Ilham Lanang
         </button>
       </div>
       <div style="text-align: center; margin-top: 10px; font-size: 11px; color: var(--text-muted);">
-        Email: <code>owner@kalamedia.id</code> / <code>finance@kalamedia.id</code><br>
-        Password: <code>password123</code>
+        Owner (Creative Manager): <code>owner@kalamedia.id</code><br>
+        Marketing Manager: <code>finance@kalamedia.id</code> &bull; Pass: <code>password123</code>
       </div>
     </div>
   </div>

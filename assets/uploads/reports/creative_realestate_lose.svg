@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400">
+  <defs>
+    <linearGradient id="bgGradLose" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E1B18"/>
+      <stop offset="50%" stop-color="#2D1F1D"/>
+      <stop offset="100%" stop-color="#451A1A"/>
+    </linearGradient>
+    <linearGradient id="badgeGradLose" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#EF4444"/>
+      <stop offset="100%" stop-color="#B91C1C"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#bgGradLose)" rx="12"/>
+  
+  <!-- Graphic Mockup Frame -->
+  <rect x="24" y="24" width="552" height="352" rx="10" fill="#000000" fill-opacity="0.4" stroke="#F87171" stroke-width="1.5" stroke-dasharray="4 4"/>
+  
+  <!-- Underperforming Badge -->
+  <rect x="44" y="44" width="220" height="34" rx="17" fill="url(#badgeGradLose)"/>
+  <text x="56" y="66" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12.5" font-weight="bold" fill="#FFFFFF">⚠️ UNDERPERFORMING ASSET</text>
+  
+  <!-- Static Banner Icon -->
+  <circle cx="300" cy="180" r="42" fill="#EF4444" fill-opacity="0.15"/>
+  <rect x="275" y="160" width="50" height="40" rx="4" fill="none" stroke="#F87171" stroke-width="3"/>
+  <circle cx="288" cy="173" r="4" fill="#F87171"/>
+  <polyline points="278,193 293,180 305,190 318,175 323,193" fill="none" stroke="#F87171" stroke-width="2"/>
+  
+  <!-- Banner Title & Problem -->
+  <text x="300" y="250" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="800" fill="#FFFFFF" text-anchor="middle">Single Image Static 2D Flyer Banner</text>
+  <text x="300" y="278" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" fill="#FCA5A5" text-anchor="middle">Issue: High Bounce Rate, Low CTR (1.08%), CPL Rp 85.000 (Inefficient)</text>
+  
+  <!-- KPI Pills at Bottom -->
+  <rect x="70" y="315" width="130" height="40" rx="8" fill="#2D1F1D" stroke="#451A1A"/>
+  <text x="135" y="333" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" fill="#FCA5A5" text-anchor="middle">CTR (ADS)</text>
+  <text x="135" y="349" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="bold" fill="#EF4444" text-anchor="middle">1.08% Poor</text>
+
+  <rect x="235" y="315" width="130" height="40" rx="8" fill="#2D1F1D" stroke="#451A1A"/>
+  <text x="300" y="333" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" fill="#FCA5A5" text-anchor="middle">CPL COST</text>
+  <text x="300" y="349" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="bold" fill="#EF4444" text-anchor="middle">Rp 85.000 / lead</text>
+
+  <rect x="400" y="315" width="130" height="40" rx="8" fill="#2D1F1D" stroke="#451A1A"/>
+  <text x="465" y="333" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" fill="#FCA5A5" text-anchor="middle">RECOMMENDATION</text>
+  <text x="465" y="349" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" fill="#FBBF24" text-anchor="middle">Hentikan / Shift UGC</text>
+</svg>

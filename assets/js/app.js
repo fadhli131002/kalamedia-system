@@ -535,22 +535,31 @@ window.shareFreelancerVoucherWa = function() {
   const p = window.currentVoucherDataCache.payout;
   const f = window.currentVoucherDataCache.formatted;
 
+  const loc = window.location;
+  const basePath = loc.pathname.replace(/\/(expenses|salaries|invoices|clients|reports|settings|content-calendar|owner-dashboard|admin-dashboard).*$/, '').replace(/\/$/, '');
+  const docUrl = `${loc.origin}${basePath}/voucher-view?id=${p.id}`;
+
   const text = 
-`*BUKTI PEMBAYARAN & INVOICE FEE TALENTA - KALA MEDIA*
-Halo *${p.freelancer_name}*, berikut bukti pembayaran honor/fee resmi Anda:
+`*BUKTI PEMBAYARAN & INVOICE FEE TALENTA*
+*Kala Media Creative*
 
-📄 *No. Voucher:* #${f.voucher_number}
-📌 *Proyek Terkait:* ${p.project_name}
-🏢 *Klien / Brand:* ${p.client_company}
-💼 *Uraian Tugas:* ${p.task_description}
-🗓 *Tanggal Bayar:* ${f.payment_date}
-━━━━━━━━━━━━━━━━━━━━
-💰 *TOTAL DIBAYARKAN:* *${f.amount}*
-💳 *Transfer ke:* ${p.freelancer_bank || 'BCA'} - ${p.freelancer_account || '-'}
-✅ *Status Transaksi:* LUNAS (PAID)
+Halo *${p.freelancer_name}*, berikut rincian bukti pembayaran honor/fee resmi Anda:
 
-_Terima kasih banyak atas kerja sama dan hasil karya hebatnya bersama tim Kala Media Creative!_
-*Kala Media Creative • Built to Be Seen.*`;
+- No. Voucher: #${f.voucher_number}
+- Proyek Terkait: ${p.project_name}
+- Klien / Brand: ${p.client_company}
+- Uraian Tugas: ${p.task_description}
+- Tanggal Bayar: ${f.payment_date}
+------------------------------------
+- TOTAL DIBAYARKAN: *${f.amount}*
+- Transfer ke: ${p.freelancer_bank || 'BCA'} - ${p.freelancer_account || '-'}
+- Status: LUNAS (PAID)
+
+Lihat & Unduh Dokumen Resmi:
+${docUrl}
+
+Terima kasih atas kerja sama dan hasil karya hebat Anda bersama Kala Media Creative.
+_Kala Media Creative • Built to Be Seen._`;
 
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
 };

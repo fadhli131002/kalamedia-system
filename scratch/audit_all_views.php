@@ -51,6 +51,8 @@ $views = [
     'content_dashboard' => __DIR__ . '/../views/content_dashboard.php',
     'settings' => __DIR__ . '/../views/settings.php',
     'login' => __DIR__ . '/../views/login.php',
+    'voucher_view' => __DIR__ . '/../views/voucher_view.php',
+    'salary_view' => __DIR__ . '/../views/salary_view.php',
 ];
 
 $_GET['id'] = 1;

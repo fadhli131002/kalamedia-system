@@ -2,10 +2,18 @@
 /**
  * Kala Media Creative Agency - Official Invoice Template View (1:1 Match)
  */
-require_auth();
+$isLoggedIn = function_exists('is_logged_in') && is_logged_in();
 $db = Database::getConnection();
 
 $invoiceId = intval($_GET['id'] ?? 0);
+if ($invoiceId <= 0) {
+    if (!$isLoggedIn) {
+        header('Location: ' . url('login'));
+        exit;
+    }
+    die("ID Invoice tidak valid.");
+}
+
 $stmt = $db->prepare("
     SELECT i.*, c.name as client_name, c.company as client_company, c.email as client_email, c.phone as client_phone, c.address as client_address,
            p.name as project_name
@@ -48,19 +56,27 @@ $clientCompany = $invoice['client_company'] ?: $invoice['client_name'];
 $projectName = $invoice['project_name'] ?: 'Layanan Kreatif & Media';
 $totalFormatted = format_rupiah($invoice['total_amount']);
 
-$waText = "Halo Bapak/Ibu *$clientPicName* ($clientCompany),\n\n";
-$waText .= "Semoga dalam keadaan baik. Kami dari *Kala Media Creative Agency* ingin menyampaikan rincian tagihan Invoice berikut:\n\n";
-$waText .= "📄 *No. Invoice:* #{$invoice['invoice_number']}\n";
-$waText .= "💼 *Proyek / Layanan:* $projectName\n";
-$waText .= "💰 *Total Tagihan:* *$totalFormatted*\n";
-$waText .= "📅 *Jatuh Tempo:* $dueDateFormatted\n";
-$waText .= "📌 *Status:* " . ($invoice['status'] === 'Paid' ? '✅ LUNAS (PAID)' : '⏳ MENUNGGU PEMBAYARAN') . "\n\n";
-$waText .= "💳 *Informasi Rekening Pembayaran:*\n";
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || ($_SERVER['SERVER_PORT'] ?? '') == 443) ? "https://" : "http://";
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$invoiceUrl = $protocol . $host . url("invoice-view?id={$invoice['id']}");
+
+$waText = "*TAGIHAN INVOICE RESMI*\n";
+$waText .= "*Kala Media Creative*\n\n";
+$waText .= "Halo Bapak/Ibu *$clientPicName* ($clientCompany),\n";
+$waText .= "Berikut rincian tagihan invoice resmi Anda:\n\n";
+$waText .= "- No. Invoice: #{$invoice['invoice_number']}\n";
+$waText .= "- Proyek / Layanan: $projectName\n";
+$waText .= "- Total Tagihan: *$totalFormatted*\n";
+$waText .= "- Jatuh Tempo: $dueDateFormatted\n";
+$waText .= "- Status: " . ($invoice['status'] === 'Paid' ? 'LUNAS (PAID)' : 'MENUNGGU PEMBAYARAN') . "\n\n";
+$waText .= "Informasi Rekening Pembayaran:\n";
 $waText .= "Bank: *" . AGENCY_BANK_NAME . "*\n";
 $waText .= "No. Rek: *" . AGENCY_BANK_ACCOUNT . "*\n";
 $waText .= "A.N: *" . AGENCY_BANK_HOLDER . "*\n\n";
-$waText .= "Terima kasih atas kerja samanya! 🙏\n";
-$waText .= "— *Kala Media Creative*";
+$waText .= "Lihat & Unduh Invoice Resmi:\n";
+$waText .= "$invoiceUrl\n\n";
+$waText .= "Terima kasih atas kerja samanya.\n";
+$waText .= "_Kala Media Creative • Built to Be Seen._";
 
 $waUrl = !empty($waPhone) 
     ? "https://api.whatsapp.com/send?phone=$waPhone&text=" . urlencode($waText) 

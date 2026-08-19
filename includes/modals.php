@@ -1754,27 +1754,36 @@ window.shareSlipGajiWa = function() {
   }
   const s = window.currentSlipDataCache.salary;
   const f = window.currentSlipDataCache.formatted;
+
+  const loc = window.location;
+  const basePath = loc.pathname.replace(/\/(expenses|salaries|invoices|clients|reports|settings|content-calendar|owner-dashboard|admin-dashboard).*$/, '').replace(/\/$/, '');
+  const docUrl = `${loc.origin}${basePath}/salary-view?id=${s.id}`;
   
   const text = 
-`*SLIP GAJI RESMI - KALA MEDIA CREATIVE*
+`*SLIP GAJI RESMI KARYAWAN*
+*Kala Media Creative*
+
 Halo *${s.employee_name}*, berikut rincian slip gaji resmi Anda:
 
-📅 *Periode:* ${s.month_period || '-'}
-💼 *Jabatan:* ${s.employee_position || '-'} (${s.emp_dept || 'Creative & Production'})
-🗓 *Tanggal Bayar:* ${f.payment_date}
+- Periode: ${s.month_period || '-'}
+- Jabatan: ${s.employee_position || '-'} (${s.emp_dept || 'Creative & Production'})
+- Tanggal Bayar: ${f.payment_date}
 
-💵 *Gaji Pokok:* ${f.base_salary}
-➕ *Tunjangan:* ${f.allowance}
-➖ *Potongan:* ${f.deduction}
-━━━━━━━━━━━━━━━━━━━━
-💰 *GAJI BERSIH (TAKE-HOME PAY):* *${f.net_salary}*
-💳 *Rekening:* ${s.bank_name || 'BCA'} - ${s.bank_account || '-'}
-✅ *Status:* ${s.status === 'Paid' ? 'LUNAS (PAID)' : 'PENDING'}
+- Gaji Pokok: ${f.base_salary}
+- Tunjangan: ${f.allowance}
+- Potongan: ${f.deduction}
+------------------------------------
+- GAJI BERSIH (TAKE-HOME PAY): *${f.net_salary}*
+- Rekening: ${s.bank_name || 'BCA'} - ${s.bank_account || '-'}
+- Status: ${s.status === 'Paid' ? 'LUNAS (PAID)' : 'PENDING'}
 
-📝 *Catatan:* ${s.notes || 'Pembayaran gaji bulanan Kala Media Creative.'}
+Catatan: ${s.notes || 'Pembayaran gaji bulanan Kala Media Creative.'}
 
-_Terima kasih atas kerja keras dan kontribusi luar biasa Anda untuk Kala Media Creative!_
-*Kala Media Creative • Built to Be Seen.*`;
+Lihat & Unduh Slip Gaji Resmi:
+${docUrl}
+
+Terima kasih atas kerja keras dan dedikasi Anda untuk Kala Media Creative.
+_Kala Media Creative • Built to Be Seen._`;
 
   let phone = (s.emp_phone || '').replace(/[^0-9]/g, '');
   if (phone.startsWith('0')) {

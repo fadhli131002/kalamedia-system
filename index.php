@@ -78,6 +78,14 @@ switch ($route) {
         require_once __DIR__ . '/views/salaries.php';
         break;
 
+    case 'salary-view':
+        require_once __DIR__ . '/views/salary_view.php';
+        break;
+
+    case 'voucher-view':
+        require_once __DIR__ . '/views/voucher_view.php';
+        break;
+
     case 'clients':
         require_once __DIR__ . '/views/clients.php';
         break;

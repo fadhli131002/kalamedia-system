@@ -176,6 +176,41 @@ function unformatRupiah(value) {
   return parseFloat(value.toString().replace(/[^0-9]/g, '')) || 0;
 }
 
+window.formatRupiahDisplay = formatRupiahDisplay;
+window.formatRupiahInput = formatRupiahDisplay;
+window.unformatRupiah = unformatRupiah;
+
+// Global Client Projects Loader for Select Dropdowns
+window.loadProjectsForClient = async function(clientId, targetSelectId = 'inv-project-select') {
+  const select = document.getElementById(targetSelectId);
+  if (!select) return;
+
+  select.innerHTML = '<option value="">-- Memuat Proyek... --</option>';
+  if (!clientId) {
+    select.innerHTML = '<option value="">-- Pilih Klien Terlebih Dahulu --</option>';
+    return;
+  }
+
+  try {
+    const res = await fetch(`api/clients.php?action=get_client_projects&client_id=${clientId}`);
+    const data = await res.json();
+    if (data.success && data.projects && data.projects.length > 0) {
+      select.innerHTML = '<option value="">-- Pilih Proyek Terkait --</option>';
+      data.projects.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.innerText = `${p.name} (Kontrak: Rp ${Number(p.contract_value).toLocaleString('id-ID')})`;
+        select.appendChild(opt);
+      });
+    } else {
+      select.innerHTML = '<option value="">-- Otomatis Buat Proyek untuk Klien Ini --</option>';
+    }
+  } catch (err) {
+    console.error('Failed to load client projects', err);
+    select.innerHTML = '<option value="">-- Otomatis Terkait Proyek Klien --</option>';
+  }
+};
+
 function initRupiahInputs() {
   document.querySelectorAll('.rupiah-input').forEach(input => {
     if (input.dataset.rupiahInitialized) return;
@@ -651,29 +686,32 @@ window.openEditPayoutModal = async function(payoutId) {
       return;
     }
     const p = data.payout;
-    document.getElementById('edit-payout-id').value = p.id;
-    document.getElementById('edit-payout-name').value = p.freelancer_name || '';
-    document.getElementById('edit-payout-phone').value = p.freelancer_phone || '';
-    document.getElementById('edit-payout-bank').value = p.freelancer_bank || 'BCA';
-    document.getElementById('edit-payout-account').value = p.freelancer_account || '';
+    if (document.getElementById('edit-payout-id')) document.getElementById('edit-payout-id').value = p.id;
+    if (document.getElementById('edit-payout-name')) document.getElementById('edit-payout-name').value = p.freelancer_name || '';
+    if (document.getElementById('edit-payout-phone')) document.getElementById('edit-payout-phone').value = p.freelancer_phone || '';
+    if (document.getElementById('edit-payout-bank')) document.getElementById('edit-payout-bank').value = p.freelancer_bank || 'BCA';
+    if (document.getElementById('edit-payout-account')) document.getElementById('edit-payout-account').value = p.freelancer_account || '';
     
     const clientSelect = document.getElementById('edit-payout-client-select');
     if (clientSelect) {
       clientSelect.value = p.client_id || '';
-      loadProjectsForClient(p.client_id, 'edit-payout-project-select');
-      setTimeout(() => {
-        const projSelect = document.getElementById('edit-payout-project-select');
-        if (projSelect) projSelect.value = p.project_id || '';
-      }, 100);
+      if (typeof window.loadProjectsForClient === 'function') {
+        await window.loadProjectsForClient(p.client_id, 'edit-payout-project-select');
+      }
+      const projSelect = document.getElementById('edit-payout-project-select');
+      if (projSelect && p.project_id) {
+        projSelect.value = p.project_id;
+      }
     }
     
-    document.getElementById('edit-payout-task').value = p.task_description || '';
-    document.getElementById('edit-payout-amount').value = formatRupiahInput(p.amount.toString());
-    document.getElementById('edit-payout-status').value = p.status || 'Pending';
+    if (document.getElementById('edit-payout-task')) document.getElementById('edit-payout-task').value = p.task_description || '';
+    if (document.getElementById('edit-payout-amount')) document.getElementById('edit-payout-amount').value = window.formatRupiahDisplay(p.amount ? p.amount.toString() : '0');
+    if (document.getElementById('edit-payout-status')) document.getElementById('edit-payout-status').value = p.status || 'Pending';
 
     openModal('modal-edit-payout');
   } catch (err) {
-    showToast('Gagal memuat data fee freelancer', 'danger');
+    console.error('Error opening edit payout modal:', err);
+    showToast('Gagal memuat data fee freelancer: ' + err.message, 'danger');
   }
 };
 
@@ -687,27 +725,30 @@ window.openEditAdsModal = async function(adsId) {
       return;
     }
     const a = data.ads;
-    document.getElementById('edit-ads-id').value = a.id;
+    if (document.getElementById('edit-ads-id')) document.getElementById('edit-ads-id').value = a.id;
     
     const clientSelect = document.getElementById('edit-ads-client-select');
     if (clientSelect) {
       clientSelect.value = a.client_id || '';
-      loadProjectsForClient(a.client_id, 'edit-ads-project-select');
-      setTimeout(() => {
-        const projSelect = document.getElementById('edit-ads-project-select');
-        if (projSelect) projSelect.value = a.project_id || '';
-      }, 100);
+      if (typeof window.loadProjectsForClient === 'function') {
+        await window.loadProjectsForClient(a.client_id, 'edit-ads-project-select');
+      }
+      const projSelect = document.getElementById('edit-ads-project-select');
+      if (projSelect && a.project_id) {
+        projSelect.value = a.project_id;
+      }
     }
 
-    document.getElementById('edit-ads-platform').value = a.platform || 'Meta Ads';
-    document.getElementById('edit-ads-account').value = a.account_id || '';
-    document.getElementById('edit-ads-amount').value = formatRupiahInput(a.amount.toString());
-    document.getElementById('edit-ads-date').value = a.spent_date || '';
-    document.getElementById('edit-ads-notes').value = a.notes || '';
+    if (document.getElementById('edit-ads-platform')) document.getElementById('edit-ads-platform').value = a.platform || 'Meta Ads';
+    if (document.getElementById('edit-ads-account')) document.getElementById('edit-ads-account').value = a.account_id || '';
+    if (document.getElementById('edit-ads-amount')) document.getElementById('edit-ads-amount').value = window.formatRupiahDisplay(a.amount ? a.amount.toString() : '0');
+    if (document.getElementById('edit-ads-date')) document.getElementById('edit-ads-date').value = a.spent_date || '';
+    if (document.getElementById('edit-ads-notes')) document.getElementById('edit-ads-notes').value = a.notes || '';
 
     openModal('modal-edit-ads');
   } catch (err) {
-    showToast('Gagal memuat data pengeluaran iklan', 'danger');
+    console.error('Error opening edit ads modal:', err);
+    showToast('Gagal memuat data pengeluaran iklan: ' + err.message, 'danger');
   }
 };
 

@@ -117,7 +117,7 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
                   <?php foreach ($invoices as $inv): ?>
                     <tr>
                       <td style="font-weight: 700; white-space: nowrap;">
-                        <a href="<?= url('invoice-view?id=' . $inv['id'] . $pSuffix) ?>" style="color: #101828; text-decoration: none; font-weight: 700; font-family: inherit;">
+                        <a href="<?= url('invoice-view?id=' . $inv['id']) ?>" style="color: #101828; text-decoration: none; font-weight: 700; font-family: inherit;">
                           #<?= htmlspecialchars($inv['invoice_number']) ?>
                         </a>
                       </td>
@@ -141,7 +141,7 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
                       </td>
                       <td style="text-align: right; white-space: nowrap;">
                         <div style="display: inline-flex; gap: 8px; justify-content: flex-end; align-items: center;">
-                          <a href="<?= url('invoice-view?id=' . $inv['id'] . $pSuffix) ?>" class="btn btn-secondary btn-sm" style="padding: 6px 12px; font-size: 12px; font-weight: 600; color: #344054; border: 1px solid #D0D5DD; background: #FFFFFF; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none;" title="Lihat & Unduh PDF">
+                          <a href="<?= url('invoice-view?id=' . $inv['id']) ?>" class="btn btn-secondary btn-sm" style="padding: 6px 12px; font-size: 12px; font-weight: 600; color: #344054; border: 1px solid #D0D5DD; background: #FFFFFF; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none;" title="Lihat & Unduh PDF">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                             <span>Lihat Invoice</span>
                           </a>

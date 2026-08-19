@@ -151,7 +151,7 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; background: #F9FAFB; padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
               <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <label style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">Filter Periode:</label>
-                <select class="form-select" style="width: 150px; padding: 5px 8px; font-size: 12px;" onchange="location.href='<?= url('salaries?tab=payroll' . $pSuffix . '&status=' . urlencode($filterStatus)) ?>&period=' + this.value">
+                <select class="form-select" style="width: 150px; padding: 5px 8px; font-size: 12px;" onchange="location.href='<?= url('salaries?tab=payroll&status=' . urlencode($filterStatus)) ?>&period=' + this.value">
                   <option value="">Semua Periode</option>
                   <?php foreach ($availablePeriods as $p): ?>
                     <option value="<?= $p ?>" <?= $filterPeriod === $p ? 'selected' : '' ?>><?= $p ?></option>
@@ -159,7 +159,7 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
                 </select>
 
                 <label style="font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-left: 8px;">Status:</label>
-                <select class="form-select" style="width: 130px; padding: 5px 8px; font-size: 12px;" onchange="location.href='<?= url('salaries?tab=payroll' . $pSuffix . '&period=' . urlencode($filterPeriod)) ?>&status=' + this.value">
+                <select class="form-select" style="width: 130px; padding: 5px 8px; font-size: 12px;" onchange="location.href='<?= url('salaries?tab=payroll&period=' . urlencode($filterPeriod)) ?>&status=' + this.value">
                   <option value="">Semua Status</option>
                   <option value="Paid" <?= $filterStatus === 'Paid' ? 'selected' : '' ?>>Paid (Lunas)</option>
                   <option value="Pending" <?= $filterStatus === 'Pending' ? 'selected' : '' ?>>Pending</option>

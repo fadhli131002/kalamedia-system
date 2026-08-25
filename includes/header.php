@@ -27,20 +27,22 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
 
 <header class="topbar">
   <div class="greeting-text">
-    <button class="btn btn-secondary btn-sm" id="sidebar-toggle" style="display:none; padding:6px 10px;" onclick="document.querySelector('.sidebar').classList.toggle('open')">
-      &#9776;
+    <button class="sidebar-toggle-btn" id="sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Toggle Sidebar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
     </button>
-    <div style="display: flex; flex-direction: column; gap: 3px;">
+    <div class="greeting-info">
       <div class="topbar-breadcrumb">
         <span class="breadcrumb-root"><?= htmlspecialchars($currentPageInfo['parent']) ?></span>
         <span class="breadcrumb-sep">/</span>
         <span class="breadcrumb-current"><?= htmlspecialchars($currentPageInfo['name']) ?></span>
       </div>
-      <h1 style="font-size: 15px; font-weight: 700; color: #101828; margin: 0; display: flex; align-items: center; gap: 8px;">
-        Halo, <?= htmlspecialchars($currentUser['name'] ?? ($isOwnerPortal ? 'Owner Kala' : 'Finance Kala')) ?> 👋
-        <span style="font-size: 12px; font-weight: 500; color: var(--text-secondary);">
-          (<?= date('l, d F Y') ?>)
-        </span>
+      <h1 class="greeting-heading">
+        <span class="greeting-name">Halo, <?= htmlspecialchars($currentUser['name'] ?? ($isOwnerPortal ? 'Owner Kala' : 'Finance Kala')) ?> 👋</span>
+        <span class="greeting-date">(<?= date('d M Y') ?>)</span>
       </h1>
     </div>
   </div>
@@ -57,7 +59,7 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
     <?php endif; ?>
 
     <!-- Create Invoice Button (Primary CTA) -->
-    <button class="btn btn-primary btn-sm" onclick="openModal('modal-create-invoice')">
+    <button class="btn btn-primary btn-sm btn-create-invoice" onclick="openModal('modal-create-invoice')">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="12" y1="5" x2="12" y2="19"></line>
         <line x1="5" y1="12" x2="19" y2="12"></line>

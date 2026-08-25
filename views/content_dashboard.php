@@ -55,6 +55,41 @@ unset($c);
       overflow: hidden;
     }
 
+    @media (max-width: 900px) {
+      .supitar-calendar-card {
+        flex-direction: column !important;
+        min-height: auto !important;
+        overflow: visible !important;
+      }
+      .supitar-sidebar {
+        width: 100% !important;
+        min-width: 100% !important;
+        border-right: none !important;
+        border-bottom: 1px solid #EAECF0 !important;
+        padding: 16px !important;
+        gap: 14px !important;
+      }
+      .supitar-main-panel {
+        width: 100% !important;
+        padding: 14px 10px !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+      .calendar-scroll-wrapper {
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-x pan-y !important;
+        padding-bottom: 8px;
+      }
+      .supitar-fc-container, #calendar {
+        min-width: 680px !important;
+      }
+      .supitar-topbar {
+        min-width: 680px !important;
+      }
+    }
+
     .supitar-sidebar {
       width: 260px;
       min-width: 260px;
@@ -586,8 +621,10 @@ unset($c);
               </div>
             </div>
 
-            <!-- FullCalendar Container -->
-            <div id="calendar" class="supitar-fc-container"></div>
+            <!-- FullCalendar Container with Horizontal Touch Scroll Support -->
+            <div class="calendar-scroll-wrapper">
+              <div id="calendar" class="supitar-fc-container"></div>
+            </div>
 
           </div>
 

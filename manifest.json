@@ -1,0 +1,24 @@
+{
+  "name": "Kalamedia Agency System",
+  "short_name": "Kalamedia",
+  "description": "Kala Media Creative Agency Financial & Project Management System",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#101828",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "assets/Jpg/Asset 3.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/Jpg/Asset 3.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

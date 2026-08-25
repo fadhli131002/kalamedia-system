@@ -8,7 +8,9 @@ $currentPage = $GLOBALS['currentPage'] ?? $_GET['page'] ?? ($isOwner ? 'owner-da
 $homeUrl = $isOwner ? url('owner-dashboard') : url('admin-dashboard');
 ?>
 
-<aside class="sidebar">
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
+<aside class="sidebar" id="app-sidebar">
   <div class="sidebar-header">
     <a href="<?= $homeUrl ?>" style="display: flex; align-items: center; justify-content: space-between; width: 100%; text-decoration: none; color: inherit; gap: 8px;">
       <img src="assets/Jpg/Asset 3.png" alt="Kala Media Creative Agency" class="sidebar-brand-img" style="height: 23px; width: auto; max-width: 120px; object-fit: contain;">
@@ -16,6 +18,7 @@ $homeUrl = $isOwner ? url('owner-dashboard') : url('admin-dashboard');
         <?= $isOwner ? 'OWNER' : 'FINANCE' ?>
       </span>
     </a>
+    <button class="sidebar-close-btn" onclick="closeMobileSidebar()" aria-label="Close Sidebar">&times;</button>
   </div>
 
   <nav class="sidebar-nav">

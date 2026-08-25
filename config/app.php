@@ -52,10 +52,12 @@ $_SESSION['last_activity'] = time();
 
 // Helper Functions
 function get_base_url() {
-    $script_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+    $script_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
     if ($script_dir === '/' || $script_dir === '\\') {
         $script_dir = '';
     }
+    // Remove /api or /scratch subfolder if current script is inside api or scratch folder
+    $script_dir = preg_replace('#/(api|scratch)$#i', '', $script_dir);
     return rtrim($script_dir, '/');
 }
 

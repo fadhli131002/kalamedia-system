@@ -3,6 +3,22 @@
  * Core Frontend Interactions & Modal Manager
  */
 
+// Mobile Sidebar Drawer Navigation Helper
+function toggleMobileSidebar() {
+  const sidebar = document.querySelector('.sidebar') || document.getElementById('app-sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (sidebar) sidebar.classList.toggle('open');
+  if (overlay) overlay.classList.toggle('active');
+}
+
+function closeMobileSidebar() {
+  const sidebar = document.querySelector('.sidebar') || document.getElementById('app-sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+  if (sidebar) sidebar.classList.remove('open');
+  if (overlay) overlay.classList.remove('active');
+}
+
+
 // Toast Notifications System
 function showToast(message, type = 'info') {
   let container = document.getElementById('toast-container');
@@ -1111,8 +1127,16 @@ window.toggleExportRangeMode = function(mode) {
   } else {
     if (monthWrap) monthWrap.style.display = 'none';
     if (customWrap) customWrap.style.display = 'flex';
-    if (labelMonth) labelMonth.style.borderColor = '#D0D5DD';
     if (labelCustom) labelCustom.style.borderColor = '#2563EB';
   }
 };
+
+// Register PWA Service Worker for mobile app capability
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(err => {
+      console.log('PWA ServiceWorker registration failed: ', err);
+    });
+  });
+}
 

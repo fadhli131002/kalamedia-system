@@ -170,13 +170,13 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
               <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Tren riwayat arus kas masuk dan biaya operasional 6 bulan terakhir</p>
             </div>
           </div>
-          <div style="height: 300px; width: 100%;">
+          <div style="position: relative; height: 260px; width: 100%;">
             <canvas id="cashflowChart"></canvas>
           </div>
         </div>
 
         <!-- Two Column Layout: Project Profitability Leaderboard & Outstanding Receivables -->
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start;">
+        <div class="owner-dashboard-grid">
           
           <!-- Project Profitability Leaderboard -->
           <div class="glass-panel" style="margin-bottom: 0;">
@@ -301,7 +301,7 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
           </div>
 
           <!-- Internal Team & Payroll Summary Widget -->
-          <div class="glass-panel" style="grid-column: span 2; margin-top: 20px;">
+          <div class="glass-panel owner-full-width-panel">
             <div class="panel-header" style="margin-bottom: 16px;">
               <div>
                 <h3 class="panel-title">
@@ -315,7 +315,7 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
               </a>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 18px;">
+            <div class="payroll-cards-grid">
               <div style="background: #F9FAFB; padding: 14px 18px; border-radius: 8px; border: 1px solid var(--border-color); border-left: 4px solid #101828;">
                 <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Total Karyawan Aktif</div>
                 <div style="font-size: 20px; font-weight: 800; color: #101828; margin-top: 4px;"><?= $activeEmployeeCount ?> Orang</div>
@@ -336,18 +336,20 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
             </div>
 
             <?php if (!empty($activeEmployees)): ?>
-              <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                <?php foreach ($activeEmployees as $emp): ?>
-                  <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px; box-shadow: var(--shadow-xs);">
-                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #F2F4F7; color: #101828; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; border: 1px solid var(--border-color);">
-                      <?= strtoupper(substr($emp['name'], 0, 2)) ?>
+              <div class="touch-swipe-x">
+                <div style="display: flex; gap: 12px; min-width: 500px;">
+                  <?php foreach ($activeEmployees as $emp): ?>
+                    <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px; box-shadow: var(--shadow-xs);">
+                      <div style="width: 36px; height: 36px; border-radius: 50%; background: #F2F4F7; color: #101828; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; border: 1px solid var(--border-color);">
+                        <?= strtoupper(substr($emp['name'], 0, 2)) ?>
+                      </div>
+                      <div style="flex: 1; min-width: 0;">
+                        <div style="font-size: 13px; font-weight: 700; color: #101828; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($emp['name']) ?></div>
+                        <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($emp['position'] ?: 'Karyawan') ?> &bull; <span style="color: var(--success-text); font-weight: 600;"><?= format_rupiah($emp['base_salary']) ?></span></div>
+                      </div>
                     </div>
-                    <div style="flex: 1; min-width: 0;">
-                      <div style="font-size: 13px; font-weight: 700; color: #101828; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($emp['name']) ?></div>
-                      <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($emp['position'] ?: 'Karyawan') ?> &bull; <span style="color: var(--success-text); font-weight: 600;"><?= format_rupiah($emp['base_salary']) ?></span></div>
-                    </div>
-                  </div>
-                <?php endforeach; ?>
+                  <?php endforeach; ?>
+                </div>
               </div>
             <?php endif; ?>
           </div>

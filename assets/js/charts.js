@@ -115,7 +115,14 @@ function initCashflowChart(chartData) {
       scales: {
         x: {
           grid: { color: '#F2F4F7', drawBorder: false },
-          ticks: { color: '#475467', font: { family: 'Plus Jakarta Sans', size: 11, weight: 500 } }
+          ticks: {
+            color: '#475467',
+            font: { family: 'Plus Jakarta Sans', size: 10, weight: 500 },
+            maxRotation: 0,
+            minRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: 6
+          }
         },
         y: {
           grid: { color: '#F2F4F7', drawBorder: false },

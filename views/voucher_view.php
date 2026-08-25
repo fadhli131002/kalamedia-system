@@ -73,6 +73,40 @@ $paymentDateFormatted = format_date($paidDate, true);
       padding: 40px 44px;
       box-sizing: border-box;
     }
+    @media (max-width: 768px) {
+      body {
+        padding: 12px 8px !important;
+      }
+      .top-actions-bar {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 10px;
+      }
+      .voucher-sheet {
+        padding: 20px 16px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+        overflow-x: auto;
+      }
+      .voucher-header-row {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 14px;
+        margin-bottom: 20px !important;
+      }
+      .voucher-header-col-right {
+        text-align: left !important;
+      }
+      .voucher-title-large {
+        font-size: 22px !important;
+        letter-spacing: 1px !important;
+      }
+      .voucher-grid-2 {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+    }
     @media print {
       body { background: #fff !important; padding: 0 !important; }
       .top-actions-bar { display: none !important; }
@@ -88,10 +122,10 @@ $paymentDateFormatted = format_date($paidDate, true);
       <?php if (function_exists('is_logged_in') && is_logged_in()): ?>
         <a href="<?= url('expenses') ?>" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-          <span>Kembali ke Dashboard</span>
+          <span>Kembali ke Pengeluaran</span>
         </a>
       <?php else: ?>
-        <span style="color: #94A3B8; font-size: 13px; font-weight: 600;">Kala Media Creative &bull; Official Payment Voucher</span>
+        <span style="color: #94A3B8; font-size: 13px; font-weight: 600;">Kala Media Creative &bull; Payment Voucher</span>
       <?php endif; ?>
     </div>
 
@@ -110,7 +144,7 @@ $paymentDateFormatted = format_date($paidDate, true);
   <!-- Voucher Sheet -->
   <div class="voucher-sheet" id="voucher-print-area">
     <!-- Top To / Date Bar -->
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 1.5px solid #000000; margin-bottom: 24px;">
+    <div class="voucher-header-row" style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 1.5px solid #000000; margin-bottom: 24px;">
       <div>
         <div style="font-size: 13px; font-weight: 500; color: #000000; margin-bottom: 3px;">Penerima Honor (Talenta / Freelancer):</div>
         <div style="font-size: 17px; font-weight: 700; color: #000000;"><?= htmlspecialchars($payout['freelancer_name']) ?></div>
@@ -118,15 +152,15 @@ $paymentDateFormatted = format_date($paidDate, true);
           <?= htmlspecialchars($payout['freelancer_bank'] ?: 'Bank') ?> - <?= htmlspecialchars($payout['freelancer_account'] ?: '-') ?>
         </div>
       </div>
-      <div style="text-align: right;">
+      <div class="voucher-header-col-right" style="text-align: right;">
         <div style="font-size: 13px; font-weight: 800; color: #000000; margin-bottom: 3px;">VOUCHER: #<?= htmlspecialchars($voucherNumber) ?></div>
         <div style="font-size: 12.5px; color: #4B5563;">Tanggal Bayar: <?= htmlspecialchars($paymentDateFormatted) ?></div>
       </div>
     </div>
 
     <!-- Main Header: Logo & Title -->
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px;">
-      <div style="width: 260px;">
+    <div class="voucher-header-row" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px;">
+      <div style="width: 260px; max-width: 100%;">
         <img src="assets/Jpg/Asset 3.png" alt="Kala Media Creative Agency" style="height: 52px; width: auto; object-fit: contain; margin-bottom: 10px; display: block;">
         <div style="font-size: 10.5px; line-height: 1.35; color: #6B7280;">
           Jl. BSD Raya Utama, Pagedangan,<br>
@@ -135,8 +169,8 @@ $paymentDateFormatted = format_date($paidDate, true);
         </div>
       </div>
 
-      <div style="text-align: right;">
-        <div style="font-size: 32px; font-weight: 900; color: #000000; letter-spacing: 1.5px; line-height: 1.1; margin-bottom: 8px; text-transform: uppercase;">
+      <div class="voucher-header-col-right" style="text-align: right;">
+        <div class="voucher-title-large" style="font-size: 32px; font-weight: 900; color: #000000; letter-spacing: 1.5px; line-height: 1.1; margin-bottom: 8px; text-transform: uppercase;">
           PAYMENT VOUCHER
         </div>
         <div style="font-size: 12px; font-weight: 800; color: #4F46E5; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px;">
@@ -149,7 +183,7 @@ $paymentDateFormatted = format_date($paidDate, true);
     </div>
 
     <!-- Project & Client Metadata -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px;">
+    <div class="voucher-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px;">
       <div>
         <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 110px; display: inline-block;">Proyek Terkait:</span> <strong style="color: #0F172A;"><?= htmlspecialchars($payout['project_name']) ?></strong></div>
         <div><span style="color: #64748B; width: 110px; display: inline-block;">Klien / Brand:</span> <span style="font-weight: 600; color: #0F172A;"><?= htmlspecialchars($payout['client_company']) ?></span></div>

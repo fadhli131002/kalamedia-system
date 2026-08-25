@@ -1449,10 +1449,14 @@ body {
   }
   
   .modal-dialog {
-    width: 94vw !important;
-    max-width: 520px !important;
+    width: 95vw !important;
+    max-width: 95vw !important;
     margin: 12px auto !important;
-    padding: 16px !important;
+    padding: 16px 12px !important;
+    box-sizing: border-box !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+    overflow-x: auto !important;
   }
   .calendar-layout-wrapper {
     grid-template-columns: 1fr !important;

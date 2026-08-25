@@ -93,6 +93,56 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
       padding: 0 12px;
     }
 
+    @media (max-width: 768px) {
+      .deck-screen-wrapper {
+        padding-bottom: 24px;
+      }
+      .deck-actions-bar {
+        flex-direction: column;
+        align-items: stretch !important;
+        padding: 10px 12px;
+        gap: 10px;
+      }
+      .deck-actions-left, .deck-actions-right {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .deck-canvas-container {
+        padding: 0 6px;
+      }
+      .deck-paper {
+        padding: 18px 14px !important;
+        border-radius: 8px;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+        overflow-x: auto;
+      }
+      .deck-kpi-grid-4 {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+      }
+      .paid-ads-deck-grid {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+      }
+      .creative-concept-bar {
+        flex-direction: column;
+        align-items: flex-start !important;
+      }
+      .deck-header-row {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 10px;
+      }
+      .deck-meta-col {
+        text-align: left !important;
+        align-items: flex-start !important;
+      }
+    }
+
     .deck-paper {
       background: #FFFFFF;
       border-radius: 12px;

@@ -74,6 +74,40 @@ $paymentDateFormatted = format_date($sal['payment_date']);
       padding: 40px 44px;
       box-sizing: border-box;
     }
+    @media (max-width: 768px) {
+      body {
+        padding: 12px 8px !important;
+      }
+      .top-actions-bar {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 10px;
+      }
+      .slip-sheet {
+        padding: 20px 16px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+        overflow-x: auto;
+      }
+      .slip-header-row {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 14px;
+        margin-bottom: 20px !important;
+      }
+      .slip-header-col-right {
+        text-align: left !important;
+      }
+      .slip-title-large {
+        font-size: 26px !important;
+        letter-spacing: 1px !important;
+      }
+      .slip-grid-2 {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+    }
     @media print {
       body { background: #fff !important; padding: 0 !important; }
       .top-actions-bar { display: none !important; }
@@ -111,7 +145,7 @@ $paymentDateFormatted = format_date($sal['payment_date']);
   <!-- Salary Sheet -->
   <div class="slip-sheet" id="slip-print-area">
     <!-- Top To / Date Bar -->
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 1.5px solid #000000; margin-bottom: 24px;">
+    <div class="slip-header-row" style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 1.5px solid #000000; margin-bottom: 24px;">
       <div>
         <div style="font-size: 13px; font-weight: 500; color: #000000; margin-bottom: 3px;">Karyawan:</div>
         <div style="font-size: 17px; font-weight: 700; color: #000000;"><?= htmlspecialchars($sal['employee_name']) ?></div>
@@ -119,15 +153,15 @@ $paymentDateFormatted = format_date($sal['payment_date']);
           <?= htmlspecialchars($sal['employee_position'] ?: '-') ?> &bull; <?= htmlspecialchars($sal['emp_dept'] ?: 'Creative & Production') ?>
         </div>
       </div>
-      <div style="text-align: right;">
+      <div class="slip-header-col-right" style="text-align: right;">
         <div style="font-size: 13px; color: #000000; margin-bottom: 3px;">Periode: <?= htmlspecialchars($sal['month_period'] ?: '-') ?></div>
         <div style="font-size: 13px; font-weight: 700; color: #000000; letter-spacing: 0.5px;">Tanggal Bayar: <?= htmlspecialchars($paymentDateFormatted) ?></div>
       </div>
     </div>
 
     <!-- Main Header: Logo & Title -->
-    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px;">
-      <div style="width: 250px;">
+    <div class="slip-header-row" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px;">
+      <div style="width: 250px; max-width: 100%;">
         <img src="assets/Jpg/Asset 3.png" alt="Kala Media Creative Agency" style="height: 52px; width: auto; object-fit: contain; margin-bottom: 10px; display: block;">
         <div style="font-size: 10.5px; line-height: 1.35; color: #6B7280;">
           Jl. BSD Raya Utama, Pagedangan,<br>
@@ -136,8 +170,8 @@ $paymentDateFormatted = format_date($sal['payment_date']);
         </div>
       </div>
 
-      <div style="text-align: right;">
-        <div style="font-size: 44px; font-weight: 900; color: #000000; letter-spacing: 2px; line-height: 1; margin-bottom: 8px; text-transform: uppercase;">
+      <div class="slip-header-col-right" style="text-align: right;">
+        <div class="slip-title-large" style="font-size: 44px; font-weight: 900; color: #000000; letter-spacing: 2px; line-height: 1; margin-bottom: 8px; text-transform: uppercase;">
           SLIP GAJI
         </div>
         <div style="font-size: 12.5px; color: #000000;">
@@ -147,7 +181,7 @@ $paymentDateFormatted = format_date($sal['payment_date']);
     </div>
 
     <!-- Employee Info Summary Grid -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px;">
+    <div class="slip-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px;">
       <div>
         <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 120px; display: inline-block;">Status Kepegawaian:</span> <strong style="color: #0F172A;"><?= htmlspecialchars($sal['employment_type'] ?: 'Full-time') ?></strong></div>
         <div><span style="color: #64748B; width: 120px; display: inline-block;">Departemen:</span> <span><?= htmlspecialchars($sal['emp_dept'] ?: 'Creative & Production') ?></span></div>
@@ -159,7 +193,7 @@ $paymentDateFormatted = format_date($sal['payment_date']);
     </div>
 
     <!-- 2 Columns: Penghasilan vs Potongan -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+    <div class="slip-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
       <!-- Column A: Penghasilan -->
       <div style="border: 1px solid #E5E7EB; border-radius: 6px; overflow: hidden;">
         <div style="background: #F9FAFB; padding: 10px 14px; font-weight: 700; font-size: 13px; color: #000000; border-bottom: 1px solid #E5E7EB; letter-spacing: 0.3px;">

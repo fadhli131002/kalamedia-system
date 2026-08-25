@@ -51,6 +51,17 @@ if (is_logged_in()) {
       gap: 10px;
       margin-top: 10px;
     }
+    @media (max-width: 480px) {
+      .login-page {
+        padding: 14px;
+      }
+      .login-card {
+        padding: 24px 18px;
+      }
+      .demo-btn-group {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body class="login-page">

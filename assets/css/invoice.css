@@ -1,6 +1,6 @@
 /*
- * Kala Media Creative Agency - Official Invoice Template
- * 1:1 Pixel-Accurate Match with Kala Media Brand Guidelines
+ * PT Kala Kausa Prima - Official Invoice Template
+ * 1:1 Pixel-Accurate Match with PT Kala Kausa Prima Brand Guidelines
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
@@ -246,10 +246,11 @@
 }
 
 .km-logo-img {
-  height: 52px;
+  height: 85px;
   width: auto;
+  max-width: 130px;
   object-fit: contain;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   display: block;
 }
 

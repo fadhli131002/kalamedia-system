@@ -34,7 +34,7 @@ $projects = $db->query("
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Database Klien & Proyek - Kalamedia</title>
+  <title>Database Klien & Proyek - PT Kala Kausa Prima</title>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>

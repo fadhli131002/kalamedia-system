@@ -31,7 +31,7 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manajemen Invoice - Kalamedia</title>
+  <title>Manajemen Invoice - PT Kala Kausa Prima</title>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>

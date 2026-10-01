@@ -592,7 +592,7 @@ if ($action === 'export_pdf') {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Laporan Rekonsiliasi - Kala Media</title>
+      <title>Laporan Rekonsiliasi - PT Kala Kausa Prima</title>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
       <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -668,8 +668,8 @@ if ($action === 'export_pdf') {
           gap: 14px;
         }
         .logo {
-          height: 46px;
-          width: auto;
+          height: 60px;
+          width: 60px;
           object-fit: contain;
         }
         .title-block {
@@ -756,7 +756,7 @@ if ($action === 'export_pdf') {
 
       <div class="top-action-bar">
         <div style="font-size: 13.5px; font-weight: 700; letter-spacing: -0.2px;">
-          Laporan Rekonsiliasi Keuangan Bulanan - Kala Media Creative
+          Laporan Rekonsiliasi Keuangan Bulanan - PT Kala Kausa Prima
         </div>
         <div style="display: flex; gap: 10px;">
           <button type="button" class="btn-action btn-primary" id="btn-dl-pdf" onclick="generatePdf()">
@@ -773,9 +773,9 @@ if ($action === 'export_pdf') {
       <div class="report-page-wrapper" id="report-canvas">
         <div class="header">
           <div class="logo-box">
-            <img src="../assets/Jpg/Asset 3.png" alt="Kala Media" class="logo" onerror="this.src='../assets/img/qr_code.svg';">
+            <img src="../assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" class="logo" onerror="this.src='../assets/img/qr_code.svg';">
             <div>
-              <div style="font-weight: 800; font-size: 14.5px; color: #0F172A;">Kala Media Creative</div>
+              <div style="font-weight: 800; font-size: 14.5px; color: #0F172A;">PT Kala Kausa Prima</div>
               <div style="font-size: 11px; color: #64748B; line-height: 1.3;">Financial & Operational Reconciliation Report</div>
             </div>
           </div>
@@ -834,7 +834,7 @@ if ($action === 'export_pdf') {
         </table>
 
         <div style="margin-top: 36px; padding-top: 16px; border-top: 1px solid #E2E8F0; display: flex; justify-content: space-between; font-size: 10.5px; color: #94A3B8;">
-          <div>Dokumen ini dihasilkan secara resmi oleh Sistem Finansial Kala Media Creative.</div>
+          <div>Dokumen ini dihasilkan secara resmi oleh Sistem Finansial PT Kala Kausa Prima.</div>
           <div>Halaman 1 / 1</div>
         </div>
       </div>

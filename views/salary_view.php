@@ -1,7 +1,7 @@
 <?php
 /**
  * Standalone Employee Salary Slip View
- * Kala Media Creative Agency
+ * PT Kala Kausa Prima
  */
 require_once __DIR__ . '/../config/app.php';
 require_once __DIR__ . '/../config/database.php';
@@ -126,7 +126,7 @@ $paymentDateFormatted = format_date($sal['payment_date']);
           <span>Kembali ke Dashboard</span>
         </a>
       <?php else: ?>
-        <span style="color: #94A3B8; font-size: 13px; font-weight: 600;">Kala Media Creative &bull; Official Salary Slip</span>
+        <span style="color: #94A3B8; font-size: 13px; font-weight: 600;">PT Kala Kausa Prima &bull; Official Salary Slip</span>
       <?php endif; ?>
     </div>
 
@@ -162,7 +162,7 @@ $paymentDateFormatted = format_date($sal['payment_date']);
     <!-- Main Header: Logo & Title -->
     <div class="slip-header-row" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px;">
       <div style="width: 250px; max-width: 100%;">
-        <img src="assets/Jpg/Asset 3.png" alt="Kala Media Creative Agency" style="height: 52px; width: auto; object-fit: contain; margin-bottom: 10px; display: block;">
+        <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" style="height: 85px; width: auto; max-width: 130px; object-fit: contain; margin-bottom: 12px; display: block;">
         <div style="font-size: 10.5px; line-height: 1.35; color: #6B7280;">
           Jl. BSD Raya Utama, Pagedangan,<br>
           Kec. Pagedangan, Kabupaten Tangerang,<br>
@@ -244,7 +244,7 @@ $paymentDateFormatted = format_date($sal['payment_date']);
           GAJI BERSIH (TAKE-HOME PAY)
         </div>
         <div style="font-size: 11px; color: #4B5563; margin-top: 3px;">
-          Catatan: <?= htmlspecialchars($sal['notes'] ?: 'Pembayaran gaji bulanan Kala Media Creative.') ?>
+          Catatan: <?= htmlspecialchars($sal['notes'] ?: 'Pembayaran gaji bulanan PT Kala Kausa Prima.') ?>
         </div>
       </div>
       <div style="font-size: 26px; font-weight: 900; color: #000000; letter-spacing: 0.5px;">
@@ -269,7 +269,7 @@ $paymentDateFormatted = format_date($sal['payment_date']);
 
     <!-- Bottom Tagline & Brand Links -->
     <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E5E7EB; padding-top: 12px; margin-top: 28px; font-size: 10.5px; color: #6B7280;">
-      <div style="font-weight: 700; color: #000000;">Built to Be Seen.</div>
+      <div style="font-weight: 700; color: #000000;">Built for What’s Next</div>
       <div style="display: flex; gap: 16px;">
         <span><?= AGENCY_INSTAGRAM ?></span>
         <span><?= AGENCY_EMAIL ?></span>

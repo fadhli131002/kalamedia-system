@@ -1,7 +1,7 @@
 <?php
 /**
  * Standalone Ads Top-Up Voucher & Outflow Invoice View
- * Kala Media Creative Agency
+ * PT Kala Kausa Prima
  */
 require_once __DIR__ . '/../config/app.php';
 require_once __DIR__ . '/../config/database.php';
@@ -38,7 +38,7 @@ $spentDateFormatted = format_date($spentDate);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ads Top-Up Voucher #<?= htmlspecialchars($voucherNumber) ?> - Kala Media</title>
+  <title>Ads Top-Up Voucher #<?= htmlspecialchars($voucherNumber) ?> - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -92,7 +92,7 @@ $spentDateFormatted = format_date($spentDate);
           <span>Kembali ke Pengeluaran</span>
         </a>
       <?php else: ?>
-        <span style="color: #94A3B8; font-size: 13px; font-weight: 600;">Kala Media Creative &bull; Official Ads Top-Up Voucher</span>
+        <span style="color: #94A3B8; font-size: 13px; font-weight: 600;">PT Kala Kausa Prima &bull; Official Ads Top-Up Voucher</span>
       <?php endif; ?>
     </div>
 
@@ -129,7 +129,7 @@ $spentDateFormatted = format_date($spentDate);
     <!-- Main Header: Logo & Title -->
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px;">
       <div style="width: 260px;">
-        <img src="assets/Jpg/Asset 3.png" alt="Kala Media Creative Agency" style="height: 52px; width: auto; object-fit: contain; margin-bottom: 10px; display: block;">
+        <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" style="height: 85px; width: auto; max-width: 130px; object-fit: contain; margin-bottom: 12px; display: block;">
         <div style="font-size: 10.5px; line-height: 1.35; color: #6B7280;">
           Jl. BSD Raya Utama, Pagedangan,<br>
           Kec. Pagedangan, Kabupaten Tangerang,<br>
@@ -158,7 +158,7 @@ $spentDateFormatted = format_date($spentDate);
       </div>
       <div>
         <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 110px; display: inline-block;">Kategori Biaya:</span> <strong style="color: #0F172A;">Media Spend Outflow</strong></div>
-        <div><span style="color: #64748B; width: 110px; display: inline-block;">Akun Pengiklan:</span> <span style="font-weight: 600; color: #0F172A;">Kala Media Business Manager</span></div>
+        <div><span style="color: #64748B; width: 110px; display: inline-block;">Akun Pengiklan:</span> <span style="font-weight: 600; color: #0F172A;">PT Kala Kausa Prima Business Manager</span></div>
       </div>
     </div>
 
@@ -224,7 +224,7 @@ $spentDateFormatted = format_date($spentDate);
 
     <!-- Bottom Tagline & Brand Links -->
     <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E5E7EB; padding-top: 12px; margin-top: 28px; font-size: 10.5px; color: #6B7280;">
-      <div style="font-weight: 700; color: #000000;">Built to Be Seen.</div>
+      <div style="font-weight: 700; color: #000000;">Built for What’s Next</div>
       <div style="display: flex; gap: 16px;">
         <span><?= AGENCY_INSTAGRAM ?></span>
         <span><?= AGENCY_EMAIL ?></span>

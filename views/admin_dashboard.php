@@ -143,7 +143,7 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin & Finance Dashboard - Kalamedia</title>
+  <title>Admin & Finance Dashboard - PT Kala Kausa Prima</title>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>

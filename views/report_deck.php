@@ -47,7 +47,7 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Performance Deck - <?= htmlspecialchars($clientCompany) ?> (<?= htmlspecialchars($report['report_period']) ?>) - Kalamedia</title>
+  <title>Performance Deck - <?= htmlspecialchars($clientCompany) ?> (<?= htmlspecialchars($report['report_period']) ?>) - PT Kala Kausa Prima</title>
   <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
   <script src="assets/js/html2pdf.bundle.min.js"></script>
 
@@ -197,8 +197,8 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
       gap: 8px;
     }
     .deck-p2-logo {
-      height: 22px;
-      width: auto;
+      height: 32px;
+      width: 32px;
       object-fit: contain;
     }
     .deck-p2-title {
@@ -228,13 +228,13 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
     .deck-agency-info {
       display: flex;
       flex-direction: column;
-      gap: 1px;
+      gap: 3px;
     }
     .deck-agency-logo {
-      height: 32px;
-      width: auto;
+      height: 54px;
+      width: 54px;
       object-fit: contain;
-      margin-bottom: 2px;
+      margin-bottom: 4px;
       align-self: flex-start;
     }
     .deck-tagline {
@@ -833,8 +833,8 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
         <!-- 1. Executive Deck Header -->
         <div class="deck-header-row">
           <div class="deck-agency-info">
-            <img src="assets/Jpg/Asset 3.png" alt="Kala Media Creative Agency" class="deck-agency-logo">
-            <div class="deck-tagline">KALA MEDIA CREATIVE &bull; BUILT TO BE SEEN.</div>
+            <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" class="deck-agency-logo">
+            <div class="deck-tagline">PT KALA KAUSA PRIMA &bull; BUILT FOR WHAT’S NEXT</div>
             <div class="deck-subtext">
               Full-Funnel Performance Marketing &bull; Digital Growth Advisory &bull; Tangerang, Banten 15339
             </div>
@@ -1053,8 +1053,8 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
         <!-- Page 2 Mini Running Header -->
         <div class="deck-page-2-header">
           <div class="deck-p2-brand">
-            <img src="assets/Jpg/Asset 3.png" alt="Kala Media" class="deck-p2-logo">
-            <span class="deck-p2-title">KALA MEDIA &bull; EXECUTIVE PERFORMANCE REPORT</span>
+            <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" class="deck-p2-logo">
+            <span class="deck-p2-title">PT KALA KAUSA PRIMA &bull; EXECUTIVE PERFORMANCE REPORT</span>
           </div>
           <div class="deck-p2-meta">
             <?= htmlspecialchars($clientCompany) ?> &bull; <?= htmlspecialchars($report['report_period']) ?>
@@ -1104,7 +1104,7 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
         <!-- 7. Deck Footer Sign-Off & Authenticity -->
         <div class="deck-signoff-row">
           <div class="deck-confidential-note">
-            Dokumen laporan kinerja performa ini disusun secara objektif oleh Kalamedia Creative Agency untuk internal manajemen klien. Seluruh data metrik telah melalui rekonsiliasi analytics.
+            Dokumen laporan kinerja performa ini disusun secara objektif oleh PT Kala Kausa Prima untuk internal manajemen klien. Seluruh data metrik telah melalui rekonsiliasi analytics.
           </div>
 
           <div style="display: flex; gap: 32px; align-items: flex-end;">

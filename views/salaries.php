@@ -54,7 +54,7 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manajemen Gaji Karyawan (Payroll) - Kalamedia</title>
+  <title>Manajemen Gaji Karyawan (Payroll) - PT Kala Kausa Prima</title>
   <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
   <script src="assets/js/html2pdf.bundle.min.js"></script>
 </head>

@@ -615,7 +615,7 @@ window.shareFreelancerVoucherWa = function() {
 
   const text = 
 `*BUKTI PEMBAYARAN & INVOICE FEE TALENTA*
-*Kala Media Creative*
+*PT Kala Kausa Prima*
 
 Halo *${p.freelancer_name}*, berikut rincian bukti pembayaran honor/fee resmi Anda:
 
@@ -632,8 +632,8 @@ Halo *${p.freelancer_name}*, berikut rincian bukti pembayaran honor/fee resmi An
 Lihat & Unduh Dokumen Resmi:
 ${docUrl}
 
-Terima kasih atas kerja sama dan hasil karya hebat Anda bersama Kala Media Creative.
-_Kala Media Creative • Built to Be Seen._`;
+Terima kasih atas kerja sama dan hasil karya hebat Anda bersama PT Kala Kausa Prima.
+_PT Kala Kausa Prima • Built for What’s Next_`;
 
   let phone = (p.freelancer_phone || '').replace(/[^0-9]/g, '');
   if (phone.startsWith('0')) {
@@ -652,7 +652,7 @@ window.printFreelancerVoucher = function() {
   printWin.document.write(`
     <html>
       <head>
-        <title>Voucher Pembayaran Freelancer - Kala Media</title>
+        <title>Voucher Pembayaran Freelancer - PT Kala Kausa Prima</title>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
         <style>
           body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; background: #fff; padding: 20px; color: #000; }
@@ -848,7 +848,7 @@ window.shareAdsVoucherWa = function() {
 
   const text = 
 `*BUKTI TOP-UP ANGGARAN IKLAN DIGITAL*
-*Kala Media Creative*
+*PT Kala Kausa Prima*
 
 Halo *${a.client_company}* (PIC: ${a.client_pic || '-'}), berikut rincian bukti transaksi top-up saldo iklan Anda:
 
@@ -866,7 +866,7 @@ Lihat & Unduh Dokumen Resmi:
 ${docUrl}
 
 Saldo iklan telah dialokasikan langsung ke akun iklan resmi.
-_Kala Media Creative • Built to Be Seen._`;
+_PT Kala Kausa Prima • Built for What’s Next_`;
 
   let phone = (a.client_phone || '').replace(/[^0-9]/g, '');
   if (phone.startsWith('0')) {
@@ -885,7 +885,7 @@ window.printAdsVoucher = function() {
   printWin.document.write(`
     <html>
       <head>
-        <title>Voucher Top-Up Ads - Kala Media</title>
+        <title>Voucher Top-Up Ads - PT Kala Kausa Prima</title>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
         <style>
           body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; background: #fff; padding: 20px; color: #000; }

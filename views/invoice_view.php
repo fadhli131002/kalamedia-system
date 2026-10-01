@@ -1,6 +1,6 @@
 <?php
 /**
- * Kala Media Creative Agency - Official Invoice Template View (1:1 Match)
+ * PT Kala Kausa Prima - Official Invoice Template View (1:1 Match)
  */
 $isLoggedIn = function_exists('is_logged_in') && is_logged_in();
 $db = Database::getConnection();
@@ -61,7 +61,7 @@ $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $invoiceUrl = $protocol . $host . url("invoice-view?id={$invoice['id']}");
 
 $waText = "*TAGIHAN INVOICE RESMI*\n";
-$waText .= "*Kala Media Creative*\n\n";
+$waText .= "*PT Kala Kausa Prima*\n\n";
 $waText .= "Halo Bapak/Ibu *$clientPicName* ($clientCompany),\n";
 $waText .= "Berikut rincian tagihan invoice resmi Anda:\n\n";
 $waText .= "- No. Invoice: #{$invoice['invoice_number']}\n";
@@ -76,7 +76,7 @@ $waText .= "A.N: *" . AGENCY_BANK_HOLDER . "*\n\n";
 $waText .= "Lihat & Unduh Invoice Resmi:\n";
 $waText .= "$invoiceUrl\n\n";
 $waText .= "Terima kasih atas kerja samanya.\n";
-$waText .= "_Kala Media Creative • Built to Be Seen._";
+$waText .= "_PT Kala Kausa Prima • Built for What’s Next_";
 
 $waUrl = !empty($waPhone) 
     ? "https://api.whatsapp.com/send?phone=$waPhone&text=" . urlencode($waText) 
@@ -88,7 +88,7 @@ $waUrl = !empty($waPhone)
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice #<?= htmlspecialchars($invoice['invoice_number']) ?> - Kala Media</title>
+  <title>Invoice #<?= htmlspecialchars($invoice['invoice_number']) ?> - PT Kala Kausa Prima</title>
   <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
   <link rel="stylesheet" href="assets/css/invoice.css?v=<?= time() ?>">
 </head>
@@ -158,7 +158,7 @@ $waUrl = !empty($waPhone)
     <!-- 2. Main Header: Logo, Address, INVOICE & Dates -->
     <div class="km-main-header">
       <div class="km-logo-col">
-        <img src="assets/Jpg/Asset 3.png" alt="Kala Media Creative Agency" class="km-logo-img">
+        <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" class="km-logo-img">
         <div class="km-agency-address">
           Jl. BSD Raya Utama,<br>
           Pagedangan,<br>
@@ -259,15 +259,15 @@ $waUrl = !empty($waPhone)
         </div>
 
         <div class="km-about-text-box">
-          <div class="km-about-title">Kala Media Creative</div>
+          <div class="km-about-title">PT Kala Kausa Prima</div>
           <div class="km-about-desc">
-            Kala Media represents a creative agency focused on visibility, clarity, and impactful storytelling. The brand combines bold creativity with professional execution to create strong and meaningful brand communication.
+            PT Kala Kausa Prima represents a modern creative agency focused on visibility, clarity, and impactful storytelling. The brand combines bold creativity with professional execution to create strong and meaningful brand communication.
           </div>
         </div>
       </div>
 
       <div class="km-bottom-bar">
-        <div class="km-tagline">Built to Be Seen.</div>
+        <div class="km-tagline">Built for What’s Next</div>
         <div class="km-social-links">
           <span class="km-social-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>

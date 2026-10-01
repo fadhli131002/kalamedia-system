@@ -13,8 +13,11 @@ $homeUrl = $isOwner ? url('owner-dashboard') : url('admin-dashboard');
 <aside class="sidebar" id="app-sidebar">
   <div class="sidebar-header">
     <a href="<?= $homeUrl ?>" style="display: flex; align-items: center; justify-content: space-between; width: 100%; text-decoration: none; color: inherit; gap: 8px;">
-      <img src="assets/Jpg/Asset 3.png" alt="Kala Media Creative Agency" class="sidebar-brand-img" style="height: 23px; width: auto; max-width: 120px; object-fit: contain;">
-      <span class="role-badge-sidebar" style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 6px; border-radius: 4px; background: #F2F4F7; color: <?= $isOwner ? '#B45309' : '#101828' ?>; white-space: nowrap;">
+      <div style="display: flex; align-items: center; gap: 9px; min-width: 0;">
+        <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" class="sidebar-brand-img" style="height: 30px; width: 30px; object-fit: contain; flex-shrink: 0;">
+        <span style="font-weight: 800; font-size: 13px; color: #101828; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Kala Kausa Prima</span>
+      </div>
+      <span class="role-badge-sidebar" style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 6px; border-radius: 4px; background: #F2F4F7; color: <?= $isOwner ? '#B45309' : '#101828' ?>; white-space: nowrap; flex-shrink: 0;">
         <?= $isOwner ? 'OWNER' : 'FINANCE' ?>
       </span>
     </a>

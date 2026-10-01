@@ -15,18 +15,18 @@ if (session_status() === PHP_SESSION_NONE) {
 date_default_timezone_set('Asia/Jakarta');
 
 // App Info
-define('APP_NAME', 'Kala Media System');
-define('AGENCY_NAME', 'Kala Media Creative');
+define('APP_NAME', 'PT Kala Kausa Prima');
+define('AGENCY_NAME', 'PT Kala Kausa Prima');
 define('AGENCY_EMAIL', 'support@kalamediacreative.com');
 define('AGENCY_WEBSITE', 'kalamediacreative.com');
 define('AGENCY_INSTAGRAM', '@kalamedia.creative');
-define('AGENCY_TAGLINE', 'Built to Be Seen.');
+define('AGENCY_TAGLINE', 'Built for What’s Next');
 define('AGENCY_PHONE', '+62 812-3456-7890');
 define('AGENCY_ADDRESS', "Jl. BSD Raya Utama, Pagedangan,\nKec. Pagedangan, Kabupaten Tangerang,\nBanten 15339");
 define('AGENCY_BANK_NAME', 'Bank Jago');
 define('AGENCY_BANK_ACCOUNT', '107577583322');
 define('AGENCY_BANK_HOLDER', 'ILHAM LANANG');
-define('AGENCY_LOGO', 'assets/Jpg/Asset 3.png');
+define('AGENCY_LOGO', 'assets/img/Logo-1.webp');
 
 // Paths
 define('BASE_PATH', dirname(__DIR__));

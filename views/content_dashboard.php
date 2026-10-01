@@ -35,7 +35,7 @@ unset($c);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Content Calendar - Kalamedia</title>
+  <title>Content Calendar - PT Kala Kausa Prima</title>
   <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
   <!-- FullCalendar 6.1.15 JS -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>

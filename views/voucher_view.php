@@ -1,7 +1,7 @@
 <?php
 /**
  * Standalone Freelancer Payment Voucher & Fee Invoice View
- * Kala Media Creative Agency
+ * PT Kala Kausa Prima
  */
 require_once __DIR__ . '/../config/app.php';
 require_once __DIR__ . '/../config/database.php';
@@ -37,7 +37,7 @@ $paymentDateFormatted = format_date($paidDate, true);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payment Voucher #<?= htmlspecialchars($voucherNumber) ?> - Kala Media</title>
+  <title>Payment Voucher #<?= htmlspecialchars($voucherNumber) ?> - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -125,7 +125,7 @@ $paymentDateFormatted = format_date($paidDate, true);
           <span>Kembali ke Pengeluaran</span>
         </a>
       <?php else: ?>
-        <span style="color: #94A3B8; font-size: 13px; font-weight: 600;">Kala Media Creative &bull; Payment Voucher</span>
+        <span style="color: #94A3B8; font-size: 13px; font-weight: 600;">PT Kala Kausa Prima &bull; Payment Voucher</span>
       <?php endif; ?>
     </div>
 
@@ -161,7 +161,7 @@ $paymentDateFormatted = format_date($paidDate, true);
     <!-- Main Header: Logo & Title -->
     <div class="voucher-header-row" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px;">
       <div style="width: 260px; max-width: 100%;">
-        <img src="assets/Jpg/Asset 3.png" alt="Kala Media Creative Agency" style="height: 52px; width: auto; object-fit: contain; margin-bottom: 10px; display: block;">
+        <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" style="height: 85px; width: auto; max-width: 130px; object-fit: contain; margin-bottom: 12px; display: block;">
         <div style="font-size: 10.5px; line-height: 1.35; color: #6B7280;">
           Jl. BSD Raya Utama, Pagedangan,<br>
           Kec. Pagedangan, Kabupaten Tangerang,<br>
@@ -260,7 +260,7 @@ $paymentDateFormatted = format_date($paidDate, true);
 
     <!-- Bottom Tagline & Brand Links -->
     <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E5E7EB; padding-top: 12px; margin-top: 28px; font-size: 10.5px; color: #6B7280;">
-      <div style="font-weight: 700; color: #000000;">Built to Be Seen.</div>
+      <div style="font-weight: 700; color: #000000;">Built for What’s Next</div>
       <div style="display: flex; gap: 16px;">
         <span><?= AGENCY_INSTAGRAM ?></span>
         <span><?= AGENCY_EMAIL ?></span>

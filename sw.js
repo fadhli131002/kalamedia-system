@@ -4,7 +4,7 @@ const urlsToCache = [
   './',
   'assets/css/style.css',
   'assets/js/app.js',
-  'assets/Jpg/Asset 3.png'
+  'assets/img/Logo-1.webp'
 ];
 
 self.addEventListener('install', event => {

@@ -39,7 +39,7 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= htmlspecialchars($pageTitle) ?> - Kalamedia</title>
+  <title><?= htmlspecialchars($pageTitle) ?> - PT Kala Kausa Prima</title>
   <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
   <style>
     /* Tabbed Interface Layout */
@@ -342,7 +342,7 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
                       </option>
                     <?php endforeach; ?>
                   </select>
-                  <div class="input-hint">Klien penerima laporan performa agensi Kalamedia.</div>
+                  <div class="input-hint">Klien penerima laporan performa PT Kala Kausa Prima.</div>
                 </div>
 
                 <div class="form-group" style="flex: 0.8;">

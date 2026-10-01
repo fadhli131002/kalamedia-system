@@ -83,7 +83,7 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Executive Dashboard - Kalamedia</title>
+  <title>Executive Dashboard - PT Kala Kausa Prima</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="assets/js/charts.js"></script>

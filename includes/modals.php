@@ -1072,7 +1072,7 @@ document.addEventListener('DOMContentLoaded', () => {
 <div id="modal-slip-gaji" class="modal-backdrop">
   <div class="modal-dialog modal-lg">
     <div class="modal-header">
-      <h3 class="modal-title">Slip Gaji Karyawan - Kala Media Creative</h3>
+      <h3 class="modal-title">Slip Gaji Karyawan - PT Kala Kausa Prima</h3>
       <button type="button" class="modal-close" onclick="closeModal('modal-slip-gaji')">&times;</button>
     </div>
     <div class="modal-body" id="slip-print-area" style="background: #FFFFFF; color: #000000; border-radius: 8px; padding: 36px 40px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, Arial, sans-serif;">
@@ -1095,7 +1095,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <!-- Main Header: Logo & Title -->
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px;">
         <div style="width: 250px;">
-          <img src="assets/Jpg/Asset 3.png" alt="Kala Media Creative Agency" style="height: 52px; width: auto; object-fit: contain; margin-bottom: 10px; display: block;">
+          <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" style="height: 85px; width: auto; max-width: 130px; object-fit: contain; margin-bottom: 12px; display: block;">
           <div style="font-size: 10.5px; line-height: 1.35; color: #6B7280;">
             Jl. BSD Raya Utama,<br>
             Pagedangan,<br>
@@ -1178,7 +1178,7 @@ document.addEventListener('DOMContentLoaded', () => {
             GAJI BERSIH (TAKE-HOME PAY)
           </div>
           <div style="font-size: 11px; color: #4B5563; margin-top: 3px;" id="slip-notes-display">
-            Catatan: Pembayaran gaji bulanan Kala Media Creative.
+            Catatan: Pembayaran gaji bulanan PT Kala Kausa Prima.
           </div>
         </div>
         <div style="font-size: 26px; font-weight: 900; color: #000000; letter-spacing: 0.5px;" id="slip-net-val">
@@ -1203,7 +1203,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       <!-- Bottom Tagline & Brand Links -->
       <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E5E7EB; padding-top: 12px; margin-top: 28px; font-size: 10.5px; color: #6B7280;">
-        <div style="font-weight: 700; color: #000000;">Built to Be Seen.</div>
+        <div style="font-weight: 700; color: #000000;">Built for What’s Next</div>
         <div style="display: flex; gap: 16px;">
           <span><?= AGENCY_INSTAGRAM ?></span>
           <span><?= AGENCY_EMAIL ?></span>
@@ -1262,7 +1262,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <!-- Main Header: Logo & Title -->
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px;">
         <div style="width: 260px;">
-          <img src="assets/Jpg/Asset 3.png" alt="Kala Media Creative Agency" style="height: 52px; width: auto; object-fit: contain; margin-bottom: 10px; display: block;">
+          <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" style="height: 85px; width: auto; max-width: 130px; object-fit: contain; margin-bottom: 12px; display: block;">
           <div style="font-size: 10.5px; line-height: 1.35; color: #6B7280;">
             Jl. BSD Raya Utama, Pagedangan,<br>
             Kec. Pagedangan, Kabupaten Tangerang,<br>
@@ -1359,7 +1359,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       <!-- Bottom Tagline & Brand Links -->
       <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E5E7EB; padding-top: 12px; margin-top: 28px; font-size: 10.5px; color: #6B7280;">
-        <div style="font-weight: 700; color: #000000;">Built to Be Seen.</div>
+        <div style="font-weight: 700; color: #000000;">Built for What’s Next</div>
         <div style="display: flex; gap: 16px;">
           <span><?= AGENCY_INSTAGRAM ?></span>
           <span><?= AGENCY_EMAIL ?></span>
@@ -1418,7 +1418,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <!-- Main Header: Logo & Title -->
       <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px;">
         <div style="width: 260px;">
-          <img src="assets/Jpg/Asset 3.png" alt="Kala Media Creative Agency" style="height: 52px; width: auto; object-fit: contain; margin-bottom: 10px; display: block;">
+          <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" style="height: 85px; width: auto; max-width: 130px; object-fit: contain; margin-bottom: 12px; display: block;">
           <div style="font-size: 10.5px; line-height: 1.35; color: #6B7280;">
             Jl. BSD Raya Utama, Pagedangan,<br>
             Kec. Pagedangan, Kabupaten Tangerang,<br>
@@ -1447,7 +1447,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div>
           <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 110px; display: inline-block;">Kategori Biaya:</span> <strong style="color: #0F172A;">Media Spend Outflow</strong></div>
-          <div><span style="color: #64748B; width: 110px; display: inline-block;">Akun Pengiklan:</span> <span style="font-weight: 600; color: #0F172A;">Kala Media Business Manager</span></div>
+          <div><span style="color: #64748B; width: 110px; display: inline-block;">Akun Pengiklan:</span> <span style="font-weight: 600; color: #0F172A;">PT Kala Kausa Prima Business Manager</span></div>
         </div>
       </div>
 
@@ -1513,7 +1513,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       <!-- Bottom Tagline & Brand Links -->
       <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E5E7EB; padding-top: 12px; margin-top: 28px; font-size: 10.5px; color: #6B7280;">
-        <div style="font-weight: 700; color: #000000;">Built to Be Seen.</div>
+        <div style="font-weight: 700; color: #000000;">Built for What’s Next</div>
         <div style="display: flex; gap: 16px;">
           <span><?= AGENCY_INSTAGRAM ?></span>
           <span><?= AGENCY_EMAIL ?></span>
@@ -2070,7 +2070,7 @@ async function openSlipGajiModal(salaryId) {
     document.getElementById('slip-total-deductions').innerText = f.deduction;
 
     document.getElementById('slip-net-val').innerText = f.net_salary;
-    document.getElementById('slip-notes-display').innerText = 'Catatan: ' + (s.notes || 'Pembayaran gaji bulanan Kala Media Creative.');
+    document.getElementById('slip-notes-display').innerText = 'Catatan: ' + (s.notes || 'Pembayaran gaji bulanan PT Kala Kausa Prima.');
     document.getElementById('slip-sign-emp').innerText = s.employee_name;
 
     openModal('modal-slip-gaji');
@@ -2130,7 +2130,7 @@ window.shareSlipGajiWa = function() {
   
   const text = 
 `*SLIP GAJI RESMI KARYAWAN*
-*Kala Media Creative*
+*PT Kala Kausa Prima*
 
 Halo *${s.employee_name}*, berikut rincian slip gaji resmi Anda:
 
@@ -2146,13 +2146,13 @@ Halo *${s.employee_name}*, berikut rincian slip gaji resmi Anda:
 - Rekening: ${s.bank_name || 'BCA'} - ${s.bank_account || '-'}
 - Status: ${s.status === 'Paid' ? 'LUNAS (PAID)' : 'PENDING'}
 
-Catatan: ${s.notes || 'Pembayaran gaji bulanan Kala Media Creative.'}
+Catatan: ${s.notes || 'Pembayaran gaji bulanan PT Kala Kausa Prima.'}
 
 Lihat & Unduh Slip Gaji Resmi:
 ${docUrl}
 
-Terima kasih atas kerja keras dan dedikasi Anda untuk Kala Media Creative.
-_Kala Media Creative • Built to Be Seen._`;
+Terima kasih atas kerja keras dan dedikasi Anda untuk PT Kala Kausa Prima.
+_PT Kala Kausa Prima • Built for What’s Next_`;
 
   let phone = (s.emp_phone || '').replace(/[^0-9]/g, '');
   if (phone.startsWith('0')) {
@@ -2213,7 +2213,7 @@ async function downloadSlipPdf() {
 
 function printSlipGaji(customTitle) {
   const content = document.getElementById('slip-print-area').innerHTML;
-  const docTitle = customTitle || 'Slip Gaji - Kala Media Creative';
+  const docTitle = customTitle || 'Slip Gaji - PT Kala Kausa Prima';
   const printWindow = window.open('', '', 'width=850,height=950');
   printWindow.document.write(`
     <!DOCTYPE html>

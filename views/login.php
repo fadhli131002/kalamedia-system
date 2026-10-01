@@ -12,7 +12,7 @@ if (is_logged_in()) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Kalamedia Agency System</title>
+  <title>Login - PT Kala Kausa Prima</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <style>
     .login-page {
@@ -68,15 +68,16 @@ if (is_logged_in()) {
 
   <div class="login-card">
     <div class="login-brand" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 24px;">
-      <img src="assets/Jpg/Asset 3.png" alt="Kala Media Creative Agency" style="height: 52px; width: auto; max-width: 220px; object-fit: contain; margin-bottom: 4px;">
+      <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" style="height: 60px; width: 60px; object-fit: contain; margin-bottom: 2px;">
+      <div style="font-weight: 800; font-size: 18px; color: #101828; letter-spacing: -0.3px;">PT Kala Kausa Prima</div>
       <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; letter-spacing: 0.8px; background: #F2F4F7; padding: 3px 12px; border-radius: 20px;">
-        Financial & Project System
+        Built for What’s Next
       </span>
     </div>
 
     <div style="margin-bottom: 24px;">
       <h3 style="font-size: 18px; font-weight: 800; color: #101828; margin-bottom: 4px; letter-spacing: -0.2px;">Selamat Datang Kembali</h3>
-      <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Masuk ke akun internal agensi Kalamedia.</p>
+      <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Masuk ke akun internal PT Kala Kausa Prima.</p>
     </div>
 
     <form id="form-login" action="api/auth.php?action=login" method="POST">

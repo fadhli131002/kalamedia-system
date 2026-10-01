@@ -452,7 +452,7 @@ if ($action === 'download_slip_pdf') {
         <!-- Main Header: Logo & Title -->
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px;">
           <div style="width: 250px;">
-            <img src="../assets/Jpg/Asset 3.png" alt="Kala Media Creative Agency" style="height: 52px; width: auto; object-fit: contain; margin-bottom: 10px; display: block;">
+            <img src="../assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" style="height: 85px; width: auto; max-width: 130px; object-fit: contain; margin-bottom: 12px; display: block;">
             <div style="font-size: 10.5px; line-height: 1.35; color: #6B7280;">
               <?= AGENCY_ADDRESS ?>
             </div>
@@ -530,7 +530,7 @@ if ($action === 'download_slip_pdf') {
               GAJI BERSIH DITERIMA (TAKE HOME PAY)
             </div>
             <div style="font-size: 11px; color: #64748B;">
-              Catatan: <?= htmlspecialchars($sal['notes'] ?: 'Pembayaran gaji bulanan Kala Media Creative.') ?>
+              Catatan: <?= htmlspecialchars($sal['notes'] ?: 'Pembayaran gaji bulanan PT Kala Kausa Prima.') ?>
             </div>
           </div>
           <div style="font-size: 26px; font-weight: 900; color: #000000; letter-spacing: -0.5px;">
@@ -555,7 +555,7 @@ if ($action === 'download_slip_pdf') {
 
         <!-- Footer Contact -->
         <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid #E5E7EB; font-size: 10px; color: #6B7280;">
-          <div style="font-weight: 700; color: #111827; letter-spacing: 0.5px;">Built to Be Seen.</div>
+          <div style="font-weight: 700; color: #111827; letter-spacing: 0.5px;">Built for What’s Next</div>
           <div><?= AGENCY_EMAIL ?> &bull; <?= AGENCY_WEBSITE ?></div>
         </div>
       </div>

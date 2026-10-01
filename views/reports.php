@@ -75,7 +75,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Laporan Performance Marketing Klien - Kalamedia</title>
+  <title>Laporan Performance Marketing Klien - PT Kala Kausa Prima</title>
   <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
 </head>
 <body>

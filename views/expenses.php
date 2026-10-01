@@ -40,7 +40,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pengeluaran Operasional (Outflow) - Kala Media</title>
+  <title>Pengeluaran Operasional (Outflow) - PT Kala Kausa Prima</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <style>
     /* Untitled UI Design System Custom Extensions */

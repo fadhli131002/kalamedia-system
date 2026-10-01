@@ -12,7 +12,7 @@ $users = $db->query("SELECT id, name, email, role, created_at FROM users ORDER B
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pengaturan Agensi - Kalamedia</title>
+  <title>Pengaturan Agensi - PT Kala Kausa Prima</title>
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>

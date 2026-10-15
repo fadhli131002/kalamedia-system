@@ -357,11 +357,27 @@ class Database {
             }
         };
 
+        // Create employee_clients mapping table if not exists
+        $db->exec("
+            CREATE TABLE IF NOT EXISTS employee_clients (
+                id {$pkDef},
+                user_id INT NOT NULL,
+                client_id INT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+        ");
+
         // 1. Migrate `users` table columns
         $userCols = $getTableCols('users');
         if (!empty($userCols)) {
             if (!in_array('employment_type', $userCols)) {
-                $db->exec("ALTER TABLE users ADD COLUMN employment_type VARCHAR(30) DEFAULT 'internal'");
+                $db->exec("ALTER TABLE users ADD COLUMN employment_type VARCHAR(30) DEFAULT 'karyawan'");
+            }
+            if (!in_array('position', $userCols)) {
+                $db->exec("ALTER TABLE users ADD COLUMN position VARCHAR(150) DEFAULT NULL");
+            }
+            if (!in_array('jobdesk', $userCols)) {
+                $db->exec("ALTER TABLE users ADD COLUMN jobdesk TEXT DEFAULT NULL");
             }
             if (!in_array('phone_wa', $userCols)) {
                 $db->exec("ALTER TABLE users ADD COLUMN phone_wa VARCHAR(50) DEFAULT NULL");
@@ -371,6 +387,9 @@ class Database {
             }
             if (!in_array('is_active', $userCols)) {
                 $db->exec("ALTER TABLE users ADD COLUMN is_active INT DEFAULT 1");
+            }
+            if (!in_array('is_deleted', $userCols)) {
+                $db->exec("ALTER TABLE users ADD COLUMN is_deleted INT DEFAULT 0");
             }
         }
 
@@ -431,7 +450,8 @@ class Database {
             $db->exec("DELETE FROM tasks WHERE title LIKE '%Copywriting Meta Ads%' OR title LIKE '%Setup Kampanye Meta Ads%' OR title LIKE '%Desain Feed Carousel%' OR title LIKE '%Shooting Video Reels%'");
             $db->exec("DELETE FROM projects WHERE name LIKE '%Grand BSD%' OR name LIKE '%Horizon%' OR client_id IN (SELECT id FROM clients WHERE company LIKE '%Grand BSD%' OR name LIKE '%Clarissa Tan%')");
             $db->exec("DELETE FROM clients WHERE company LIKE '%Grand BSD%' OR name LIKE '%Clarissa Tan%'");
-            $db->exec("DELETE FROM users WHERE email IN ('annisa@kalamedia.id', 'dimas@kalamedia.id', 'clarissa@grandbsd.com') OR name IN ('Annisa Nuraini', 'Dimas Prasetyo', 'Clarissa Tan')");
+            $db->exec("DELETE FROM users WHERE email IN ('annisa@kalamedia.id', 'dimas@kalamedia.id', 'clarissa@grandbsd.com', 'kevin@kalamedia.id') OR name IN ('Annisa Nuraini', 'Dimas Prasetyo', 'Clarissa Tan', 'Kevin Wijaya')");
+            $db->exec("DELETE FROM employees WHERE email IN ('annisa@kalamedia.id', 'dimas@kalamedia.id', 'clarissa@grandbsd.com', 'kevin@kalamedia.id') OR name IN ('Annisa Nuraini', 'Dimas Prasetyo', 'Kevin Wijaya')");
         } catch (Exception $e) {
             // Ignore if tables do not exist yet
         }

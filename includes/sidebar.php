@@ -106,6 +106,11 @@ $currentBadge = $badgeColors[$role] ?? ['bg' => '#F2F4F7', 'text' => '#344054'];
         <span>Pembagian Tugas Tim</span>
       </a>
 
+      <!-- Team & Employees Management -->
+      <a href="<?= url('team') ?>" class="nav-link <?= in_array($currentPage, ['team', 'employees-management']) ? 'active' : '' ?>">
+        <span>Tim & Karyawan</span>
+      </a>
+
       <!-- Client Portal Preview for Admin/Owner -->
       <a href="<?= url('client-portal') ?>" class="nav-link <?= $currentPage === 'client-portal' ? 'active' : '' ?>">
         <span>Portal Klien (Preview)</span>

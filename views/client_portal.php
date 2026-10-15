@@ -768,10 +768,10 @@ $invoices = $stmtInvoices->fetchAll();
       let html = '';
       tasks.forEach(t => {
         const sInfo = statusMap[t.status] || { label: t.status, class: 'backlog' };
-        const isFreelance = (t.worker_type === 'freelancer');
+        const workerPos = t.worker_position ? ` (${escapeHtml(t.worker_position)})` : '';
         const workerBadge = isFreelance 
-          ? `<span class="badge-worker freelancer">Freelancer: ${escapeHtml(t.worker_name || 'Talent')}</span>`
-          : `<span class="badge-worker karyawan">In-House: ${escapeHtml(t.worker_name || 'Staff')}</span>`;
+          ? `<span class="badge-worker freelancer">Freelancer: ${escapeHtml(t.worker_name || 'Talent')}${workerPos}</span>`
+          : `<span class="badge-worker karyawan">Tim Kalamedia: ${escapeHtml(t.worker_name || 'Staff')}${workerPos}</span>`;
 
         const hasPreview = !!t.deliverable_link;
         const feedbacksCount = parseInt(t.feedbacks_count) || 0;

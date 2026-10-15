@@ -32,33 +32,86 @@ function parse_client_amount($val): float {
     return floatval($clean);
 }
 
-// 1. CREATE CLIENT
+// 1. CREATE CLIENT & PORTAL LOGIN ACCESS
 if ($action === 'create_client') {
+    $compSelect = trim($_POST['company_select'] ?? '');
+    $compNew = trim($_POST['company_new'] ?? '');
+    $company = ($compSelect === '__new__' || empty($compSelect)) ? $compNew : $compSelect;
+    if (empty($company) && !empty($_POST['company'])) {
+        $company = trim($_POST['company']);
+    }
+
     $name = trim($_POST['name'] ?? '');
-    $company = trim($_POST['company'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
-    $address = trim($_POST['address'] ?? '');
+    $password = trim($_POST['password'] ?? '');
 
     if (empty($name) || empty($company) || empty($email)) {
-        echo json_encode(['success' => false, 'message' => 'Nama kontak, nama perusahaan, dan email wajib diisi.']);
+        echo json_encode(['success' => false, 'message' => 'Nama, nama perusahaan/PT, dan email login wajib diisi.']);
         exit;
     }
 
-    try {
-        $stmt = $db->prepare("INSERT INTO clients (name, company, email, phone, address, is_deleted) VALUES (?, ?, ?, ?, ?, 0)");
-        $stmt->execute([$name, $company, $email, $phone, $address]);
-        $clientId = $db->lastInsertId();
+    if (empty($password)) {
+        $password = 'kalamedia123';
+    }
 
-        log_activity('client', "Klien Baru Ditambahkan: $company", "Kontak: $name ($email)");
+    try {
+        $db->beginTransaction();
+
+        // 1. Check if client with this company name already exists
+        $stmtChk = $db->prepare("SELECT id FROM clients WHERE company = ? AND COALESCE(is_deleted, 0) = 0 LIMIT 1");
+        $stmtChk->execute([$company]);
+        $existingClientId = $stmtChk->fetchColumn();
+
+        if ($existingClientId) {
+            $clientId = (int)$existingClientId;
+            $db->prepare("UPDATE clients SET name = ?, email = ?, phone = ?, company_name = ?, pic_name = ? WHERE id = ?")
+               ->execute([$name, $email, $phone, $company, $name, $clientId]);
+        } else {
+            $stmt = $db->prepare("INSERT INTO clients (name, company, company_name, pic_name, email, phone, status, is_deleted) VALUES (?, ?, ?, ?, ?, ?, 'Active', 0)");
+            $stmt->execute([$name, $company, $company, $name, $email, $phone]);
+            $clientId = (int)$db->lastInsertId();
+        }
+
+        // 2. Ensure at least one project is linked to this client
+        $chkProj = $db->prepare("SELECT id FROM projects WHERE client_id = ? AND COALESCE(is_deleted, 0) = 0 LIMIT 1");
+        $chkProj->execute([$clientId]);
+        $hasProject = $chkProj->fetchColumn();
+        if (!$hasProject) {
+            $projectName = 'Project ' . $company;
+            $db->prepare("INSERT INTO projects (client_id, name, project_name, contract_value, target_margin_percent, status, start_date) VALUES (?, ?, ?, 0, 30, 'In Progress', ?)")
+               ->execute([$clientId, $projectName, $projectName, date('Y-m-d')]);
+        }
+
+        // 3. Create or Update Client User Account for Portal Access
+        $hashedPw = password_hash($password, PASSWORD_BCRYPT);
+        $userStmt = $db->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
+        $userStmt->execute([$email]);
+        $existingUserId = $userStmt->fetchColumn();
+
+        if ($existingUserId) {
+            $db->prepare("
+                UPDATE users SET name = ?, password = ?, role = 'client', client_id = ?, phone_wa = ?, is_active = 1, is_deleted = 0
+                WHERE id = ?
+            ")->execute([$name, $hashedPw, $clientId, $phone, $existingUserId]);
+        } else {
+            $db->prepare("
+                INSERT INTO users (name, email, password, role, employment_type, client_id, phone_wa, is_active, is_deleted)
+                VALUES (?, ?, ?, 'client', 'client', ?, ?, 1, 0)
+            ")->execute([$name, $email, $hashedPw, $clientId, $phone]);
+        }
+
+        $db->commit();
+        log_activity('client', "Klien Baru & Akses Portal Dibuat: $company", "Nama: $name ($email)");
 
         echo json_encode([
             'success' => true,
-            'message' => 'Data klien berhasil ditambahkan!',
+            'message' => 'Data klien dan akses login portal berhasil dibuat!',
             'client_id' => $clientId
         ]);
         exit;
     } catch (Exception $e) {
+        if ($db->inTransaction()) $db->rollBack();
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         exit;
     }
@@ -87,18 +140,39 @@ if ($action === 'update_client') {
     $company = trim($_POST['company'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
-    $address = trim($_POST['address'] ?? '');
 
     if ($id <= 0 || empty($name) || empty($company)) {
-        echo json_encode(['success' => false, 'message' => 'Nama PIC dan nama perusahaan wajib diisi.']);
+        echo json_encode(['success' => false, 'message' => 'Nama dan nama perusahaan wajib diisi.']);
         exit;
     }
 
-    try {
-        $stmt = $db->prepare("UPDATE clients SET name = ?, company = ?, email = ?, phone = ?, address = ? WHERE id = ?");
-        $stmt->execute([$name, $company, $email, $phone, $address, $id]);
+    $password = trim($_POST['password'] ?? '');
 
-        log_activity('client', "Data Klien Diperbarui: $company", "Nomor Kontak: $phone, PIC: $name");
+    try {
+        $stmt = $db->prepare("UPDATE clients SET name = ?, company = ?, company_name = ?, pic_name = ?, email = ?, phone = ? WHERE id = ?");
+        $stmt->execute([$name, $company, $company, $name, $email, $phone, $id]);
+
+        // Sync to users table for Client Portal access
+        $userStmt = $db->prepare("SELECT id FROM users WHERE client_id = ? OR email = ? LIMIT 1");
+        $userStmt->execute([$id, $email]);
+        $existingUserId = $userStmt->fetchColumn();
+
+        if ($existingUserId) {
+            if (!empty($password)) {
+                $hashedPw = password_hash($password, PASSWORD_BCRYPT);
+                $db->prepare("UPDATE users SET name = ?, email = ?, password = ?, role = 'client', client_id = ?, phone_wa = ?, is_active = 1, is_deleted = 0 WHERE id = ?")
+                   ->execute([$name, $email, $hashedPw, $id, $phone, $existingUserId]);
+            } else {
+                $db->prepare("UPDATE users SET name = ?, email = ?, role = 'client', client_id = ?, phone_wa = ?, is_active = 1, is_deleted = 0 WHERE id = ?")
+                   ->execute([$name, $email, $id, $phone, $existingUserId]);
+            }
+        } elseif (!empty($password)) {
+            $hashedPw = password_hash($password, PASSWORD_BCRYPT);
+            $db->prepare("INSERT INTO users (name, email, password, role, employment_type, client_id, phone_wa, is_active, is_deleted) VALUES (?, ?, ?, 'client', 'client', ?, ?, 1, 0)")
+               ->execute([$name, $email, $hashedPw, $id, $phone]);
+        }
+
+        log_activity('client', "Data Klien Diperbarui: $company", "Nomor Kontak: $phone, Nama: $name");
 
         echo json_encode(['success' => true, 'message' => 'Data klien berhasil diperbarui!']);
         exit;

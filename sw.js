@@ -1,5 +1,5 @@
 // Kalamedia Progressive Web App (PWA) Service Worker
-const CACHE_NAME = 'kalamedia-pwa-v1';
+const CACHE_NAME = 'kalamedia-pwa-v2';
 const urlsToCache = [
   './',
   'assets/css/style.css',

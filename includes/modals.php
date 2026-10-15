@@ -7,6 +7,15 @@ $allClients = $db->query("SELECT id, name, company FROM clients ORDER BY company
 $allProjects = $db->query("SELECT p.id, p.client_id, p.name, c.company FROM projects p JOIN clients c ON p.client_id = c.id ORDER BY p.id DESC")->fetchAll();
 $unpaidInvoices = $db->query("SELECT id, invoice_number, total_amount, (SELECT company FROM clients WHERE id = invoices.client_id) as client_name FROM invoices WHERE status != 'Paid' ORDER BY id DESC")->fetchAll();
 $allEmployees = $db->query("SELECT id, name, position, department, bank_name, bank_account, base_salary FROM employees WHERE status = 'Active' ORDER BY name ASC")->fetchAll();
+$allCompanyNames = $db->query("
+    SELECT DISTINCT name as comp_name FROM (
+        SELECT company as name FROM clients WHERE COALESCE(is_deleted, 0) = 0 AND company IS NOT NULL AND company != ''
+        UNION
+        SELECT project_name as name FROM projects WHERE COALESCE(is_deleted, 0) = 0 AND project_name IS NOT NULL AND project_name != ''
+        UNION
+        SELECT name FROM projects WHERE COALESCE(is_deleted, 0) = 0 AND name IS NOT NULL AND name != ''
+    ) t ORDER BY comp_name ASC
+")->fetchAll(PDO::FETCH_COLUMN);
 ?>
 
 <!-- 1. Modal Buat Invoice Baru -->
@@ -714,39 +723,82 @@ document.addEventListener('DOMContentLoaded', () => {
       <h3 class="modal-title">+ Tambah Klien Baru</h3>
       <button type="button" class="modal-close" onclick="closeModal('modal-create-client')">&times;</button>
     </div>
-    <form id="form-create-client" action="api/clients.php?action=create_client" method="POST">
+    <form id="form-create-client" action="<?= url('api/clients.php?action=create_client') ?>" method="POST">
       <div class="modal-body">
+        <!-- 1. Nama Perusahaan / PT (Dropdown dari Proyek / Klien) -->
         <div class="form-group">
-          <label class="form-label">Nama Perusahaan *</label>
-          <input type="text" name="company" class="form-control" placeholder="Contoh: PT Sumber Berkah Abadi" required>
+          <label class="form-label">Nama Perusahaan / PT <span style="color:red;">*</span></label>
+          <select name="company_select" id="create-client-company-select" class="form-select" onchange="toggleClientCompanyInput(this.value)" required>
+            <option value="">-- Pilih PT / Perusahaan dari Daftar Proyek --</option>
+            <?php foreach ($allCompanyNames as $cName): ?>
+              <option value="<?= htmlspecialchars($cName) ?>"><?= htmlspecialchars($cName) ?></option>
+            <?php endforeach; ?>
+            <option value="__new__" <?= empty($allCompanyNames) ? 'selected' : '' ?>>+ Ketik Nama PT Baru</option>
+          </select>
+          <div id="box-new-client-company-input" style="<?= empty($allCompanyNames) ? 'display:block;' : 'display:none;' ?> margin-top: 8px;">
+            <input type="text" name="company_new" id="create-client-company-new" class="form-control" placeholder="Ketik nama PT / Brand baru (Contoh: PT Sumber Berkah Abadi)" <?= empty($allCompanyNames) ? 'required' : '' ?>>
+          </div>
         </div>
+
+        <!-- 2. Nama Orang (Label diubah dari PIC menjadi Nama) -->
         <div class="form-group">
-          <label class="form-label">Penanggung Jawab (PIC) *</label>
+          <label class="form-label">Nama <span style="color:red;">*</span></label>
           <input type="text" name="name" class="form-control" placeholder="Contoh: Budi Gunawan" required>
         </div>
+
+        <!-- 3. Email Login Portal & Password Akses Portal -->
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Email PIC *</label>
+            <label class="form-label">Email Login Portal Klien <span style="color:red;">*</span></label>
             <input type="email" name="email" class="form-control" placeholder="budi@company.com" required>
           </div>
           <div class="form-group">
-            <label class="form-label">Nomor WhatsApp</label>
-            <input type="text" name="phone" class="form-control" placeholder="081234567890">
+            <label class="form-label">Password Akses Portal <span style="color:red;">*</span></label>
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="password" name="password" id="client-password-input" class="form-control" placeholder="Password untuk klien login" required style="padding-right: 55px;">
+              <button type="button" onclick="togglePasswordVisibility('client-password-input', this)" style="position: absolute; right: 10px; background: none; border: none; font-size: 11px; font-weight: 700; color: var(--primary); cursor: pointer; padding: 4px;">Lihat</button>
+            </div>
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Alamat Kantor</label>
-          <textarea name="address" class="form-control" rows="2" placeholder="Alamat lengkap perusahaan untuk invoice"></textarea>
+
+        <!-- 4. Nomor WhatsApp (Alamat kantor dihapus!) -->
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label">Nomor WhatsApp</label>
+          <input type="text" name="phone" class="form-control" placeholder="081234567890">
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal('modal-create-client')">Batal</button>
-        <button type="submit" class="btn btn-primary">Simpan Klien</button>
+        <button type="submit" class="btn btn-primary">Simpan Klien & Buat Akses</button>
       </div>
     </form>
   </div>
 </div>
 <script>
+function toggleClientCompanyInput(val) {
+  const box = document.getElementById('box-new-client-company-input');
+  const input = document.getElementById('create-client-company-new');
+  if (val === '__new__') {
+    if (box) box.style.display = 'block';
+    if (input) input.required = true;
+  } else {
+    if (box) box.style.display = 'none';
+    if (input) input.required = false;
+  }
+}
+
+function togglePasswordVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (btn) btn.innerText = 'Tutup';
+  } else {
+    input.type = 'password';
+    if (btn) btn.innerText = 'Lihat';
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   handleAjaxForm('form-create-client', () => {
     closeModal('modal-create-client');
@@ -828,16 +880,16 @@ document.addEventListener('DOMContentLoaded', () => {
       <input type="hidden" name="id" id="edit-client-id">
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label">Nama Perusahaan / Brand *</label>
+          <label class="form-label">Nama Perusahaan / PT *</label>
           <input type="text" name="company" id="edit-client-company" class="form-control" placeholder="Contoh: PT Sumber Berkah Abadi" required>
         </div>
         <div class="form-group">
-          <label class="form-label">Penanggung Jawab (PIC) *</label>
+          <label class="form-label">Nama *</label>
           <input type="text" name="name" id="edit-client-name" class="form-control" placeholder="Contoh: Budi Gunawan" required>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Email PIC *</label>
+            <label class="form-label">Email Login Portal *</label>
             <input type="email" name="email" id="edit-client-email" class="form-control" placeholder="budi@company.com" required>
           </div>
           <div class="form-group">
@@ -846,8 +898,14 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Alamat Kantor</label>
-          <textarea name="address" id="edit-client-address" class="form-control" rows="2" placeholder="Alamat lengkap perusahaan"></textarea>
+          <label class="form-label">Password Akses Portal Baru (Opsional)</label>
+          <div style="position: relative; display: flex; align-items: center;">
+            <input type="password" name="password" id="edit-client-password" class="form-control" placeholder="Kosongkan jika tidak ingin mengubah password" style="padding-right: 64px;">
+            <button type="button" onclick="togglePasswordVisibility('edit-client-password', this)" style="position: absolute; right: 8px; background: transparent; border: 1px solid var(--border-color, #E4E7EC); border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 600; color: #475467; cursor: pointer;">
+              Lihat
+            </button>
+          </div>
+          <div style="font-size: 11px; color: var(--text-secondary, #667085); margin-top: 4px;">Hanya isi jika ingin mereset password login akun klien ke Client Portal.</div>
         </div>
       </div>
       <div class="modal-footer">

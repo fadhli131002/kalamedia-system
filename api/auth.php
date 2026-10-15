@@ -70,21 +70,18 @@ if ($action === 'login') {
 
 if ($action === 'quick_login') {
     $role = $_POST['role'] ?? 'owner';
-    
-    $emailMap = [
-        'owner' => 'owner@kalamedia.id',
-        'admin' => 'finance@kalamedia.id',
-        'karyawan' => 'dimas@kalamedia.id',
-        'freelancer' => 'kevin@kalamedia.id',
-        'client' => 'client@grandbsd.co.id'
-    ];
-
-    $email = $emailMap[$role] ?? 'owner@kalamedia.id';
 
     try {
         $db = Database::getConnection();
-        $stmt = $db->prepare("SELECT * FROM users WHERE email = ? OR role = ? LIMIT 1");
-        $stmt->execute([$email, $role]);
+        $stmt = $db->prepare("
+            SELECT * FROM users 
+            WHERE (role = ? OR employment_type = ?) 
+              AND COALESCE(is_active, 1) = 1 
+              AND COALESCE(is_deleted, 0) = 0 
+            ORDER BY id ASC 
+            LIMIT 1
+        ");
+        $stmt->execute([$role, $role]);
         $user = $stmt->fetch();
 
         if ($user) {

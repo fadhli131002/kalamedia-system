@@ -66,7 +66,7 @@ $projects = $db->query("
               <thead>
                 <tr>
                   <th>NAMA PERUSAHAAN</th>
-                  <th>KONTAK PIC</th>
+                  <th>NAMA</th>
                   <th>EMAIL & TELEPON</th>
                   <th>TOTAL PROYEK</th>
                   <th>TOTAL DITAGIHKAN</th>
@@ -84,7 +84,6 @@ $projects = $db->query("
                         <div class="clickable-client-link" onclick="openProjectFinancialDetailModal(0, <?= $c['id'] ?>)" title="Lihat Rincian Alokasi Keuangan Klien">
                           <span style="font-size: 14px; font-weight: 700;"><?= htmlspecialchars($c['company']) ?></span>
                         </div>
-                        <div style="font-size: 11px; color: var(--text-muted);"><?= htmlspecialchars($c['address'] ?: 'Alamat belum diatur') ?></div>
                       </td>
                       <td style="font-weight: 600; color: #101828;"><?= htmlspecialchars($c['name']) ?></td>
                       <td>

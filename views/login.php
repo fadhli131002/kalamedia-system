@@ -73,9 +73,14 @@ if (is_logged_in()) {
       <div class="form-group" style="margin-bottom: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
           <label class="form-label" style="margin-bottom: 0;">Kata Sandi</label>
-          <a href="javascript:void(0)" onclick="showToast('Silakan gunakan password bawaan: password123', 'info')" style="font-size: 11.5px; color: var(--text-secondary); text-decoration: none; font-weight: 600;">Lupa Password?</a>
+          <a href="javascript:void(0)" onclick="showToast('Silakan hubungi Owner / Administrator untuk bantuan login.', 'info')" style="font-size: 11.5px; color: var(--text-secondary); text-decoration: none; font-weight: 600;">Lupa Password?</a>
         </div>
-        <input type="password" name="password" id="login-password" class="form-control" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;" required>
+        <div style="position: relative; display: flex; align-items: center;">
+          <input type="password" name="password" id="login-password" class="form-control" placeholder="••••••••" required style="padding-right: 64px;">
+          <button type="button" onclick="togglePasswordVisibility('login-password', this)" style="position: absolute; right: 8px; background: transparent; border: 1px solid var(--border-color, #E4E7EC); border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 600; color: #475467; cursor: pointer;">
+            Lihat
+          </button>
+        </div>
       </div>
 
       <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 11px 16px; font-size: 14px;">

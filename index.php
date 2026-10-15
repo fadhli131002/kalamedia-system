@@ -122,6 +122,12 @@ switch ($route) {
         require_once __DIR__ . '/views/clients.php';
         break;
 
+    case 'team':
+    case 'employees-management':
+        require_admin();
+        require_once __DIR__ . '/views/team.php';
+        break;
+
     case 'content-calendar':
     case 'content-planner':
         require_auth();

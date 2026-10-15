@@ -10,6 +10,26 @@ $role = current_user_role();
 $userId = (int)$user['id'];
 $isAdminUser = is_admin();
 $isWorkerUser = ($role === 'karyawan' || $role === 'freelancer');
+$db = Database::getConnection();
+
+$workerProfile = null;
+$assignedClients = [];
+if ($isWorkerUser) {
+    $stmtW = $db->prepare("SELECT position, jobdesk, employment_type FROM users WHERE id = ?");
+    $stmtW->execute([$userId]);
+    $workerProfile = $stmtW->fetch();
+
+    $stmtAc = $db->prepare("
+        SELECT c.id, c.company, c.name as pic_name, c.package_name,
+               (SELECT COUNT(*) FROM tasks WHERE client_id = c.id AND assigned_to_user_id = ? AND COALESCE(is_deleted,0) = 0) as my_task_count
+        FROM clients c
+        JOIN employee_clients ec ON c.id = ec.client_id
+        WHERE ec.user_id = ? AND COALESCE(c.is_deleted,0) = 0
+        ORDER BY c.company ASC
+    ");
+    $stmtAc->execute([$userId, $userId]);
+    $assignedClients = $stmtAc->fetchAll();
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -258,6 +278,53 @@ $isWorkerUser = ($role === 'karyawan' || $role === 'freelancer');
 
         <!-- Alert Banner for Workers if Revision / Client Feedback Arrived -->
         <div id="revision-alert-container" style="display: none;"></div>
+
+        <?php if ($isWorkerUser): ?>
+          <!-- Worker Info Section: Jobdesk & Assigned Clients -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;">
+            <!-- 1. Jobdesk Saya dari Owner -->
+            <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #175CD3; background: #EFF8FF; padding: 2px 8px; border-radius: 4px; border: 1px solid #B2DDFF;">
+                  JOBDESK DARI OWNER
+                </span>
+                <span style="font-size: 12px; font-weight: 700; color: #101828;">
+                  <?= htmlspecialchars($workerProfile['position'] ?? 'Spesialis Tim') ?>
+                </span>
+              </div>
+              <h4 style="font-size: 14px; font-weight: 800; color: #101828; margin: 0 0 6px;">Tanggung Jawab Utama Anda:</h4>
+              <p style="font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.5; white-space: pre-line;">
+                <?= !empty($workerProfile['jobdesk']) ? htmlspecialchars($workerProfile['jobdesk']) : 'Menangani pengerjaan deliverables kreatif, kampanye, dan revisi klien sesuai arahan Owner Kalamedia.' ?>
+              </p>
+            </div>
+
+            <!-- 2. Klien & Proyek yang Saya Pegang -->
+            <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #027A48; background: #ECFDF3; padding: 2px 8px; border-radius: 4px; border: 1px solid #A6F4C5;">
+                  KLIEN & PT YANG SAYA PEGANG
+                </span>
+                <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">
+                  <?= count($assignedClients) ?> Perusahaan
+                </span>
+              </div>
+              <?php if (empty($assignedClients)): ?>
+                <p style="font-size: 12.5px; color: var(--text-muted); font-style: italic; margin: 0;">
+                  Belum ada klien khusus yang dialokasikan oleh Owner ke Anda. Anda dapat mengerjakan seluruh penugasan aktif di bawah.
+                </p>
+              <?php else: ?>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                  <?php foreach ($assignedClients as $ac): ?>
+                    <div style="background: #F9FAFB; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; display: inline-flex; flex-direction: column; gap: 2px;">
+                      <span style="font-size: 13px; font-weight: 800; color: #101828;"><?= htmlspecialchars($ac['company']) ?></span>
+                      <span style="font-size: 11px; color: var(--text-secondary);">PIC: <?= htmlspecialchars($ac['pic_name']) ?> &bull; <b><?= (int)$ac['my_task_count'] ?> Tugas</b></span>
+                    </div>
+                  <?php endforeach; ?>
+                </div>
+              <?php endif; ?>
+            </div>
+          </div>
+        <?php endif; ?>
 
         <!-- KPI Metrics Row -->
         <div class="kpi-row">

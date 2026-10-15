@@ -420,6 +420,8 @@ function fillClientModal(c) {
   if (emailEl) emailEl.value = c.email || '';
   if (phoneEl) phoneEl.value = c.phone || '';
   if (addrEl) addrEl.value = c.address || '';
+  const pwEl = document.getElementById('edit-client-password');
+  if (pwEl) pwEl.value = '';
 
   openModal('modal-edit-client');
 }
@@ -1129,6 +1131,18 @@ window.toggleExportRangeMode = function(mode) {
     if (monthWrap) monthWrap.style.display = 'none';
     if (customWrap) customWrap.style.display = 'flex';
     if (labelCustom) labelCustom.style.borderColor = '#2563EB';
+  }
+};
+
+window.togglePasswordVisibility = function(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (btn) btn.textContent = 'Tutup';
+  } else {
+    input.type = 'password';
+    if (btn) btn.textContent = 'Lihat';
   }
 };
 

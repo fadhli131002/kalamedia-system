@@ -105,6 +105,7 @@ if ($action === 'list_tasks') {
                        t.created_at, t.updated_at,
                        p.name as project_name,
                        u.name as worker_name, u.role as worker_role, u.employment_type as worker_emp_type,
+                       u.position as worker_position, u.jobdesk as worker_jobdesk,
                        u.avatar as worker_avatar, u.phone_wa as worker_phone,
                        (SELECT COUNT(*) FROM task_feedbacks WHERE task_id = t.id) as feedbacks_count,
                        (SELECT message FROM task_feedbacks WHERE task_id = t.id ORDER BY id DESC LIMIT 1) as latest_feedback
@@ -262,7 +263,7 @@ if ($action === 'list_tasks') {
                        t.created_at, t.updated_at,
                        p.name as project_name,
                        c.company as client_company, c.name as client_pic,
-                       u.name as worker_name, u.role as worker_role, u.employment_type as worker_emp_type,
+                       u.name as worker_name, u.role as worker_role, u.employment_type as worker_emp_type, u.position as worker_position, u.jobdesk as worker_jobdesk,
                        u.avatar as worker_avatar, u.phone_wa as worker_phone,
                        u_by.name as assigned_by_name,
                        (SELECT COUNT(*) FROM task_feedbacks WHERE task_id = t.id) as feedbacks_count,
@@ -714,10 +715,11 @@ if ($action === 'team_members') {
 
     try {
         $stmt = $db->query("
-            SELECT id, name, email, role, employment_type, phone_wa, avatar
+            SELECT id, name, email, role, employment_type, position, phone_wa, avatar
             FROM users
             WHERE role IN ('karyawan', 'freelancer', 'admin', 'owner')
               AND (is_active IS NULL OR is_active = 1)
+              AND COALESCE(is_deleted, 0) = 0
             ORDER BY 
                 CASE 
                     WHEN role = 'karyawan' THEN 1

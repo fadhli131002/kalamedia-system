@@ -13,7 +13,8 @@ $db = Database::getConnection();
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
 if ($action === 'create') {
-    $clientId = intval($_POST['client_id'] ?? 0);
+    $rawClientId = $_POST['client_id'] ?? '';
+    $clientId = ($rawClientId !== '__new__') ? intval($rawClientId) : 0;
     $projectId = !empty($_POST['project_id']) ? intval($_POST['project_id']) : null;
     $issueDate = $_POST['issue_date'] ?? date('Y-m-d');
     $dueDate = $_POST['due_date'] ?? date('Y-m-d', strtotime('+14 days'));
@@ -28,6 +29,23 @@ if ($action === 'create') {
     $items = $_POST['items'] ?? [];
     if (is_string($items)) {
         $items = json_decode($items, true) ?: [];
+    }
+
+    // Auto-create client if client_id is '__new__' or empty, and new client info is provided
+    if ($clientId <= 0) {
+        $newCompany = trim($_POST['new_client_company'] ?? $_POST['new_client_name'] ?? '');
+        if (!empty($newCompany)) {
+            $newPic = trim($_POST['new_client_pic'] ?? $newCompany);
+            $newPhone = trim($_POST['new_client_phone'] ?? '-');
+            $newEmail = trim($_POST['new_client_email'] ?? (strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $newCompany)) . '@kalamedia.client'));
+
+            $stmtNewClient = $db->prepare("
+                INSERT INTO clients (name, company, company_name, pic_name, email, phone, status)
+                VALUES (?, ?, ?, ?, ?, ?, 'Active')
+            ");
+            $stmtNewClient->execute([$newPic, $newCompany, $newCompany, $newPic, $newEmail, $newPhone]);
+            $clientId = (int)$db->lastInsertId();
+        }
     }
 
     if ($clientId <= 0 || empty($items)) {
@@ -64,31 +82,43 @@ if ($action === 'create') {
     $taxAmount = ($afterDiscount * $taxPercent) / 100;
     $totalAmount = $afterDiscount + $taxAmount;
 
-    // Generate Invoice Number: INV-KMC-YYMMXXX
+    // Generate Invoice Number: INV-KMC-YYMMXXX (collision-free)
     $prefix = 'INV-KMC-' . date('ym');
     $countStmt = $db->query("SELECT COUNT(*) FROM invoices WHERE invoice_number LIKE '$prefix%' OR invoice_number LIKE 'INV%'");
-    $nextSeq = str_pad(intval($countStmt->fetchColumn()) + 1, 3, '0', STR_PAD_LEFT);
-    $invoiceNumber = $prefix . $nextSeq;
+    $counter = intval($countStmt->fetchColumn()) + 1;
+    $invoiceNumber = '';
+    do {
+        $seq = str_pad($counter, 3, '0', STR_PAD_LEFT);
+        $candidate = $prefix . $seq;
+        $check = $db->prepare("SELECT COUNT(*) FROM invoices WHERE invoice_number = ?");
+        $check->execute([$candidate]);
+        if ($check->fetchColumn() == 0) {
+            $invoiceNumber = $candidate;
+            break;
+        }
+        $counter++;
+    } while ($counter < 9999);
 
     try {
         $db->beginTransaction();
 
         // If no project selected, auto-create a project for this client to ensure margin and expense tracking works seamlessly
         if (empty($projectId) || $projectId <= 0) {
-            $clientStmt = $db->prepare("SELECT company FROM clients WHERE id = ?");
+            $clientStmt = $db->prepare("SELECT company, company_name FROM clients WHERE id = ?");
             $clientStmt->execute([$clientId]);
-            $clientCompany = $clientStmt->fetchColumn() ?: 'Klien #' . $clientId;
+            $clientRow = $clientStmt->fetch();
+            $clientCompany = !empty($clientRow['company']) ? $clientRow['company'] : (!empty($clientRow['company_name']) ? $clientRow['company_name'] : 'Klien #' . $clientId);
 
             $primaryService = !empty($validItems[0]['service_name']) ? $validItems[0]['service_name'] : 'Creative & Media Service';
             $projectName = $primaryService . ' - ' . $clientCompany;
 
             $projStmt = $db->prepare("
                 INSERT INTO projects (
-                    client_id, name, contract_value, target_margin_percent, status, start_date, end_date
-                ) VALUES (?, ?, ?, 30, 'In Progress', ?, ?)
+                    client_id, name, project_name, contract_value, target_margin_percent, status, start_date, end_date
+                ) VALUES (?, ?, ?, ?, 30, 'In Progress', ?, ?)
             ");
-            $projStmt->execute([$clientId, $projectName, $totalAmount, $issueDate, $dueDate]);
-            $projectId = $db->lastInsertId();
+            $projStmt->execute([$clientId, $projectName, $projectName, $totalAmount, $issueDate, $dueDate]);
+            $projectId = (int)$db->lastInsertId();
         }
 
         $stmt = $db->prepare("

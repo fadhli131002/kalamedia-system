@@ -781,13 +781,47 @@ if ($action === 'delete_task') {
     }
 
     try {
-        $db->prepare("UPDATE tasks SET is_deleted = 1 WHERE id = ?")->execute([$taskId]);
+        try {
+            $db->prepare("DELETE FROM task_feedbacks WHERE task_id = ?")->execute([$taskId]);
+        } catch (Exception $e) {}
+
+        // Direct delete
+        $del = $db->prepare("DELETE FROM tasks WHERE id = ?");
+        $del->execute([$taskId]);
+
+        // Soft delete fallback if still exists
+        try {
+            $db->prepare("UPDATE tasks SET is_deleted = 1 WHERE id = ?")->execute([$taskId]);
+        } catch (Exception $e) {}
+
         log_activity('task', "Tugas Dihapus", "Task ID {$taskId} dihapus oleh {$user['name']}");
 
         echo json_encode(['success' => true, 'message' => 'Tugas berhasil dihapus']);
         exit;
     } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        echo json_encode(['success' => false, 'message' => 'Gagal menghapus tugas: ' . $e->getMessage()]);
+        exit;
+    }
+}
+
+// -------------------------------------------------------------
+// 10. POST: Delete All Tasks (Owner / Admin)
+// -------------------------------------------------------------
+if ($action === 'delete_all_tasks') {
+    if (!is_admin()) {
+        echo json_encode(['success' => false, 'message' => 'Hanya Owner dan Admin yang dapat menghapus tugas']);
+        exit;
+    }
+
+    try {
+        $db->exec("DELETE FROM task_feedbacks");
+        $db->exec("DELETE FROM tasks");
+        log_activity('task', "Semua Tugas Dihapus", "Seluruh data tugas dibersihkan oleh {$user['name']}");
+
+        echo json_encode(['success' => true, 'message' => 'Semua tugas berhasil dihapus bersih']);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Gagal menghapus semua tugas: ' . $e->getMessage()]);
         exit;
     }
 }

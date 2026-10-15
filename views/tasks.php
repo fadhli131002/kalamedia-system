@@ -241,10 +241,13 @@ $isWorkerUser = ($role === 'karyawan' || $role === 'freelancer');
             </p>
           </div>
 
-          <div style="display: flex; gap: 8px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <?php if ($isAdminUser): ?>
               <button class="btn btn-primary btn-sm" onclick="openAssignTaskModal()">
                 <span>+ Bagi Tugas Baru (Assign)</span>
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="deleteAllTasks()" style="color: #B42318; border-color: #FECDCA; background: #FEF3F2; font-weight: 700;" title="Hapus Semua Tugas">
+                <span>Hapus Semua Tugas</span>
               </button>
             <?php endif; ?>
             <button class="btn btn-secondary btn-sm" onclick="loadTasksData()">
@@ -842,6 +845,24 @@ $isWorkerUser = ($role === 'karyawan' || $role === 'freelancer');
           showToast('Koneksi server gagal', 'danger');
         }
       }
+
+      async function deleteAllTasks() {
+        if (!confirm('Apakah Anda yakin ingin menghapus SEMUA tugas yang ada di sistem? Tindakan ini tidak dapat dibatalkan.')) return;
+        try {
+          const res = await fetch('api/portal_tasks.php?action=delete_all_tasks', {
+            method: 'POST'
+          });
+          const data = await res.json();
+          if (data.success) {
+            showToast(data.message, 'success');
+            loadTasksData();
+          } else {
+            showToast(data.message || 'Gagal menghapus semua tugas', 'danger');
+          }
+        } catch (err) {
+          showToast('Koneksi server gagal', 'danger');
+        }
+      }
     <?php endif; ?>
 
     function openUpdateProgressModal(taskId, currentStatus, currentLink) {
@@ -1011,5 +1032,8 @@ $isWorkerUser = ($role === 'karyawan' || $role === 'freelancer');
       return text.replace(/[&<>"']/g, m => map[m]);
     }
   </script>
+
+  <?php require_once BASE_PATH . '/includes/modals.php'; ?>
+  <script src="assets/js/invoice.js?v=<?= time() ?>"></script>
 </body>
 </html>

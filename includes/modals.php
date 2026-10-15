@@ -16,23 +16,52 @@ $allEmployees = $db->query("SELECT id, name, position, department, bank_name, ba
       <h3 class="modal-title">+ Buat Invoice Baru</h3>
       <button type="button" class="modal-close" onclick="closeModal('modal-create-invoice')">&times;</button>
     </div>
-    <form id="form-create-invoice" action="api/invoices.php?action=create" method="POST" onsubmit="event.preventDefault(); submitInvoiceForm('form-create-invoice');">
+    <form id="form-create-invoice" action="<?= url('api/invoices.php?action=create') ?>" method="POST" onsubmit="event.preventDefault(); submitInvoiceForm('form-create-invoice');">
       <div class="modal-body">
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Klien *</label>
-            <select name="client_id" id="inv-client-select" class="form-select" onchange="loadProjectsForClient(this.value, 'inv-project-select')" required>
+            <label class="form-label">Klien <span style="color:red;">*</span></label>
+            <select name="client_id" id="inv-client-select" class="form-select" onchange="handleInvoiceClientChange(this.value)" required>
               <option value="">-- Pilih Klien --</option>
+              <option value="__new__" <?= empty($allClients) ? 'selected' : '' ?>>+ Tambah Klien Baru Langsung</option>
               <?php foreach ($allClients as $c): ?>
                 <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['company']) ?> (<?= htmlspecialchars($c['name']) ?>)</option>
               <?php endforeach; ?>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label">Proyek</label>
+            <label class="form-label">Proyek (Opsional)</label>
             <select name="project_id" id="inv-project-select" class="form-select">
-              <option value="">-- Pilih Proyek --</option>
+              <option value="">-- Otomatis Terkait Layanan Invoice --</option>
+              <?php foreach ($allProjects as $p): ?>
+                <option value="<?= $p['id'] ?>" data-client="<?= $p['client_id'] ?>"><?= htmlspecialchars($p['name']) ?> (<?= htmlspecialchars($p['company']) ?>)</option>
+              <?php endforeach; ?>
             </select>
+          </div>
+        </div>
+
+        <!-- Inline New Client Box (Active if __new__ selected or when no clients exist) -->
+        <div id="box-new-client-fields" style="<?= empty($allClients) ? 'display:block;' : 'display:none;' ?> margin-bottom: 16px; padding: 14px; background: #F8F9FA; border-radius: var(--radius-sm); border: 1px dashed #D0D5DD;">
+          <div style="font-size: 12px; font-weight: 700; color: #344054; margin-bottom: 8px;">Informasi Klien Baru</div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom: 8px;">
+              <label class="form-label" style="font-size: 11.5px;">Nama Perusahaan / Brand <span style="color:red;">*</span></label>
+              <input type="text" name="new_client_company" id="new-client-company" class="form-control" placeholder="Contoh: PT Surya Cipta" <?= empty($allClients) ? 'required' : '' ?>>
+            </div>
+            <div class="form-group" style="margin-bottom: 8px;">
+              <label class="form-label" style="font-size: 11.5px;">Nama PIC</label>
+              <input type="text" name="new_client_pic" id="new-client-pic" class="form-control" placeholder="Contoh: Bpk. Budi Santoso">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 11.5px;">No. WhatsApp / Telepon</label>
+              <input type="text" name="new_client_phone" id="new-client-phone" class="form-control" placeholder="Contoh: 08123456789">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 11.5px;">Email Klien</label>
+              <input type="email" name="new_client_email" id="new-client-email" class="form-control" placeholder="klien@perusahaan.com">
+            </div>
           </div>
         </div>
 

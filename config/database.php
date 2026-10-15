@@ -415,7 +415,7 @@ class Database {
         }
 
         // 4. Ensure is_deleted on other standard tables
-        $tablesWithDeleted = ['invoices', 'freelancer_payouts', 'ads_spend', 'salaries', 'content_planner', 'client_reports', 'performance_reports'];
+        $tablesWithDeleted = ['tasks', 'invoices', 'freelancer_payouts', 'ads_spend', 'salaries', 'content_planner', 'client_reports', 'performance_reports'];
         foreach ($tablesWithDeleted as $t) {
             $cols = $getTableCols($t);
             if (!empty($cols) && !in_array('is_deleted', $cols)) {
@@ -425,7 +425,18 @@ class Database {
             }
         }
 
-        // 5. Seed official system accounts (Owner and Admin only)
+        // 5. Auto-purge legacy dummy tasks, projects, clients, and demo accounts across SQLite & MySQL
+        try {
+            $db->exec("DELETE FROM task_feedbacks WHERE task_id IN (SELECT id FROM tasks WHERE title LIKE '%Copywriting Meta Ads%' OR title LIKE '%Setup Kampanye Meta Ads%' OR title LIKE '%Desain Feed Carousel%' OR title LIKE '%Shooting Video Reels%')");
+            $db->exec("DELETE FROM tasks WHERE title LIKE '%Copywriting Meta Ads%' OR title LIKE '%Setup Kampanye Meta Ads%' OR title LIKE '%Desain Feed Carousel%' OR title LIKE '%Shooting Video Reels%'");
+            $db->exec("DELETE FROM projects WHERE name LIKE '%Grand BSD%' OR name LIKE '%Horizon%' OR client_id IN (SELECT id FROM clients WHERE company LIKE '%Grand BSD%' OR name LIKE '%Clarissa Tan%')");
+            $db->exec("DELETE FROM clients WHERE company LIKE '%Grand BSD%' OR name LIKE '%Clarissa Tan%'");
+            $db->exec("DELETE FROM users WHERE email IN ('annisa@kalamedia.id', 'dimas@kalamedia.id', 'clarissa@grandbsd.com') OR name IN ('Annisa Nuraini', 'Dimas Prasetyo', 'Clarissa Tan')");
+        } catch (Exception $e) {
+            // Ignore if tables do not exist yet
+        }
+
+        // 6. Seed official system accounts (Owner and Admin only)
         self::seedDefaultSystemAccounts($db);
     }
 

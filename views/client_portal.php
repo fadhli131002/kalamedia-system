@@ -13,20 +13,60 @@ $db = Database::getConnection();
 // Determine Client ID
 $clientId = current_user_client_id();
 if (!$clientId && ($role === 'owner' || $role === 'admin')) {
-    // If Owner/Admin is previewing portal, default to Grand BSD Residence or first client
-    $clientId = (int)$db->query("SELECT id FROM clients WHERE company LIKE '%Grand BSD%' LIMIT 1")->fetchColumn();
-    if (!$clientId) {
-        $clientId = (int)$db->query("SELECT id FROM clients WHERE COALESCE(is_deleted,0)=0 LIMIT 1")->fetchColumn();
-    }
+    $clientId = (int)$db->query("SELECT id FROM clients WHERE COALESCE(is_deleted,0)=0 ORDER BY id ASC LIMIT 1")->fetchColumn();
 }
 
 // Fetch Client Profile
-$stmtClient = $db->prepare("SELECT * FROM clients WHERE id = ?");
-$stmtClient->execute([$clientId]);
-$client = $stmtClient->fetch();
+$client = null;
+if ($clientId > 0) {
+    $stmtClient = $db->prepare("SELECT * FROM clients WHERE id = ?");
+    $stmtClient->execute([$clientId]);
+    $client = $stmtClient->fetch();
+}
 
 if (!$client) {
-    die("Profil klien tidak ditemukan. Silakan hubungi admin Kalamedia.");
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client Portal - Kalamedia</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    <?php require_once BASE_PATH . '/includes/sidebar.php'; ?>
+    <main class="main-wrapper">
+      <?php require_once BASE_PATH . '/includes/header.php'; ?>
+      <div class="content-body">
+        <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 50px 30px; text-align: center; margin-top: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+          <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: #F4F3FF; color: #5925DC; border-radius: 50%; font-size: 28px; margin-bottom: 16px;">
+            ✦
+          </div>
+          <h2 style="font-size: 20px; font-weight: 800; color: #101828; margin-bottom: 8px;">Belum Ada Klien Terdaftar</h2>
+          <p style="font-size: 14px; color: var(--text-secondary); max-width: 520px; margin: 0 auto 24px; line-height: 1.5;">
+            Saat ini belum ada data klien aktif di sistem Kalamedia. Anda dapat langsung membuat invoice baru untuk klien pertama atau menambahkan klien melalui menu Klien.
+          </p>
+          <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-primary" onclick="openModal('modal-create-invoice')">
+              + Buat Invoice Baru
+            </button>
+            <a href="<?= url('clients') ?>" class="btn btn-secondary">
+              Kelola Data Klien
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <?php require_once BASE_PATH . '/includes/modals.php'; ?>
+  <script src="assets/js/app.js?v=<?= time() ?>"></script>
+  <script src="assets/js/invoice.js?v=<?= time() ?>"></script>
+</body>
+</html>
+<?php
+    exit;
 }
 
 // Fetch Active Project for this client
@@ -346,7 +386,7 @@ $invoices = $stmtInvoices->fetchAll();
 
             <div style="text-align: right;">
               <span style="font-size: 11px; opacity: 0.75; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">PIC Kalamedia Agensi</span>
-              <div style="font-size: 14px; font-weight: 800; margin-top: 2px;">Muhammad Fadhli / Ilham Lanang</div>
+              <div style="font-size: 14px; font-weight: 800; margin-top: 2px;">Tim Kalamedia</div>
               <a href="https://wa.me/628881124215" target="_blank" class="btn btn-sm" style="margin-top: 8px; background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.3); font-size: 11.5px; font-weight: 700;">
                 Hubungi via WhatsApp
               </a>
@@ -986,5 +1026,8 @@ $invoices = $stmtInvoices->fetchAll();
       return text.replace(/[&<>"']/g, m => map[m]);
     }
   </script>
+
+  <?php require_once BASE_PATH . '/includes/modals.php'; ?>
+  <script src="assets/js/invoice.js?v=<?= time() ?>"></script>
 </body>
 </html>

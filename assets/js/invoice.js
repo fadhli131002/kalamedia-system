@@ -122,10 +122,37 @@ async function loadProjectsForClient(clientId, targetSelectId = 'inv-project-sel
   }
 }
 
+function handleInvoiceClientChange(val) {
+  const box = document.getElementById('box-new-client-fields');
+  const compInput = document.getElementById('new-client-company');
+  if (val === '__new__') {
+    if (box) box.style.display = 'block';
+    if (compInput) compInput.required = true;
+  } else {
+    if (box) box.style.display = 'none';
+    if (compInput) compInput.required = false;
+    loadProjectsForClient(val, 'inv-project-select');
+  }
+}
+
 // Gather invoice items as JSON before submit
 function submitInvoiceForm(formId) {
   const form = document.getElementById(formId);
   if (!form) return;
+
+  const clientSelect = form.querySelector('[name="client_id"]');
+  if (clientSelect && (clientSelect.value === '__new__' || !clientSelect.value)) {
+    const compInput = form.querySelector('[name="new_client_company"]');
+    if (!compInput || !compInput.value.trim()) {
+      if (typeof showToast === 'function') {
+        showToast('Harap pilih klien atau masukkan Nama Perusahaan Klien Baru!', 'danger');
+      } else {
+        alert('Harap pilih klien atau masukkan Nama Perusahaan Klien Baru!');
+      }
+      if (compInput) compInput.focus();
+      return;
+    }
+  }
 
   const rows = document.querySelectorAll('#invoice-items-container tr');
   const items = [];
@@ -146,7 +173,11 @@ function submitInvoiceForm(formId) {
   });
 
   if (items.length === 0) {
-    showToast('Harap isi minimal 1 item layanan!', 'danger');
+    if (typeof showToast === 'function') {
+      showToast('Harap isi minimal 1 item layanan!', 'danger');
+    } else {
+      alert('Harap isi minimal 1 item layanan!');
+    }
     return;
   }
 

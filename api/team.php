@@ -20,6 +20,9 @@ if (!is_admin()) {
     exit;
 }
 
+// Release session lock immediately to prevent concurrent request blocking
+release_session();
+
 // 1. LIST TEAM MEMBERS
 if ($action === 'list') {
     try {
@@ -33,19 +36,31 @@ if ($action === 'list') {
         ");
         $members = $stmt->fetchAll();
 
-        // Attach assigned clients to each member
+        // Single batch query: Fetch all employee-client assignments at once (No N+1)
+        $assignedRows = $db->query("
+            SELECT ec.user_id, c.id, c.company, c.name as pic_name
+            FROM employee_clients ec
+            JOIN clients c ON ec.client_id = c.id
+            WHERE COALESCE(c.is_deleted, 0) = 0
+            ORDER BY c.company ASC
+        ")->fetchAll();
+
+        $assignmentsByUser = [];
+        foreach ($assignedRows as $row) {
+            $uid = (int)$row['user_id'];
+            $assignmentsByUser[$uid][] = [
+                'id' => $row['id'],
+                'company' => $row['company'],
+                'pic_name' => $row['pic_name']
+            ];
+        }
+
         foreach ($members as &$m) {
-            $stmtClients = $db->prepare("
-                SELECT c.id, c.company, c.name as pic_name
-                FROM clients c
-                JOIN employee_clients ec ON c.id = ec.client_id
-                WHERE ec.user_id = ? AND COALESCE(c.is_deleted, 0) = 0
-                ORDER BY c.company ASC
-            ");
-            $stmtClients->execute([$m['id']]);
-            $m['clients'] = $stmtClients->fetchAll();
+            $uid = (int)$m['id'];
+            $m['clients'] = $assignmentsByUser[$uid] ?? [];
             $m['client_ids'] = array_column($m['clients'], 'id');
         }
+        unset($m);
 
         echo json_encode(['success' => true, 'members' => $members]);
         exit;

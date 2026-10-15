@@ -7,6 +7,12 @@
 require_once __DIR__ . '/app.php';
 require_once __DIR__ . '/database.php';
 
+function release_session(): void {
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+    }
+}
+
 function is_logged_in(): bool {
     return !empty($_SESSION['logged_in']) && !empty($_SESSION['user']);
 }

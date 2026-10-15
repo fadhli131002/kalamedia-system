@@ -23,6 +23,9 @@ require_auth();
 $user = current_user();
 $role = current_user_role();
 $userId = (int)$user['id'];
+
+// Release session lock immediately to prevent concurrent request blocking
+release_session();
 $clientId = current_user_client_id();
 
 $db = Database::getConnection();

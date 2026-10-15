@@ -28,17 +28,28 @@ $teamMembers = $db->query("
         u.name ASC
 ")->fetchAll();
 
-// Attach assigned clients to each member
+// Batch query: Fetch all employee-client assignments in 1 query (No N+1)
+$assignedRows = $db->query("
+    SELECT ec.user_id, c.id, c.company, c.name as pic_name
+    FROM employee_clients ec
+    JOIN clients c ON ec.client_id = c.id
+    WHERE COALESCE(c.is_deleted, 0) = 0
+    ORDER BY c.company ASC
+")->fetchAll();
+
+$assignmentsByUser = [];
+foreach ($assignedRows as $row) {
+    $uid = (int)$row['user_id'];
+    $assignmentsByUser[$uid][] = [
+        'id' => $row['id'],
+        'company' => $row['company'],
+        'pic_name' => $row['pic_name']
+    ];
+}
+
 foreach ($teamMembers as &$m) {
-    $stmtC = $db->prepare("
-        SELECT c.id, c.company, c.name as pic_name
-        FROM clients c
-        JOIN employee_clients ec ON c.id = ec.client_id
-        WHERE ec.user_id = ? AND COALESCE(c.is_deleted, 0) = 0
-        ORDER BY c.company ASC
-    ");
-    $stmtC->execute([$m['id']]);
-    $m['assigned_clients'] = $stmtC->fetchAll();
+    $uid = (int)$m['id'];
+    $m['assigned_clients'] = $assignmentsByUser[$uid] ?? [];
     $m['client_ids'] = array_column($m['assigned_clients'], 'id');
 }
 unset($m);

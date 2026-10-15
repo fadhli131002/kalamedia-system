@@ -16,7 +16,10 @@ class Database {
 
     public static function getConnection(): PDO {
         if (self::$instance === null) {
-            $mysqlHost = defined('DB_HOST') ? DB_HOST : (getenv('DB_HOST') ?: '127.0.0.1');
+            $mysqlHost = defined('DB_HOST') ? DB_HOST : getenv('DB_HOST');
+            if ($mysqlHost === 'localhost') {
+                $mysqlHost = '127.0.0.1'; // Avoid IPv6 DNS resolution latency on Windows
+            }
             $mysqlPort = defined('DB_PORT') ? DB_PORT : (getenv('DB_PORT') ?: '3306');
             $mysqlDb   = defined('DB_NAME') ? DB_NAME : (getenv('DB_NAME') ?: 'kalamedia');
             $mysqlUser = defined('DB_USER') ? DB_USER : (getenv('DB_USER') ?: 'root');
@@ -27,12 +30,11 @@ class Database {
             // 1. Try MySQL Connection First if configured or available
             if (!empty($mysqlHost)) {
                 try {
-                    // Quick ping/connect with short timeout
                     $dsnServer = "mysql:host={$mysqlHost};port={$mysqlPort};charset=utf8mb4";
                     $pdoServer = new PDO($dsnServer, $mysqlUser, $mysqlPass, [
                         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                        PDO::ATTR_TIMEOUT => 2
+                        PDO::ATTR_TIMEOUT => 1
                     ]);
                     $pdoServer->exec("CREATE DATABASE IF NOT EXISTS `{$mysqlDb}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
 
@@ -46,7 +48,6 @@ class Database {
                     self::$driver = 'mysql';
                     $connected = true;
                 } catch (Throwable $e) {
-                    // Fallback to SQLite gracefully
                     $connected = false;
                 }
             }
@@ -66,6 +67,11 @@ class Database {
                         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
                         PDO::ATTR_TIMEOUT => 5
                     ]);
+                    // High-performance SQLite tuning
+                    self::$instance->exec("PRAGMA journal_mode = WAL;");
+                    self::$instance->exec("PRAGMA synchronous = NORMAL;");
+                    self::$instance->exec("PRAGMA temp_store = MEMORY;");
+                    self::$instance->exec("PRAGMA cache_size = -20000;"); // 20MB cache
                     self::$instance->exec("PRAGMA foreign_keys = ON;");
                     self::$driver = 'sqlite';
                 } catch (PDOException $e) {
@@ -73,8 +79,12 @@ class Database {
                 }
             }
 
-            // Auto-migration & Schema Check
-            self::runMigrations(self::$instance, self::$driver);
+            // High Performance: Only run migrations if lock file does not exist (0ms overhead on requests)
+            $lockFile = BASE_PATH . '/database/.schema_v3.lock';
+            if (!file_exists($lockFile)) {
+                self::runMigrations(self::$instance, self::$driver);
+                @file_put_contents($lockFile, "Schema v3 initialized at " . date('Y-m-d H:i:s'));
+            }
         }
         return self::$instance;
     }
@@ -458,6 +468,33 @@ class Database {
 
         // 6. Seed official system accounts (Owner and Admin only)
         self::seedDefaultSystemAccounts($db);
+
+        // 7. High-Performance Relational Indexes
+        $indexes = [
+            'idx_tasks_client' => ['tasks', 'client_id, status'],
+            'idx_tasks_worker' => ['tasks', 'assigned_to_user_id, status'],
+            'idx_emp_clients' => ['employee_clients', 'user_id, client_id'],
+            'idx_feedbacks_task' => ['task_feedbacks', 'task_id'],
+            'idx_users_role' => ['users', 'role, client_id'],
+            'idx_projects_client' => ['projects', 'client_id'],
+            'idx_invoices_client' => ['invoices', 'client_id'],
+            'idx_content_client' => ['content_planner', 'client_id']
+        ];
+
+        foreach ($indexes as $idxName => [$tbl, $cols]) {
+            try {
+                if ($driver === 'sqlite') {
+                    $db->exec("CREATE INDEX IF NOT EXISTS {$idxName} ON {$tbl}({$cols})");
+                } else {
+                    $checkIdx = $db->query("SHOW INDEX FROM `{$tbl}` WHERE Key_name = '{$idxName}'")->fetch();
+                    if (!$checkIdx) {
+                        $db->exec("CREATE INDEX `{$idxName}` ON `{$tbl}` ({$cols})");
+                    }
+                }
+            } catch (Throwable $e) {
+                // Ignore if table does not exist yet or index already present
+            }
+        }
     }
 
     public static function seedDefaultSystemAccounts(PDO $db): void {

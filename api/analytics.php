@@ -7,6 +7,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/auth.php';
 
 require_auth();
+release_session();
 
 $db = Database::getConnection();
 $range = $_GET['range'] ?? 'month'; // 'month', 'quarter', 'year', 'all'

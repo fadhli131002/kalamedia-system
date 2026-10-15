@@ -8,6 +8,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/auth.php';
 
 require_auth();
+release_session();
 
 $db = Database::getConnection();
 $action = $_GET['action'] ?? $_POST['action'] ?? '';

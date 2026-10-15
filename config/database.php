@@ -425,175 +425,41 @@ class Database {
             }
         }
 
-        // 5. Seed initial multi-role users & demo project tasks
-        self::seedMultiRoleAccountsAndTasks($db);
+        // 5. Seed official system accounts (Owner and Admin only)
+        self::seedDefaultSystemAccounts($db);
     }
 
-    public static function seedMultiRoleAccountsAndTasks(PDO $db): void {
-        // Ensure standard client Grand BSD Residence exists
-        $cGrandBsd = $db->query("SELECT id FROM clients WHERE company LIKE '%Grand BSD%' LIMIT 1")->fetchColumn();
-        if (!$cGrandBsd) {
-            $db->exec("INSERT INTO clients (name, pic_name, company, company_name, email, phone, package_name, status, address) VALUES (
-                'Clarissa Tan', 'Clarissa Tan', 'Grand BSD Residence', 'Grand BSD Residence', 'clarissa@grandbsd.co.id', '081399881122', 'Full Social Media & Performance Ads', 'Active', 'Marketing Gallery Grand BSD, Jl. BSD Raya Utama No. 8, Tangerang'
-            )");
-            $cGrandBsd = $db->lastInsertId();
-        }
-
-        // Seed 5-Role User Accounts (Owner, Admin, Karyawan 1 & 2, Freelancer 1 & 2, Client)
+    public static function seedDefaultSystemAccounts(PDO $db): void {
         $hashedPw = password_hash('password123', PASSWORD_BCRYPT);
 
-        $upsertUser = function($name, $email, $role, $empType, $phone, $clientId = null) use ($db, $hashedPw) {
-            $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
-            $stmt->execute([$email]);
-            $existing = $stmt->fetchColumn();
+        // 1. Owner Account (Official, clean, no personal name)
+        $ownerStmt = $db->prepare("SELECT id FROM users WHERE email = 'owner@kalamedia.id' OR role = 'owner' LIMIT 1");
+        $ownerStmt->execute();
+        $ownerId = $ownerStmt->fetchColumn();
 
-            if (!$existing) {
-                $insert = $db->prepare("
-                    INSERT INTO users (name, email, password, role, employment_type, phone_wa, client_id, is_active)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, 1)
-                ");
-                $insert->execute([$name, $email, $hashedPw, $role, $empType, $phone, $clientId]);
-                return $db->lastInsertId();
-            } else {
-                $update = $db->prepare("
-                    UPDATE users SET 
-                        role = ?, 
-                        employment_type = ?, 
-                        phone_wa = COALESCE(phone_wa, ?), 
-                        client_id = COALESCE(client_id, ?)
-                    WHERE id = ?
-                ");
-                $update->execute([$role, $empType, $phone, $clientId, $existing]);
-                return $existing;
-            }
-        };
-
-        // 1. Owner
-        $ownerId = $upsertUser('Muhammad Fadhli', 'owner@kalamedia.id', 'owner', 'internal', '08881124215', null);
-
-        // 2. Admin / PM
-        $adminId = $upsertUser('Ilham Lanang', 'finance@kalamedia.id', 'admin', 'internal', '081382573705', null);
-
-        // 3. Karyawan (In-House Team)
-        $karyawan1Id = $upsertUser('Dimas Prasetyo', 'dimas@kalamedia.id', 'karyawan', 'internal', '081298765431', null);
-        $karyawan2Id = $upsertUser('Annisa Nuraini', 'annisa@kalamedia.id', 'karyawan', 'internal', '081387654321', null);
-
-        // 4. Freelancer (External Talent)
-        $freelance1Id = $upsertUser('Kevin Pratama', 'kevin@kalamedia.id', 'freelancer', 'freelance', '081277665544', null);
-        $freelance2Id = $upsertUser('Bima Satria', 'bima@kalamedia.id', 'freelancer', 'freelance', '081566778899', null);
-
-        // 5. Client
-        $clientId = $upsertUser('Clarissa Tan', 'client@grandbsd.co.id', 'client', 'client_user', '081399881122', $cGrandBsd);
-
-        // Ensure active project for Grand BSD Residence
-        $projId = $db->query("SELECT id FROM projects WHERE client_id = {$cGrandBsd} LIMIT 1")->fetchColumn();
-        if (!$projId) {
-            $projStmt = $db->prepare("
-                INSERT INTO projects (client_id, name, project_name, contract_value, target_margin_percent, progress_percent, status, start_date, end_date)
-                VALUES (?, ?, ?, ?, ?, ?, 'In Progress', ?, ?)
+        if (!$ownerId) {
+            $insert = $db->prepare("
+                INSERT INTO users (name, email, password, role, employment_type, phone_wa, is_active)
+                VALUES ('Owner', 'owner@kalamedia.id', ?, 'owner', 'internal', '08881124215', 1)
             ");
-            $projStmt->execute([
-                $cGrandBsd,
-                'Digital Campaign & Lead Gen - Grand BSD Horizon',
-                'Digital Campaign & Lead Gen - Grand BSD Horizon',
-                45000000.00,
-                35.00,
-                60.00,
-                date('Y-m-01'),
-                date('Y-m-t', strtotime('+2 months'))
-            ]);
-            $projId = $db->lastInsertId();
+            $insert->execute([$hashedPw]);
+        } else {
+            $db->prepare("UPDATE users SET name = 'Owner', role = 'owner' WHERE id = ?")->execute([$ownerId]);
         }
 
-        // Seed Sample Deliverable Tasks if table has no tasks for this project
-        $taskCount = intval($db->query("SELECT COUNT(*) FROM tasks WHERE project_id = {$projId} AND is_deleted = 0")->fetchColumn());
-        if ($taskCount === 0) {
-            $taskStmt = $db->prepare("
-                INSERT INTO tasks (
-                    project_id, client_id, assigned_to_user_id, assigned_by_user_id,
-                    title, description, category, worker_type, priority, status,
-                    deliverable_link, due_date
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        // 2. Admin Account (Official, clean, no personal name)
+        $adminStmt = $db->prepare("SELECT id FROM users WHERE email = 'admin@kalamedia.id' OR (role = 'admin' AND email != 'owner@kalamedia.id') LIMIT 1");
+        $adminStmt->execute();
+        $adminId = $adminStmt->fetchColumn();
+
+        if (!$adminId) {
+            $insert = $db->prepare("
+                INSERT INTO users (name, email, password, role, employment_type, phone_wa, is_active)
+                VALUES ('Admin', 'admin@kalamedia.id', ?, 'admin', 'internal', '081382573705', 1)
             ");
-
-            // Task 1: Approved Design by Karyawan
-            $taskStmt->execute([
-                $projId, $cGrandBsd, $karyawan1Id, $adminId,
-                'Desain Feed Carousel Instagram - Promo Early Bird Cluster Horizon',
-                'Pembuatan 7 slide desain carousel edukasi denah tipe 72/90 dan promo cicilan mulai 3 jutaan. Gunakan tone warna warm luxury sesuai brand guidelines.',
-                'design', 'karyawan', 'high', 'approved',
-                'https://drive.google.com/drive/folders/demo-grandbsd-feed-approved',
-                date('Y-m-d', strtotime('-3 days'))
-            ]);
-            $t1 = $db->lastInsertId();
-
-            // Task 2: Video Walkthrough by Freelancer (Menunggu Review Klien)
-            $taskStmt->execute([
-                $projId, $cGrandBsd, $freelance1Id, $adminId,
-                'Video Reels POV Walk-through Show Unit Tipe 72',
-                'Editing video Reels 45 detik format vertikal 9:16 dengan transisi seamless, color grading modern, backsound trending, dan motion text spesifikasi ruangan.',
-                'video', 'freelancer', 'urgent', 'client_review',
-                'https://drive.google.com/file/d/demo-reels-unit-hook/view',
-                date('Y-m-d', strtotime('+1 day'))
-            ]);
-            $t2 = $db->lastInsertId();
-
-            // Task 3: Copywriting Meta Ads (Revisi Diminta oleh Klien)
-            $taskStmt->execute([
-                $projId, $cGrandBsd, $karyawan2Id, $adminId,
-                'Copywriting Meta Ads & Broadcast WhatsApp Promo Merdeka',
-                'Penyusunan naskah copy primary text Meta Ads, headline 5 variasi, dan template broadcast pesan WhatsApp follow up calon prospek show unit.',
-                'copywriting', 'karyawan', 'medium', 'revision',
-                'https://docs.google.com/document/d/demo-copy-promo-horizon/edit',
-                date('Y-m-d', strtotime('+2 days'))
-            ]);
-            $t3 = $db->lastInsertId();
-
-            // Task 4: Setup Meta Ads Campaign (Sedang Dikerjakan)
-            $taskStmt->execute([
-                $projId, $cGrandBsd, $karyawan1Id, $adminId,
-                'Setup Kampanye Meta Ads Instant Form - Segment Jabodetabek',
-                'Konfigurasi Ads Manager Meta untuk objektif Lead Generation form dengan filter kualifikasi penghasilan dan Custom Audience lookalike database.',
-                'ads', 'karyawan', 'high', 'in_progress',
-                null,
-                date('Y-m-d', strtotime('+4 days'))
-            ]);
-
-            // Task 5: Web Landing Page Slices (Antrean / Backlog)
-            $taskStmt->execute([
-                $projId, $cGrandBsd, $freelance2Id, $adminId,
-                'Slicing Landing Page & Integrasi Form CRM BSD Horizon',
-                'Coding landing page responive mobile-first, integrasi Google Tag Manager, Meta Pixel API, dan Webhook form leads ke spreadsheet sales.',
-                'web', 'freelancer', 'medium', 'backlog',
-                null,
-                date('Y-m-d', strtotime('+7 days'))
-            ]);
-
-            // Seed Sample Discussions / Feedbacks
-            $fbStmt = $db->prepare("
-                INSERT INTO task_feedbacks (task_id, user_id, feedback_type, message, attachment_path, is_read_by_worker)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ");
-
-            // Feedback on Task 2 (Freelancer asking for client review)
-            $fbStmt->execute([
-                $t2, $freelance1Id, 'comment',
-                'Halo Bu Clarissa & Tim Grand BSD, draft video reels sudah selesai diedit dengan tempo cepat dan teks fasilitas lengkap. Silakan dicek melalui link Google Drive di atas ya.',
-                null, 1
-            ]);
-
-            // Feedback on Task 3 (Client requesting revision)
-            $fbStmt->execute([
-                $t3, $clientId, 'revision_request',
-                'Tolong revisi pada Headline Variasi 1 & 2 ya tim Kalamedia. Buat lebih menonjolkan keuntungan "Free Biaya KPR & Subsidi DP 0%". Terima kasih!',
-                null, 0
-            ]);
-
-            $fbStmt->execute([
-                $t3, $karyawan2Id, 'comment',
-                'Baik Bu Clarissa! Copy sedang kami perbaiki sesuai arahan dan segera kami perbarui link dokumennya siang ini.',
-                null, 1
-            ]);
+            $insert->execute([$hashedPw]);
+        } else {
+            $db->prepare("UPDATE users SET name = 'Admin', role = 'admin' WHERE id = ?")->execute([$adminId]);
         }
     }
 }

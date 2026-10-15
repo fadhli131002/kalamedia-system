@@ -172,6 +172,8 @@ body {
   position: sticky;
   top: 0;
   height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   z-index: 100;
   transition: var(--transition);
 }
@@ -181,6 +183,7 @@ body {
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 .sidebar-brand-img {
@@ -235,7 +238,8 @@ body {
 
 .sidebar-nav {
   padding: 16px 12px;
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -289,20 +293,13 @@ body {
 }
 
 .nav-link svg {
-  width: 17px;
-  height: 17px;
-  flex-shrink: 0;
-  color: var(--text-muted);
-  transition: var(--transition);
-}
-
-.nav-link:hover svg,
-.nav-link.active svg {
-  color: #101828;
+  display: none !important;
 }
 
 /* Sidebar User Footer */
 .sidebar-user {
+  flex-shrink: 0;
+  margin-top: auto;
   padding: 14px 16px;
   border-top: 1px solid var(--border-color);
   display: flex;
@@ -1045,6 +1042,7 @@ body {
 /* ==========================================================================
    6. MODAL SYSTEM (UNTITLED UI PURE WHITE)
    ========================================================================== */
+.modal,
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -1060,6 +1058,8 @@ body {
   padding: 20px;
 }
 
+.modal.show,
+.modal.active,
 .modal-backdrop.show {
   display: flex !important;
 }

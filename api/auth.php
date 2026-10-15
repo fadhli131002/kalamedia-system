@@ -1,6 +1,7 @@
 <?php
 /**
  * Auth API Handler
+ * Multi-Role Authentication for 5 Roles: Owner, Admin, Karyawan, Freelancer, Client
  */
 
 header('Content-Type: application/json');
@@ -20,16 +21,26 @@ if ($action === 'login') {
 
     try {
         $db = Database::getConnection();
-        $stmt = $db->prepare("SELECT * FROM users WHERE email = ?");
-        $stmt->execute([$email]);
+        $stmt = $db->prepare("SELECT * FROM users WHERE (email = ? OR (role = 'admin' AND ? = 'finance@kalamedia.id')) AND (is_active IS NULL OR is_active = 1) LIMIT 1");
+        $stmt->execute([$email, $email]);
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
+            $displayName = $user['name'];
+            if ($user['role'] === 'owner') {
+                $displayName = 'Owner';
+            } elseif ($user['role'] === 'admin') {
+                $displayName = 'Admin';
+            }
+
             $userPayload = [
-                'id' => $user['id'],
-                'name' => $user['name'],
+                'id' => (int)$user['id'],
+                'name' => $displayName,
                 'email' => $user['email'],
                 'role' => $user['role'],
+                'employment_type' => $user['employment_type'] ?? 'internal',
+                'phone_wa' => $user['phone_wa'] ?? null,
+                'client_id' => !empty($user['client_id']) ? (int)$user['client_id'] : null,
                 'avatar' => $user['avatar']
             ];
 
@@ -38,7 +49,7 @@ if ($action === 'login') {
             $_SESSION['last_activity'] = time();
 
             // Strict role-based redirect target
-            $redirectUrl = ($user['role'] === 'owner') ? url('owner-dashboard') : url('admin-dashboard');
+            $redirectUrl = home_url_for_role($user['role']);
 
             echo json_encode([
                 'success' => true,
@@ -59,20 +70,32 @@ if ($action === 'login') {
 
 if ($action === 'quick_login') {
     $role = $_POST['role'] ?? 'owner';
-    $email = ($role === 'owner') ? 'owner@kalamedia.id' : 'finance@kalamedia.id';
+    
+    $emailMap = [
+        'owner' => 'owner@kalamedia.id',
+        'admin' => 'finance@kalamedia.id',
+        'karyawan' => 'dimas@kalamedia.id',
+        'freelancer' => 'kevin@kalamedia.id',
+        'client' => 'client@grandbsd.co.id'
+    ];
+
+    $email = $emailMap[$role] ?? 'owner@kalamedia.id';
 
     try {
         $db = Database::getConnection();
-        $stmt = $db->prepare("SELECT * FROM users WHERE email = ? OR (role = 'admin' AND email = 'admin@kalamedia.id') OR (role = ?)");
+        $stmt = $db->prepare("SELECT * FROM users WHERE email = ? OR role = ? LIMIT 1");
         $stmt->execute([$email, $role]);
         $user = $stmt->fetch();
 
         if ($user) {
             $userPayload = [
-                'id' => $user['id'],
+                'id' => (int)$user['id'],
                 'name' => $user['name'],
                 'email' => $user['email'],
                 'role' => $user['role'],
+                'employment_type' => $user['employment_type'] ?? 'internal',
+                'phone_wa' => $user['phone_wa'] ?? null,
+                'client_id' => !empty($user['client_id']) ? (int)$user['client_id'] : null,
                 'avatar' => $user['avatar']
             ];
 
@@ -80,12 +103,17 @@ if ($action === 'quick_login') {
             $_SESSION['user'] = $userPayload;
             $_SESSION['last_activity'] = time();
 
-            $redirectUrl = ($user['role'] === 'owner') ? url('owner-dashboard') : url('admin-dashboard');
+            $redirectUrl = home_url_for_role($user['role']);
+
             echo json_encode([
                 'success' => true,
-                'message' => 'Masuk sebagai ' . ucfirst($role) . ' berhasil!',
-                'redirect' => $redirectUrl
+                'message' => 'Masuk sebagai ' . ucfirst($role) . ' (' . htmlspecialchars($user['name']) . ') berhasil!',
+                'redirect' => $redirectUrl,
+                'user' => $userPayload
             ]);
+            exit;
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Akun peran ' . $role . ' tidak ditemukan.']);
             exit;
         }
     } catch (Exception $e) {
@@ -105,7 +133,6 @@ if ($action === 'logout') {
     }
     session_destroy();
     
-    // If called directly via browser GET or regular form
     if (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')) {
         header('Location: ' . url('login'));
         exit;

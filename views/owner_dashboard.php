@@ -76,6 +76,34 @@ $pendingSalaryCount = intval($db->query("SELECT COUNT(*) FROM salaries WHERE sta
 
 // 7. Recent High-Level Activities
 $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->fetchAll();
+
+// 8. System Users for Owner User Management (Karyawan, Freelancer, Client, Admin)
+$systemUsers = $db->query("
+    SELECT u.id, u.name, u.email, u.role, u.employment_type, u.phone_wa, u.client_id, u.created_at,
+           c.company as client_company
+    FROM users u
+    LEFT JOIN clients c ON u.client_id = c.id
+    ORDER BY CASE u.role 
+        WHEN 'owner' THEN 1 
+        WHEN 'admin' THEN 2 
+        WHEN 'karyawan' THEN 3 
+        WHEN 'freelancer' THEN 4 
+        WHEN 'client' THEN 5 
+        ELSE 6 END, u.id ASC
+")->fetchAll();
+
+$userCounts = [
+    'karyawan' => 0,
+    'freelancer' => 0,
+    'client' => 0,
+    'admin' => 0,
+    'owner' => 0
+];
+foreach ($systemUsers as $su) {
+    if (isset($userCounts[$su['role']])) {
+        $userCounts[$su['role']]++;
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -103,9 +131,6 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Total Revenue (Inflow)</span>
-              <div class="kpi-icon" style="background: var(--success-bg); color: var(--success-text);">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-              </div>
             </div>
             <div class="kpi-value" id="kpi-revenue"><?= format_rupiah($totalRevenue) ?></div>
             <div class="kpi-meta">
@@ -117,9 +142,6 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Total Expense (Outflow)</span>
-              <div class="kpi-icon" style="background: var(--danger-bg); color: var(--danger-text);">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
-              </div>
             </div>
             <div class="kpi-value" id="kpi-expense"><?= format_rupiah($totalExpense) ?></div>
             <div class="kpi-meta" style="font-size: 11px;">
@@ -131,9 +153,6 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Monthly Net Profit & Margin</span>
-              <div class="kpi-icon" style="background: #F2F4F7; color: #101828;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path><line x1="12" y1="6" x2="12" y2="18"></line></svg>
-              </div>
             </div>
             <div class="kpi-value" id="kpi-profit"><?= format_rupiah($netProfit) ?></div>
             <div class="kpi-meta">
@@ -148,9 +167,6 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Outstanding Receivables</span>
-              <div class="kpi-icon" style="background: var(--warning-bg); color: var(--warning-text);">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-              </div>
             </div>
             <div class="kpi-value" id="kpi-receivables"><?= format_rupiah($outstandingReceivables) ?></div>
             <div class="kpi-meta">
@@ -164,7 +180,6 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
           <div class="panel-header">
             <div>
               <h3 class="panel-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
                 Grafik Cashflow Tren Agensi (Inflow vs Outflow)
               </h3>
               <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Tren riwayat arus kas masuk dan biaya operasional 6 bulan terakhir</p>
@@ -183,7 +198,6 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
             <div class="panel-header">
               <div>
                 <h3 class="panel-title">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                   Project Profitability Leaderboard
                 </h3>
                 <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Peringkat proyek berdasarkan profit margin & efisiensi biaya produksi</p>
@@ -214,16 +228,15 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
                               $rankClass = $idx === 0 ? 'rank-badge-1' : ($idx === 1 ? 'rank-badge-2' : ($idx === 2 ? 'rank-badge-3' : 'rank-badge-other'));
                             ?>
                             <span class="rank-badge <?= $rankClass ?>" title="Peringkat <?= $idx + 1 ?>">
-                              <?= $idx === 0 ? '🥇' : ($idx === 1 ? '🥈' : ($idx === 2 ? '🥉' : '#' . ($idx + 1))) ?>
+                              #<?= $idx + 1 ?>
                             </span>
                             <div>
                               <div class="clickable-client-link" onclick="openProjectFinancialDetailModal(<?= $p['id'] ?>, <?= $p['client_id'] ?>)" title="Lihat Rincian Alokasi Keuangan">
                                 <span style="font-size: 13.5px;"><?= htmlspecialchars($p['name']) ?></span>
-                                <svg class="icon-open" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                               </div>
                               <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 1px;">
                                 <span style="font-weight: 600;"><?= htmlspecialchars($p['client_company']) ?></span> &bull; 
-                                <span style="color: #2563EB; font-weight: 600; cursor: pointer;" onclick="openProjectFinancialDetailModal(<?= $p['id'] ?>, <?= $p['client_id'] ?>)">Rincian Biaya ↗</span>
+                                <span style="color: #2563EB; font-weight: 600; cursor: pointer;" onclick="openProjectFinancialDetailModal(<?= $p['id'] ?>, <?= $p['client_id'] ?>)">Rincian Biaya</span>
                               </div>
                             </div>
                           </div>
@@ -257,7 +270,6 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
             <div class="panel-header">
               <div>
                 <h3 class="panel-title">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                   Outstanding Receivables
                 </h3>
                 <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Tagihan klien yang belum masuk</p>
@@ -267,7 +279,7 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
             <div style="display: flex; flex-direction: column; gap: 10px;">
               <?php if (empty($unpaidInvoicesList)): ?>
                 <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 13px; background: #F9FAFB; border-radius: var(--radius-sm); border: 1px dashed var(--border-color);">
-                  Semua invoice klien telah dilunasi! 🎉
+                  Semua invoice klien telah dilunasi!
                 </div>
               <?php else: ?>
                 <?php foreach ($unpaidInvoicesList as $u):
@@ -278,7 +290,6 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
                       <div>
                         <div class="clickable-client-link" onclick="openProjectFinancialDetailModal(<?= !empty($u['project_id']) ? $u['project_id'] : 0 ?>, <?= $u['client_id'] ?>)" title="Lihat Rincian Keuangan Klien">
                           <span style="font-size: 13px; font-weight: 700;"><?= htmlspecialchars($u['client_company']) ?></span>
-                          <svg class="icon-open" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                         </div>
                         <div style="font-size: 11px; color: var(--text-secondary);">#<?= htmlspecialchars($u['invoice_number']) ?></div>
                       </div>
@@ -305,7 +316,6 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
             <div class="panel-header" style="margin-bottom: 16px;">
               <div>
                 <h3 class="panel-title">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M7 15h0M2 9.5h20"></path><circle cx="16" cy="14" r="2"></circle></svg>
                   Tim Internal & Ringkasan Payroll (Gaji Karyawan)
                 </h3>
                 <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Pemantauan struktur tim agensi, biaya gaji bulanan, dan status slip gaji</p>
@@ -352,6 +362,133 @@ $activities = $db->query("SELECT * FROM activities ORDER BY id DESC LIMIT 6")->f
                 </div>
               </div>
             <?php endif; ?>
+          </div>
+
+          <!-- 7. Manajemen Akun Pengguna (Karyawan, Freelance, Client & Admin) -->
+          <div class="glass-panel owner-full-width-panel" style="margin-top: 24px;">
+            <div class="panel-header" style="margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h3 class="panel-title">
+                  Manajemen Akun Pengguna (User Access Control)
+                </h3>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
+                  Kelola hak akses dan tambahkan akun baru untuk Karyawan, Freelancer, dan Klien agensi
+                </p>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openCreateUserModal('karyawan')">
+                  + Akun Karyawan
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openCreateUserModal('freelancer')">
+                  + Akun Freelance
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openCreateUserModal('client')">
+                  + Akun Klien
+                </button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="openCreateUserModal()">
+                  + Tambah Akun
+                </button>
+              </div>
+            </div>
+
+            <!-- Role Summary Badges -->
+            <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+              <div style="background: #ECFDF3; border: 1px solid #A6F4C5; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #027A48;">
+                Karyawan: <?= $userCounts['karyawan'] ?> Akun
+              </div>
+              <div style="background: #F4F3FF; border: 1px solid #D9D6FE; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #5925DC;">
+                Freelancer: <?= $userCounts['freelancer'] ?> Akun
+              </div>
+              <div style="background: #EFF8FF; border: 1px solid #B2DDFF; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #175CD3;">
+                Client Portal: <?= $userCounts['client'] ?> Akun
+              </div>
+              <div style="background: #F8F9FC; border: 1px solid #EAECF0; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #344054;">
+                Admin &amp; Owner: <?= $userCounts['admin'] + $userCounts['owner'] ?> Akun
+              </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="table-responsive">
+              <table class="table-custom">
+                <thead>
+                  <tr>
+                    <th>Nama &amp; Email</th>
+                    <th>Peran (Role)</th>
+                    <th>Afiliasi / Kontak</th>
+                    <th>Status</th>
+                    <th>Tgl Dibuat</th>
+                    <th style="text-align: right;">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="user-management-tbody">
+                  <?php foreach ($systemUsers as $u): ?>
+                    <tr id="user-row-<?= $u['id'] ?>">
+                      <td>
+                        <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($u['name']) ?></div>
+                        <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($u['email']) ?></div>
+                      </td>
+                      <td>
+                        <?php
+                          $roleBadgeStyle = [
+                            'owner' => 'background: #FEF3F2; color: #B42318; border: 1px solid #FECDCA;',
+                            'admin' => 'background: #EFF8FF; color: #175CD3; border: 1px solid #B2DDFF;',
+                            'karyawan' => 'background: #ECFDF3; color: #027A48; border: 1px solid #A6F4C5;',
+                            'freelancer' => 'background: #F4F3FF; color: #5925DC; border: 1px solid #D9D6FE;',
+                            'client' => 'background: #F8F9FC; color: #344054; border: 1px solid #D0D5DD;'
+                          ][$u['role']] ?? 'background: #F2F4F7; color: #344054;';
+
+                          $roleText = [
+                            'owner' => 'Owner',
+                            'admin' => 'Admin / PM',
+                            'karyawan' => 'Karyawan',
+                            'freelancer' => 'Freelancer',
+                            'client' => 'Client Portal'
+                          ][$u['role']] ?? ucfirst($u['role']);
+                        ?>
+                        <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; <?= $roleBadgeStyle ?>">
+                          <?= $roleText ?>
+                        </span>
+                      </td>
+                      <td>
+                        <?php if ($u['role'] === 'client'): ?>
+                          <div style="font-size: 12px; font-weight: 600; color: #101828;">
+                            <?= htmlspecialchars($u['client_company'] ?: 'Belum terhubung') ?>
+                          </div>
+                          <div style="font-size: 10.5px; color: var(--text-secondary);">Portal Klien</div>
+                        <?php else: ?>
+                          <div style="font-size: 12px; color: #101828;">
+                            <?= htmlspecialchars($u['phone_wa'] ?: '-') ?>
+                          </div>
+                          <div style="font-size: 10.5px; color: var(--text-secondary);">
+                            <?= $u['employment_type'] === 'freelance' ? 'Talenta Eksternal' : 'Internal Staff' ?>
+                          </div>
+                        <?php endif; ?>
+                      </td>
+                      <td>
+                        <span style="font-size: 11px; font-weight: 700; color: #027A48; background: #ECFDF3; padding: 2px 8px; border-radius: 12px;">
+                          Aktif
+                        </span>
+                      </td>
+                      <td style="font-size: 12px; color: var(--text-secondary);">
+                        <?= !empty($u['created_at']) ? date('d M Y', strtotime($u['created_at'])) : '-' ?>
+                      </td>
+                      <td style="text-align: right;">
+                        <div style="display: inline-flex; gap: 6px;">
+                          <button type="button" class="btn btn-secondary btn-sm" onclick="openResetPasswordModal(<?= $u['id'] ?>, '<?= htmlspecialchars(addslashes($u['name'])) ?>')" style="font-size: 11px; padding: 4px 8px;">
+                            Reset Sandi
+                          </button>
+                          <?php if ($u['role'] !== 'owner' && $u['id'] != ($currentUser['id'] ?? 0)): ?>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="deleteUserAccount(<?= $u['id'] ?>, '<?= htmlspecialchars(addslashes($u['name'])) ?>')" style="color: var(--danger-text); border-color: #FECDCA; font-size: 11px; padding: 4px 8px;">
+                              Hapus
+                            </button>
+                          <?php endif; ?>
+                        </div>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
+                </tbody>
+              </table>
+            </div>
           </div>
 
         </div>

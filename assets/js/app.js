@@ -64,8 +64,9 @@ function closeModal(modalId) {
 
 // Close modal when clicking outside dialog
 document.addEventListener('click', (e) => {
-  if (e.target.classList.contains('modal-backdrop')) {
+  if (e.target.classList.contains('modal-backdrop') || e.target.classList.contains('modal')) {
     e.target.classList.remove('show');
+    e.target.classList.remove('active');
     document.body.style.overflow = 'auto';
   }
 });

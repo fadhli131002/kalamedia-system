@@ -163,15 +163,12 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <a href="api/analytics.php?action=export_excel" class="btn btn-secondary btn-sm" style="font-weight: 700;" title="Unduh spreadsheet Excel dengan format tabel & border rapi">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
               <span>Export Excel (.xls)</span>
             </a>
             <a href="api/analytics.php?action=export_csv" class="btn btn-secondary btn-sm" style="font-weight: 700;" title="Unduh spreadsheet CSV dengan pemisah kolom otomatis">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
               <span>Export CSV</span>
             </a>
             <a href="api/analytics.php?action=export_pdf" target="_blank" class="btn btn-primary btn-sm" style="font-weight: 700;" title="Buka & cetak laporan rekonsiliasi bulanan format PDF">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
               <span>Cetak Laporan PDF</span>
             </a>
           </div>
@@ -180,9 +177,6 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
         <!-- 1. Quick Action Cards (PRD 3.3 + Gaji Karyawan) -->
         <div class="quick-actions-bar">
           <div class="quick-action-card" onclick="openModal('modal-create-invoice')">
-            <div class="action-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-            </div>
             <div>
               <div class="action-title">+ Buat Invoice</div>
               <div class="action-desc">Penagihan baru ke klien</div>
@@ -190,9 +184,6 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
           </div>
 
           <div class="quick-action-card" onclick="openModal('modal-record-payment')">
-            <div class="action-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-            </div>
             <div>
               <div class="action-title">+ Catat Uang Masuk</div>
               <div class="action-desc">Pelunasan invoice klien</div>
@@ -200,9 +191,6 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
           </div>
 
           <div class="quick-action-card" onclick="openModal('modal-input-payout')">
-            <div class="action-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="22" y1="11" x2="16" y2="11"></line></svg>
-            </div>
             <div>
               <div class="action-title">+ Fee Freelancer</div>
               <div class="action-desc">Input pembayaran talenta</div>
@@ -210,9 +198,6 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
           </div>
 
           <div class="quick-action-card" onclick="openModal('modal-input-salary')">
-            <div class="action-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M7 15h0M2 9.5h20"></path><circle cx="16" cy="14" r="2"></circle></svg>
-            </div>
             <div>
               <div class="action-title">+ Gaji Karyawan</div>
               <div class="action-desc">Payroll & slip gaji tim</div>
@@ -220,9 +205,6 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
           </div>
 
           <div class="quick-action-card" onclick="openModal('modal-catat-ads')">
-            <div class="action-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-            </div>
             <div>
               <div class="action-title">+ Top-Up Ads</div>
               <div class="action-desc">Meta, Google & TikTok Ads</div>
@@ -234,9 +216,6 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
         <div class="alert-cards-grid">
           <!-- Unpaid Invoices -->
           <div class="alert-card danger-border" onclick="switchOpTab('tab-ar')" style="cursor: pointer;">
-            <div style="width: 36px; height: 36px; border-radius: 8px; background: var(--danger-bg); color: var(--danger-text); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-            </div>
             <div class="alert-card-info">
               <h5>Accounts Receivable (A/R)</h5>
               <div class="count"><?= $unpaidCount ?> Invoice Belum Lunas</div>
@@ -246,9 +225,6 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
 
           <!-- Pending Freelancer Payouts -->
           <div class="alert-card warning-border" onclick="switchOpTab('tab-ap')" style="cursor: pointer;">
-            <div style="width: 36px; height: 36px; border-radius: 8px; background: var(--warning-bg); color: var(--warning-text); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            </div>
             <div class="alert-card-info">
               <h5>Pending Freelancers (A/P)</h5>
               <div class="count"><?= $pendingPayoutCount ?> Talenta</div>
@@ -258,9 +234,6 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
 
           <!-- Pending Employee Salaries -->
           <div class="alert-card" onclick="switchOpTab('tab-ap')" style="cursor: pointer; border-left: 4px solid #101828;">
-            <div style="width: 36px; height: 36px; border-radius: 8px; background: #F2F4F7; color: #101828; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M7 15h0M2 9.5h20"></path><circle cx="16" cy="14" r="2"></circle></svg>
-            </div>
             <div class="alert-card-info">
               <h5>Pending Gaji Tim (A/P)</h5>
               <div class="count"><?= $pendingSalaryCount ?> Karyawan</div>
@@ -270,9 +243,6 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
 
           <!-- Missing Receipts -->
           <div class="alert-card info-border" onclick="switchOpTab('tab-missing')" style="cursor: pointer;">
-            <div style="width: 36px; height: 36px; border-radius: 8px; background: var(--info-bg); color: var(--info-text); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-            </div>
             <div class="alert-card-info">
               <h5>Missing Receipt Audit</h5>
               <div class="count"><?= $totalMissingReceipts ?> Transaksi</div>
@@ -294,7 +264,6 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
           <div class="panel-header">
             <div>
               <h3 class="panel-title" id="tab-panel-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
                 Tabel Antrean Transaksi Berjalan (Active Queue)
               </h3>
               <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;" id="tab-panel-desc">Daftar transaksi mutasi operasional real-time</p>
@@ -346,12 +315,10 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
                       <td style="text-align: right;">
                         <?php if (!empty($t['receipt_file'])): ?>
                           <button type="button" class="btn btn-secondary btn-sm" onclick="viewReceiptImage('<?= UPLOAD_URL . '/' . htmlspecialchars($t['receipt_file']) ?>', '<?= htmlspecialchars($t['title']) ?>')">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="3"></circle></svg>
                             <span>Lihat Bukti</span>
                           </button>
                         <?php else: ?>
                           <button type="button" class="btn btn-secondary btn-sm" onclick="triggerUploadModal('<?= $t['target_type'] ?>', <?= $t['id'] ?>, 'Upload Bukti <?= htmlspecialchars($t['title']) ?>')">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                             <span>Upload Bukti</span>
                           </button>
                         <?php endif; ?>
@@ -378,7 +345,7 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
               </thead>
               <tbody>
                 <?php if (empty($arInvoices)): ?>
-                  <tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">Tidak ada tagihan tertunda. Semua invoice telah dilunasi! 🎉</td></tr>
+                  <tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">Tidak ada tagihan tertunda. Semua invoice telah dilunasi!</td></tr>
                 <?php else: ?>
                   <?php foreach ($arInvoices as $ar): 
                     $isOverdue = (strtotime($ar['due_date']) < time() && $ar['status'] !== 'Paid');
@@ -475,7 +442,7 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
               </thead>
               <tbody>
                 <?php if (empty($missingReceiptItems)): ?>
-                  <tr><td colspan="6" style="text-align: center; color: var(--success-text); font-weight: 600; padding: 24px;">Audit Sempurna! Semua transaksi lunas memiliki bukti transfer. 🎉</td></tr>
+                  <tr><td colspan="6" style="text-align: center; color: var(--success-text); font-weight: 600; padding: 24px;">Audit Sempurna! Semua transaksi lunas memiliki bukti transfer.</td></tr>
                 <?php else: ?>
                   <?php foreach ($missingReceiptItems as $m): ?>
                     <tr>
@@ -497,7 +464,6 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
                       </td>
                       <td style="text-align: right;">
                         <button type="button" class="btn btn-primary btn-sm" onclick="triggerUploadModal('<?= $m['target_type'] ?>', <?= $m['id'] ?>, 'Upload Bukti <?= htmlspecialchars($m['title']) ?>')">
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                           <span>Upload Bukti Struk</span>
                         </button>
                       </td>
@@ -533,16 +499,16 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
       const descEl = document.getElementById('tab-panel-desc');
 
       if (tabId === 'tab-all') {
-        titleEl.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg> Tabel Antrean Transaksi Berjalan (Active Queue)`;
+        titleEl.textContent = 'Tabel Antrean Transaksi Berjalan (Active Queue)';
         descEl.textContent = 'Daftar transaksi mutasi operasional real-time';
       } else if (tabId === 'tab-ar') {
-        titleEl.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Accounts Receivable (Daftar Invoice Belum Lunas)`;
+        titleEl.textContent = 'Accounts Receivable (Daftar Invoice Belum Lunas)';
         descEl.textContent = 'Monitoring invoice terkirim dan jatuh tempo yang menunggu pembayaran klien';
       } else if (tabId === 'tab-ap') {
-        titleEl.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg> Accounts Payable (Antrean Pembayaran Outflow)`;
+        titleEl.textContent = 'Accounts Payable (Antrean Pembayaran Outflow)';
         descEl.textContent = 'Daftar fee freelancer dan gaji tim yang menunggu transfer kas keluar';
       } else if (tabId === 'tab-missing') {
-        titleEl.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle></svg> Audit Bukti Transfer (Missing Receipts)`;
+        titleEl.textContent = 'Audit Bukti Transfer (Missing Receipts)';
         descEl.textContent = 'Daftar transaksi lunas yang belum memiliki lampiran struk/bukti transfer';
       }
     }

@@ -48,8 +48,7 @@ $allEmployees = $db->query("SELECT id, name, position, department, bank_name, ba
           <div class="form-group">
             <label class="form-label">Status Tagihan</label>
             <select name="status" class="form-select">
-              <option value="Draft">Draft</option>
-              <option value="Sent" selected>Terkirim (Sent)</option>
+              <option value="Draft" selected>Draft</option>
             </select>
           </div>
         </div>
@@ -134,6 +133,119 @@ $allEmployees = $db->query("SELECT id, name, position, department, bank_name, ba
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal('modal-create-invoice')">Batal</button>
         <button type="submit" class="btn btn-primary">Simpan & Terbitkan Invoice</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 1.1 Modal Edit Invoice (Khusus Draft) -->
+<div id="modal-edit-invoice" class="modal-backdrop">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-header">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <h3 class="modal-title" style="margin: 0;">Edit Draft Invoice</h3>
+        <span id="edit-inv-number-badge" style="font-size: 13px; font-weight: 700; color: #1570EF; background: #EFF8FF; border: 1px solid #B2DDFF; padding: 2px 8px; border-radius: 6px;"></span>
+      </div>
+      <button type="button" class="modal-close" onclick="closeModal('modal-edit-invoice')">&times;</button>
+    </div>
+    <form id="form-edit-invoice" action="api/invoices.php?action=update" method="POST" onsubmit="event.preventDefault(); submitEditInvoiceForm('form-edit-invoice');">
+      <input type="hidden" name="invoice_id" id="edit-inv-id">
+      <div class="modal-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Klien *</label>
+            <select name="client_id" id="edit-inv-client-select" class="form-select" onchange="loadProjectsForClient(this.value, 'edit-inv-project-select')" required>
+              <option value="">-- Pilih Klien --</option>
+              <?php foreach ($allClients as $c): ?>
+                <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['company']) ?> (<?= htmlspecialchars($c['name']) ?>)</option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Proyek</label>
+            <select name="project_id" id="edit-inv-project-select" class="form-select">
+              <option value="">-- Pilih Proyek --</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tanggal Terbit *</label>
+            <input type="date" name="issue_date" id="edit-inv-issue-date" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tanggal Jatuh Tempo *</label>
+            <input type="date" name="due_date" id="edit-inv-due-date" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status Tagihan</label>
+            <select name="status" id="edit-inv-status" class="form-select">
+              <option value="Draft" selected>Draft</option>
+            </select>
+          </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 20px 0;">
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h4 style="font-size: 14px; font-weight: 700; color: #101828; margin: 0;">Daftar Layanan</h4>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="addEditInvoiceItemRow()">+ Tambah Layanan</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table-custom">
+            <thead>
+              <tr>
+                <th>Deskripsi Layanan</th>
+                <th style="width: 100px;">Kuantitas</th>
+                <th style="width: 180px;">Harga Satuan (Rp)</th>
+                <th style="width: 180px;" class="text-right">Subtotal (Rp)</th>
+                <th style="width: 50px;"></th>
+              </tr>
+            </thead>
+            <tbody id="edit-invoice-items-container">
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Totals & Calculations -->
+        <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+          <div style="width: 320px; background: #F9FAFB; padding: 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px;">
+              <span style="color: var(--text-secondary);">Subtotal:</span>
+              <span id="edit-inv-display-subtotal" style="font-weight: 700; color: #101828;">Rp 0</span>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 13px; margin-bottom: 8px;">
+              <span style="color: var(--text-secondary);">Diskon (%):</span>
+              <div style="display: flex; align-items: center; gap: 8px; width: 140px;">
+                <input type="number" name="discount_percent" id="edit-inv-discount-percent" class="form-control" style="padding: 4px 8px; height: 28px; width: 60px;" value="0" min="0" max="100" oninput="calculateEditInvoiceTotals()">
+                <span id="edit-inv-display-discount" style="font-size: 12px; color: var(--danger);">- Rp 0</span>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 13px; margin-bottom: 8px;">
+              <span style="color: var(--text-secondary);">PPN (%):</span>
+              <div style="display: flex; align-items: center; gap: 8px; width: 140px;">
+                <input type="number" name="tax_percent" id="edit-inv-tax-percent" class="form-control" style="padding: 4px 8px; height: 28px; width: 60px;" value="0" min="0" max="100" oninput="calculateEditInvoiceTotals()">
+                <span id="edit-inv-display-tax" style="font-size: 12px; color: var(--info);">+ Rp 0</span>
+              </div>
+            </div>
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 10px 0;">
+            <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 800; color: #101828;">
+              <span>Total Tagihan:</span>
+              <span id="edit-inv-display-total" style="color: #027A48;">Rp 0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 16px;">
+          <label class="form-label">Catatan & Syarat Pembayaran</label>
+          <textarea name="notes" id="edit-inv-notes" class="form-control" rows="2" placeholder="Catatan atau syarat pembayaran invoice..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-edit-invoice')">Batal</button>
+        <button type="submit" class="btn btn-primary" id="btn-submit-edit-invoice">Simpan Perubahan Invoice</button>
       </div>
     </form>
   </div>
@@ -1097,10 +1209,9 @@ document.addEventListener('DOMContentLoaded', () => {
         <div style="width: 250px;">
           <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" style="height: 85px; width: auto; max-width: 130px; object-fit: contain; margin-bottom: 12px; display: block;">
           <div style="font-size: 10.5px; line-height: 1.35; color: #6B7280;">
-            Jl. BSD Raya Utama,<br>
-            Pagedangan,<br>
-            Kec. Pagedangan, Kabupaten Tangerang,<br>
-            Banten 15339
+            Jl. Padat Karya, Cisauk Girang, RT 001/RW 005,<br>
+            Kel. Cisauk, Tangerang,<br>
+            Banten 15341
           </div>
         </div>
 
@@ -1216,19 +1327,15 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
       <button type="button" class="btn btn-secondary" onclick="closeModal('modal-slip-gaji')">Tutup</button>
       <button type="button" class="btn btn-secondary" onclick="printSlipGaji()" title="Cetak langsung ke printer">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
         <span>Cetak</span>
       </button>
       <button type="button" class="btn btn-secondary" onclick="copySlipGajiLink()" title="Salin link slip gaji ke clipboard">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
         <span>Salin Link</span>
       </button>
       <button type="button" class="btn btn-primary" id="btn-download-slip-pdf" onclick="downloadSlipPdf()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         <span>Unduh PDF</span>
       </button>
-      <button type="button" class="btn" onclick="shareSlipGajiWa()" title="Kirim rincian slip gaji ke WhatsApp Karyawan" style="background: #25D366; color: #FFFFFF; border: none; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+      <button type="button" class="btn" onclick="shareSlipGajiWa()" title="Kirim rincian slip gaji ke WhatsApp Karyawan" style="background: #25D366; color: #FFFFFF; border: none; font-weight: 700;">
         <span>Share ke WA</span>
       </button>
     </div>
@@ -1264,9 +1371,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div style="width: 260px;">
           <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" style="height: 85px; width: auto; max-width: 130px; object-fit: contain; margin-bottom: 12px; display: block;">
           <div style="font-size: 10.5px; line-height: 1.35; color: #6B7280;">
-            Jl. BSD Raya Utama, Pagedangan,<br>
-            Kec. Pagedangan, Kabupaten Tangerang,<br>
-            Banten 15339 &bull; <?= AGENCY_EMAIL ?>
+            Jl. Padat Karya, Cisauk Girang, RT 001/RW 005,<br>
+            Kel. Cisauk, Tangerang, Banten 15341 &bull; <?= AGENCY_EMAIL ?>
           </div>
         </div>
 
@@ -1372,19 +1478,15 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
       <button type="button" class="btn btn-secondary" onclick="closeModal('modal-freelancer-voucher')">Tutup</button>
       <button type="button" class="btn btn-secondary" onclick="printFreelancerVoucher()" title="Cetak langsung ke printer">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
         <span>Cetak Voucher</span>
       </button>
       <button type="button" class="btn btn-secondary" onclick="copyFreelancerVoucherLink()" title="Salin link voucher fee ke clipboard">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
         <span>Salin Link</span>
       </button>
       <button type="button" class="btn btn-primary" onclick="downloadFreelancerVoucherPdf()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         <span>Unduh PDF</span>
       </button>
-      <button type="button" class="btn" onclick="shareFreelancerVoucherWa()" title="Kirim bukti pembayaran ke WhatsApp Talenta" style="background: #25D366; color: #FFFFFF; border: none; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+      <button type="button" class="btn" onclick="shareFreelancerVoucherWa()" title="Kirim bukti pembayaran ke WhatsApp Talenta" style="background: #25D366; color: #FFFFFF; border: none; font-weight: 700;">
         <span>Share ke WA</span>
       </button>
     </div>
@@ -1420,9 +1522,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <div style="width: 260px;">
           <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" style="height: 85px; width: auto; max-width: 130px; object-fit: contain; margin-bottom: 12px; display: block;">
           <div style="font-size: 10.5px; line-height: 1.35; color: #6B7280;">
-            Jl. BSD Raya Utama, Pagedangan,<br>
-            Kec. Pagedangan, Kabupaten Tangerang,<br>
-            Banten 15339 &bull; <?= AGENCY_EMAIL ?>
+            Jl. Padat Karya, Cisauk Girang, RT 001/RW 005,<br>
+            Kel. Cisauk, Tangerang, Banten 15341 &bull; <?= AGENCY_EMAIL ?>
           </div>
         </div>
 
@@ -1526,19 +1627,15 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; flex-wrap: wrap;">
       <button type="button" class="btn btn-secondary" onclick="closeModal('modal-ads-voucher')">Tutup</button>
       <button type="button" class="btn btn-secondary" onclick="printAdsVoucher()" title="Cetak langsung ke printer">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
         <span>Cetak Voucher</span>
       </button>
       <button type="button" class="btn btn-secondary" onclick="copyAdsVoucherLink()" title="Salin link voucher ads ke clipboard">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
         <span>Salin Link</span>
       </button>
       <button type="button" class="btn btn-primary" onclick="downloadAdsVoucherPdf()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         <span>Unduh PDF</span>
       </button>
-      <button type="button" class="btn" onclick="shareAdsVoucherWa()" title="Kirim bukti top-up ads ke WhatsApp Klien" style="background: #25D366; color: #FFFFFF; border: none; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+      <button type="button" class="btn" onclick="shareAdsVoucherWa()" title="Kirim bukti top-up ads ke WhatsApp Klien" style="background: #25D366; color: #FFFFFF; border: none; font-weight: 700;">
         <span>Share ke WA</span>
       </button>
     </div>
@@ -1647,8 +1744,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <label class="form-label">Tautan Aset Digital</label>
             <div style="display: flex; gap: 8px;">
               <input type="url" name="asset_url" id="cp-asset-url" class="form-control" placeholder="https://drive.google.com/... atau https://canva.com/..." oninput="updateAssetUrlButton(this.value)">
-              <a href="#" id="cp-btn-open-asset" target="_blank" class="btn btn-secondary btn-sm" style="display: none; align-items: center; justify-content: center; padding: 0 12px; height: 38px;" title="Buka Tautan Aset">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+              <a href="#" id="cp-btn-open-asset" target="_blank" class="btn btn-secondary btn-sm" style="display: none; align-items: center; justify-content: center; padding: 0 12px; height: 38px; font-weight: 600;" title="Buka Tautan Aset">
+                Buka
               </a>
             </div>
           </div>
@@ -1677,7 +1774,6 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
         <div>
           <button type="button" id="cp-btn-delete" class="btn btn-secondary" style="color: #D92D20; border-color: #FDA29B; background: #FEF3F2; display: none;" onclick="deleteContentFromModal()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
             <span>Hapus Konten</span>
           </button>
         </div>
@@ -1777,8 +1873,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px;">
         <button type="button" class="btn btn-secondary" onclick="closeModal('modal-export-content-pdf')">Batal</button>
-        <button type="submit" class="btn btn-primary" style="display: inline-flex; align-items: center; gap: 6px;">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <button type="submit" class="btn btn-primary">
           <span>Unduh Laporan PDF</span>
         </button>
       </div>
@@ -1789,14 +1884,6 @@ document.addEventListener('DOMContentLoaded', () => {
 <!-- 13. Custom Destructive Confirmation Modal (Untitled UI Style) -->
 <div id="modal-confirm-delete" class="modal-backdrop">
   <div class="modal-confirm-dialog">
-    <div class="confirm-icon-badge">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="3 6 5 6 21 6"></polyline>
-        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-        <line x1="10" y1="11" x2="10" y2="17"></line>
-        <line x1="14" y1="11" x2="14" y2="17"></line>
-      </svg>
-    </div>
     <h3 class="confirm-modal-title" id="confirm-modal-title">Hapus Data?</h3>
     <p class="confirm-modal-desc" id="confirm-modal-desc">
       Apakah Anda yakin ingin menghapus data ini? Tindakan ini bersifat permanen dan data yang dihapus tidak dapat dipulihkan.
@@ -1980,12 +2067,107 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <div class="modal-footer" style="padding: 14px 24px; border-top: 1px solid #EAECF0; display: flex; justify-content: space-between; align-items: center;">
       <div style="font-size: 12px; color: var(--text-secondary);">
-        💡 Klik bukti transfer atau nomor invoice untuk melihat rincian dokumen terkait.
+        Klik bukti transfer atau nomor invoice untuk melihat rincian dokumen terkait.
       </div>
       <button type="button" class="btn btn-secondary" onclick="closeModal('modal-project-financial-breakdown')">
         Tutup
       </button>
     </div>
+  </div>
+</div>
+
+<!-- Modal Tambah Akun Pengguna (Karyawan, Freelance, Client, Admin) -->
+<div id="modal-add-user" class="modal-backdrop">
+  <div class="modal-dialog modal-md">
+    <div class="modal-header">
+      <h3 class="modal-title">+ Tambah Akun Pengguna Baru</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-add-user')">&times;</button>
+    </div>
+    <form id="form-add-user" onsubmit="event.preventDefault(); submitCreateUser('form-add-user');">
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Peran Akun (Role) *</label>
+          <select name="role" id="new-user-role" class="form-select" onchange="toggleUserRoleFields(this.value)" required>
+            <option value="karyawan">Karyawan (In-House Creative &amp; Tech)</option>
+            <option value="freelancer">Freelancer (Talenta Eksternal)</option>
+            <option value="client">Klien (Client Portal)</option>
+            <option value="admin">Admin / PM (Manajemen Operasional)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" id="label-user-name">Nama Lengkap *</label>
+          <input type="text" name="name" id="new-user-name" class="form-control" placeholder="Contoh: Dimas Wahyudi atau Nabila Putri" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Alamat Email (Login) *</label>
+            <input type="email" name="email" id="new-user-email" class="form-control" placeholder="nama@kalamedia.id" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kata Sandi Awal *</label>
+            <input type="password" name="password" id="new-user-password" class="form-control" value="password123" required>
+            <small style="color: var(--text-muted); font-size: 11px;">Default: <code>password123</code></small>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Nomor Telepon / WhatsApp</label>
+          <input type="text" name="phone_wa" id="new-user-phone" class="form-control" placeholder="0812xxxxxxxx">
+        </div>
+
+        <!-- Field Khusus Klien: Hubungkan ke Perusahaan Klien -->
+        <div class="form-group" id="group-client-select" style="display: none; background: #F8F9FC; border: 1px solid #D0D5DD; padding: 12px 14px; border-radius: 8px;">
+          <label class="form-label" style="font-weight: 700; color: #101828;">Pilih Perusahaan / Brand Klien *</label>
+          <select name="client_id" id="new-user-client-id" class="form-select">
+            <option value="">-- Hubungkan ke Perusahaan Klien --</option>
+            <?php foreach ($allClients as $cl): ?>
+              <option value="<?= $cl['id'] ?>"><?= htmlspecialchars($cl['company']) ?> (PIC: <?= htmlspecialchars($cl['name']) ?>)</option>
+            <?php endforeach; ?>
+          </select>
+          <small style="color: var(--text-secondary); font-size: 11px; margin-top: 4px; display: block;">
+            Pengguna dengan akun ini akan diarahkan langsung ke Client Portal brand yang dipilih saat login.
+          </small>
+        </div>
+
+        <!-- Field Khusus Karyawan / Freelancer: Posisi -->
+        <div class="form-group" id="group-position-input">
+          <label class="form-label" id="label-user-position">Posisi / Spesialisasi</label>
+          <input type="text" name="position" id="new-user-position" class="form-control" placeholder="Contoh: Graphic Designer, Video Editor, Copywriter">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-user')">Batal</button>
+        <button type="submit" class="btn btn-primary" id="btn-save-new-user">Simpan &amp; Buat Akun</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Reset Password Pengguna -->
+<div id="modal-reset-user-password" class="modal-backdrop">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-header">
+      <h3 class="modal-title">Ganti Sandi Akun</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-reset-user-password')">&times;</button>
+    </div>
+    <form id="form-reset-user-password" onsubmit="event.preventDefault(); submitResetPassword('form-reset-user-password');">
+      <input type="hidden" name="id" id="reset-user-id" value="">
+      <div class="modal-body">
+        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">
+          Atur ulang kata sandi baru untuk pengguna <strong id="reset-user-name" style="color: #101828;"></strong>:
+        </p>
+        <div class="form-group">
+          <label class="form-label">Kata Sandi Baru *</label>
+          <input type="password" name="password" id="reset-user-new-password" class="form-control" placeholder="Minimal 4 karakter" required>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-reset-user-password')">Batal</button>
+        <button type="submit" class="btn btn-primary" id="btn-save-reset-pw">Simpan Sandi</button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -2186,7 +2368,7 @@ async function downloadSlipPdf() {
   const btn = document.getElementById('btn-download-slip-pdf');
   const origHtml = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = `<svg style="animation: spin 1s linear infinite; width:14px; height:14px; display:inline-block; margin-right:4px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg> <span>Menyiapkan PDF...</span>`;
+  btn.innerHTML = `<span>Menyiapkan PDF...</span>`;
 
   try {
     if (typeof html2pdf !== 'undefined' && element) {
@@ -2521,5 +2703,145 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => window.location.reload(), 800);
   });
 });
+
+window.openCreateUserModal = function(defaultRole = 'karyawan') {
+  const form = document.getElementById('form-add-user');
+  if (form) form.reset();
+  const roleSelect = document.getElementById('new-user-role');
+  if (roleSelect) {
+    roleSelect.value = defaultRole;
+    toggleUserRoleFields(defaultRole);
+  }
+  openModal('modal-add-user');
+};
+
+window.toggleUserRoleFields = function(role) {
+  const clientGroup = document.getElementById('group-client-select');
+  const clientSelect = document.getElementById('new-user-client-id');
+  const posGroup = document.getElementById('group-position-input');
+  const posLabel = document.getElementById('label-user-position');
+  const nameLabel = document.getElementById('label-user-name');
+
+  if (role === 'client') {
+    if (clientGroup) clientGroup.style.display = 'block';
+    if (clientSelect) clientSelect.required = true;
+    if (posGroup) posGroup.style.display = 'none';
+    if (nameLabel) nameLabel.textContent = 'Nama Kontak PIC Klien *';
+  } else if (role === 'freelancer') {
+    if (clientGroup) clientGroup.style.display = 'none';
+    if (clientSelect) clientSelect.required = false;
+    if (posGroup) posGroup.style.display = 'block';
+    if (posLabel) posLabel.textContent = 'Keahlian / Spesialisasi Freelancer';
+    if (nameLabel) nameLabel.textContent = 'Nama Lengkap Freelancer *';
+  } else if (role === 'karyawan') {
+    if (clientGroup) clientGroup.style.display = 'none';
+    if (clientSelect) clientSelect.required = false;
+    if (posGroup) posGroup.style.display = 'block';
+    if (posLabel) posLabel.textContent = 'Posisi / Jabatan Internal';
+    if (nameLabel) nameLabel.textContent = 'Nama Lengkap Karyawan *';
+  } else {
+    // admin
+    if (clientGroup) clientGroup.style.display = 'none';
+    if (clientSelect) clientSelect.required = false;
+    if (posGroup) posGroup.style.display = 'none';
+    if (nameLabel) nameLabel.textContent = 'Nama Akun Admin *';
+  }
+};
+
+window.submitCreateUser = async function(formId) {
+  const form = document.getElementById(formId);
+  if (!form) return;
+  const btn = document.getElementById('btn-save-new-user');
+  const origText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = 'Menyimpan...';
+
+  const formData = new FormData(form);
+
+  try {
+    const res = await fetch('api/users.php?action=create', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.message, 'success');
+      closeModal('modal-add-user');
+      setTimeout(() => window.location.reload(), 700);
+    } else {
+      showToast(data.message || 'Gagal membuat akun.', 'danger');
+    }
+  } catch (err) {
+    showToast('Terjadi kesalahan koneksi server.', 'danger');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = origText;
+  }
+};
+
+window.openResetPasswordModal = function(userId, userName) {
+  document.getElementById('reset-user-id').value = userId;
+  document.getElementById('reset-user-name').textContent = userName;
+  document.getElementById('reset-user-new-password').value = '';
+  openModal('modal-reset-user-password');
+};
+
+window.submitResetPassword = async function(formId) {
+  const form = document.getElementById(formId);
+  const btn = document.getElementById('btn-save-reset-pw');
+  btn.disabled = true;
+  btn.innerHTML = 'Menyimpan...';
+
+  const formData = new FormData(form);
+  try {
+    const res = await fetch('api/users.php?action=reset_password', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.message, 'success');
+      closeModal('modal-reset-user-password');
+    } else {
+      showToast(data.message || 'Gagal reset kata sandi.', 'danger');
+    }
+  } catch (err) {
+    showToast('Gagal koneksi server.', 'danger');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Simpan Sandi';
+  }
+};
+
+window.deleteUserAccount = async function(userId, userName) {
+  if (!confirm(`Apakah Anda yakin ingin menghapus akun "${userName}"? Tindakan ini tidak dapat dibatalkan.`)) {
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append('id', userId);
+
+  try {
+    const res = await fetch('api/users.php?action=delete', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.message, 'success');
+      const row = document.getElementById(`user-row-${userId}`);
+      if (row) {
+        row.style.opacity = '0';
+        setTimeout(() => row.remove(), 400);
+      } else {
+        setTimeout(() => window.location.reload(), 700);
+      }
+    } else {
+      showToast(data.message || 'Gagal menghapus akun.', 'danger');
+    }
+  } catch (err) {
+    showToast('Gagal koneksi server.', 'danger');
+  }
+};
 </script>
 

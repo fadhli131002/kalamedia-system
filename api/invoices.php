@@ -21,6 +21,9 @@ if ($action === 'create') {
     $taxPercent = floatval($_POST['tax_percent'] ?? 0);
     $notes = trim($_POST['notes'] ?? '');
     $status = $_POST['status'] ?? 'Draft';
+    if ($status === 'Sent' || empty($status)) {
+        $status = 'Draft';
+    }
 
     $items = $_POST['items'] ?? [];
     if (is_string($items)) {
@@ -131,6 +134,156 @@ if ($action === 'create') {
     }
 }
 
+if ($action === 'update') {
+    $invoiceId = intval($_POST['invoice_id'] ?? 0);
+    if ($invoiceId <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Invoice ID tidak valid.']);
+        exit;
+    }
+
+    // Verify invoice exists and is Draft
+    $invStmt = $db->prepare("SELECT * FROM invoices WHERE id = ? AND COALESCE(is_deleted, 0) = 0");
+    $invStmt->execute([$invoiceId]);
+    $currentInv = $invStmt->fetch();
+
+    if (!$currentInv) {
+        echo json_encode(['success' => false, 'message' => 'Invoice tidak ditemukan atau telah dihapus.']);
+        exit;
+    }
+
+    if ($currentInv['status'] === 'Paid') {
+        echo json_encode(['success' => false, 'message' => 'Invoice yang sudah LUNAS (Paid) tidak dapat diedit.']);
+        exit;
+    }
+
+    $clientId = intval($_POST['client_id'] ?? 0);
+    $projectId = !empty($_POST['project_id']) ? intval($_POST['project_id']) : null;
+    $issueDate = $_POST['issue_date'] ?? date('Y-m-d');
+    $dueDate = $_POST['due_date'] ?? date('Y-m-d', strtotime('+14 days'));
+    $discountPercent = floatval($_POST['discount_percent'] ?? 0);
+    $taxPercent = floatval($_POST['tax_percent'] ?? 0);
+    $notes = trim($_POST['notes'] ?? '');
+    $status = $_POST['status'] ?? 'Draft';
+    if ($status === 'Sent' || empty($status)) {
+        $status = 'Draft';
+    }
+
+    $items = $_POST['items'] ?? [];
+    if (is_string($items)) {
+        $items = json_decode($items, true) ?: [];
+    }
+
+    if ($clientId <= 0 || empty($items)) {
+        echo json_encode(['success' => false, 'message' => 'Klien dan minimal 1 item jasa wajib diisi.']);
+        exit;
+    }
+
+    // Calculate subtotal
+    $subtotal = 0;
+    $validItems = [];
+    foreach ($items as $item) {
+        $serviceName = trim($item['service_name'] ?? '');
+        $quantity = floatval($item['quantity'] ?? 1);
+        $unitPrice = floatval($item['unit_price'] ?? 0);
+        if (!empty($serviceName) && $quantity > 0 && $unitPrice >= 0) {
+            $lineTotal = $quantity * $unitPrice;
+            $subtotal += $lineTotal;
+            $validItems[] = [
+                'service_name' => $serviceName,
+                'quantity' => $quantity,
+                'unit_price' => $unitPrice,
+                'total_price' => $lineTotal
+            ];
+        }
+    }
+
+    if (empty($validItems)) {
+        echo json_encode(['success' => false, 'message' => 'Layanan jasa tidak valid.']);
+        exit;
+    }
+
+    $discountAmount = ($subtotal * $discountPercent) / 100;
+    $afterDiscount = $subtotal - $discountAmount;
+    $taxAmount = ($afterDiscount * $taxPercent) / 100;
+    $totalAmount = $afterDiscount + $taxAmount;
+
+    try {
+        $db->beginTransaction();
+
+        // If no project selected, check if client has project or create one
+        if (empty($projectId) || $projectId <= 0) {
+            $clientStmt = $db->prepare("SELECT company FROM clients WHERE id = ?");
+            $clientStmt->execute([$clientId]);
+            $clientCompany = $clientStmt->fetchColumn() ?: 'Klien #' . $clientId;
+
+            $primaryService = !empty($validItems[0]['service_name']) ? $validItems[0]['service_name'] : 'Creative & Media Service';
+            $projectName = $primaryService . ' - ' . $clientCompany;
+
+            $projStmt = $db->prepare("
+                INSERT INTO projects (
+                    client_id, name, contract_value, target_margin_percent, status, start_date, end_date
+                ) VALUES (?, ?, ?, 30, 'In Progress', ?, ?)
+            ");
+            $projStmt->execute([$clientId, $projectName, $totalAmount, $issueDate, $dueDate]);
+            $projectId = $db->lastInsertId();
+        }
+
+        // Update invoices
+        $stmt = $db->prepare("
+            UPDATE invoices SET
+                client_id = ?,
+                project_id = ?,
+                issue_date = ?,
+                due_date = ?,
+                subtotal = ?,
+                discount_percent = ?,
+                discount_amount = ?,
+                tax_percent = ?,
+                tax_amount = ?,
+                total_amount = ?,
+                status = ?,
+                notes = ?
+            WHERE id = ?
+        ");
+        $stmt->execute([
+            $clientId, $projectId, $issueDate, $dueDate,
+            $subtotal, $discountPercent, $discountAmount, $taxPercent, $taxAmount,
+            $totalAmount, $status, $notes, $invoiceId
+        ]);
+
+        // Delete existing items & re-insert
+        $delItemStmt = $db->prepare("DELETE FROM invoice_items WHERE invoice_id = ?");
+        $delItemStmt->execute([$invoiceId]);
+
+        $itemStmt = $db->prepare("
+            INSERT INTO invoice_items (invoice_id, service_name, quantity, unit_price, total_price)
+            VALUES (?, ?, ?, ?, ?)
+        ");
+        foreach ($validItems as $vItem) {
+            $itemStmt->execute([
+                $invoiceId, $vItem['service_name'], $vItem['quantity'], $vItem['unit_price'], $vItem['total_price']
+            ]);
+        }
+
+        $db->commit();
+
+        $invoiceNumber = $currentInv['invoice_number'];
+        log_activity('invoice', "Draft Invoice Diperbarui: #$invoiceNumber", "Total tagihan: " . format_rupiah($totalAmount), $totalAmount);
+
+        echo json_encode([
+            'success' => true,
+            'message' => "Draft Invoice #$invoiceNumber berhasil diperbarui!",
+            'invoice_id' => $invoiceId,
+            'invoice_number' => $invoiceNumber
+        ]);
+        exit;
+    } catch (Exception $e) {
+        if ($db->inTransaction()) $db->rollBack();
+        echo json_encode(['success' => false, 'message' => 'Gagal memperbarui invoice: ' . $e->getMessage()]);
+        exit;
+    }
+}
+
 if ($action === 'mark_paid') {
     $invoiceId = intval($_POST['invoice_id'] ?? 0);
     $paymentMethod = trim($_POST['payment_method'] ?? 'Bank Transfer');
@@ -161,6 +314,9 @@ if ($action === 'mark_paid') {
 if ($action === 'update_status') {
     $invoiceId = intval($_POST['invoice_id'] ?? 0);
     $status = $_POST['status'] ?? 'Draft';
+    if ($status === 'Sent') {
+        $status = 'Draft';
+    }
 
     try {
         $stmt = $db->prepare("UPDATE invoices SET status = ? WHERE id = ?");
@@ -301,10 +457,9 @@ if ($action === 'download_pdf') {
             <div class="km-logo-col">
               <img src="../assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" class="km-logo-img">
               <div class="km-agency-address">
-                Jl. BSD Raya Utama,<br>
-                Pagedangan,<br>
-                Kec. Pagedangan, Kabupaten Tangerang,<br>
-                Banten 15339
+                Jl. Padat Karya, Cisauk Girang, RT 001/RW 005,<br>
+                Kel. Cisauk, Tangerang,<br>
+                Banten 15341
               </div>
             </div>
 
@@ -351,7 +506,7 @@ if ($action === 'download_pdf') {
 
               <div class="km-bank-info">
                 <div class="km-bank-title">Informasi Rekening</div>
-                <div class="km-bank-detail">(<?= AGENCY_BANK_NAME ?>) <?= AGENCY_BANK_ACCOUNT ?> a.n <?= AGENCY_BANK_HOLDER ?></div>
+                <div class="km-bank-detail">(<?= AGENCY_BANK_NAME ?> a.n <?= AGENCY_BANK_HOLDER ?> - <?= AGENCY_BANK_ACCOUNT ?>)</div>
               </div>
             </div>
 

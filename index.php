@@ -23,7 +23,16 @@ if (empty($route)) {
 // Default route resolution
 if (empty($route)) {
     if (is_logged_in()) {
-        $route = is_owner() ? 'owner-dashboard' : 'admin-dashboard';
+        $role = current_user_role();
+        if ($role === 'client') {
+            $route = 'client-portal';
+        } elseif ($role === 'karyawan' || $role === 'freelancer') {
+            $route = 'tasks';
+        } elseif ($role === 'owner') {
+            $route = 'owner-dashboard';
+        } else {
+            $route = 'admin-dashboard';
+        }
     } else {
         $route = 'login';
     }
@@ -52,6 +61,17 @@ switch ($route) {
         header('Location: ' . url('login'));
         exit;
 
+    case 'client-portal':
+        require_client();
+        require_once __DIR__ . '/views/client_portal.php';
+        break;
+
+    case 'tasks':
+    case 'team-workspace':
+        require_worker();
+        require_once __DIR__ . '/views/tasks.php';
+        break;
+
     case 'owner-dashboard':
         require_owner();
         require_once __DIR__ . '/views/owner_dashboard.php';
@@ -63,52 +83,64 @@ switch ($route) {
         break;
 
     case 'invoices':
+        require_auth();
         require_once __DIR__ . '/views/invoices.php';
         break;
 
     case 'invoice-view':
+        require_auth();
         require_once __DIR__ . '/views/invoice_view.php';
         break;
 
     case 'expenses':
+        require_admin();
         require_once __DIR__ . '/views/expenses.php';
         break;
 
     case 'salaries':
+        require_admin();
         require_once __DIR__ . '/views/salaries.php';
         break;
 
     case 'salary-view':
+        require_admin();
         require_once __DIR__ . '/views/salary_view.php';
         break;
 
     case 'voucher-view':
+        require_admin();
         require_once __DIR__ . '/views/voucher_view.php';
         break;
 
     case 'ads-voucher-view':
+        require_admin();
         require_once __DIR__ . '/views/ads_voucher_view.php';
         break;
 
     case 'clients':
+        require_admin();
         require_once __DIR__ . '/views/clients.php';
         break;
 
     case 'content-calendar':
     case 'content-planner':
+        require_auth();
         require_once __DIR__ . '/views/content_dashboard.php';
         break;
 
     case 'reports':
+        require_auth();
         require_once __DIR__ . '/views/reports.php';
         break;
 
     case 'reports-form':
+        require_admin();
         require_once __DIR__ . '/views/reports_form.php';
         break;
 
     case 'report-view':
     case 'report-deck':
+        require_auth();
         require_once __DIR__ . '/views/report_deck.php';
         break;
 
@@ -120,7 +152,7 @@ switch ($route) {
     default:
         // If unknown route, redirect based on login status
         if (is_logged_in()) {
-            header('Location: ' . (is_owner() ? url('owner-dashboard') : url('admin-dashboard')));
+            header('Location: ' . home_url_for_role());
         } else {
             header('Location: ' . url('login'));
         }

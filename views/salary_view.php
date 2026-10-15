@@ -121,8 +121,7 @@ $paymentDateFormatted = format_date($sal['payment_date']);
   <div class="top-actions-bar">
     <div>
       <?php if (function_exists('is_logged_in') && is_logged_in()): ?>
-        <a href="<?= url('salaries') ?>" class="btn btn-secondary btn-sm" style="display: inline-flex; align-items: center; gap: 6px;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <a href="<?= url('salaries') ?>" class="btn btn-secondary btn-sm">
           <span>Kembali ke Dashboard</span>
         </a>
       <?php else: ?>
@@ -131,12 +130,10 @@ $paymentDateFormatted = format_date($sal['payment_date']);
     </div>
 
     <div style="display: flex; gap: 10px; align-items: center;">
-      <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()" style="display: inline-flex; align-items: center; gap: 6px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()">
         <span>Cetak</span>
       </button>
-      <button type="button" class="btn btn-primary btn-sm" onclick="downloadSlipPdf()" style="display: inline-flex; align-items: center; gap: 6px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      <button type="button" class="btn btn-primary btn-sm" onclick="downloadSlipPdf()">
         <span>Unduh PDF</span>
       </button>
     </div>
@@ -164,9 +161,9 @@ $paymentDateFormatted = format_date($sal['payment_date']);
       <div style="width: 250px; max-width: 100%;">
         <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" style="height: 85px; width: auto; max-width: 130px; object-fit: contain; margin-bottom: 12px; display: block;">
         <div style="font-size: 10.5px; line-height: 1.35; color: #6B7280;">
-          Jl. BSD Raya Utama, Pagedangan,<br>
-          Kec. Pagedangan, Kabupaten Tangerang,<br>
-          Banten 15339
+          Jl. Padat Karya, Cisauk Girang, RT 001/RW 005,<br>
+          Kel. Cisauk, Tangerang,<br>
+          Banten 15341
         </div>
       </div>
 

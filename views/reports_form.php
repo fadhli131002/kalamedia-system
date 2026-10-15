@@ -269,8 +269,7 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
           <div>
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-              <a href="<?= url('reports') ?>" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--text-secondary); text-decoration: none;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+              <a href="<?= url('reports') ?>" style="display: inline-flex; align-items: center; font-size: 13px; font-weight: 600; color: var(--text-secondary); text-decoration: none;">
                 Kembali ke Dashboard Laporan
               </a>
             </div>
@@ -283,8 +282,7 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
           </div>
 
           <?php if ($isEdit): ?>
-            <a href="<?= url("report-deck?id={$report['id']}") ?>" target="_blank" class="btn btn-secondary btn-sm" style="gap: 6px;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <a href="<?= url("report-deck?id={$report['id']}") ?>" target="_blank" class="btn btn-secondary btn-sm">
               <span>Buka Pitch Deck Presentasi</span>
             </a>
           <?php endif; ?>
@@ -322,9 +320,6 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
           <div class="tab-pane-content active" id="tab-pane-1">
             <div class="form-section-card">
               <div class="form-section-header">
-                <div class="section-icon-badge indigo">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                </div>
                 <div>
                   <h3 class="form-section-title">Business Summary & Full-Funnel Economics</h3>
                   <p class="form-section-subtitle">Tentukan klien, periode laporan, objektif campaign, dan efisiensi belanja iklan (ROAS/ROI).</p>
@@ -415,9 +410,8 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
               </div>
 
               <div style="display: flex; justify-content: flex-end; margin-top: 24px;">
-                <button type="button" class="btn btn-primary" onclick="switchTab(2)" style="gap: 6px;">
+                <button type="button" class="btn btn-primary" onclick="switchTab(2)">
                   <span>Lanjut ke Tab 2: Paid Ads</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </button>
               </div>
             </div>
@@ -429,9 +423,6 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
           <div class="tab-pane-content" id="tab-pane-2">
             <div class="form-section-card">
               <div class="form-section-header">
-                <div class="section-icon-badge emerald">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
-                </div>
                 <div>
                   <h3 class="form-section-title">Paid Ads Performance & Algorithmic Efficiency</h3>
                   <p class="form-section-subtitle">Distribusi traffic iklan, efisiensi bidding (CPC/CPM), dan Lost Impression Share.</p>
@@ -509,9 +500,8 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
                 <button type="button" class="btn btn-secondary" onclick="switchTab(1)">
                   &larr; Kembali ke Business Summary
                 </button>
-                <button type="button" class="btn btn-primary" onclick="switchTab(3)" style="gap: 6px;">
+                <button type="button" class="btn btn-primary" onclick="switchTab(3)">
                   <span>Lanjut ke Tab 3: Content & Retention</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </button>
               </div>
             </div>
@@ -523,9 +513,6 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
           <div class="tab-pane-content" id="tab-pane-3">
             <div class="form-section-card">
               <div class="form-section-header">
-                <div class="section-icon-badge amber">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                </div>
                 <div>
                   <h3 class="form-section-title">Content & Creative Intelligence</h3>
                   <p class="form-section-subtitle">Retensi video, pertumbuhan followers, serta evaluasi komparatif Winning vs Underperforming creatives.</p>
@@ -583,7 +570,7 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
                   <!-- 1. Winning Creative Card -->
                   <div class="creative-upload-card winning">
                     <div class="creative-card-title" style="color: #047857;">
-                      <span>🏆 Winning Creative (Top Performer)</span>
+                      <span>Winning Creative (Top Performer)</span>
                     </div>
 
                     <div class="creative-thumb-preview" id="preview-winning-box">
@@ -591,14 +578,12 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
                         <img src="<?= htmlspecialchars($report['winning_content_url']) ?>" alt="Winning Creative Preview" id="preview-winning-img">
                       <?php else: ?>
                         <div id="preview-winning-placeholder" style="text-align: center; color: #94A3B8; font-size: 12px;">
-                          <div style="font-size: 28px; margin-bottom: 4px;">🎬</div>
                           <span>Belum ada screenshot winning creative</span>
                         </div>
                       <?php endif; ?>
                     </div>
 
-                    <label class="btn btn-secondary btn-sm" style="width: 100%; justify-content: center; cursor: pointer; gap: 6px;">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    <label class="btn btn-secondary btn-sm" style="width: 100%; justify-content: center; cursor: pointer;">
                       <span>Upload Screenshot Winning (JPG/PNG/SVG)</span>
                       <input type="file" name="winning_content_file" id="file-winning" accept="image/*,.svg" style="display: none;" onchange="previewCreative(this, 'preview-winning-box')">
                     </label>
@@ -608,7 +593,7 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
                   <!-- 2. Underperforming Creative Card -->
                   <div class="creative-upload-card losing">
                     <div class="creative-card-title" style="color: #B91C1C;">
-                      <span>⚠️ Underperforming Creative (Low Retention / High CPL)</span>
+                      <span>Underperforming Creative (Low Retention / High CPL)</span>
                     </div>
 
                     <div class="creative-thumb-preview" id="preview-underperforming-box">
@@ -616,14 +601,12 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
                         <img src="<?= htmlspecialchars($report['underperforming_content_url']) ?>" alt="Underperforming Creative Preview" id="preview-underperforming-img">
                       <?php else: ?>
                         <div id="preview-underperforming-placeholder" style="text-align: center; color: #94A3B8; font-size: 12px;">
-                          <div style="font-size: 28px; margin-bottom: 4px;">📉</div>
                           <span>Belum ada screenshot underperforming creative</span>
                         </div>
                       <?php endif; ?>
                     </div>
 
-                    <label class="btn btn-secondary btn-sm" style="width: 100%; justify-content: center; cursor: pointer; gap: 6px;">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                    <label class="btn btn-secondary btn-sm" style="width: 100%; justify-content: center; cursor: pointer;">
                       <span>Upload Screenshot Underperforming</span>
                       <input type="file" name="underperforming_content_file" id="file-underperforming" accept="image/*,.svg" style="display: none;" onchange="previewCreative(this, 'preview-underperforming-box')">
                     </label>
@@ -636,9 +619,8 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
                 <button type="button" class="btn btn-secondary" onclick="switchTab(2)">
                   &larr; Kembali ke Paid Ads
                 </button>
-                <button type="button" class="btn btn-primary" onclick="switchTab(4)" style="gap: 6px;">
+                <button type="button" class="btn btn-primary" onclick="switchTab(4)">
                   <span>Lanjut ke Tab 4: Action Plan</span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                 </button>
               </div>
             </div>
@@ -650,9 +632,6 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
           <div class="tab-pane-content" id="tab-pane-4">
             <div class="form-section-card">
               <div class="form-section-header">
-                <div class="section-icon-badge purple">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                </div>
                 <div>
                   <h3 class="form-section-title">Strategic Insights & Executive Action Plan</h3>
                   <p class="form-section-subtitle">Sintesis temuan lapangan dan rencana scaling budget/konten untuk periode berikutnya.</p>
@@ -661,7 +640,6 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
 
               <div class="form-group">
                 <label class="form-label" style="color: #047857;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                   What Worked (Faktor Keberhasilan & Winning Angle) *
                 </label>
                 <textarea name="what_worked" id="input-what-worked" class="form-control" rows="4" placeholder="• Hook 3 detik pertama dengan angle 'Beli Rumah Cicilan 3 Jutaan'...&#10;• Format video Reels POV walk-through show unit menghasilkan 68% total leads...&#10;• Custom Audience Lookalike 1% menghasilkan CPL paling efisien (Rp 28.500)..."><?= htmlspecialchars($report['what_worked'] ?? '') ?></textarea>
@@ -670,7 +648,6 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
 
               <div class="form-group">
                 <label class="form-label" style="color: #B91C1C;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                   What Didn't Work (Hambatan & Titik Inefisiensi) *
                 </label>
                 <textarea name="what_didnt_work" id="input-what-didnt-work" class="form-control" rows="4" placeholder="• Single Image banner statis memiliki bounce rate tinggi (CTR < 1.1%) dan CPL membengkak...&#10;• Penargetan audiens broad interest terlalu banyak mendatangkan leads luar Jabodetabek..."><?= htmlspecialchars($report['what_didnt_work'] ?? '') ?></textarea>
@@ -679,7 +656,6 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
 
               <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label" style="color: #4F46E5;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                   Next Action Plan & Roadmap Scaling (Rencana Aksi Bulan Berikutnya) *
                 </label>
                 <textarea name="next_action_plan" id="input-next-action-plan" class="form-control" rows="4" placeholder="1. Scale budget 30% pada ad set winning creative 'Video Tour Hook 2 Lantai'.&#10;2. Produksi 4 variasi video UGC testimoni serah terima kunci cluster terbaru.&#10;3. Implementasi WhatsApp Business Automation CRM untuk fast response < 5 menit."><?= htmlspecialchars($report['next_action_plan'] ?? '') ?></textarea>
@@ -692,8 +668,7 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
                 </button>
                 <div style="display: flex; gap: 10px;">
                   <a href="<?= url('reports') ?>" class="btn btn-secondary">Batal</a>
-                  <button type="button" id="btn-submit-report" onclick="submitReportForm()" class="btn btn-primary" style="padding: 10px 24px; gap: 8px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                  <button type="button" id="btn-submit-report" onclick="submitReportForm()" class="btn btn-primary" style="padding: 10px 24px;">
                     <span><?= $isEdit ? 'Simpan Perubahan Laporan' : 'Terbitkan Laporan Performance Deck' ?></span>
                   </button>
                 </div>
@@ -866,7 +841,6 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = `
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="animation: spin 1s linear infinite;"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
           <span>Memproses &amp; Menerbitkan Deck...</span>
         `;
       }

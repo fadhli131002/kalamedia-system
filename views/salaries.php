@@ -72,9 +72,6 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Gaji Terbayar (Bulan Ini)</span>
-              <div class="kpi-icon" style="background: var(--success-bg); color: var(--success-text);">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2"></rect><circle cx="16" cy="14" r="2"></circle></svg>
-              </div>
             </div>
             <div class="kpi-value" style="color: var(--success-text);"><?= format_rupiah($paidSalaryMonth) ?></div>
             <div class="kpi-meta" style="color: var(--success-text); font-weight: 600;">&bull; Sudah ditransfer ke rekening tim</div>
@@ -83,9 +80,6 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Pending Gaji (Antrean)</span>
-              <div class="kpi-icon" style="background: var(--warning-bg); color: var(--warning-text);">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-              </div>
             </div>
             <div class="kpi-value" style="color: var(--warning-text);"><?= format_rupiah($totalPendingSalary) ?></div>
             <div class="kpi-meta" style="color: var(--warning-text); font-weight: 600;">&bull; <?= $pendingCount ?> karyawan menunggu transfer</div>
@@ -94,9 +88,6 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Total Karyawan Aktif</span>
-              <div class="kpi-icon" style="background: #F2F4F7; color: #101828;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-              </div>
             </div>
             <div class="kpi-value"><?= $activeEmployeeCount ?> Orang</div>
             <div class="kpi-meta">Tim internal creative & tech</div>
@@ -105,9 +96,6 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Total Payroll All-Time</span>
-              <div class="kpi-icon" style="background: var(--success-bg); color: var(--success-text);">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-              </div>
             </div>
             <div class="kpi-value"><?= format_rupiah($totalSalaryAllTime) ?></div>
             <div class="kpi-meta">Akumulasi pengeluaran gaji</div>
@@ -119,7 +107,6 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
           <div class="panel-header" style="flex-wrap: wrap; gap: 14px;">
             <div>
               <h3 class="panel-title">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M7 15h0M2 9.5h20"></path><circle cx="16" cy="14" r="2"></circle></svg>
                 Manajemen Penggajian Karyawan & Slip Gaji
               </h3>
               <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Kelola pembayaran take-home pay, cetak slip gaji resmi, dan bukti transfer</p>
@@ -134,12 +121,10 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
 
               <?php if ($tab === 'payroll'): ?>
                 <button class="btn btn-primary btn-sm" onclick="openModal('modal-input-salary')">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                   <span>Input Gaji Karyawan</span>
                 </button>
               <?php else: ?>
                 <button class="btn btn-primary btn-sm" onclick="openModal('modal-create-employee')">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                   <span>Tambah Karyawan</span>
                 </button>
               <?php endif; ?>
@@ -228,7 +213,6 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
                           <div style="display: inline-flex; gap: 6px; align-items: center;">
                             <!-- Slip Gaji Modal Trigger -->
                             <button type="button" class="btn btn-secondary btn-sm" onclick="openSlipGajiModal(<?= $s['id'] ?>)" title="Lihat & Cetak Slip Gaji">
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                               <span>Slip Gaji</span>
                             </button>
 
@@ -251,11 +235,8 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
                             <?php endif; ?>
 
                             <!-- Delete Option -->
-                            <button type="button" class="btn-delete-ghost" onclick="confirmDeleteSalary(<?= $s['id'] ?>, 'Gaji <?= htmlspecialchars($s['employee_name']) ?> (<?= htmlspecialchars($s['month_period']) ?>)')" title="Hapus Data Gaji">
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                              </svg>
+                            <button type="button" class="btn-delete-ghost" onclick="confirmDeleteSalary(<?= $s['id'] ?>, 'Gaji <?= htmlspecialchars($s['employee_name']) ?> (<?= htmlspecialchars($s['month_period']) ?>)')" title="Hapus Data Gaji" style="padding: 4px 8px; font-size: 12px; font-weight: 600;">
+                              Hapus
                             </button>
                           </div>
                         </td>
@@ -316,11 +297,7 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
                         <td style="text-align: right;">
                           <div style="display: inline-flex; gap: 6px; align-items: center;">
                             <!-- Edit Employee Button -->
-                            <button type="button" class="btn btn-secondary btn-sm" onclick='openEditEmployeeModal(<?= json_encode($emp, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Edit Data Karyawan">
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                              </svg>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick='openEditEmployeeModal(<?= json_encode($emp, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Edit Data Karyawan" style="padding: 5px 12px; font-size: 12px; border-radius: 6px; font-weight: 600;">
                               <span>Edit</span>
                             </button>
 
@@ -330,11 +307,8 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
                             </button>
 
                             <!-- Delete Employee -->
-                            <button type="button" class="btn-delete-ghost" onclick="confirmDeleteEmployee(<?= $emp['id'] ?>, '<?= htmlspecialchars($emp['name'], ENT_QUOTES) ?>')" title="Hapus Karyawan">
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                              </svg>
+                            <button type="button" class="btn-delete-ghost" onclick="confirmDeleteEmployee(<?= $emp['id'] ?>, '<?= htmlspecialchars($emp['name'], ENT_QUOTES) ?>')" title="Hapus Karyawan" style="padding: 4px 8px; font-size: 12px; font-weight: 600;">
+                              Hapus
                             </button>
                           </div>
                         </td>

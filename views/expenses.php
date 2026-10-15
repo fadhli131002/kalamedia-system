@@ -391,12 +391,10 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
           <div>
             <?php if ($tab === 'freelancers'): ?>
               <button type="button" class="btn-solid-dark" onclick="openModal('modal-input-payout')">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 <span>+ Input Fee Freelancer</span>
               </button>
             <?php else: ?>
               <button type="button" class="btn-solid-dark" onclick="openModal('modal-catat-ads')">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 <span>+ Catat Top-Up Ads</span>
               </button>
             <?php endif; ?>
@@ -433,12 +431,10 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
         <!-- 2. Main Category Tabs (Level 1 Filter: Segmented Control) -->
         <div class="segmented-control-container">
           <a href="<?= url('expenses?tab=freelancers') ?>" class="segmented-tab-btn <?= $tab === 'freelancers' ? 'active' : '' ?>">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
             <span>Fee Freelancer</span>
             <span style="font-size: 11px; padding: 1px 7px; border-radius: 10px; background: <?= $tab === 'freelancers' ? '#F2F4F7' : 'rgba(0,0,0,0.06)' ?>; font-weight: 600; color: #344054;"><?= count($payouts) ?></span>
           </a>
           <a href="<?= url('expenses?tab=ads') ?>" class="segmented-tab-btn <?= $tab === 'ads' ? 'active' : '' ?>">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
             <span>Top-Up Ads</span>
             <span style="font-size: 11px; padding: 1px 7px; border-radius: 10px; background: <?= $tab === 'ads' ? '#F2F4F7' : 'rgba(0,0,0,0.06)' ?>; font-weight: 600; color: #344054;"><?= count($adsList) ?></span>
           </a>
@@ -451,9 +447,8 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
           <div class="table-toolbar-row">
             <div class="toolbar-filters-group">
               
-              <!-- Search Input with Icon -->
+              <!-- Search Input -->
               <div class="search-input-wrapper">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                 <input 
                   type="text" 
                   id="expenses-search-input" 
@@ -495,7 +490,6 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
             <!-- Export Button -->
             <div>
               <button type="button" class="btn-ghost-outlined" onclick="exportExpensesCsv()" title="Export data tabel ke file CSV / Spreadsheet">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                 <span>Export CSV</span>
               </button>
             </div>
@@ -573,35 +567,29 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                             
                             <!-- Invoice Button -->
                             <button type="button" class="btn-action-outline" onclick="openFreelancerVoucherModal(<?= $p['id'] ?>)" title="Lihat &amp; Cetak Invoice / Voucher Fee Freelancer">
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                               <span>Invoice Fee</span>
                             </button>
 
                             <!-- Struk / Upload Button -->
                             <?php if (!empty($p['receipt_file'])): ?>
                               <button type="button" class="btn-action-outline" onclick="viewReceiptImage('<?= UPLOAD_URL . '/' . htmlspecialchars($p['receipt_file']) ?>', 'Bukti Transfer <?= htmlspecialchars($p['freelancer_name']) ?>')" title="Lihat Bukti Transfer">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                 <span>Lihat Struk</span>
                               </button>
                             <?php else: ?>
                               <button type="button" class="btn-action-upload" onclick="triggerUploadModal('payout', <?= $p['id'] ?>, 'Upload Bukti Fee <?= htmlspecialchars($p['freelancer_name']) ?>')" title="Upload Struk Transfer">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                                 <span>+ Struk</span>
                               </button>
                             <?php endif; ?>
 
-                            <!-- Edit Icon Button -->
-                            <button type="button" class="btn-icon-square" onclick="openEditPayoutModal(<?= $p['id'] ?>)" title="Edit Pembayaran Freelancer">
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            <!-- Edit Button -->
+                            <button type="button" class="btn-action-outline" onclick="openEditPayoutModal(<?= $p['id'] ?>)" title="Edit Pembayaran Freelancer" style="font-weight: 600; padding: 4px 8px; font-size: 11.5px;">
+                              <span>Edit</span>
                             </button>
 
-                            <!-- Delete Icon Button (Owner Only) -->
+                            <!-- Delete Button (Owner Only) -->
                             <?php if (is_owner()): ?>
-                              <button type="button" class="btn-icon-delete" onclick="confirmDeleteExpense('payout', <?= $p['id'] ?>, '<?= htmlspecialchars($p['freelancer_name']) ?>')" title="Hapus Fee Freelancer">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                  <polyline points="3 6 5 6 21 6"></polyline>
-                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                </svg>
+                              <button type="button" class="btn-icon-delete" onclick="confirmDeleteExpense('payout', <?= $p['id'] ?>, '<?= htmlspecialchars($p['freelancer_name']) ?>')" title="Hapus Fee Freelancer" style="font-size: 11.5px; font-weight: 600; padding: 4px 8px; width: auto; height: auto;">
+                                <span>Hapus</span>
                               </button>
                             <?php endif; ?>
 
@@ -664,35 +652,29 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                             
                             <!-- Invoice Ads Button -->
                             <button type="button" class="btn-action-outline" onclick="openAdsVoucherModal(<?= $ad['id'] ?>)" title="Lihat &amp; Cetak Invoice / Voucher Top-Up Ads">
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                               <span>Invoice Ads</span>
                             </button>
 
                             <!-- Struk Button -->
                             <?php if (!empty($ad['receipt_file'])): ?>
                               <button type="button" class="btn-action-outline" onclick="viewReceiptImage('<?= UPLOAD_URL . '/' . htmlspecialchars($ad['receipt_file']) ?>', 'Struk Top-Up <?= htmlspecialchars($ad['platform']) ?>')" title="Lihat Struk Top-Up">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                                 <span>Lihat Struk</span>
                               </button>
                             <?php else: ?>
                               <button type="button" class="btn-action-upload" onclick="triggerUploadModal('ads', <?= $ad['id'] ?>, 'Upload Struk <?= htmlspecialchars($ad['platform']) ?>')" title="Upload Struk Top-Up">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                                 <span>+ Struk</span>
                               </button>
                             <?php endif; ?>
 
-                            <!-- Edit Icon Button -->
-                            <button type="button" class="btn-icon-square" onclick="openEditAdsModal(<?= $ad['id'] ?>)" title="Edit Top-Up Ads">
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            <!-- Edit Button -->
+                            <button type="button" class="btn-action-outline" onclick="openEditAdsModal(<?= $ad['id'] ?>)" title="Edit Top-Up Ads" style="font-weight: 600; padding: 4px 8px; font-size: 11.5px;">
+                              <span>Edit</span>
                             </button>
 
-                            <!-- Delete Icon Button (Owner Only) -->
+                            <!-- Delete Button (Owner Only) -->
                             <?php if (is_owner()): ?>
-                              <button type="button" class="btn-icon-delete" onclick="confirmDeleteExpense('ads', <?= $ad['id'] ?>, 'Top-Up <?= htmlspecialchars($ad['platform']) ?>')" title="Hapus Top-Up Ads">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                  <polyline points="3 6 5 6 21 6"></polyline>
-                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                </svg>
+                              <button type="button" class="btn-icon-delete" onclick="confirmDeleteExpense('ads', <?= $ad['id'] ?>, 'Top-Up <?= htmlspecialchars($ad['platform']) ?>')" title="Hapus Top-Up Ads" style="font-size: 11.5px; font-weight: 600; padding: 4px 8px; width: auto; height: auto;">
+                                <span>Hapus</span>
                               </button>
                             <?php endif; ?>
 

@@ -22,10 +22,10 @@ define('AGENCY_WEBSITE', 'kalamediacreative.com');
 define('AGENCY_INSTAGRAM', '@kalamedia.creative');
 define('AGENCY_TAGLINE', 'Built for What’s Next');
 define('AGENCY_PHONE', '+62 812-3456-7890');
-define('AGENCY_ADDRESS', "Jl. BSD Raya Utama, Pagedangan,\nKec. Pagedangan, Kabupaten Tangerang,\nBanten 15339");
-define('AGENCY_BANK_NAME', 'Bank Jago');
-define('AGENCY_BANK_ACCOUNT', '107577583322');
-define('AGENCY_BANK_HOLDER', 'ILHAM LANANG');
+define('AGENCY_ADDRESS', "Jl. Padat Karya, Cisauk Girang, RT 001/RW 005,\nKel. Cisauk, Tangerang,\nBanten 15341");
+define('AGENCY_BANK_NAME', 'Mandiri');
+define('AGENCY_BANK_ACCOUNT', '1640010196501');
+define('AGENCY_BANK_HOLDER', 'Kala Kausa Prima');
 define('AGENCY_LOGO', 'assets/img/Logo-1.webp');
 
 // Paths

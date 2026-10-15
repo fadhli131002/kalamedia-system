@@ -51,7 +51,6 @@ $projects = $db->query("
           <div class="panel-header">
             <div>
               <h3 class="panel-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                 Database Klien & Brand Agensi
               </h3>
               <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Daftar seluruh klien dan riwayat penagihan</p>
@@ -84,7 +83,6 @@ $projects = $db->query("
                       <td>
                         <div class="clickable-client-link" onclick="openProjectFinancialDetailModal(0, <?= $c['id'] ?>)" title="Lihat Rincian Alokasi Keuangan Klien">
                           <span style="font-size: 14px; font-weight: 700;"><?= htmlspecialchars($c['company']) ?></span>
-                          <svg class="icon-open" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                         </div>
                         <div style="font-size: 11px; color: var(--text-muted);"><?= htmlspecialchars($c['address'] ?: 'Alamat belum diatur') ?></div>
                       </td>
@@ -107,16 +105,12 @@ $projects = $db->query("
                       </td>
                       <td style="text-align: right; white-space: nowrap;">
                         <div style="display: inline-flex; gap: 6px; justify-content: flex-end; align-items: center;">
-                          <button type="button" class="btn btn-secondary btn-sm" onclick='openEditClientModal(<?= json_encode($c, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Edit Data Klien" style="padding: 5px 10px; font-size: 12px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600;">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                            <span>Edit</span>
+                          <button type="button" class="btn btn-secondary btn-sm" onclick='openEditClientModal(<?= json_encode($c, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Edit Data Klien" style="padding: 5px 12px; font-size: 12px; border-radius: 6px; font-weight: 600;">
+                            Edit
                           </button>
                           <?php if (is_owner()): ?>
-                            <button type="button" class="btn-delete-ghost" onclick="confirmDeleteClient(<?= $c['id'] ?>, '<?= htmlspecialchars($c['company'], ENT_QUOTES) ?>')" title="Hapus Klien">
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                              </svg>
+                            <button type="button" class="btn-delete-ghost" onclick="confirmDeleteClient(<?= $c['id'] ?>, '<?= htmlspecialchars($c['company'], ENT_QUOTES) ?>')" title="Hapus Klien" style="padding: 5px 10px; font-size: 12px; border-radius: 6px; font-weight: 600;">
+                              Hapus
                             </button>
                           <?php endif; ?>
                         </div>
@@ -134,7 +128,6 @@ $projects = $db->query("
           <div class="panel-header">
             <div>
               <h3 class="panel-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                 Daftar Proyek & Kontrol Margin
               </h3>
               <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Pantau progres nilai kontrak vs biaya produksi aktual</p>
@@ -174,7 +167,6 @@ $projects = $db->query("
                       <td>
                         <div class="clickable-client-link" onclick="openProjectFinancialDetailModal(<?= $p['id'] ?>, <?= $p['client_id'] ?>)" title="Lihat Rincian Alokasi Keuangan Proyek">
                           <span style="font-weight: 700; color: #101828;"><?= htmlspecialchars($p['name']) ?></span>
-                          <svg class="icon-open" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                         </div>
                         <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($p['client_company']) ?></div>
                       </td>
@@ -200,16 +192,12 @@ $projects = $db->query("
                       </td>
                       <td style="text-align: right; white-space: nowrap;">
                         <div style="display: inline-flex; gap: 6px; justify-content: flex-end; align-items: center;">
-                          <button type="button" class="btn btn-secondary btn-sm" onclick='openEditProjectModal(<?= json_encode($p, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Edit Proyek" style="padding: 5px 10px; font-size: 12px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600;">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                            <span>Edit</span>
+                          <button type="button" class="btn btn-secondary btn-sm" onclick='openEditProjectModal(<?= json_encode($p, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Edit Proyek" style="padding: 5px 12px; font-size: 12px; border-radius: 6px; font-weight: 600;">
+                            Edit
                           </button>
                           <?php if (is_owner()): ?>
-                            <button type="button" class="btn-delete-ghost" onclick="confirmDeleteProject(<?= $p['id'] ?>, '<?= htmlspecialchars($p['name'], ENT_QUOTES) ?>')" title="Hapus Proyek">
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                              </svg>
+                            <button type="button" class="btn-delete-ghost" onclick="confirmDeleteProject(<?= $p['id'] ?>, '<?= htmlspecialchars($p['name'], ENT_QUOTES) ?>')" title="Hapus Proyek" style="padding: 5px 10px; font-size: 12px; border-radius: 6px; font-weight: 600;">
+                              Hapus
                             </button>
                           <?php endif; ?>
                         </div>

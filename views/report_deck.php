@@ -792,8 +792,7 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
   <!-- Sticky Presentation Action Bar -->
   <div class="deck-actions-bar">
     <div class="deck-actions-left">
-      <a href="<?= url('reports') ?>" class="btn btn-secondary btn-sm" style="background: #334155; color: #FFFFFF; border-color: #475467; gap: 6px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      <a href="<?= url('reports') ?>" class="btn btn-secondary btn-sm" style="background: #334155; color: #FFFFFF; border-color: #475467;">
         <span>Daftar Laporan</span>
       </a>
       <span style="font-size: 13px; font-weight: 800; color: #F8FAFC;">
@@ -805,18 +804,15 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
     </div>
 
     <div class="deck-actions-right">
-      <a href="<?= url("reports-form?id={$report['id']}") ?>" class="btn btn-secondary btn-sm" style="background: #334155; color: #FFFFFF; border-color: #475467; gap: 6px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+      <a href="<?= url("reports-form?id={$report['id']}") ?>" class="btn btn-secondary btn-sm" style="background: #334155; color: #FFFFFF; border-color: #475467;">
         <span>Edit Data Laporan</span>
       </a>
 
-      <button type="button" class="btn btn-primary btn-sm" onclick="exportDeckToPdf()" style="gap: 6px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+      <button type="button" class="btn btn-primary btn-sm" onclick="exportDeckToPdf()">
         <span>Save as PDF / Download</span>
       </button>
 
-      <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()" style="background: #334155; color: #FFFFFF; border-color: #475467; gap: 6px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+      <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()" style="background: #334155; color: #FFFFFF; border-color: #475467;">
         <span>Cetak Deck</span>
       </button>
     </div>
@@ -863,11 +859,9 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
 
           <div class="deck-client-right">
             <div class="deck-objective-badge">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polygon points="12 8 8 12 12 16 12 8"></polygon></svg>
               <span><?= htmlspecialchars($report['objective'] ?: 'Full-Funnel Growth') ?></span>
             </div>
             <div class="deck-date-badge">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
               <span><?= date('d M Y', strtotime($report['created_at'])) ?></span>
             </div>
           </div>
@@ -992,10 +986,10 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
 
         <!-- Creative Showdown Side-by-Side Cards -->
         <div class="creative-showdown-grid">
-          <!-- 🏆 Winning Creative -->
+          <!-- Winning Creative -->
           <div class="showdown-card winning">
             <div class="showdown-card-header">
-              <span class="showdown-badge">🏆 Winning Creative</span>
+              <span class="showdown-badge">Winning Creative</span>
               <span class="showdown-subbadge">High Hook Rate</span>
             </div>
 
@@ -1004,7 +998,6 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
                 <img src="<?= htmlspecialchars($report['winning_content_url']) ?>" alt="Winning Creative Screenshot">
               <?php else: ?>
                 <div style="color: #94A3B8; font-size: 11px; text-align: center;">
-                  <div style="font-size: 20px; margin-bottom: 2px;">🎬</div>
                   <span>Materi Winning Creative</span>
                 </div>
               <?php endif; ?>
@@ -1015,10 +1008,10 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
             </div>
           </div>
 
-          <!-- ⚠️ Underperforming Creative -->
+          <!-- Underperforming Creative -->
           <div class="showdown-card losing">
             <div class="showdown-card-header">
-              <span class="showdown-badge">⚠️ Underperforming</span>
+              <span class="showdown-badge">Underperforming</span>
               <span class="showdown-subbadge">Low Retention / High CPA</span>
             </div>
 
@@ -1027,7 +1020,6 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
                 <img src="<?= htmlspecialchars($report['underperforming_content_url']) ?>" alt="Underperforming Creative Screenshot">
               <?php else: ?>
                 <div style="color: #94A3B8; font-size: 11px; text-align: center;">
-                  <div style="font-size: 20px; margin-bottom: 2px;">📉</div>
                   <span>Materi Underperforming</span>
                 </div>
               <?php endif; ?>
@@ -1070,7 +1062,6 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
           <!-- What Worked -->
           <div class="matrix-card worked">
             <div class="matrix-title">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
               What Worked (Faktor Kunci)
             </div>
             <div class="matrix-content">
@@ -1081,7 +1072,6 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
           <!-- What Didn't Work -->
           <div class="matrix-card didnt-work">
             <div class="matrix-title">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
               What Didn't Work (Evaluasi)
             </div>
             <div class="matrix-content">
@@ -1092,7 +1082,6 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
           <!-- Next Action Plan -->
           <div class="matrix-card action-plan">
             <div class="matrix-title">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
               Next Action Plan (Roadmap)
             </div>
             <div class="matrix-content">

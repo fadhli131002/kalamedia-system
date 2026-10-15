@@ -31,7 +31,6 @@ $users = $db->query("SELECT id, name, email, role, created_at FROM users ORDER B
             <div class="panel-header">
               <div>
                 <h3 class="panel-title">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                   Profil & Rekening Agensi
                 </h3>
                 <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Identitas resmi dan info rekening penerima pembayaran invoice</p>
@@ -74,11 +73,13 @@ $users = $db->query("SELECT id, name, email, role, created_at FROM users ORDER B
             <div class="panel-header">
               <div>
                 <h3 class="panel-title">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                   Manajemen Akun Pengguna (RBAC)
                 </h3>
                 <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Daftar akun dan hak akses pengguna sistem</p>
               </div>
+              <button type="button" class="btn btn-primary btn-sm" onclick="openCreateUserModal()">
+                + Tambah Akun
+              </button>
             </div>
 
             <div class="table-responsive">
@@ -98,12 +99,21 @@ $users = $db->query("SELECT id, name, email, role, created_at FROM users ORDER B
                         <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($u['email']) ?></div>
                       </td>
                       <td>
-                        <span class="role-badge <?= $u['role'] === 'owner' ? 'role-owner' : 'role-admin' ?>">
-                          <?= $u['role'] === 'owner' ? 'Owner Agensi' : 'Finance Agensi' ?>
+                        <span class="role-badge" style="font-weight: 700; font-size: 11px; text-transform: uppercase;">
+                          <?= htmlspecialchars($u['role']) ?>
                         </span>
                       </td>
                       <td style="font-size: 11px; color: var(--text-secondary);">
-                        <?= $u['role'] === 'owner' ? 'Akses Eksekutif (Analisis Profit & Pengaturan Sistem)' : 'Operasional Harian (Pencatatan Keuangan & Kalender Konten)' ?>
+                        <?php
+                          $roleDesc = [
+                            'owner' => 'Akses Penuh Eksekutif (Profit, User Management & Sistem)',
+                            'admin' => 'Operasional Agensi (Invoice, Penugasan & Pengeluaran)',
+                            'karyawan' => 'Workspace Karyawan (Tugas In-House & Kalender Konten)',
+                            'freelancer' => 'Workspace Freelance (Tugas Talenta & Kalender Konten)',
+                            'client' => 'Client Portal (Progress Proyek, Review & Invoice)'
+                          ][$u['role']] ?? 'Akses Sistem';
+                          echo $roleDesc;
+                        ?>
                       </td>
                     </tr>
                   <?php endforeach; ?>

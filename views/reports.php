@@ -147,7 +147,6 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <div class="panel-header">
             <div>
               <h3 class="panel-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                 Laporan Kinerja Full-Funnel Performance Marketing
               </h3>
               <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
@@ -155,8 +154,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
               </p>
             </div>
 
-            <a href="<?= url('reports-form') ?>" class="btn btn-primary btn-sm" style="gap: 6px;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <a href="<?= url('reports-form') ?>" class="btn btn-primary btn-sm">
               <span>+ Buat Laporan Performance Baru</span>
             </a>
           </div>
@@ -270,8 +268,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                       <!-- Conversions & CPL/CPA -->
                       <td>
-                        <span style="display: inline-flex; align-items: center; gap: 5px; background: #0F172A; color: #FFFFFF; font-weight: 800; font-size: 11.5px; padding: 3px 9px; border-radius: 16px;">
-                          <span style="color: #FCD34D;">★</span>
+                        <span style="display: inline-flex; align-items: center; background: #0F172A; color: #FFFFFF; font-weight: 800; font-size: 11.5px; padding: 3px 9px; border-radius: 16px;">
                           <?= number_format($r['total_conversions']) ?> Conv
                         </span>
                         <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 2px;">
@@ -282,17 +279,16 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
                       <!-- Actions -->
                       <td style="text-align: right;">
                         <div style="display: inline-flex; align-items: center; gap: 6px;">
-                          <a href="<?= url("report-deck?id={$r['id']}") ?>" class="btn btn-primary btn-sm" style="padding: 5px 10px; gap: 5px;" title="Buka Pitch Deck">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                          <a href="<?= url("report-deck?id={$r['id']}") ?>" class="btn btn-primary btn-sm" style="padding: 5px 10px;" title="Buka Pitch Deck">
                             <span>Deck</span>
                           </a>
 
-                          <a href="<?= url("reports-form?id={$r['id']}") ?>" class="btn btn-secondary btn-sm" style="padding: 5px 9px;" title="Edit Data Laporan">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                          <a href="<?= url("reports-form?id={$r['id']}") ?>" class="btn btn-secondary btn-sm" style="padding: 5px 10px; font-weight: 600;" title="Edit Data Laporan">
+                            <span>Edit</span>
                           </a>
 
-                          <button type="button" class="btn btn-secondary btn-sm" style="padding: 5px 9px; color: var(--danger-text);" onclick="deleteReport(<?= $r['id'] ?>, '<?= htmlspecialchars(addslashes($r['client_company'])) ?>', '<?= htmlspecialchars($r['report_period']) ?>')" title="Hapus Laporan">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                          <button type="button" class="btn btn-secondary btn-sm" style="padding: 5px 10px; color: var(--danger-text); font-weight: 600;" onclick="deleteReport(<?= $r['id'] ?>, '<?= htmlspecialchars(addslashes($r['client_company'])) ?>', '<?= htmlspecialchars($r['report_period']) ?>')" title="Hapus Laporan">
+                            <span>Hapus</span>
                           </button>
                         </div>
                       </td>

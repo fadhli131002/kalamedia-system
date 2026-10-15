@@ -1,89 +1,169 @@
 <?php
 /**
  * Kalamedia Database Connection & Auto-Migrator
- * Supports SQLite (Zero-Config, Instant) & MySQL
+ * Hybrid Database Engine: Primary MySQL (via XAMPP / Server) with Zero-Config SQLite Fallback
  */
 
 require_once __DIR__ . '/app.php';
 
 class Database {
     private static ?PDO $instance = null;
+    private static string $driver = 'sqlite';
+
+    public static function getDriver(): string {
+        return self::$driver;
+    }
 
     public static function getConnection(): PDO {
         if (self::$instance === null) {
-            $dbPath = BASE_PATH . '/database/kalamedia.sqlite';
-            $dbDir = dirname($dbPath);
-            
-            if (!is_dir($dbDir)) {
-                mkdir($dbDir, 0777, true);
+            $mysqlHost = defined('DB_HOST') ? DB_HOST : (getenv('DB_HOST') ?: '127.0.0.1');
+            $mysqlPort = defined('DB_PORT') ? DB_PORT : (getenv('DB_PORT') ?: '3306');
+            $mysqlDb   = defined('DB_NAME') ? DB_NAME : (getenv('DB_NAME') ?: 'kalamedia');
+            $mysqlUser = defined('DB_USER') ? DB_USER : (getenv('DB_USER') ?: 'root');
+            $mysqlPass = defined('DB_PASS') ? DB_PASS : (getenv('DB_PASS') ?: '');
+
+            $connected = false;
+
+            // 1. Try MySQL Connection First if configured or available
+            if (!empty($mysqlHost)) {
+                try {
+                    // Quick ping/connect with short timeout
+                    $dsnServer = "mysql:host={$mysqlHost};port={$mysqlPort};charset=utf8mb4";
+                    $pdoServer = new PDO($dsnServer, $mysqlUser, $mysqlPass, [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                        PDO::ATTR_TIMEOUT => 2
+                    ]);
+                    $pdoServer->exec("CREATE DATABASE IF NOT EXISTS `{$mysqlDb}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;");
+
+                    // Connect to specific database
+                    $dsnDb = "mysql:host={$mysqlHost};port={$mysqlPort};dbname={$mysqlDb};charset=utf8mb4";
+                    self::$instance = new PDO($dsnDb, $mysqlUser, $mysqlPass, [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                        PDO::ATTR_TIMEOUT => 2
+                    ]);
+                    self::$driver = 'mysql';
+                    $connected = true;
+                } catch (Throwable $e) {
+                    // Fallback to SQLite gracefully
+                    $connected = false;
+                }
             }
 
-            // Default to SQLite for zero-friction out-of-the-box operation
-            try {
-                self::$instance = new PDO("sqlite:" . $dbPath, null, null, [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_TIMEOUT => 5
-                ]);
-                self::$instance->exec("PRAGMA foreign_keys = ON;");
+            // 2. Fallback Zero-Config: SQLite
+            if (!$connected) {
+                $dbPath = BASE_PATH . '/database/kalamedia.sqlite';
+                $dbDir = dirname($dbPath);
                 
-                // Check if schema or new migrations are needed
-                $hasMeta = self::$instance->query("SELECT name FROM sqlite_master WHERE type='table' AND name='system_meta'")->fetchColumn();
-                if (!$hasMeta) {
-                    self::ensureTablesAndSeed(self::$instance);
-                } else {
-                    self::runMigrations(self::$instance);
+                if (!is_dir($dbDir)) {
+                    mkdir($dbDir, 0777, true);
                 }
-            } catch (PDOException $e) {
-                die("Database Connection Error: " . $e->getMessage());
+
+                try {
+                    self::$instance = new PDO("sqlite:" . $dbPath, null, null, [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                        PDO::ATTR_TIMEOUT => 5
+                    ]);
+                    self::$instance->exec("PRAGMA foreign_keys = ON;");
+                    self::$driver = 'sqlite';
+                } catch (PDOException $e) {
+                    die("Database Connection Error: " . $e->getMessage());
+                }
             }
+
+            // Auto-migration & Schema Check
+            self::runMigrations(self::$instance, self::$driver);
         }
         return self::$instance;
     }
 
-    private static function ensureTablesAndSeed(PDO $db): void {
-        // Initialize Schema (Idempotent: CREATE TABLE IF NOT EXISTS)
+    public static function runMigrations(PDO $db, string $driver = 'sqlite'): void {
+        $pkDef = ($driver === 'mysql') ? "INT AUTO_INCREMENT PRIMARY KEY" : "INTEGER PRIMARY KEY AUTOINCREMENT";
 
-        // Initialize Schema
+        // Create base tables if not exists
         $db->exec("
             CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id {$pkDef},
                 name VARCHAR(100) NOT NULL,
                 email VARCHAR(150) UNIQUE NOT NULL,
                 password VARCHAR(255) NOT NULL,
-                role VARCHAR(20) NOT NULL DEFAULT 'admin', -- 'owner' or 'admin'
+                role VARCHAR(20) NOT NULL DEFAULT 'admin',
+                employment_type VARCHAR(30) DEFAULT 'internal',
+                phone_wa VARCHAR(50) DEFAULT NULL,
                 avatar VARCHAR(255) DEFAULT NULL,
+                client_id INT DEFAULT NULL,
+                is_active INT DEFAULT 1,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS clients (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id {$pkDef},
                 name VARCHAR(150) NOT NULL,
                 company VARCHAR(150) NOT NULL,
+                company_name VARCHAR(150) DEFAULT NULL,
+                pic_name VARCHAR(150) DEFAULT NULL,
                 email VARCHAR(150) NOT NULL,
                 phone VARCHAR(50) NOT NULL,
+                package_name VARCHAR(100) DEFAULT 'Social Media & Performance Ads',
+                status VARCHAR(30) DEFAULT 'Active',
                 address TEXT DEFAULT NULL,
+                logo VARCHAR(255) DEFAULT NULL,
+                is_deleted INT DEFAULT 0,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS projects (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                client_id INTEGER NOT NULL,
+                id {$pkDef},
+                client_id INT NOT NULL,
                 name VARCHAR(200) NOT NULL,
+                project_name VARCHAR(200) DEFAULT NULL,
                 contract_value DECIMAL(15,2) NOT NULL DEFAULT 0,
                 target_margin_percent DECIMAL(5,2) DEFAULT 30.00,
-                status VARCHAR(30) DEFAULT 'In Progress', -- 'Planning', 'In Progress', 'Completed', 'On Hold'
+                progress_percent DECIMAL(5,2) DEFAULT 0,
+                status VARCHAR(30) DEFAULT 'In Progress',
                 start_date DATE DEFAULT NULL,
                 end_date DATE DEFAULT NULL,
+                is_deleted INT DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS tasks (
+                id {$pkDef},
+                project_id INT NOT NULL,
+                client_id INT NOT NULL,
+                assigned_to_user_id INT DEFAULT NULL,
+                assigned_by_user_id INT DEFAULT NULL,
+                title VARCHAR(255) NOT NULL,
+                description TEXT DEFAULT NULL,
+                category VARCHAR(50) NOT NULL DEFAULT 'design',
+                worker_type VARCHAR(30) NOT NULL DEFAULT 'karyawan',
+                priority VARCHAR(20) NOT NULL DEFAULT 'medium',
+                status VARCHAR(30) NOT NULL DEFAULT 'backlog',
+                deliverable_link TEXT DEFAULT NULL,
+                due_date DATE DEFAULT NULL,
+                is_deleted INT NOT NULL DEFAULT 0,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS task_feedbacks (
+                id {$pkDef},
+                task_id INT NOT NULL,
+                user_id INT NOT NULL,
+                feedback_type VARCHAR(30) NOT NULL DEFAULT 'comment',
+                message TEXT NOT NULL,
+                attachment_path VARCHAR(255) DEFAULT NULL,
+                is_read_by_worker INT NOT NULL DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS invoices (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id {$pkDef},
                 invoice_number VARCHAR(50) UNIQUE NOT NULL,
-                client_id INTEGER NOT NULL,
-                project_id INTEGER DEFAULT NULL,
+                client_id INT NOT NULL,
+                project_id INT DEFAULT NULL,
                 issue_date DATE NOT NULL,
                 due_date DATE NOT NULL,
                 subtotal DECIMAL(15,2) NOT NULL DEFAULT 0,
@@ -92,119 +172,110 @@ class Database {
                 tax_percent DECIMAL(5,2) DEFAULT 0,
                 tax_amount DECIMAL(15,2) DEFAULT 0,
                 total_amount DECIMAL(15,2) NOT NULL DEFAULT 0,
-                status VARCHAR(20) DEFAULT 'Draft', -- 'Draft', 'Sent', 'Paid', 'Overdue'
+                status VARCHAR(20) DEFAULT 'Draft',
                 paid_at DATETIME DEFAULT NULL,
                 payment_method VARCHAR(50) DEFAULT NULL,
                 receipt_file VARCHAR(255) DEFAULT NULL,
                 notes TEXT DEFAULT NULL,
-                is_deleted INTEGER DEFAULT 0,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
-                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL
+                is_deleted INT DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS invoice_items (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                invoice_id INTEGER NOT NULL,
+                id {$pkDef},
+                invoice_id INT NOT NULL,
                 service_name VARCHAR(200) NOT NULL,
                 quantity DECIMAL(10,2) NOT NULL DEFAULT 1,
                 unit_price DECIMAL(15,2) NOT NULL DEFAULT 0,
-                total_price DECIMAL(15,2) NOT NULL DEFAULT 0,
-                FOREIGN KEY (invoice_id) REFERENCES invoices(id) ON DELETE CASCADE
+                total_price DECIMAL(15,2) NOT NULL DEFAULT 0
             );
 
             CREATE TABLE IF NOT EXISTS freelancer_payouts (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id {$pkDef},
                 freelancer_name VARCHAR(150) NOT NULL,
                 freelancer_phone VARCHAR(50) DEFAULT NULL,
                 freelancer_bank VARCHAR(100) DEFAULT NULL,
                 freelancer_account VARCHAR(100) DEFAULT NULL,
-                project_id INTEGER NOT NULL,
+                project_id INT NOT NULL,
                 task_description TEXT NOT NULL,
                 amount DECIMAL(15,2) NOT NULL DEFAULT 0,
-                status VARCHAR(20) DEFAULT 'Pending', -- 'Pending', 'Paid'
+                status VARCHAR(20) DEFAULT 'Pending',
                 paid_at DATETIME DEFAULT NULL,
                 receipt_file VARCHAR(255) DEFAULT NULL,
-                is_deleted INTEGER DEFAULT 0,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+                is_deleted INT DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS ads_spend (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                client_id INTEGER NOT NULL,
-                project_id INTEGER DEFAULT NULL,
-                platform VARCHAR(50) NOT NULL, -- 'Meta Ads', 'Google Ads', 'TikTok Ads', 'LinkedIn Ads'
+                id {$pkDef},
+                client_id INT NOT NULL,
+                project_id INT DEFAULT NULL,
+                platform VARCHAR(50) NOT NULL,
                 account_id VARCHAR(100) DEFAULT NULL,
                 amount DECIMAL(15,2) NOT NULL DEFAULT 0,
                 spent_date DATE NOT NULL,
                 receipt_file VARCHAR(255) DEFAULT NULL,
                 notes TEXT DEFAULT NULL,
-                is_deleted INTEGER DEFAULT 0,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
-                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL
+                is_deleted INT DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS employees (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id {$pkDef},
                 name VARCHAR(150) NOT NULL,
                 position VARCHAR(100) NOT NULL,
                 department VARCHAR(100) DEFAULT 'Creative & Tech',
-                employment_type VARCHAR(50) DEFAULT 'Full-time', -- 'Full-time', 'Part-time', 'Contract', 'Intern'
+                employment_type VARCHAR(50) DEFAULT 'Full-time',
                 email VARCHAR(150) DEFAULT NULL,
                 phone VARCHAR(50) DEFAULT NULL,
                 bank_name VARCHAR(100) DEFAULT 'BCA',
                 bank_account VARCHAR(100) DEFAULT NULL,
                 base_salary DECIMAL(15,2) NOT NULL DEFAULT 0,
-                status VARCHAR(20) DEFAULT 'Active', -- 'Active', 'Inactive'
+                status VARCHAR(20) DEFAULT 'Active',
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS salaries (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                employee_id INTEGER DEFAULT NULL,
+                id {$pkDef},
+                employee_id INT DEFAULT NULL,
                 employee_name VARCHAR(150) NOT NULL,
                 employee_position VARCHAR(100) DEFAULT NULL,
                 bank_name VARCHAR(100) DEFAULT 'BCA',
                 bank_account VARCHAR(100) DEFAULT NULL,
-                month_period VARCHAR(20) NOT NULL, -- e.g. '2026-08' or 'Agustus 2026'
+                month_period VARCHAR(20) NOT NULL,
                 base_salary DECIMAL(15,2) NOT NULL DEFAULT 0,
-                allowance DECIMAL(15,2) NOT NULL DEFAULT 0, -- Tunjangan, Bonus, Lembur
-                deduction DECIMAL(15,2) NOT NULL DEFAULT 0, -- Potongan, BPJS, PPh21, Kasbon
-                net_salary DECIMAL(15,2) NOT NULL DEFAULT 0, -- Take-Home Pay (base + allowance - deduction)
+                allowance DECIMAL(15,2) NOT NULL DEFAULT 0,
+                deduction DECIMAL(15,2) NOT NULL DEFAULT 0,
+                net_salary DECIMAL(15,2) NOT NULL DEFAULT 0,
                 payment_date DATE NOT NULL,
-                status VARCHAR(20) DEFAULT 'Pending', -- 'Pending', 'Paid'
+                status VARCHAR(20) DEFAULT 'Pending',
                 paid_at DATETIME DEFAULT NULL,
-                is_deleted INTEGER DEFAULT 0,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE SET NULL
+                notes TEXT DEFAULT NULL,
+                is_deleted INT DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS content_planner (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                client_id INTEGER NOT NULL,
-                project_id INTEGER DEFAULT NULL,
+                id {$pkDef},
+                client_id INT NOT NULL,
+                project_id INT DEFAULT NULL,
                 title VARCHAR(255) NOT NULL,
                 platform VARCHAR(50) NOT NULL DEFAULT 'Instagram',
                 content_type VARCHAR(50) NOT NULL DEFAULT 'Reels / Video',
                 publish_date DATE NOT NULL,
                 publish_time TIME DEFAULT '10:00:00',
                 status VARCHAR(30) NOT NULL DEFAULT 'Draft',
-                assignee_id INTEGER DEFAULT NULL,
+                assignee_id INT DEFAULT NULL,
                 asset_url TEXT DEFAULT NULL,
                 color_hex VARCHAR(20) DEFAULT '#3B82F6',
                 notes TEXT DEFAULT NULL,
-                is_deleted INTEGER DEFAULT 0,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
-                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL,
-                FOREIGN KEY (assignee_id) REFERENCES employees(id) ON DELETE SET NULL
+                is_deleted INT DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS performance_reports (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                client_id INTEGER NOT NULL,
+                id {$pkDef},
+                client_id INT NOT NULL,
                 report_period VARCHAR(100) NOT NULL,
                 objective VARCHAR(255) DEFAULT NULL,
                 total_ad_spend DECIMAL(15,2) NOT NULL DEFAULT 0,
@@ -233,33 +304,31 @@ class Database {
                 next_action_plan TEXT DEFAULT NULL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                is_deleted INTEGER NOT NULL DEFAULT 0,
-                FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
+                is_deleted INT NOT NULL DEFAULT 0
             );
 
             CREATE TABLE IF NOT EXISTS client_reports (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                client_id INTEGER NOT NULL,
-                report_month VARCHAR(50) NOT NULL, -- e.g. 'August 2026'
+                id {$pkDef},
+                client_id INT NOT NULL,
+                report_month VARCHAR(50) NOT NULL,
                 executive_summary TEXT,
-                followers_growth INTEGER NOT NULL DEFAULT 0,
-                total_reach INTEGER NOT NULL DEFAULT 0,
-                total_impressions INTEGER NOT NULL DEFAULT 0,
+                followers_growth INT NOT NULL DEFAULT 0,
+                total_reach INT NOT NULL DEFAULT 0,
+                total_impressions INT NOT NULL DEFAULT 0,
                 engagement_rate DECIMAL(5,2) NOT NULL DEFAULT 0.00,
-                saves_shares INTEGER NOT NULL DEFAULT 0,
-                link_clicks INTEGER NOT NULL DEFAULT 0,
-                leads_generated INTEGER NOT NULL DEFAULT 0,
+                saves_shares INT NOT NULL DEFAULT 0,
+                link_clicks INT NOT NULL DEFAULT 0,
+                leads_generated INT NOT NULL DEFAULT 0,
                 top_content_summary TEXT,
                 action_plan TEXT,
-                is_deleted INTEGER NOT NULL DEFAULT 0,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
+                is_deleted INT NOT NULL DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS activities (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER DEFAULT NULL,
-                type VARCHAR(50) NOT NULL, -- 'invoice', 'payout', 'ads', 'client', 'project', 'salary', 'report'
+                id {$pkDef},
+                user_id INT DEFAULT NULL,
+                type VARCHAR(50) NOT NULL,
                 title VARCHAR(255) NOT NULL,
                 description TEXT DEFAULT NULL,
                 amount DECIMAL(15,2) DEFAULT NULL,
@@ -267,438 +336,264 @@ class Database {
             );
 
             CREATE TABLE IF NOT EXISTS system_meta (
-                key VARCHAR(50) PRIMARY KEY,
-                value TEXT
+                `key` VARCHAR(50) PRIMARY KEY,
+                `value` TEXT
             );
         ");
 
-        // Run migrations on existing tables (idempotent)
-        self::runMigrations($db);
-
-        // Check if database was already seeded once
-        $isSeeded = $db->query("SELECT value FROM system_meta WHERE key = 'is_seeded'")->fetchColumn();
-        if ($isSeeded) {
-            return; // Already seeded once. NEVER auto re-seed when user deletes data!
-        }
-
-        // Seed Default Users if empty
-        $userCount = intval($db->query("SELECT COUNT(*) FROM users")->fetchColumn());
-        if ($userCount === 0) {
-            $hashedPw = password_hash('password123', PASSWORD_BCRYPT);
-            $userStmt = $db->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
-            $userStmt->execute(['Muhammad Fadhli', 'owner@kalamedia.id', $hashedPw, 'owner']);
-            $userStmt->execute(['Ilham Lanang', 'finance@kalamedia.id', $hashedPw, 'admin']);
-        }
-
-        // Seed Default Employees if empty
-        $empCount = intval($db->query("SELECT COUNT(*) FROM employees")->fetchColumn());
-        if ($empCount === 0) {
-            $empStmt = $db->prepare("
-                INSERT INTO employees (name, position, department, employment_type, email, phone, bank_name, bank_account, base_salary, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'Active')
-            ");
-            $empStmt->execute(['Muhammad Fadhli', 'Creative Manager', 'Creative & Production', 'Full-time', 'mha.fadhli@gmail.com', '081298765432', 'BCA', '5420987123', 12000000]);
-            $empStmt->execute(['Ilham Lanang', 'Marketing Manager', 'Marketing & Operations', 'Full-time', 'ilhamlanang30@gmail.com', '081387654321', 'Bank Jago', '107577583322', 12000000]);
-            $empStmt->execute(['Dimas Prasetyo', 'Senior Graphic Designer', 'Creative Design', 'Full-time', 'dimas@kalamedia.id', '081298765431', 'BCA', '5420987123', 7500000]);
-            $empStmt->execute(['Annisa Nuraini', 'Social Media Specialist', 'Digital Marketing', 'Full-time', 'annisa@kalamedia.id', '081387654321', 'BCA', '5420112233', 6500000]);
-            $empStmt->execute(['Kevin Pratama', 'Motion & Video Editor', 'Video Production', 'Full-time', 'kevin@kalamedia.id', '081277665544', 'Mandiri', '1370019283746', 7000000]);
-            $empStmt->execute(['Bima Satria', 'Fullstack Web Developer', 'Technology & IT', 'Full-time', 'bima@kalamedia.id', '081566778899', 'BCA', '5420778899', 8500000]);
-        }
-
-        // Seed Default Salaries if empty
-        $salCount = intval($db->query("SELECT COUNT(*) FROM salaries")->fetchColumn());
-        if ($salCount === 0) {
-            $currentMonth = date('Y-m');
-            $salStmt = $db->prepare("
-                INSERT INTO salaries (
-                    employee_id, employee_name, employee_position, bank_name, bank_account,
-                    month_period, base_salary, allowance, deduction, net_salary, payment_date, status, paid_at, notes
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ");
-            // Paid record 1
-            $salStmt->execute([1, 'Dimas Prasetyo', 'Senior Graphic Designer', 'BCA', '5420987123', $currentMonth, 7500000, 500000, 250000, 7750000, date('Y-m-25'), 'Paid', date('Y-m-25 10:30:00'), 'Gaji Pokok + Bonus Desain Project']);
-            // Paid record 2
-            $salStmt->execute([2, 'Annisa Nuraini', 'Social Media Specialist', 'BCA', '5420112233', $currentMonth, 6500000, 300000, 0, 6800000, date('Y-m-25'), 'Paid', date('Y-m-25 11:15:00'), 'Gaji Pokok + Tunjangan Komunikasi']);
-            // Pending record 3
-            $salStmt->execute([3, 'Kevin Pratama', 'Motion & Video Editor', 'Mandiri', '1370019283746', $currentMonth, 7000000, 400000, 150000, 7250000, date('Y-m-28'), 'Pending', null, 'Payroll Akhir Bulan']);
-            // Pending record 4
-            $salStmt->execute([4, 'Bima Satria', 'Fullstack Web Developer', 'BCA', '5420778899', $currentMonth, 8500000, 500000, 200000, 8800000, date('Y-m-28'), 'Pending', null, 'Payroll Akhir Bulan + Bonus Tech']);
-        }
-
-        // Seed Performance Reports
-        self::seedPerformanceReports($db);
-
-        // Seed Default Client Reports if empty
-        $reportCount = intval($db->query("SELECT COUNT(*) FROM client_reports")->fetchColumn());
-        if ($reportCount === 0) {
-            self::seedDefaultReports($db);
-        }
-
-        // Mark as seeded so subsequent deletions stay permanently deleted
-        $db->exec("INSERT OR REPLACE INTO system_meta (key, value) VALUES ('is_seeded', '1')");
-    }
-
-    public static function seedPerformanceReports(PDO $db): void {
-        // Ensure client 1: Grand BSD Residence (Real Estate Project)
-        $cRealEstate = $db->query("SELECT id FROM clients WHERE company LIKE '%Grand BSD%' LIMIT 1")->fetchColumn();
-        if (!$cRealEstate) {
-            $db->exec("INSERT INTO clients (name, company, email, phone, address) VALUES ('Clarissa Tan', 'Grand BSD Residence', 'clarissa@grandbsd.co.id', '081399881122', 'Marketing Gallery Grand BSD, Jl. BSD Raya Utama No. 8, Tangerang')");
-            $cRealEstate = $db->lastInsertId();
-        }
-
-        // Ensure client 2: Lucere Official (Hijab & Modest Fashion Brand)
-        $cLucere = $db->query("SELECT id FROM clients WHERE company LIKE '%Lucere%' LIMIT 1")->fetchColumn();
-        if (!$cLucere) {
-            $db->exec("INSERT INTO clients (name, company, email, phone, address) VALUES ('Nabila Putri', 'Lucere Official', 'nabila@lucerehijab.com', '081289901234', 'Headquarters Lucere, Jl. Senopati No. 45, Kebayoran Baru, Jakarta Selatan')");
-            $cLucere = $db->lastInsertId();
-        }
-
-        // Check if performance_reports has data
-        $perfCount = intval($db->query("SELECT COUNT(*) FROM performance_reports WHERE COALESCE(is_deleted, 0) = 0")->fetchColumn());
-        if ($perfCount === 0) {
-            $stmt = $db->prepare("
-                INSERT INTO performance_reports (
-                    client_id, report_period, objective,
-                    total_ad_spend, revenue, roas, roi, total_conversions, cpl_cpa,
-                    ads_reach, ads_impressions, ads_ctr, ads_cpc, ads_cpm,
-                    lost_is_rank, lost_is_budget, ads_evaluation,
-                    content_identity, total_views, followers_gained, avg_video_retention, engagement_rate,
-                    winning_content_url, underperforming_content_url,
-                    what_worked, what_didnt_work, next_action_plan
-                ) VALUES (
-                    ?, ?, ?,
-                    ?, ?, ?, ?, ?, ?,
-                    ?, ?, ?, ?, ?,
-                    ?, ?, ?,
-                    ?, ?, ?, ?, ?,
-                    ?, ?,
-                    ?, ?, ?
-                )
-            ");
-
-            // 1. Real Estate Project: Grand BSD Residence (Lead Generation & 60 Units Closing)
-            $stmt->execute([
-                $cRealEstate,
-                'August 2026',
-                'Lead Generation & Closing Unit Cluster Horizon',
-                45000000.00,       // Total Ad Spend: Rp 45.000.000
-                1800000000.00,     // Revenue / Omset Booking & DP: Rp 1.800.000.000
-                40.00,             // ROAS: 40.00x
-                3900.00,           // ROI: 3,900%
-                60,                // Total Conversions (60 Closing Units)
-                31034.48,          // CPL (Cost Per Lead): Rp 31.034 / CPA Closing: Rp 750.000
-                345000,            // Ads Reach
-                890000,            // Ads Impressions
-                3.85,              // CTR: 3.85%
-                1312.00,           // CPC: Rp 1.312
-                50560.00,          // CPM: Rp 50.560
-                6.40,              // Lost IS (Rank): 6.40%
-                12.80,             // Lost IS (Budget): 12.80%
-                'Struktur kampanye Instant Form Meta Ads dengan filter qualifying questions (penghasilan > Rp 15 Jt/bln & rencana beli < 3 bulan) sukses menekan junk leads hingga 82% dan mendongkrak booking show unit langsung ke sales gallery.',
-                'Virtual Room Tour 360° Unit Hook 2-Lantai & Testimoni Serah Terima Unit Tipe 72/90',
-                480000,            // Total Views
-                2950,              // Followers Gained
-                52.40,             // Avg Video Retention: 52.40%
-                5.85,              // Engagement Rate: 5.85%
-                'assets/uploads/reports/creative_realestate_win.svg',
-                'assets/uploads/reports/creative_realestate_lose.svg',
-                "• Hook 3 detik pertama dengan angle 'Beli Rumah Cicilan 3 Jutaan Free Biaya KPR' menghasilkan CTR 4.2%.\n• Format video Reels POV walk-through show unit menghasilkan 68% total qualified leads.\n• Custom Audience Lookalike 1% dari database pembeli terdahulu menghasilkan CPL paling efisien (Rp 28.500).",
-                "• Single Image ad banner statis memiliki bounce rate tinggi (CTR < 1.1%) dan CPL membengkak ke Rp 85.000.\n• Penargetan audiens broad interest umum 'Property Investment' terlalu banyak menghasilkan junk leads dari luar Jabodetabek.",
-                "1. Scale budget 30% pada ad set winning creative 'Video Tour Hook 2 Lantai'.\n2. Produksi 4 variasi video UGC testimoni serah terima kunci cluster terbaru.\n3. Implementasi WhatsApp Business Automation CRM untuk fast response < 5 menit bagi seluruh lead baru."
-            ]);
-
-            // 2. Fashion / Hijab Brand: Lucere Official (E-Commerce ROAS Scale-up)
-            $stmt->execute([
-                $cLucere,
-                'August 2026',
-                'E-Commerce ROAS Scale-up & Ramadhan Silk Launch',
-                38000000.00,       // Total Ad Spend: Rp 38.000.000
-                266000000.00,      // Revenue / Omset: Rp 266.000.000
-                7.00,              // ROAS: 7.00x
-                600.00,            // ROI: 600%
-                1820,              // Total Conversions (1,820 Orders)
-                20879.12,          // CPA (Cost Per Acquisition): Rp 20.879
-                580000,            // Ads Reach
-                1620000,           // Ads Impressions
-                4.45,              // CTR: 4.45%
-                880.00,            // CPC: Rp 880
-                23450.00,          // CPM: Rp 23.450
-                4.20,              // Lost IS (Rank): 4.20%
-                16.50,             // Lost IS (Budget): 16.50%
-                'Kombinasi Advantage+ Shopping Campaigns (ASC) di Meta Ads dan Spark Ads di TikTok berhasil menjangkau repeat buyer scarf silk dengan AOV Rp 146.000 dan Return on Ad Spend stabil di atas 7.00x.',
-                'Styling 5 Menit Pashmina Silk Shimmer & ASMR Unboxing Exclusive Box',
-                1150000,           // Total Views
-                7450,              // Followers Gained
-                64.80,             // Avg Video Retention: 64.80%
-                8.20,              // Engagement Rate: 8.20%
-                'assets/uploads/reports/creative_lucere_win.svg',
-                'assets/uploads/reports/creative_lucere_lose.svg',
-                "• Format Reels 'Styling Tutorial 3 Cara Pakai Hijab Segiempat' viral dengan 420K views organik & mendongkrak purchase ad score ke Excellent.\n• Bundle offer 'Beli 3 Gratis Pouch' menaikkan keranjang belanja AOV sebesar 35%.\n• Retargeting Website 14-day Add-to-Cart audiens mengonversi dengan ROAS 11.4x.",
-                "• Foto Flatlay katalog produk tanpa model manusia mendapatkan click rate rendah (CTR 0.85%).\n• Diskon flash sale direct-to-checkout tanpa teaser storytelling kurang efektif membangun brand equity.",
-                "1. Luncurkan bundling New Signature Silk Motif Collection dengan seeding ke 15 micro-influencer hijab.\n2. Alokasikan 20% budget untuk live shopping TikTok Ads retargeting pada jam 19.00 - 22.00 WIB.\n3. Uji coba lead generation program VIP Reseller / Membership di WhatsApp."
-            ]);
-        }
-    }
-
-    public static function seedDefaultReports(PDO $db): void {
-        self::seedPerformanceReports($db);
-        
-        $db->exec("
-            CREATE TABLE IF NOT EXISTS client_reports (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                client_id INTEGER NOT NULL,
-                report_month VARCHAR(50) NOT NULL,
-                executive_summary TEXT,
-                followers_growth INTEGER NOT NULL DEFAULT 0,
-                total_reach INTEGER NOT NULL DEFAULT 0,
-                total_impressions INTEGER NOT NULL DEFAULT 0,
-                engagement_rate DECIMAL(5,2) NOT NULL DEFAULT 0.00,
-                saves_shares INTEGER NOT NULL DEFAULT 0,
-                link_clicks INTEGER NOT NULL DEFAULT 0,
-                leads_generated INTEGER NOT NULL DEFAULT 0,
-                top_content_summary TEXT,
-                action_plan TEXT,
-                is_deleted INTEGER NOT NULL DEFAULT 0,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
-            );
-        ");
-
-        // Ensure standard clients exist for rich reporting
-        $c1 = $db->query("SELECT id FROM clients WHERE company LIKE '%Prima Pasir%' LIMIT 1")->fetchColumn();
-        if (!$c1) {
-            $db->exec("INSERT INTO clients (name, company, email, phone, address) VALUES ('Bang Akbar', 'Prima Pasir Mandiri', 'akbar@primapasir.com', '0895361622252', 'Kp Cisauk Girang, RT 05/RW 05, Kec. Cisauk, Kab. Tangerang, Banten')");
-            $c1 = $db->lastInsertId();
-        }
-
-        $c2 = $db->query("SELECT id FROM clients WHERE company LIKE '%Autolux%' LIMIT 1")->fetchColumn();
-        if (!$c2) {
-            $db->exec("INSERT INTO clients (name, company, email, phone, address) VALUES ('Hendra Wijaya', 'Autolux Detailing & Bodyworks', 'hendra@autolux.id', '081288997766', 'Jl. Boulevard Gading Serpong Kav. 22, Tangerang')");
-            $c2 = $db->lastInsertId();
-        }
-
-        $c3 = $db->query("SELECT id FROM clients WHERE company LIKE '%Grand BSD%' LIMIT 1")->fetchColumn();
-        if (!$c3) {
-            $db->exec("INSERT INTO clients (name, company, email, phone, address) VALUES ('Clarissa Tan', 'Grand BSD Residence', 'clarissa@grandbsd.co.id', '081399881122', 'Marketing Gallery Grand BSD, Jl. BSD Raya Utama No. 8, Tangerang')");
-            $c3 = $db->lastInsertId();
-        }
-
-        $reportStmt = $db->prepare("
-            INSERT INTO client_reports (
-                client_id, report_month, executive_summary,
-                followers_growth, total_reach, total_impressions,
-                engagement_rate, saves_shares, link_clicks, leads_generated,
-                top_content_summary, action_plan
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
-
-        // 1. Report Prima Pasir Mandiri (Real Estate / Building Materials - Lead Gen & Reach)
-        $reportStmt->execute([
-            $c1,
-            'August 2026',
-            'Bulan Agustus 2026 mencatatkan lonjakan awareness dan inquiry material konstruksi sebesar 42% untuk Prima Pasir Mandiri. Fokus konten edukasi pemilihan pasir cor berkualitas tinggi serta transparansi armada pengiriman terbukti mendorong kepercayaan kontraktor dan pemilik proyek residensial di area Jabodetabek.',
-            850,
-            145200,
-            382400,
-            4.85,
-            1940,
-            820,
-            48,
-            'Reels edukasi "Perbedaan Pasir Cor Cuci vs Pasir Kasar untuk Struktur Bangunan Tahan Gempa" meraih 94.000 views, 1.200 saves, dan mendatangkan 22 direct WhatsApp leads dalam 48 jam pertama penayangan.',
-            "1. Gandakan frekuensi konten edukasi teknis konstruksi & tips hemat budget proyek konstruksi.\n2. Luncurkan segmen video testimoni mandor proyek perumahan di Serpong & BSD.\n3. Uji coba Meta Ads retargeting pada audiens yang telah menyimpan (save) postingan tips."
-        ]);
-
-        // 2. Report Autolux Detailing & Bodyworks (Automotive - Short Video Views & Booking Inquiries)
-        $reportStmt->execute([
-            $c2,
-            'August 2026',
-            'Kampanye Reels dan TikTok Showroom Transformation menghasilkan viralitas tinggi dengan total impresi menembus 520.000+. Peningkatan engagement didorong oleh format ASMR Ceramic Coating dan perbandingan Before-After restorasi cat mobil klasik.',
-            1620,
-            215000,
-            524000,
-            6.40,
-            3450,
-            1150,
-            64,
-            'Short Video "Restorasi Cat Kusam Porsche 911 1995 Menjadi Seperti Baru (ASMR & Timelapse)" mencatat 182.000 views, 2.100 shares, dan engagement rate 8.2%.',
-            "1. Perkuat konten Behind-the-Scenes proses pengerjaan Paint Protection Film (PPF).\n2. Kolaborasi mini influencer car enthusiast lokal Tangerang Selatan.\n3. Siapkan promo early-bird bundling Nano Ceramic Coating untuk periode September 2026."
-        ]);
-
-        // 3. Report Grand BSD Residence (Property / Real Estate - Leads & Walkthroughs)
-        $reportStmt->execute([
-            $c3,
-            'July 2026',
-            'Peluncuran cluster terbaru "The Grand Horizon" mendapatkan atensi kuat dari segmen keluarga muda mapan. Visualisasi interior dan virtual tour unit rumah contoh mengonversi reach digital menjadi kunjungan show unit offline.',
-            1200,
-            188000,
-            410000,
-            5.15,
-            2280,
-            1420,
-            52,
-            'Video Walkthrough "Rumah 2 Lantai Konsep Japandi Modern dengan Rooftop Garden" menghasilkan 31 booking jadwal kunjungan marketing gallery.',
-            "1. Follow-up lead database dengan konten video FAQ cicilan KPR & promo DP 0%.\n2. Produksi video live streaming open house setiap akhir pekan bersama sales agent."
-        ]);
-    }
-
-    private static function runMigrations(PDO $db): void {
-        // Ensure performance_reports table exists
-        $db->exec("
-            CREATE TABLE IF NOT EXISTS performance_reports (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                client_id INTEGER NOT NULL,
-                report_period VARCHAR(100) NOT NULL,
-                objective VARCHAR(255) DEFAULT NULL,
-                total_ad_spend DECIMAL(15,2) NOT NULL DEFAULT 0,
-                revenue DECIMAL(15,2) NOT NULL DEFAULT 0,
-                roas DECIMAL(5,2) NOT NULL DEFAULT 0,
-                roi DECIMAL(5,2) NOT NULL DEFAULT 0,
-                total_conversions INT NOT NULL DEFAULT 0,
-                cpl_cpa DECIMAL(15,2) NOT NULL DEFAULT 0,
-                ads_reach INT NOT NULL DEFAULT 0,
-                ads_impressions INT NOT NULL DEFAULT 0,
-                ads_ctr DECIMAL(5,2) NOT NULL DEFAULT 0,
-                ads_cpc DECIMAL(10,2) NOT NULL DEFAULT 0,
-                ads_cpm DECIMAL(10,2) NOT NULL DEFAULT 0,
-                lost_is_rank DECIMAL(5,2) NOT NULL DEFAULT 0,
-                lost_is_budget DECIMAL(5,2) NOT NULL DEFAULT 0,
-                ads_evaluation TEXT DEFAULT NULL,
-                content_identity TEXT DEFAULT NULL,
-                total_views INT NOT NULL DEFAULT 0,
-                followers_gained INT NOT NULL DEFAULT 0,
-                avg_video_retention DECIMAL(5,2) NOT NULL DEFAULT 0,
-                engagement_rate DECIMAL(5,2) NOT NULL DEFAULT 0,
-                winning_content_url VARCHAR(255) DEFAULT NULL,
-                underperforming_content_url VARCHAR(255) DEFAULT NULL,
-                what_worked TEXT DEFAULT NULL,
-                what_didnt_work TEXT DEFAULT NULL,
-                next_action_plan TEXT DEFAULT NULL,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                is_deleted INTEGER NOT NULL DEFAULT 0,
-                FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
-            );
-        ");
-
-        // Ensure content_planner table exists
-        $db->exec("
-            CREATE TABLE IF NOT EXISTS content_planner (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                client_id INTEGER NOT NULL,
-                project_id INTEGER DEFAULT NULL,
-                title VARCHAR(255) NOT NULL,
-                platform VARCHAR(50) NOT NULL DEFAULT 'Instagram',
-                content_type VARCHAR(50) NOT NULL DEFAULT 'Reels / Video',
-                publish_date DATE NOT NULL,
-                publish_time TIME DEFAULT '10:00:00',
-                status VARCHAR(30) NOT NULL DEFAULT 'Draft',
-                assignee_id INTEGER DEFAULT NULL,
-                asset_url TEXT DEFAULT NULL,
-                color_hex VARCHAR(20) DEFAULT '#3B82F6',
-                notes TEXT DEFAULT NULL,
-                is_deleted INTEGER DEFAULT 0,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
-                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL,
-                FOREIGN KEY (assignee_id) REFERENCES employees(id) ON DELETE SET NULL
-            );
-        ");
-
-        // Ensure client_reports table exists
-        $db->exec("
-            CREATE TABLE IF NOT EXISTS client_reports (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                client_id INTEGER NOT NULL,
-                report_month VARCHAR(50) NOT NULL,
-                executive_summary TEXT,
-                followers_growth INTEGER NOT NULL DEFAULT 0,
-                total_reach INTEGER NOT NULL DEFAULT 0,
-                total_impressions INTEGER NOT NULL DEFAULT 0,
-                engagement_rate DECIMAL(5,2) NOT NULL DEFAULT 0.00,
-                saves_shares INTEGER NOT NULL DEFAULT 0,
-                link_clicks INTEGER NOT NULL DEFAULT 0,
-                leads_generated INTEGER NOT NULL DEFAULT 0,
-                top_content_summary TEXT,
-                action_plan TEXT,
-                is_deleted INTEGER NOT NULL DEFAULT 0,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE
-            );
-        ");
-
-        $tables = ['invoices', 'freelancer_payouts', 'ads_spend', 'salaries', 'content_planner', 'client_reports', 'performance_reports'];
-        foreach ($tables as $t) {
+        // Helper to check existing columns for migration
+        $getTableCols = function(string $table) use ($db, $driver): array {
             try {
-                $cols = $db->query("PRAGMA table_info($t)")->fetchAll(PDO::FETCH_COLUMN, 1);
-                if (!empty($cols) && !in_array('is_deleted', $cols)) {
-                    $db->exec("ALTER TABLE $t ADD COLUMN is_deleted INTEGER DEFAULT 0");
+                if ($driver === 'mysql') {
+                    $stmt = $db->prepare("SHOW COLUMNS FROM `{$table}`");
+                    $stmt->execute();
+                    return $stmt->fetchAll(PDO::FETCH_COLUMN, 0);
+                } else {
+                    $stmt = $db->query("PRAGMA table_info({$table})");
+                    return $stmt->fetchAll(PDO::FETCH_COLUMN, 1);
                 }
             } catch (Exception $e) {
-                // Ignore if table not created yet or already migrated
+                return [];
+            }
+        };
+
+        // 1. Migrate `users` table columns
+        $userCols = $getTableCols('users');
+        if (!empty($userCols)) {
+            if (!in_array('employment_type', $userCols)) {
+                $db->exec("ALTER TABLE users ADD COLUMN employment_type VARCHAR(30) DEFAULT 'internal'");
+            }
+            if (!in_array('phone_wa', $userCols)) {
+                $db->exec("ALTER TABLE users ADD COLUMN phone_wa VARCHAR(50) DEFAULT NULL");
+            }
+            if (!in_array('client_id', $userCols)) {
+                $db->exec("ALTER TABLE users ADD COLUMN client_id INT DEFAULT NULL");
+            }
+            if (!in_array('is_active', $userCols)) {
+                $db->exec("ALTER TABLE users ADD COLUMN is_active INT DEFAULT 1");
             }
         }
 
-        // Ensure employees table has email column
-        try {
-            $empCols = $db->query("PRAGMA table_info(employees)")->fetchAll(PDO::FETCH_COLUMN, 1);
-            if (!in_array('email', $empCols)) {
-                $db->exec("ALTER TABLE employees ADD COLUMN email VARCHAR(150) DEFAULT NULL");
+        // 2. Migrate `clients` table columns
+        $clientCols = $getTableCols('clients');
+        if (!empty($clientCols)) {
+            if (!in_array('company_name', $clientCols)) {
+                $db->exec("ALTER TABLE clients ADD COLUMN company_name VARCHAR(150) DEFAULT NULL");
+                $db->exec("UPDATE clients SET company_name = company WHERE company_name IS NULL OR company_name = ''");
             }
-        } catch (Exception $e) {
-            // Ignore
-        }
-
-        // Ensure clients table has logo and is_deleted columns
-        try {
-            $clientCols = $db->query("PRAGMA table_info(clients)")->fetchAll(PDO::FETCH_COLUMN, 1);
+            if (!in_array('pic_name', $clientCols)) {
+                $db->exec("ALTER TABLE clients ADD COLUMN pic_name VARCHAR(150) DEFAULT NULL");
+                $db->exec("UPDATE clients SET pic_name = name WHERE pic_name IS NULL OR pic_name = ''");
+            }
+            if (!in_array('package_name', $clientCols)) {
+                $db->exec("ALTER TABLE clients ADD COLUMN package_name VARCHAR(100) DEFAULT 'Social Media & Performance Ads'");
+            }
+            if (!in_array('status', $clientCols)) {
+                $db->exec("ALTER TABLE clients ADD COLUMN status VARCHAR(30) DEFAULT 'Active'");
+            }
             if (!in_array('logo', $clientCols)) {
                 $db->exec("ALTER TABLE clients ADD COLUMN logo VARCHAR(255) DEFAULT NULL");
             }
             if (!in_array('is_deleted', $clientCols)) {
-                $db->exec("ALTER TABLE clients ADD COLUMN is_deleted INTEGER DEFAULT 0");
+                $db->exec("ALTER TABLE clients ADD COLUMN is_deleted INT DEFAULT 0");
             }
-        } catch (Exception $e) {
-            // Ignore
         }
 
-        // Ensure projects table has is_deleted column
-        try {
-            $projCols = $db->query("PRAGMA table_info(projects)")->fetchAll(PDO::FETCH_COLUMN, 1);
+        // 3. Migrate `projects` table columns
+        $projCols = $getTableCols('projects');
+        if (!empty($projCols)) {
+            if (!in_array('project_name', $projCols)) {
+                $db->exec("ALTER TABLE projects ADD COLUMN project_name VARCHAR(200) DEFAULT NULL");
+                $db->exec("UPDATE projects SET project_name = name WHERE project_name IS NULL OR project_name = ''");
+            }
+            if (!in_array('progress_percent', $projCols)) {
+                $db->exec("ALTER TABLE projects ADD COLUMN progress_percent DECIMAL(5,2) DEFAULT 0");
+            }
             if (!in_array('is_deleted', $projCols)) {
-                $db->exec("ALTER TABLE projects ADD COLUMN is_deleted INTEGER DEFAULT 0");
+                $db->exec("ALTER TABLE projects ADD COLUMN is_deleted INT DEFAULT 0");
             }
-        } catch (Exception $e) {
-            // Ignore
         }
 
-        // Ensure freelancer_payouts table has freelancer_phone column
-        try {
-            $flCols = $db->query("PRAGMA table_info(freelancer_payouts)")->fetchAll(PDO::FETCH_COLUMN, 1);
-            if (!in_array('freelancer_phone', $flCols)) {
-                $db->exec("ALTER TABLE freelancer_payouts ADD COLUMN freelancer_phone VARCHAR(50) DEFAULT NULL");
+        // 4. Ensure is_deleted on other standard tables
+        $tablesWithDeleted = ['invoices', 'freelancer_payouts', 'ads_spend', 'salaries', 'content_planner', 'client_reports', 'performance_reports'];
+        foreach ($tablesWithDeleted as $t) {
+            $cols = $getTableCols($t);
+            if (!empty($cols) && !in_array('is_deleted', $cols)) {
+                try {
+                    $db->exec("ALTER TABLE {$t} ADD COLUMN is_deleted INT DEFAULT 0");
+                } catch (Exception $e) {}
             }
-        } catch (Exception $e) {
-            // Ignore
         }
 
-        // Check and seed default reports if empty
-        try {
-            $rCount = intval($db->query("SELECT COUNT(*) FROM client_reports WHERE COALESCE(is_deleted, 0) = 0")->fetchColumn());
-            if ($rCount === 0) {
-                self::seedDefaultReports($db);
-            }
-        } catch (Exception $e) {
-            // Ignore
+        // 5. Seed initial multi-role users & demo project tasks
+        self::seedMultiRoleAccountsAndTasks($db);
+    }
+
+    public static function seedMultiRoleAccountsAndTasks(PDO $db): void {
+        // Ensure standard client Grand BSD Residence exists
+        $cGrandBsd = $db->query("SELECT id FROM clients WHERE company LIKE '%Grand BSD%' LIMIT 1")->fetchColumn();
+        if (!$cGrandBsd) {
+            $db->exec("INSERT INTO clients (name, pic_name, company, company_name, email, phone, package_name, status, address) VALUES (
+                'Clarissa Tan', 'Clarissa Tan', 'Grand BSD Residence', 'Grand BSD Residence', 'clarissa@grandbsd.co.id', '081399881122', 'Full Social Media & Performance Ads', 'Active', 'Marketing Gallery Grand BSD, Jl. BSD Raya Utama No. 8, Tangerang'
+            )");
+            $cGrandBsd = $db->lastInsertId();
         }
 
-        // Check and seed default performance reports if empty
-        try {
-            $rCount = intval($db->query("SELECT COUNT(*) FROM performance_reports WHERE COALESCE(is_deleted, 0) = 0")->fetchColumn());
-            if ($rCount === 0) {
-                self::seedPerformanceReports($db);
+        // Seed 5-Role User Accounts (Owner, Admin, Karyawan 1 & 2, Freelancer 1 & 2, Client)
+        $hashedPw = password_hash('password123', PASSWORD_BCRYPT);
+
+        $upsertUser = function($name, $email, $role, $empType, $phone, $clientId = null) use ($db, $hashedPw) {
+            $stmt = $db->prepare("SELECT id FROM users WHERE email = ?");
+            $stmt->execute([$email]);
+            $existing = $stmt->fetchColumn();
+
+            if (!$existing) {
+                $insert = $db->prepare("
+                    INSERT INTO users (name, email, password, role, employment_type, phone_wa, client_id, is_active)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+                ");
+                $insert->execute([$name, $email, $hashedPw, $role, $empType, $phone, $clientId]);
+                return $db->lastInsertId();
+            } else {
+                $update = $db->prepare("
+                    UPDATE users SET 
+                        role = ?, 
+                        employment_type = ?, 
+                        phone_wa = COALESCE(phone_wa, ?), 
+                        client_id = COALESCE(client_id, ?)
+                    WHERE id = ?
+                ");
+                $update->execute([$role, $empType, $phone, $clientId, $existing]);
+                return $existing;
             }
-        } catch (Exception $e) {
-            // Ignore
+        };
+
+        // 1. Owner
+        $ownerId = $upsertUser('Muhammad Fadhli', 'owner@kalamedia.id', 'owner', 'internal', '08881124215', null);
+
+        // 2. Admin / PM
+        $adminId = $upsertUser('Ilham Lanang', 'finance@kalamedia.id', 'admin', 'internal', '081382573705', null);
+
+        // 3. Karyawan (In-House Team)
+        $karyawan1Id = $upsertUser('Dimas Prasetyo', 'dimas@kalamedia.id', 'karyawan', 'internal', '081298765431', null);
+        $karyawan2Id = $upsertUser('Annisa Nuraini', 'annisa@kalamedia.id', 'karyawan', 'internal', '081387654321', null);
+
+        // 4. Freelancer (External Talent)
+        $freelance1Id = $upsertUser('Kevin Pratama', 'kevin@kalamedia.id', 'freelancer', 'freelance', '081277665544', null);
+        $freelance2Id = $upsertUser('Bima Satria', 'bima@kalamedia.id', 'freelancer', 'freelance', '081566778899', null);
+
+        // 5. Client
+        $clientId = $upsertUser('Clarissa Tan', 'client@grandbsd.co.id', 'client', 'client_user', '081399881122', $cGrandBsd);
+
+        // Ensure active project for Grand BSD Residence
+        $projId = $db->query("SELECT id FROM projects WHERE client_id = {$cGrandBsd} LIMIT 1")->fetchColumn();
+        if (!$projId) {
+            $projStmt = $db->prepare("
+                INSERT INTO projects (client_id, name, project_name, contract_value, target_margin_percent, progress_percent, status, start_date, end_date)
+                VALUES (?, ?, ?, ?, ?, ?, 'In Progress', ?, ?)
+            ");
+            $projStmt->execute([
+                $cGrandBsd,
+                'Digital Campaign & Lead Gen - Grand BSD Horizon',
+                'Digital Campaign & Lead Gen - Grand BSD Horizon',
+                45000000.00,
+                35.00,
+                60.00,
+                date('Y-m-01'),
+                date('Y-m-t', strtotime('+2 months'))
+            ]);
+            $projId = $db->lastInsertId();
+        }
+
+        // Seed Sample Deliverable Tasks if table has no tasks for this project
+        $taskCount = intval($db->query("SELECT COUNT(*) FROM tasks WHERE project_id = {$projId} AND is_deleted = 0")->fetchColumn());
+        if ($taskCount === 0) {
+            $taskStmt = $db->prepare("
+                INSERT INTO tasks (
+                    project_id, client_id, assigned_to_user_id, assigned_by_user_id,
+                    title, description, category, worker_type, priority, status,
+                    deliverable_link, due_date
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ");
+
+            // Task 1: Approved Design by Karyawan
+            $taskStmt->execute([
+                $projId, $cGrandBsd, $karyawan1Id, $adminId,
+                'Desain Feed Carousel Instagram - Promo Early Bird Cluster Horizon',
+                'Pembuatan 7 slide desain carousel edukasi denah tipe 72/90 dan promo cicilan mulai 3 jutaan. Gunakan tone warna warm luxury sesuai brand guidelines.',
+                'design', 'karyawan', 'high', 'approved',
+                'https://drive.google.com/drive/folders/demo-grandbsd-feed-approved',
+                date('Y-m-d', strtotime('-3 days'))
+            ]);
+            $t1 = $db->lastInsertId();
+
+            // Task 2: Video Walkthrough by Freelancer (Menunggu Review Klien)
+            $taskStmt->execute([
+                $projId, $cGrandBsd, $freelance1Id, $adminId,
+                'Video Reels POV Walk-through Show Unit Tipe 72',
+                'Editing video Reels 45 detik format vertikal 9:16 dengan transisi seamless, color grading modern, backsound trending, dan motion text spesifikasi ruangan.',
+                'video', 'freelancer', 'urgent', 'client_review',
+                'https://drive.google.com/file/d/demo-reels-unit-hook/view',
+                date('Y-m-d', strtotime('+1 day'))
+            ]);
+            $t2 = $db->lastInsertId();
+
+            // Task 3: Copywriting Meta Ads (Revisi Diminta oleh Klien)
+            $taskStmt->execute([
+                $projId, $cGrandBsd, $karyawan2Id, $adminId,
+                'Copywriting Meta Ads & Broadcast WhatsApp Promo Merdeka',
+                'Penyusunan naskah copy primary text Meta Ads, headline 5 variasi, dan template broadcast pesan WhatsApp follow up calon prospek show unit.',
+                'copywriting', 'karyawan', 'medium', 'revision',
+                'https://docs.google.com/document/d/demo-copy-promo-horizon/edit',
+                date('Y-m-d', strtotime('+2 days'))
+            ]);
+            $t3 = $db->lastInsertId();
+
+            // Task 4: Setup Meta Ads Campaign (Sedang Dikerjakan)
+            $taskStmt->execute([
+                $projId, $cGrandBsd, $karyawan1Id, $adminId,
+                'Setup Kampanye Meta Ads Instant Form - Segment Jabodetabek',
+                'Konfigurasi Ads Manager Meta untuk objektif Lead Generation form dengan filter kualifikasi penghasilan dan Custom Audience lookalike database.',
+                'ads', 'karyawan', 'high', 'in_progress',
+                null,
+                date('Y-m-d', strtotime('+4 days'))
+            ]);
+
+            // Task 5: Web Landing Page Slices (Antrean / Backlog)
+            $taskStmt->execute([
+                $projId, $cGrandBsd, $freelance2Id, $adminId,
+                'Slicing Landing Page & Integrasi Form CRM BSD Horizon',
+                'Coding landing page responive mobile-first, integrasi Google Tag Manager, Meta Pixel API, dan Webhook form leads ke spreadsheet sales.',
+                'web', 'freelancer', 'medium', 'backlog',
+                null,
+                date('Y-m-d', strtotime('+7 days'))
+            ]);
+
+            // Seed Sample Discussions / Feedbacks
+            $fbStmt = $db->prepare("
+                INSERT INTO task_feedbacks (task_id, user_id, feedback_type, message, attachment_path, is_read_by_worker)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ");
+
+            // Feedback on Task 2 (Freelancer asking for client review)
+            $fbStmt->execute([
+                $t2, $freelance1Id, 'comment',
+                'Halo Bu Clarissa & Tim Grand BSD, draft video reels sudah selesai diedit dengan tempo cepat dan teks fasilitas lengkap. Silakan dicek melalui link Google Drive di atas ya.',
+                null, 1
+            ]);
+
+            // Feedback on Task 3 (Client requesting revision)
+            $fbStmt->execute([
+                $t3, $clientId, 'revision_request',
+                'Tolong revisi pada Headline Variasi 1 & 2 ya tim Kalamedia. Buat lebih menonjolkan keuntungan "Free Biaya KPR & Subsidi DP 0%". Terima kasih!',
+                null, 0
+            ]);
+
+            $fbStmt->execute([
+                $t3, $karyawan2Id, 'comment',
+                'Baik Bu Clarissa! Copy sedang kami perbaiki sesuai arahan dan segera kami perbarui link dokumennya siang ini.',
+                null, 1
+            ]);
         }
     }
 }

@@ -1,11 +1,38 @@
 <?php
 /**
- * Kalamedia Sidebar Navigation - Clean Role-Based Architecture
+ * Kalamedia Sidebar Navigation - Clean Minimalist Text Architecture (No Icons)
+ * Multi-Role Support: Owner, Admin, Karyawan, Freelancer, Client
  */
 $currentUser = current_user();
+$role = current_user_role();
 $isOwner = is_owner();
-$currentPage = $GLOBALS['currentPage'] ?? $_GET['page'] ?? ($isOwner ? 'owner-dashboard' : 'admin-dashboard');
-$homeUrl = $isOwner ? url('owner-dashboard') : url('admin-dashboard');
+$isAdmin = is_admin();
+$isClient = is_client();
+$isWorker = ($role === 'karyawan' || $role === 'freelancer');
+
+$currentPage = $GLOBALS['currentPage'] ?? $_GET['page'] ?? '';
+if (empty($currentPage)) {
+    $currentPage = home_url_for_role();
+}
+$homeUrl = home_url_for_role();
+
+$roleLabelMap = [
+    'owner' => 'OWNER',
+    'admin' => 'ADMIN / PM',
+    'karyawan' => 'KARYAWAN',
+    'freelancer' => 'FREELANCER',
+    'client' => 'CLIENT'
+];
+$badgeLabel = $roleLabelMap[$role] ?? strtoupper($role);
+
+$badgeColors = [
+    'owner' => ['bg' => '#FEF3F2', 'text' => '#B42318'],
+    'admin' => ['bg' => '#EFF8FF', 'text' => '#175CD3'],
+    'karyawan' => ['bg' => '#ECFDF3', 'text' => '#027A48'],
+    'freelancer' => ['bg' => '#F4F3FF', 'text' => '#5925DC'],
+    'client' => ['bg' => '#F8F9FC', 'text' => '#344054']
+];
+$currentBadge = $badgeColors[$role] ?? ['bg' => '#F2F4F7', 'text' => '#344054'];
 ?>
 
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
@@ -17,131 +44,139 @@ $homeUrl = $isOwner ? url('owner-dashboard') : url('admin-dashboard');
         <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" class="sidebar-brand-img" style="height: 30px; width: 30px; object-fit: contain; flex-shrink: 0;">
         <span style="font-weight: 800; font-size: 13px; color: #101828; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Kala Kausa Prima</span>
       </div>
-      <span class="role-badge-sidebar" style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 6px; border-radius: 4px; background: #F2F4F7; color: <?= $isOwner ? '#B45309' : '#101828' ?>; white-space: nowrap; flex-shrink: 0;">
-        <?= $isOwner ? 'OWNER' : 'FINANCE' ?>
+      <span class="role-badge-sidebar" style="font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; padding: 2px 6px; border-radius: 4px; background: <?= $currentBadge['bg'] ?>; color: <?= $currentBadge['text'] ?>; white-space: nowrap; flex-shrink: 0;">
+        <?= $badgeLabel ?>
       </span>
     </a>
     <button class="sidebar-close-btn" onclick="closeMobileSidebar()" aria-label="Close Sidebar">&times;</button>
   </div>
 
   <nav class="sidebar-nav">
-    <div class="nav-section-title">Menu Utama</div>
 
-    <?php if ($isOwner): ?>
-      <!-- Owner Dashboard -->
-      <a href="<?= url('owner-dashboard') ?>" class="nav-link <?= $currentPage === 'owner-dashboard' ? 'active' : '' ?>">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="9"></rect>
-          <rect x="14" y="3" width="7" height="5"></rect>
-          <rect x="14" y="12" width="7" height="9"></rect>
-          <rect x="3" y="16" width="7" height="5"></rect>
-        </svg>
-        <span>Dashboard</span>
+    <?php if ($isClient): ?>
+      <!-- CLIENT PORTAL NAVIGATION -->
+      <div class="nav-section-title">Client Portal</div>
+
+      <a href="<?= url('client-portal') ?>" class="nav-link <?= $currentPage === 'client-portal' ? 'active' : '' ?>">
+        <span>Progress & Deliverables</span>
       </a>
+
+      <a href="<?= url('content-calendar') ?>" class="nav-link <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
+        <span>Kalender Konten</span>
+      </a>
+
+      <a href="<?= url('invoices') ?>" class="nav-link <?= in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
+        <span>Tagihan / Invoices</span>
+      </a>
+
+      <a href="<?= url('reports') ?>" class="nav-link <?= in_array($currentPage, ['reports', 'report-deck']) ? 'active' : '' ?>">
+        <span>Laporan Performa</span>
+      </a>
+
+    <?php elseif ($isWorker): ?>
+      <!-- WORKER & FREELANCER NAVIGATION -->
+      <div class="nav-section-title">Workspace Tim</div>
+
+      <a href="<?= url('tasks') ?>" class="nav-link <?= in_array($currentPage, ['tasks', 'team-workspace']) ? 'active' : '' ?>">
+        <span>Tugas Saya & Progres</span>
+      </a>
+
+      <a href="<?= url('content-calendar') ?>" class="nav-link <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
+        <span>Kalender Konten</span>
+      </a>
+
     <?php else: ?>
-      <!-- Finance Dashboard -->
-      <a href="<?= url('admin-dashboard') ?>" class="nav-link <?= $currentPage === 'admin-dashboard' ? 'active' : '' ?>">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="3" width="7" height="9"></rect>
-          <rect x="14" y="3" width="7" height="5"></rect>
-          <rect x="14" y="12" width="7" height="9"></rect>
-          <rect x="3" y="16" width="7" height="5"></rect>
-        </svg>
-        <span>Dashboard</span>
+      <!-- OWNER & ADMIN NAVIGATION -->
+      <div class="nav-section-title">Menu Utama</div>
+
+      <?php if ($isOwner): ?>
+        <a href="<?= url('owner-dashboard') ?>" class="nav-link <?= $currentPage === 'owner-dashboard' ? 'active' : '' ?>">
+          <span>Executive Dashboard</span>
+        </a>
+      <?php else: ?>
+        <a href="<?= url('admin-dashboard') ?>" class="nav-link <?= $currentPage === 'admin-dashboard' ? 'active' : '' ?>">
+          <span>Admin Dashboard</span>
+        </a>
+      <?php endif; ?>
+
+      <div class="nav-section-title">Manajemen Operasional</div>
+
+      <!-- Task Assignment & SDM Management -->
+      <a href="<?= url('tasks') ?>" class="nav-link <?= in_array($currentPage, ['tasks', 'team-workspace']) ? 'active' : '' ?>">
+        <span>Pembagian Tugas Tim</span>
       </a>
+
+      <!-- Client Portal Preview for Admin/Owner -->
+      <a href="<?= url('client-portal') ?>" class="nav-link <?= $currentPage === 'client-portal' ? 'active' : '' ?>">
+        <span>Portal Klien (Preview)</span>
+      </a>
+
+      <a href="<?= url('invoices') ?>" class="nav-link <?= in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
+        <span>Invoice & Penagihan</span>
+      </a>
+
+      <a href="<?= url('expenses') ?>" class="nav-link <?= $currentPage === 'expenses' ? 'active' : '' ?>">
+        <span>Pengeluaran Operasional</span>
+      </a>
+
+      <a href="<?= url('salaries') ?>" class="nav-link <?= in_array($currentPage, ['salaries', 'salary-view']) ? 'active' : '' ?>">
+        <span>Penggajian Karyawan</span>
+      </a>
+
+      <a href="<?= url('clients') ?>" class="nav-link <?= $currentPage === 'clients' ? 'active' : '' ?>">
+        <span>Klien & Proyek</span>
+      </a>
+
+      <a href="<?= url('reports') ?>" class="nav-link <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
+        <span>Laporan Klien</span>
+      </a>
+
+      <a href="<?= url('content-calendar') ?>" class="nav-link <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
+        <span>Kalender Konten</span>
+      </a>
+
+      <?php if ($isOwner): ?>
+        <div class="nav-section-title">Konfigurasi</div>
+        <a href="<?= url('settings') ?>" class="nav-link <?= $currentPage === 'settings' ? 'active' : '' ?>">
+          <span>Pengaturan Agensi</span>
+        </a>
+      <?php endif; ?>
     <?php endif; ?>
 
-    <div class="nav-section-title">Manajemen Operasional</div>
-
-    <a href="<?= url('invoices') ?>" class="nav-link <?= in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-        <polyline points="14 2 14 8 20 8"></polyline>
-        <line x1="16" y1="13" x2="8" y2="13"></line>
-        <line x1="16" y1="17" x2="8" y2="17"></line>
-        <polyline points="10 9 9 9 8 9"></polyline>
-      </svg>
-      <span>Invoice & Penagihan</span>
+    <!-- Dedicated Logout Menu Link -->
+    <div class="nav-section-title">Sesi Akun</div>
+    <a href="<?= url('logout') ?>" class="nav-link" style="color: #B42318; font-weight: 700;">
+      <span>Keluar (Logout)</span>
     </a>
 
-    <a href="<?= url('expenses') ?>" class="nav-link <?= $currentPage === 'expenses' ? 'active' : '' ?>">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="12" y1="1" x2="12" y2="23"></line>
-        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-      </svg>
-      <span>Pengeluaran Operasional</span>
-    </a>
-
-    <a href="<?= url('salaries') ?>" class="nav-link <?= in_array($currentPage, ['salaries', 'salary-view']) ? 'active' : '' ?>">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-        <path d="M7 15h0M2 9.5h20"></path>
-        <circle cx="16" cy="14" r="2"></circle>
-      </svg>
-      <span>Penggajian Karyawan</span>
-    </a>
-
-    <a href="<?= url('clients') ?>" class="nav-link <?= $currentPage === 'clients' ? 'active' : '' ?>">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-        <circle cx="9" cy="7" r="4"></circle>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-      </svg>
-      <span>Klien & Proyek</span>
-    </a>
-
-    <a href="<?= url('reports') ?>" class="nav-link <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-        <polyline points="14 2 14 8 20 8"></polyline>
-        <line x1="16" y1="13" x2="8" y2="13"></line>
-        <line x1="16" y1="17" x2="8" y2="17"></line>
-        <polyline points="10 9 9 9 8 9"></polyline>
-      </svg>
-      <span>Laporan Klien</span>
-    </a>
-
-    <a href="<?= url('content-calendar') ?>" class="nav-link <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-        <line x1="16" y1="2" x2="16" y2="6"></line>
-        <line x1="8" y1="2" x2="8" y2="6"></line>
-        <line x1="3" y1="10" x2="21" y2="10"></line>
-      </svg>
-      <span>Kalender Konten</span>
-    </a>
-
-    <?php if ($isOwner): ?>
-      <div class="nav-section-title">Konfigurasi</div>
-      <a href="<?= url('settings') ?>" class="nav-link <?= $currentPage === 'settings' ? 'active' : '' ?>">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"></circle>
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-        </svg>
-        <span>Pengaturan Agensi</span>
-      </a>
-    <?php endif; ?>
   </nav>
 
   <div class="sidebar-user">
     <div class="user-profile">
+      <?php
+        if ($isOwner) {
+            $sidebarProfileName = 'Owner';
+            $sidebarAvatar = 'OW';
+        } elseif ($role === 'admin') {
+            $sidebarProfileName = 'Admin';
+            $sidebarAvatar = 'AD';
+        } else {
+            $sidebarProfileName = htmlspecialchars($currentUser['name'] ?? 'User Kalamedia');
+            $sidebarAvatar = strtoupper(substr($currentUser['name'] ?? 'User', 0, 2));
+        }
+      ?>
       <div class="avatar">
-        <?= strtoupper(substr($currentUser['name'] ?? ($isOwner ? 'Owner' : 'Finance'), 0, 2)) ?>
+        <?= $sidebarAvatar ?>
       </div>
       <div class="user-details">
-        <h4><?= htmlspecialchars($currentUser['name'] ?? ($isOwner ? 'Owner Kala' : 'Finance Kala')) ?></h4>
-        <span class="role-badge <?= $isOwner ? 'role-owner' : 'role-admin' ?>">
-          <?= $isOwner ? 'Owner' : 'Finance' ?>
+        <h4><?= $sidebarProfileName ?></h4>
+        <span class="role-badge" style="background: <?= $currentBadge['bg'] ?>; color: <?= $currentBadge['text'] ?>;">
+          <?= $badgeLabel ?>
         </span>
       </div>
     </div>
-    <a href="<?= url('logout') ?>" class="btn-logout" title="Keluar / Logout">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-        <polyline points="16 17 21 12 16 7"></polyline>
-        <line x1="21" y1="12" x2="9" y2="12"></line>
-      </svg>
+    <a href="<?= url('logout') ?>" class="btn btn-secondary btn-sm" style="color: #B42318; border-color: #FECDCA; background: #FEF3F2; font-size: 11px; font-weight: 700; text-decoration: none; padding: 5px 12px; border-radius: 6px;">
+      Logout
     </a>
   </div>
 </aside>

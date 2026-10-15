@@ -84,7 +84,10 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
     <?php endif; ?>
 
     <!-- Direct Header Logout Button -->
-    <a href="<?= url('logout') ?>" class="btn btn-secondary btn-sm" style="color: #B42318; border-color: #FECDCA; background: #FEF3F2; font-size: 11.5px; font-weight: 700; text-decoration: none; padding: 6px 12px;">
+    <?php
+      $hdrLogoutContext = ($currentPage === 'client-portal' || is_client()) ? 'client' : 'internal';
+    ?>
+    <a href="<?= url('logout') ?>?context=<?= $hdrLogoutContext ?>" class="btn btn-secondary btn-sm" style="color: #B42318; border-color: #FECDCA; background: #FEF3F2; font-size: 11.5px; font-weight: 700; text-decoration: none; padding: 6px 12px;">
       Keluar (Logout)
     </a>
   </div>

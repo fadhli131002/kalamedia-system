@@ -454,6 +454,9 @@ $invoices = $stmtInvoices->fetchAll();
           <button class="portal-tab-btn" onclick="switchPortalTab('invoices', this)">
             <span>Tagihan / Invoices (<?= count($invoices) ?>)</span>
           </button>
+          <button class="portal-tab-btn" onclick="switchPortalTab('ads', this)">
+            <span>Transparansi Kampanye Ads</span>
+          </button>
         </div>
 
         <!-- TAB 1: Deliverables & Team Tasks -->
@@ -594,6 +597,29 @@ $invoices = $stmtInvoices->fetchAll();
                   <?php endif; ?>
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: Client Live Ads Transparency -->
+        <div id="tab-pane-ads" style="display: none;">
+          <div class="glass-panel">
+            <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h3 class="panel-title">Transparansi Kampanye & Anggaran Iklan (Live Ads Tracker)</h3>
+                <p style="font-size: 12.5px; color: var(--text-secondary); margin-top: 2px;">
+                  Informasi real-time penayangan iklan berbayar (Meta, Google, TikTok Ads) yang dijalankan dan diverifikasi agensi Kalamedia.
+                </p>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="loadClientAdsData()">
+                Segarkan Data
+              </button>
+            </div>
+
+            <div id="client-ads-container" style="padding: 24px;">
+              <div style="text-align: center; padding: 32px; color: var(--text-muted);">
+                Memuat data kampanye ads...
+              </div>
             </div>
           </div>
         </div>
@@ -859,6 +885,112 @@ $invoices = $stmtInvoices->fetchAll();
       document.getElementById('tab-pane-deliverables').style.display = (tabName === 'deliverables') ? 'block' : 'none';
       document.getElementById('tab-pane-calendar').style.display = (tabName === 'calendar') ? 'block' : 'none';
       document.getElementById('tab-pane-invoices').style.display = (tabName === 'invoices') ? 'block' : 'none';
+      document.getElementById('tab-pane-ads').style.display = (tabName === 'ads') ? 'block' : 'none';
+
+      if (tabName === 'ads') {
+        loadClientAdsData();
+      }
+    }
+
+    async function loadClientAdsData() {
+      const container = document.getElementById('client-ads-container');
+      try {
+        const res = await fetch('api/ads_tracker.php?action=list');
+        const data = await res.json();
+
+        if (!data.success || !data.projects || data.projects.length === 0) {
+          container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--text-muted); background: #F9FAFB; border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+              <div style="font-size: 28px; margin-bottom: 8px;">📊</div>
+              <h4 style="font-size: 15px; font-weight: 700; color: #101828; margin-bottom: 4px;">Belum Ada Kampanye Iklan Berbayar</h4>
+              <p style="font-size: 13px; margin: 0;">Saat ini belum ada kampanye ads berbayar yang aktif pada paket Anda atau data masih dalam proses setup.</p>
+            </div>
+          `;
+          return;
+        }
+
+        let html = '';
+        data.projects.forEach(p => {
+          const logs = p.logs || [];
+          const totalSpend = Number(p.total_spend_installed || 0);
+
+          html += `
+            <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 14px;">
+                <div>
+                  <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 11px; margin-bottom: 4px;">KAMPANYE IKLAN AKTIF</span>
+                  <h4 style="font-size: 16px; font-weight: 800; color: #101828; margin: 2px 0;">${escapeHtml(p.project_name)}</h4>
+                  <span style="font-size: 12.5px; color: var(--text-secondary);">${escapeHtml(p.client_company)} &bull; ${escapeHtml(p.package_name || 'Performance Marketing')}</span>
+                </div>
+                <div style="text-align: right;">
+                  <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Anggaran Iklan Terpasang</span>
+                  <div style="font-size: 20px; font-weight: 800; color: #101828;">Rp ${totalSpend.toLocaleString('id-ID')}</div>
+                </div>
+              </div>
+
+              <h5 style="font-size: 13px; font-weight: 700; color: #344054; margin: 0 0 10px;">Aktivitas & Riwayat Penayangan Iklan:</h5>
+          `;
+
+          if (logs.length === 0) {
+            html += `
+              <div style="padding: 16px; background: #F9FAFB; border-radius: 8px; font-size: 12.5px; color: var(--text-muted); font-style: italic;">
+                Tim Ads Kalamedia sedang menyiapkan setup materi iklan dan penargetan audiens. Laporan penayangan berkala akan tampil di sini.
+              </div>
+            `;
+          } else {
+            html += `
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+            `;
+            logs.forEach(l => {
+              const statusMap = {
+                'sedang_berjalan': { label: 'Sedang Berjalan', bg: '#ECFDF3', color: '#027A48' },
+                'menunggu_saldo': { label: 'Menunggu Saldo', bg: '#EFF8FF', color: '#175CD3' },
+                'saldo_hampir_habis': { label: 'Saldo Menipis', bg: '#FEF3F2', color: '#B42318' },
+                'selesai': { label: 'Selesai', bg: '#F2F4F7', color: '#344054' }
+              };
+              const st = statusMap[l.status] || { label: l.status, bg: '#F2F4F7', color: '#344054' };
+
+              html += `
+                <div style="background: #F9FAFB; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                      <span class="badge" style="background: #F4F3FF; color: #5925DC; font-weight: 800; font-size: 11px;">${escapeHtml(l.platform)}</span>
+                      <span class="badge" style="background: ${st.bg}; color: ${st.color}; font-weight: 700; font-size: 11px;">${st.label}</span>
+                      <span style="font-size: 11px; color: var(--text-muted);">${formatDate(l.created_at || l.updated_at)}</span>
+                    </div>
+                    <div style="font-size: 13px; color: #101828; margin-top: 4px;">
+                      ${escapeHtml(l.notes || 'Kampanye performa berjalan optimal sesuai target KPI.')}
+                    </div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="text-align: right;">
+                      <span style="font-size: 10.5px; color: var(--text-muted); display: block;">Realisasi Belanja</span>
+                      <span style="font-size: 14px; font-weight: 800; color: #101828;">Rp ${Number(l.spend_installed || 0).toLocaleString('id-ID')}</span>
+                    </div>
+                    ${l.attachment_proof ? `
+                      <a href="${escapeHtml(l.attachment_proof)}" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 5px 10px;">
+                        Bukti Dashboard
+                      </a>
+                    ` : ''}
+                  </div>
+                </div>
+              `;
+            });
+            html += `</div>`;
+          }
+
+          html += `</div>`;
+        });
+
+        container.innerHTML = html;
+      } catch (err) {
+        console.error(err);
+        container.innerHTML = `
+          <div style="text-align: center; padding: 32px; color: #B42318;">
+            Gagal memuat transparansi iklan. Silakan coba kembali nanti.
+          </div>
+        `;
+      }
     }
 
     async function openFeedbackModal(taskId) {

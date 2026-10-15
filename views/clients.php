@@ -3,7 +3,7 @@
  * Kalamedia Clients & Projects Database View (Untitled UI Design System)
  * Full Management: View, Add, Edit & Delete for Clients and Projects
  */
-require_auth();
+require_admin();
 $db = Database::getConnection();
 
 // Fetch all active clients with project count and total invoiced

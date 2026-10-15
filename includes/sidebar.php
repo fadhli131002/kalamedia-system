@@ -149,8 +149,11 @@ $currentBadge = $badgeColors[$role] ?? ['bg' => '#F2F4F7', 'text' => '#344054'];
     <?php endif; ?>
 
     <!-- Dedicated Logout Menu Link -->
+    <?php
+      $sbLogoutContext = ($currentPage === 'client-portal' || is_client()) ? 'client' : 'internal';
+    ?>
     <div class="nav-section-title">Sesi Akun</div>
-    <a href="<?= url('logout') ?>" class="nav-link" style="color: #B42318; font-weight: 700;">
+    <a href="<?= url('logout') ?>?context=<?= $sbLogoutContext ?>" class="nav-link" style="color: #B42318; font-weight: 700;">
       <span>Keluar (Logout)</span>
     </a>
 
@@ -180,7 +183,7 @@ $currentBadge = $badgeColors[$role] ?? ['bg' => '#F2F4F7', 'text' => '#344054'];
         </span>
       </div>
     </div>
-    <a href="<?= url('logout') ?>" class="btn btn-secondary btn-sm" style="color: #B42318; border-color: #FECDCA; background: #FEF3F2; font-size: 11px; font-weight: 700; text-decoration: none; padding: 5px 12px; border-radius: 6px;">
+    <a href="<?= url('logout') ?>?context=<?= $sbLogoutContext ?>" class="btn btn-secondary btn-sm" style="color: #B42318; border-color: #FECDCA; background: #FEF3F2; font-size: 11px; font-weight: 700; text-decoration: none; padding: 5px 12px; border-radius: 6px;">
       Logout
     </a>
   </div>

@@ -1,0 +1,6 @@
+database/.schema_*.lock
+database/*.sqlite-journal
+database/*.sqlite-wal
+database/*.sqlite-shm
+.DS_Store
+Thumbs.db

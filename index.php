@@ -49,15 +49,28 @@ switch ($route) {
         break;
 
     case 'logout':
-        $_SESSION = [];
-        if (ini_get("session.use_cookies")) {
-            $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000,
-                $params["path"], $params["domain"],
-                $params["secure"], $params["httponly"]
-            );
+        $context = $_GET['context'] ?? '';
+        if ($context === 'client') {
+            unset($_SESSION['kala_client_portal']);
+            if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'client') {
+                unset($_SESSION['user']);
+            }
+        } elseif ($context === 'internal') {
+            unset($_SESSION['kala_internal']);
+            if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] !== 'client') {
+                unset($_SESSION['user']);
+            }
+        } else {
+            $_SESSION = [];
+            if (ini_get("session.use_cookies")) {
+                $params = session_get_cookie_params();
+                setcookie(session_name(), '', time() - 42000,
+                    $params["path"], $params["domain"],
+                    $params["secure"], $params["httponly"]
+                );
+            }
+            session_destroy();
         }
-        session_destroy();
         header('Location: ' . url('login'));
         exit;
 
@@ -83,12 +96,18 @@ switch ($route) {
         break;
 
     case 'invoices':
-        require_auth();
+        require_admin(); // Strict protection: Workers cannot view invoices
         require_once __DIR__ . '/views/invoices.php';
         break;
 
     case 'invoice-view':
         require_auth();
+        $invRole = current_user_role();
+        if ($invRole === 'karyawan' || $invRole === 'freelancer') {
+            // Workers forbidden from viewing invoice amounts
+            header('Location: ' . url('tasks'));
+            exit;
+        }
         require_once __DIR__ . '/views/invoice_view.php';
         break;
 

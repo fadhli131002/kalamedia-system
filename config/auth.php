@@ -13,49 +13,143 @@ function release_session(): void {
     }
 }
 
-function is_logged_in(): bool {
-    return !empty($_SESSION['logged_in']) && !empty($_SESSION['user']);
-}
-
-function current_user(): ?array {
-    if (!is_logged_in()) {
-        return null;
+/**
+ * Multi-Slot Session Architecture:
+ * - 'kala_internal': For Owner, Admin, Karyawan, Freelancer (Internal Workspace)
+ * - 'kala_client_portal': For Clients (Client Portal)
+ * Eliminates multi-tab session overwrites so Owner and Client can be logged in concurrently.
+ */
+function get_auth_context(): string {
+    // 1. Explicit query or post context
+    if (!empty($_GET['auth_context']) && in_array($_GET['auth_context'], ['internal', 'client'])) {
+        return $_GET['auth_context'];
     }
-    return $_SESSION['user'] ?? null;
+    if (!empty($_POST['auth_context']) && in_array($_POST['auth_context'], ['internal', 'client'])) {
+        return $_POST['auth_context'];
+    }
+    // 2. HTTP header context
+    if (!empty($_SERVER['HTTP_X_AUTH_CONTEXT']) && in_array($_SERVER['HTTP_X_AUTH_CONTEXT'], ['internal', 'client'])) {
+        return $_SERVER['HTTP_X_AUTH_CONTEXT'];
+    }
+
+    // 3. HTTP referer check (for fetch/AJAX calls originating from Client Portal)
+    $referer = $_SERVER['HTTP_REFERER'] ?? '';
+    if (strpos($referer, 'client-portal') !== false) {
+        return 'client';
+    }
+
+    // 4. Request URI or route check
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    if (strpos($uri, 'client-portal') !== false) {
+        return 'client';
+    }
+
+    // 5. Global current page router
+    $currentPage = $GLOBALS['currentPage'] ?? ($_GET['page'] ?? '');
+    if ($currentPage === 'client-portal' || $currentPage === 'client') {
+        return 'client';
+    }
+
+    return 'internal';
 }
 
-function current_user_role(): string {
-    return $_SESSION['user']['role'] ?? '';
+function get_session_slot(?string $context = null): string {
+    $ctx = $context ?: get_auth_context();
+    return ($ctx === 'client') ? 'kala_client_portal' : 'kala_internal';
 }
 
-function current_user_client_id(): ?int {
-    return !empty($_SESSION['user']['client_id']) ? (int)$_SESSION['user']['client_id'] : null;
+function is_logged_in(?string $context = null): bool {
+    $slot = get_session_slot($context);
+
+    // Check specific multi-slot
+    if (!empty($_SESSION[$slot]['logged_in']) && !empty($_SESSION[$slot]['user'])) {
+        return true;
+    }
+
+    // Client Portal Preview Mode: If Owner/Admin is logged in internally, allow viewing Client Portal
+    if ($slot === 'kala_client_portal' && !empty($_SESSION['kala_internal']['logged_in']) && !empty($_SESSION['kala_internal']['user'])) {
+        $internalRole = $_SESSION['kala_internal']['user']['role'] ?? '';
+        if ($internalRole === 'owner' || $internalRole === 'admin') {
+            return true;
+        }
+    }
+
+    // Backward compatibility migration from legacy $_SESSION['user']
+    if (!empty($_SESSION['logged_in']) && !empty($_SESSION['user'])) {
+        $legacyRole = $_SESSION['user']['role'] ?? '';
+        $targetSlot = ($legacyRole === 'client') ? 'kala_client_portal' : 'kala_internal';
+        if (empty($_SESSION[$targetSlot])) {
+            $_SESSION[$targetSlot] = [
+                'logged_in' => true,
+                'user' => $_SESSION['user'],
+                'last_activity' => time()
+            ];
+        }
+        if ($targetSlot === $slot) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
-function is_owner(): bool {
-    return current_user_role() === 'owner';
+function current_user(?string $context = null): ?array {
+    $slot = get_session_slot($context);
+
+    if (!empty($_SESSION[$slot]['user'])) {
+        return $_SESSION[$slot]['user'];
+    }
+
+    // Fallback preview for Owner/Admin on Client Portal
+    if ($slot === 'kala_client_portal' && !empty($_SESSION['kala_internal']['user'])) {
+        $role = $_SESSION['kala_internal']['user']['role'] ?? '';
+        if ($role === 'owner' || $role === 'admin') {
+            return $_SESSION['kala_internal']['user'];
+        }
+    }
+
+    // Fallback to legacy
+    if (!empty($_SESSION['user'])) {
+        return $_SESSION['user'];
+    }
+
+    return null;
 }
 
-function is_admin(): bool {
-    $role = current_user_role();
+function current_user_role(?string $context = null): string {
+    $u = current_user($context);
+    return $u['role'] ?? '';
+}
+
+function current_user_client_id(?string $context = null): ?int {
+    $u = current_user($context);
+    return !empty($u['client_id']) ? (int)$u['client_id'] : null;
+}
+
+function is_owner(?string $context = null): bool {
+    return current_user_role($context) === 'owner';
+}
+
+function is_admin(?string $context = null): bool {
+    $role = current_user_role($context);
     return ($role === 'owner' || $role === 'admin');
 }
 
-function is_karyawan(): bool {
-    return current_user_role() === 'karyawan';
+function is_karyawan(?string $context = null): bool {
+    return current_user_role($context) === 'karyawan';
 }
 
-function is_freelancer(): bool {
-    return current_user_role() === 'freelancer';
+function is_freelancer(?string $context = null): bool {
+    return current_user_role($context) === 'freelancer';
 }
 
-function is_worker(): bool {
-    $role = current_user_role();
-    return ($role === 'karyawan' || $role === 'freelancer' || $role === 'admin' || $role === 'owner');
+function is_worker(?string $context = null): bool {
+    $role = current_user_role($context);
+    return in_array($role, ['karyawan', 'freelancer', 'admin', 'owner']);
 }
 
-function is_client(): bool {
-    return current_user_role() === 'client';
+function is_client(?string $context = null): bool {
+    return current_user_role($context) === 'client';
 }
 
 function home_url_for_role(?string $role = null): string {

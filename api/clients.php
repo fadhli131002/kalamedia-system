@@ -35,6 +35,10 @@ function parse_client_amount($val): float {
 
 // 1. CREATE CLIENT & PORTAL LOGIN ACCESS
 if ($action === 'create_client') {
+    if (!is_admin()) {
+        echo json_encode(['success' => false, 'message' => 'Akses ditolak: Hanya Owner dan Admin yang dapat menambahkan klien.']);
+        exit;
+    }
     $compSelect = trim($_POST['company_select'] ?? '');
     $compNew = trim($_POST['company_new'] ?? '');
     $company = ($compSelect === '__new__' || empty($compSelect)) ? $compNew : $compSelect;
@@ -265,12 +269,23 @@ if ($action === 'get_project') {
         exit;
     }
 
+    // STRICT WORKER FINANCIAL PRIVACY: Karyawan / Freelancer dilarang melihat nominal klien
+    if (is_karyawan() || is_freelancer()) {
+        unset($project['contract_value']);
+        unset($project['target_margin_percent']);
+    }
+
     echo json_encode(['success' => true, 'project' => $project]);
     exit;
 }
 
 // 7. UPDATE PROJECT
 if ($action === 'update_project') {
+    if (!is_admin()) {
+        echo json_encode(['success' => false, 'message' => 'Akses ditolak: Hanya Owner dan Admin yang dapat memperbarui proyek.']);
+        exit;
+    }
+
     $id = intval($_POST['id'] ?? 0);
     $clientId = intval($_POST['client_id'] ?? 0);
     $name = trim($_POST['name'] ?? '');
@@ -339,7 +354,12 @@ if ($action === 'delete_project') {
 // 9. GET CLIENT PROJECTS
 if ($action === 'get_client_projects') {
     $clientId = intval($_GET['client_id'] ?? 0);
-    $stmt = $db->prepare("SELECT id, name, contract_value FROM projects WHERE client_id = ? AND COALESCE(is_deleted, 0) = 0 ORDER BY id DESC");
+    // STRICT WORKER FINANCIAL PRIVACY: Jangan sertakan contract_value untuk staf/freelancer
+    if (is_karyawan() || is_freelancer()) {
+        $stmt = $db->prepare("SELECT id, name FROM projects WHERE client_id = ? AND COALESCE(is_deleted, 0) = 0 ORDER BY id DESC");
+    } else {
+        $stmt = $db->prepare("SELECT id, name, contract_value FROM projects WHERE client_id = ? AND COALESCE(is_deleted, 0) = 0 ORDER BY id DESC");
+    }
     $stmt->execute([$clientId]);
     $projects = $stmt->fetchAll();
     echo json_encode(['success' => true, 'projects' => $projects]);

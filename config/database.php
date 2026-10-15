@@ -80,10 +80,10 @@ class Database {
             }
 
             // High Performance: Only run migrations if lock file does not exist (0ms overhead on requests)
-            $lockFile = BASE_PATH . '/database/.schema_v3.lock';
+            $lockFile = BASE_PATH . '/database/.schema_v4.lock';
             if (!file_exists($lockFile)) {
                 self::runMigrations(self::$instance, self::$driver);
-                @file_put_contents($lockFile, "Schema v3 initialized at " . date('Y-m-d H:i:s'));
+                @file_put_contents($lockFile, "Schema v4 initialized at " . date('Y-m-d H:i:s'));
             }
         }
         return self::$instance;
@@ -228,6 +228,25 @@ class Database {
                 notes TEXT DEFAULT NULL,
                 is_deleted INT DEFAULT 0,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS ads_budget_logs (
+                id {$pkDef},
+                project_id INT NOT NULL,
+                client_id INT NOT NULL,
+                platform VARCHAR(50) NOT NULL DEFAULT 'Meta Ads',
+                allocated_budget DECIMAL(15,2) NOT NULL DEFAULT 0,
+                spend_installed DECIMAL(15,2) NOT NULL DEFAULT 0,
+                remaining_budget DECIMAL(15,2) NOT NULL DEFAULT 0,
+                status VARCHAR(50) NOT NULL DEFAULT 'sedang_berjalan',
+                notes TEXT DEFAULT NULL,
+                attachment_proof VARCHAR(255) DEFAULT NULL,
+                updated_by_user_id INT DEFAULT NULL,
+                updated_by_name VARCHAR(150) DEFAULT NULL,
+                is_verified_by_owner INT DEFAULT 0,
+                is_deleted INT DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS employees (
@@ -438,13 +457,16 @@ class Database {
             if (!in_array('progress_percent', $projCols)) {
                 $db->exec("ALTER TABLE projects ADD COLUMN progress_percent DECIMAL(5,2) DEFAULT 0");
             }
+            if (!in_array('allocated_ads_budget', $projCols)) {
+                $db->exec("ALTER TABLE projects ADD COLUMN allocated_ads_budget DECIMAL(15,2) DEFAULT 0");
+            }
             if (!in_array('is_deleted', $projCols)) {
                 $db->exec("ALTER TABLE projects ADD COLUMN is_deleted INT DEFAULT 0");
             }
         }
 
         // 4. Ensure is_deleted on other standard tables
-        $tablesWithDeleted = ['tasks', 'invoices', 'freelancer_payouts', 'ads_spend', 'salaries', 'content_planner', 'client_reports', 'performance_reports'];
+        $tablesWithDeleted = ['tasks', 'invoices', 'freelancer_payouts', 'ads_spend', 'ads_budget_logs', 'salaries', 'content_planner', 'client_reports', 'performance_reports'];
         foreach ($tablesWithDeleted as $t) {
             $cols = $getTableCols($t);
             if (!empty($cols) && !in_array('is_deleted', $cols)) {
@@ -478,7 +500,9 @@ class Database {
             'idx_users_role' => ['users', 'role, client_id'],
             'idx_projects_client' => ['projects', 'client_id'],
             'idx_invoices_client' => ['invoices', 'client_id'],
-            'idx_content_client' => ['content_planner', 'client_id']
+            'idx_content_client' => ['content_planner', 'client_id'],
+            'idx_ads_logs_project' => ['ads_budget_logs', 'project_id, is_deleted'],
+            'idx_ads_logs_client' => ['ads_budget_logs', 'client_id, is_deleted']
         ];
 
         foreach ($indexes as $idxName => [$tbl, $cols]) {

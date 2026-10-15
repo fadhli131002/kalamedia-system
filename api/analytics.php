@@ -9,6 +9,13 @@ require_once __DIR__ . '/../config/auth.php';
 require_auth();
 release_session();
 
+// STRICT FINANCIAL PRIVACY: Karyawan dan Freelancer dilarang mengakses analitik keuangan, omset, dan margin
+if (is_karyawan() || is_freelancer() || is_client()) {
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Akses ditolak: Data analitik finansial, margin, dan cashflow bersifat rahasia Owner.']);
+    exit;
+}
+
 $db = Database::getConnection();
 $range = $_GET['range'] ?? 'month'; // 'month', 'quarter', 'year', 'all'
 

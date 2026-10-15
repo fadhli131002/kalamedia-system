@@ -44,9 +44,20 @@ if ($action === 'login') {
                 'avatar' => $user['avatar']
             ];
 
-            $_SESSION['logged_in'] = true;
-            $_SESSION['user'] = $userPayload;
-            $_SESSION['last_activity'] = time();
+            // Multi-Slot Session Assignment:
+            $targetSlot = ($user['role'] === 'client') ? 'kala_client_portal' : 'kala_internal';
+            $_SESSION[$targetSlot] = [
+                'logged_in' => true,
+                'user' => $userPayload,
+                'last_activity' => time()
+            ];
+
+            // Only update legacy $_SESSION['user'] if internal slot or if no internal session active
+            if ($targetSlot === 'kala_internal' || empty($_SESSION['kala_internal']['user'])) {
+                $_SESSION['logged_in'] = true;
+                $_SESSION['user'] = $userPayload;
+                $_SESSION['last_activity'] = time();
+            }
 
             // Strict role-based redirect target
             $redirectUrl = home_url_for_role($user['role']);
@@ -96,9 +107,18 @@ if ($action === 'quick_login') {
                 'avatar' => $user['avatar']
             ];
 
-            $_SESSION['logged_in'] = true;
-            $_SESSION['user'] = $userPayload;
-            $_SESSION['last_activity'] = time();
+            $targetSlot = ($user['role'] === 'client') ? 'kala_client_portal' : 'kala_internal';
+            $_SESSION[$targetSlot] = [
+                'logged_in' => true,
+                'user' => $userPayload,
+                'last_activity' => time()
+            ];
+
+            if ($targetSlot === 'kala_internal' || empty($_SESSION['kala_internal']['user'])) {
+                $_SESSION['logged_in'] = true;
+                $_SESSION['user'] = $userPayload;
+                $_SESSION['last_activity'] = time();
+            }
 
             $redirectUrl = home_url_for_role($user['role']);
 

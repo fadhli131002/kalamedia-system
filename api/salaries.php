@@ -14,6 +14,12 @@ release_session();
 $db = Database::getConnection();
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
+// STRICT RBAC: Staf & Freelancer dilarang mengelola penggajian karyawan lain
+if (!is_admin() && !in_array($action, ['get_slip_data', 'download_slip_pdf'])) {
+    echo json_encode(['success' => false, 'message' => 'Akses ditolak: Hanya Owner dan Admin yang berwenang mengelola data gaji.']);
+    exit;
+}
+
 // 1. Create Salary / Payroll Record
 if ($action === 'create_salary') {
     $employeeId = !empty($_POST['employee_id']) ? intval($_POST['employee_id']) : null;

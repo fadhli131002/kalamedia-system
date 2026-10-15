@@ -10,6 +10,12 @@ require_once __DIR__ . '/../config/auth.php';
 require_auth();
 release_session();
 
+// STRICT FINANCIAL PRIVACY: Karyawan dan Freelancer dilarang mengakses pengeluaran agensi
+if (is_karyawan() || is_freelancer() || is_client()) {
+    echo json_encode(['success' => false, 'message' => 'Akses ditolak: Pengeluaran dan payout agensi hanya dapat diakses oleh Owner / Admin.']);
+    exit;
+}
+
 $db = Database::getConnection();
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 

@@ -54,6 +54,38 @@ if ($isWorkerUser) {
       gap: 16px;
     }
 
+    .workspace-tabs-bar {
+      display: inline-flex;
+      gap: 6px;
+      margin-bottom: 22px;
+      background: #F2F4F7;
+      padding: 5px;
+      border-radius: 8px;
+    }
+    .workspace-tab-btn {
+      border: none;
+      background: transparent;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #667085;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .workspace-tab-btn:hover {
+      color: #101828;
+    }
+    .workspace-tab-btn.active {
+      background: #FFFFFF;
+      color: #101828;
+      font-weight: 700;
+      box-shadow: 0 1px 3px rgba(16,24,40,0.1);
+    }
+
     .kpi-row {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -276,129 +308,239 @@ if ($isWorkerUser) {
           </div>
         </div>
 
-        <!-- Alert Banner for Workers if Revision / Client Feedback Arrived -->
-        <div id="revision-alert-container" style="display: none;"></div>
+        <!-- Section Switcher Tabs -->
+        <div class="workspace-tabs-bar">
+          <button type="button" class="workspace-tab-btn active" id="tab-btn-tasks" onclick="switchTaskWorkspaceTab('tasks')">
+            Deliverables & Penugasan Tim
+          </button>
+          <button type="button" class="workspace-tab-btn" id="tab-btn-ads" onclick="switchTaskWorkspaceTab('ads')">
+            Pelacakan & Koordinasi Anggaran Ads
+          </button>
+        </div>
 
-        <?php if ($isWorkerUser): ?>
-          <!-- Worker Info Section: Jobdesk & Assigned Clients -->
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;">
-            <!-- 1. Jobdesk Saya dari Owner -->
-            <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #175CD3; background: #EFF8FF; padding: 2px 8px; border-radius: 4px; border: 1px solid #B2DDFF;">
-                  JOBDESK DARI OWNER
+        <!-- SECTION 1: Tasks & Deliverables -->
+        <div id="section-tasks-content">
+          <!-- Alert Banner for Workers if Revision / Client Feedback Arrived -->
+          <div id="revision-alert-container" style="display: none;"></div>
+
+          <?php if ($isWorkerUser): ?>
+            <!-- Worker Info Section: Jobdesk & Assigned Clients -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;">
+              <!-- 1. Jobdesk Saya dari Owner -->
+              <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                  <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #175CD3; background: #EFF8FF; padding: 2px 8px; border-radius: 4px; border: 1px solid #B2DDFF;">
+                    JOBDESK DARI OWNER
+                  </span>
+                  <span style="font-size: 12px; font-weight: 700; color: #101828;">
+                    <?= htmlspecialchars($workerProfile['position'] ?? 'Spesialis Tim') ?>
+                  </span>
+                </div>
+                <h4 style="font-size: 14px; font-weight: 800; color: #101828; margin: 0 0 6px;">Tanggung Jawab Utama Anda:</h4>
+                <p style="font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.5; white-space: pre-line;">
+                  <?= !empty($workerProfile['jobdesk']) ? htmlspecialchars($workerProfile['jobdesk']) : 'Menangani pengerjaan deliverables kreatif, kampanye, dan revisi klien sesuai arahan Owner Kalamedia.' ?>
+                </p>
+              </div>
+
+              <!-- 2. Klien & Proyek yang Saya Pegang -->
+              <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #027A48; background: #ECFDF3; padding: 2px 8px; border-radius: 4px; border: 1px solid #A6F4C5;">
+                    KLIEN & PT YANG SAYA PEGANG
+                  </span>
+                  <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">
+                    <?= count($assignedClients) ?> Perusahaan
+                  </span>
+                </div>
+                <?php if (empty($assignedClients)): ?>
+                  <p style="font-size: 12.5px; color: var(--text-muted); font-style: italic; margin: 0;">
+                    Belum ada klien khusus yang dialokasikan oleh Owner ke Anda. Anda dapat mengerjakan seluruh penugasan aktif di bawah.
+                  </p>
+                <?php else: ?>
+                  <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <?php foreach ($assignedClients as $ac): ?>
+                      <div style="background: #F9FAFB; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; display: inline-flex; flex-direction: column; gap: 2px;">
+                        <span style="font-size: 13px; font-weight: 800; color: #101828;"><?= htmlspecialchars($ac['company']) ?></span>
+                        <span style="font-size: 11px; color: var(--text-secondary);">PIC: <?= htmlspecialchars($ac['pic_name']) ?> &bull; <b><?= (int)$ac['my_task_count'] ?> Tugas</b></span>
+                      </div>
+                    <?php endforeach; ?>
+                  </div>
+                <?php endif; ?>
+              </div>
+            </div>
+          <?php endif; ?>
+
+          <!-- KPI Metrics Row -->
+          <div class="kpi-row">
+            <div class="kpi-tile">
+              <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 600;">Total Deliverables</span>
+              <div style="font-size: 22px; font-weight: 800; color: #101828;" id="kpi-total">0</div>
+              <span style="font-size: 11px; color: var(--text-muted);">Pekerjaan aktif</span>
+            </div>
+
+            <div class="kpi-tile urgent">
+              <span style="font-size: 11.5px; color: #B42318; font-weight: 700;">Butuh Revisi</span>
+              <div style="font-size: 22px; font-weight: 800; color: #B42318;" id="kpi-revision">0</div>
+              <span style="font-size: 11px; color: #B42318;">Permintaan klien</span>
+            </div>
+
+            <div class="kpi-tile review">
+              <span style="font-size: 11.5px; color: #B54708; font-weight: 700;">Menunggu Review Klien</span>
+              <div style="font-size: 22px; font-weight: 800; color: #B54708;" id="kpi-review">0</div>
+              <span style="font-size: 11px; color: #B54708;">Menunggu approval</span>
+            </div>
+
+            <div class="kpi-tile">
+              <span style="font-size: 11.5px; color: #175CD3; font-weight: 600;">Sedang Dikerjakan</span>
+              <div style="font-size: 22px; font-weight: 800; color: #175CD3;" id="kpi-progress">0</div>
+              <span style="font-size: 11px; color: var(--text-muted);">Tahap produksi</span>
+            </div>
+
+            <div class="kpi-tile">
+              <span style="font-size: 11.5px; color: #027A48; font-weight: 600;">Selesai & Disetujui</span>
+              <div style="font-size: 22px; font-weight: 800; color: #027A48;" id="kpi-approved">0</div>
+              <span style="font-size: 11px; color: var(--text-muted);">Hasil final</span>
+            </div>
+          </div>
+
+          <!-- Filter Panel -->
+          <div class="filter-panel">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+              <div class="date-filter-group" id="status-filter-group">
+                <button class="filter-btn active" onclick="filterByStatus('all', this)">Semua</button>
+                <button class="filter-btn" onclick="filterByStatus('revision', this)">Revisi</button>
+                <button class="filter-btn" onclick="filterByStatus('client_review', this)">Review Klien</button>
+                <button class="filter-btn" onclick="filterByStatus('in_progress', this)">In Progress</button>
+                <button class="filter-btn" onclick="filterByStatus('approved', this)">Selesai</button>
+              </div>
+
+              <?php if ($isAdminUser): ?>
+                <!-- SDM Type Filter -->
+                <select id="filter-worker-type" class="form-control" style="width: auto; padding: 6px 12px; font-size: 12px; font-weight: 600;" onchange="applyFilters()">
+                  <option value="">Semua SDM</option>
+                  <option value="karyawan">Karyawan (In-House)</option>
+                  <option value="freelancer">Freelancer</option>
+                </select>
+              <?php endif; ?>
+
+              <!-- Category Filter -->
+              <select id="filter-category" class="form-control" style="width: auto; padding: 6px 12px; font-size: 12px; font-weight: 600;" onchange="applyFilters()">
+                <option value="">Semua Kategori</option>
+                <option value="design">Desain Grafis</option>
+                <option value="video">Produksi Video</option>
+                <option value="copywriting">Copywriting</option>
+                <option value="ads">Meta / TikTok Ads</option>
+                <option value="web">Web Development</option>
+              </select>
+            </div>
+
+            <div style="font-size: 12px; color: var(--text-muted);" id="tasks-count-label">
+              Menampilkan 0 tugas
+            </div>
+          </div>
+
+          <!-- Tasks Grid / List Container -->
+          <div class="tasks-grid-list" id="tasks-list-container">
+            <div style="text-align: center; padding: 48px; background: #FFF; border-radius: var(--radius-md); border: 1px solid var(--border-color); color: var(--text-muted);">
+              Memuat data tugas...
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 2: Ads Budget & Spend Tracker -->
+        <div id="section-ads-content" style="display: none;">
+          <!-- Ads Tracker Header & Controls -->
+          <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 22px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <span class="badge" style="background: #F4F3FF; color: #5925DC; border: 1px solid #D9D6FE; font-weight: 800; font-size: 11px;">
+                  ADS BUDGET & SPEND TRACKER
                 </span>
-                <span style="font-size: 12px; font-weight: 700; color: #101828;">
-                  <?= htmlspecialchars($workerProfile['position'] ?? 'Spesialis Tim') ?>
+                <span style="font-size: 12px; color: var(--text-muted);">&bull;</span>
+                <span style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">
+                  Meta Ads &bull; Google Ads &bull; TikTok Ads
                 </span>
               </div>
-              <h4 style="font-size: 14px; font-weight: 800; color: #101828; margin: 0 0 6px;">Tanggung Jawab Utama Anda:</h4>
-              <p style="font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.5; white-space: pre-line;">
-                <?= !empty($workerProfile['jobdesk']) ? htmlspecialchars($workerProfile['jobdesk']) : 'Menangani pengerjaan deliverables kreatif, kampanye, dan revisi klien sesuai arahan Owner Kalamedia.' ?>
+              <h3 style="font-size: 18px; font-weight: 800; color: #101828; margin: 0;">
+                Pelacakan Dana & Koordinasi Anggaran Iklan
+              </h3>
+              <p style="font-size: 13px; color: var(--text-secondary); margin: 3px 0 0;">
+                <?= $isAdminUser 
+                  ? 'Kelola pagu saldo ads proyek, pantau realisasi belanja iklan oleh tim Ads, dan kawal margin agensi secara presisi.' 
+                  : 'Lihat pagu saldo ads yang dialokasikan Owner untuk setiap proyek dan laporkan nominal anggaran yang sudah terpasang di dashboard.' ?>
               </p>
             </div>
 
-            <!-- 2. Klien & Proyek yang Saya Pegang -->
-            <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #027A48; background: #ECFDF3; padding: 2px 8px; border-radius: 4px; border: 1px solid #A6F4C5;">
-                  KLIEN & PT YANG SAYA PEGANG
-                </span>
-                <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">
-                  <?= count($assignedClients) ?> Perusahaan
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <?php if ($isAdminUser): ?>
+                <button class="btn btn-secondary btn-sm" onclick="openAllocateAdsModal()" style="font-weight: 700;">
+                  <span>+ Atur Pagu Saldo Ads</span>
+                </button>
+              <?php endif; ?>
+              <button class="btn btn-primary btn-sm" onclick="openLogAdsSpendModal()" style="font-weight: 700;">
+                <span>+ Update Anggaran Terpasang & Bukti</span>
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="loadAdsTrackerData()">
+                <span>Segarkan</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Summary KPI Cards -->
+          <div class="kpi-row" id="ads-kpi-container">
+            <div class="kpi-tile">
+              <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 600;">Memuat Ringkasan...</span>
+            </div>
+          </div>
+
+          <!-- Projects Ads Budget Table Card -->
+          <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <h4 style="font-size: 15px; font-weight: 800; color: #101828; margin: 0;">Status Alokasi & Anggaran Terpasang per Proyek</h4>
+                <span style="font-size: 12px; color: var(--text-secondary);">
+                  <?= $isAdminUser ? 'Perbandingan Kontrak, Pagu Saldo Ads, Spend Terpasang, dan Sisa Saldo' : 'Alokasi Pagu Saldo Ads yang Ditugaskan Owner & Realisasi Belanja Iklan' ?>
                 </span>
               </div>
-              <?php if (empty($assignedClients)): ?>
-                <p style="font-size: 12.5px; color: var(--text-muted); font-style: italic; margin: 0;">
-                  Belum ada klien khusus yang dialokasikan oleh Owner ke Anda. Anda dapat mengerjakan seluruh penugasan aktif di bawah.
-                </p>
-              <?php else: ?>
-                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                  <?php foreach ($assignedClients as $ac): ?>
-                    <div style="background: #F9FAFB; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; display: inline-flex; flex-direction: column; gap: 2px;">
-                      <span style="font-size: 13px; font-weight: 800; color: #101828;"><?= htmlspecialchars($ac['company']) ?></span>
-                      <span style="font-size: 11px; color: var(--text-secondary);">PIC: <?= htmlspecialchars($ac['pic_name']) ?> &bull; <b><?= (int)$ac['my_task_count'] ?> Tugas</b></span>
-                    </div>
-                  <?php endforeach; ?>
-                </div>
-              <?php endif; ?>
-            </div>
-          </div>
-        <?php endif; ?>
-
-        <!-- KPI Metrics Row -->
-        <div class="kpi-row">
-          <div class="kpi-tile">
-            <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 600;">Total Deliverables</span>
-            <div style="font-size: 22px; font-weight: 800; color: #101828;" id="kpi-total">0</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Pekerjaan aktif</span>
-          </div>
-
-          <div class="kpi-tile urgent">
-            <span style="font-size: 11.5px; color: #B42318; font-weight: 700;">Butuh Revisi</span>
-            <div style="font-size: 22px; font-weight: 800; color: #B42318;" id="kpi-revision">0</div>
-            <span style="font-size: 11px; color: #B42318;">Permintaan klien</span>
-          </div>
-
-          <div class="kpi-tile review">
-            <span style="font-size: 11.5px; color: #B54708; font-weight: 700;">Menunggu Review Klien</span>
-            <div style="font-size: 22px; font-weight: 800; color: #B54708;" id="kpi-review">0</div>
-            <span style="font-size: 11px; color: #B54708;">Menunggu approval</span>
-          </div>
-
-          <div class="kpi-tile">
-            <span style="font-size: 11.5px; color: #175CD3; font-weight: 600;">Sedang Dikerjakan</span>
-            <div style="font-size: 22px; font-weight: 800; color: #175CD3;" id="kpi-progress">0</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Tahap produksi</span>
-          </div>
-
-          <div class="kpi-tile">
-            <span style="font-size: 11.5px; color: #027A48; font-weight: 600;">Selesai & Disetujui</span>
-            <div style="font-size: 22px; font-weight: 800; color: #027A48;" id="kpi-approved">0</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Hasil final</span>
-          </div>
-        </div>
-
-        <!-- Filter Panel -->
-        <div class="filter-panel">
-          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-            <div class="date-filter-group" id="status-filter-group">
-              <button class="filter-btn active" onclick="filterByStatus('all', this)">Semua</button>
-              <button class="filter-btn" onclick="filterByStatus('revision', this)">Revisi</button>
-              <button class="filter-btn" onclick="filterByStatus('client_review', this)">Review Klien</button>
-              <button class="filter-btn" onclick="filterByStatus('in_progress', this)">In Progress</button>
-              <button class="filter-btn" onclick="filterByStatus('approved', this)">Selesai</button>
             </div>
 
-            <?php if ($isAdminUser): ?>
-              <!-- SDM Type Filter -->
-              <select id="filter-worker-type" class="form-control" style="width: auto; padding: 6px 12px; font-size: 12px; font-weight: 600;" onchange="applyFilters()">
-                <option value="">Semua SDM</option>
-                <option value="karyawan">Karyawan (In-House)</option>
-                <option value="freelancer">Freelancer</option>
-              </select>
-            <?php endif; ?>
-
-            <!-- Category Filter -->
-            <select id="filter-category" class="form-control" style="width: auto; padding: 6px 12px; font-size: 12px; font-weight: 600;" onchange="applyFilters()">
-              <option value="">Semua Kategori</option>
-              <option value="design">Desain Grafis</option>
-              <option value="video">Produksi Video</option>
-              <option value="copywriting">Copywriting</option>
-              <option value="ads">Meta / TikTok Ads</option>
-              <option value="web">Web Development</option>
-            </select>
+            <div class="table-responsive">
+              <table class="table-custom" id="table-ads-projects">
+                <thead>
+                  <tr>
+                    <th>PROYEK & KLIEN</th>
+                    <?php if ($isAdminUser): ?>
+                      <th>NILAI KONTRAK (RAHASIA)</th>
+                    <?php endif; ?>
+                    <th>PAGU SALDO ADS</th>
+                    <th>ANGGARAN TERPASANG (SPEND)</th>
+                    <th>SISA SALDO ADS</th>
+                    <?php if ($isAdminUser): ?>
+                      <th>MARGIN BERSIH AGENSI</th>
+                    <?php endif; ?>
+                    <th>STATUS KAMPANYE</th>
+                    <th style="text-align: right;">AKSI</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-ads-projects">
+                  <tr><td colspan="<?= $isAdminUser ? 8 : 6 ?>" style="text-align: center; padding: 28px; color: var(--text-muted);">Memuat data anggaran ads...</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <div style="font-size: 12px; color: var(--text-muted);" id="tasks-count-label">
-            Menampilkan 0 tugas
-          </div>
-        </div>
+          <!-- Coordination Logs & Screenshot Proof Feed -->
+          <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <div>
+                <h4 style="font-size: 15px; font-weight: 800; color: #101828; margin: 0;">Riwayat Update & Bukti Screenshot Dashboard Ads</h4>
+                <span style="font-size: 12px; color: var(--text-secondary);">Catatan koordinasi langsung antara Tim Ads dan Owner beserta screenshot dashboard</span>
+              </div>
+            </div>
 
-        <!-- Tasks Grid / List Container -->
-        <div class="tasks-grid-list" id="tasks-list-container">
-          <div style="text-align: center; padding: 48px; background: #FFF; border-radius: var(--radius-md); border: 1px solid var(--border-color); color: var(--text-muted);">
-            Memuat data tugas...
+            <div id="ads-logs-feed-container">
+              <div style="text-align: center; padding: 28px; color: var(--text-muted);">Memuat riwayat koordinasi...</div>
+            </div>
           </div>
         </div>
 
@@ -596,6 +738,150 @@ if ($isWorkerUser) {
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Update Anggaran Terpasang & Bukti Ads (Tim Ads / Workers / Admin) -->
+  <div class="modal" id="modal-update-ads-spend">
+    <div class="modal-dialog" style="max-width: 580px;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <h4 class="modal-title">Update Anggaran Terpasang & Bukti Dashboard</h4>
+            <span style="font-size: 12px; color: var(--text-secondary);">Laporkan nominal belanja iklan yang sudah dipasang di platform</span>
+          </div>
+          <button type="button" class="close-btn" onclick="closeModal('modal-update-ads-spend')">&times;</button>
+        </div>
+
+        <form id="form-update-ads-spend" onsubmit="handleLogAdsSpend(event)" enctype="multipart/form-data">
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Proyek & PT Klien <span style="color:red;">*</span></label>
+              <select name="project_id" id="ads-spend-project-id" class="form-control" required onchange="onAdsProjectSelectChange(this)">
+                <option value="">-- Pilih Proyek Klien --</option>
+              </select>
+            </div>
+
+            <!-- Info Pagu Saldo Ditugaskan Owner -->
+            <div id="box-allocated-info" style="display: none; background: #F4F3FF; border: 1px solid #D9D6FE; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;">
+              <div style="font-size: 11.5px; color: #5925DC; font-weight: 700; text-transform: uppercase;">Pagu Saldo Ads Ditugaskan Owner</div>
+              <div style="font-size: 18px; font-weight: 800; color: #101828;" id="txt-allocated-budget">Rp 0</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group">
+                <label class="form-label">Platform Iklan <span style="color:red;">*</span></label>
+                <select name="platform" id="ads-spend-platform" class="form-control" required>
+                  <option value="Meta Ads">Meta Ads (Instagram & FB)</option>
+                  <option value="Google Ads">Google Ads / YouTube</option>
+                  <option value="TikTok Ads">TikTok Ads</option>
+                  <option value="Multi-Platform">Multi-Platform</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Status Kampanye <span style="color:red;">*</span></label>
+                <select name="status" id="ads-spend-status" class="form-control" required>
+                  <option value="sedang_berjalan">Sedang Berjalan</option>
+                  <option value="menunggu_saldo">Menunggu Saldo</option>
+                  <option value="saldo_hampir_habis">Saldo Hampir Habis</option>
+                  <option value="selesai">Selesai</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Anggaran yang Sudah Terpasang / Terpakai (Rp) <span style="color:red;">*</span></label>
+              <input type="text" name="spend_installed" id="ads-spend-amount" class="form-control" placeholder="Contoh: 5.000.000" required oninput="formatRupiahInput(this)">
+              <small style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 3px;">
+                Nominal akumulatif atau spend saat ini yang terserap di dashboard platform ads.
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Catatan Koordinasi untuk Owner</label>
+              <textarea name="notes" id="ads-spend-notes" class="form-control" rows="2" placeholder="Contoh: Saldo Rp 5.000.000 sudah masuk ke Meta Ads Manager. Campaign Advantage+ Shopping aktif, CTR 2.3%"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Bukti Screenshot Dashboard Ads (Opsional)</label>
+              <input type="file" name="attachment_proof" id="ads-spend-attachment" class="form-control" accept="image/*,.pdf">
+              <small style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 3px;">
+                Unggah tangkapan layar (screenshot) billing / dashboard platform iklan sebagai bukti fisik.
+              </small>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-update-ads-spend')">Batal</button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-ads-spend">
+              Simpan & Koordinasikan ke Owner
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Atur Pagu Saldo Ads ke Proyek (Owner / Admin Only) -->
+  <?php if ($isAdminUser): ?>
+    <div class="modal" id="modal-allocate-ads-budget">
+      <div class="modal-dialog" style="max-width: 520px;">
+        <div class="modal-content">
+          <div class="modal-header">
+            <div>
+              <h4 class="modal-title">Atur Pagu Saldo Ads ke Proyek</h4>
+              <span style="font-size: 12px; color: var(--text-secondary);">Tentukan anggaran murni yang dialokasikan khusus untuk belanja platform iklan</span>
+            </div>
+            <button type="button" class="close-btn" onclick="closeModal('modal-allocate-ads-budget')">&times;</button>
+          </div>
+
+          <form id="form-allocate-ads-budget" onsubmit="handleAllocateAdsBudget(event)">
+            <div class="modal-body">
+              <div class="form-group">
+                <label class="form-label">Pilih Proyek Klien <span style="color:red;">*</span></label>
+                <select name="project_id" id="ads-alloc-project-id" class="form-control" required>
+                  <option value="">-- Pilih Proyek Klien --</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Pagu Saldo Iklan yang Dialokasikan (Rp) <span style="color:red;">*</span></label>
+                <input type="text" name="allocated_budget" id="ads-alloc-amount" class="form-control" placeholder="Contoh: 10.000.000" required oninput="formatRupiahInput(this)">
+                <small style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 3px;">
+                  Pagu ini yang akan menjadi batas penyerapan saldo bagi Tim Ads di dashboard iklan.
+                </small>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" onclick="closeModal('modal-allocate-ads-budget')">Batal</button>
+              <button type="submit" class="btn btn-primary" id="btn-submit-ads-alloc">
+                Simpan Alokasi Saldo
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  <?php endif; ?>
+
+  <!-- MODAL: Lightbox Preview Bukti Screenshot Dashboard Ads -->
+  <div class="modal" id="modal-preview-ads-proof">
+    <div class="modal-dialog" style="max-width: 800px;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <h4 class="modal-title">Bukti Screenshot Dashboard Ads</h4>
+            <span style="font-size: 12px; color: var(--text-secondary);">Tangkapan layar otentik platform periklanan</span>
+          </div>
+          <button type="button" class="close-btn" onclick="closeModal('modal-preview-ads-proof')">&times;</button>
+        </div>
+        <div class="modal-body" style="text-align: center; padding: 16px;">
+          <img id="img-proof-preview" src="" alt="Bukti Dashboard Ads" style="max-width: 100%; max-height: 520px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border-color); display: none;">
+          <iframe id="iframe-proof-preview" src="" style="width: 100%; height: 500px; border: none; display: none;"></iframe>
         </div>
       </div>
     </div>
@@ -1097,6 +1383,513 @@ if ($isWorkerUser) {
         "'": '&#039;'
       };
       return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    // -----------------------------------------------------------
+    // ADS BUDGET & SPEND TRACKER MODULE JS
+    // -----------------------------------------------------------
+    let allLoadedAdsData = null;
+
+    function switchTaskWorkspaceTab(tab) {
+      const btnTasks = document.getElementById('tab-btn-tasks');
+      const btnAds = document.getElementById('tab-btn-ads');
+      const secTasks = document.getElementById('section-tasks-content');
+      const secAds = document.getElementById('section-ads-content');
+
+      if (tab === 'ads') {
+        btnAds.classList.add('active');
+        btnTasks.classList.remove('active');
+        secTasks.style.display = 'none';
+        secAds.style.display = 'block';
+        loadAdsTrackerData();
+      } else {
+        btnTasks.classList.add('active');
+        btnAds.classList.remove('active');
+        secAds.style.display = 'none';
+        secTasks.style.display = 'block';
+      }
+    }
+
+    async function loadAdsTrackerData() {
+      try {
+        const res = await fetch('api/ads_tracker.php?action=list');
+        const data = await res.json();
+        if (!data.success) {
+          showToast(data.message || 'Gagal memuat data iklan', 'danger');
+          return;
+        }
+        allLoadedAdsData = data;
+        renderAdsSummary(data);
+        renderAdsProjectsTable(data);
+        renderAdsLogsFeed(data);
+        populateAdsProjectDropdowns(data.projects || []);
+      } catch (err) {
+        console.error(err);
+        showToast('Koneksi server gagal memuat data ads', 'danger');
+      }
+    }
+
+    function renderAdsSummary(data) {
+      const container = document.getElementById('ads-kpi-container');
+      const isPrivileged = (data.role === 'owner' || data.role === 'admin');
+
+      if (isPrivileged && data.summary) {
+        const s = data.summary;
+        container.innerHTML = `
+          <div class="kpi-tile">
+            <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Total Kontrak Klien (Rahasia)</span>
+            <div style="font-size: 20px; font-weight: 800; color: #101828;">Rp ${Number(s.total_contract_value || 0).toLocaleString('id-ID')}</div>
+            <span style="font-size: 11px; color: var(--text-muted);">Hanya tampak di internal Owner</span>
+          </div>
+
+          <div class="kpi-tile">
+            <span style="font-size: 11.5px; color: #5925DC; font-weight: 700; text-transform: uppercase;">Pagu Saldo Ads Dialokasikan</span>
+            <div style="font-size: 20px; font-weight: 800; color: #5925DC;">Rp ${Number(s.total_allocated_ads || 0).toLocaleString('id-ID')}</div>
+            <span style="font-size: 11px; color: var(--text-muted);">Pagu belanja platform ads</span>
+          </div>
+
+          <div class="kpi-tile">
+            <span style="font-size: 11.5px; color: #175CD3; font-weight: 700; text-transform: uppercase;">Anggaran Terpasang (Spend)</span>
+            <div style="font-size: 20px; font-weight: 800; color: #175CD3;">Rp ${Number(s.total_spend_installed || 0).toLocaleString('id-ID')}</div>
+            <span style="font-size: 11px; color: var(--text-muted);">Laporan realisasi Tim Ads</span>
+          </div>
+
+          <div class="kpi-tile ${s.total_remaining_ads <= 0 ? 'urgent' : ''}">
+            <span style="font-size: 11.5px; color: ${s.total_remaining_ads <= 0 ? '#B42318' : '#027A48'}; font-weight: 700; text-transform: uppercase;">Sisa Saldo Ads</span>
+            <div style="font-size: 20px; font-weight: 800; color: ${s.total_remaining_ads <= 0 ? '#B42318' : '#027A48'};">Rp ${Number(s.total_remaining_ads || 0).toLocaleString('id-ID')}</div>
+            <span style="font-size: 11px; color: var(--text-muted);">Saldo pagu yang tersisa</span>
+          </div>
+
+          <div class="kpi-tile">
+            <span style="font-size: 11.5px; color: #027A48; font-weight: 700; text-transform: uppercase;">Margin Bersih Agensi</span>
+            <div style="font-size: 20px; font-weight: 800; color: #027A48;">Rp ${Number(s.total_agency_retained || 0).toLocaleString('id-ID')}</div>
+            <span style="font-size: 11px; color: var(--text-muted);">Kontrak - Pagu Saldo Ads</span>
+          </div>
+        `;
+      } else {
+        // STRICT WORKER VIEW: Calculate sums without any contract or agency margin values
+        let totalAlloc = 0;
+        let totalInstalled = 0;
+        let totalRemaining = 0;
+        const projects = data.projects || [];
+
+        projects.forEach(p => {
+          totalAlloc += Number(p.allocated_ads_budget || 0);
+          totalInstalled += Number(p.total_spend_installed || 0);
+          totalRemaining += Number(p.remaining_ads_budget || 0);
+        });
+
+        container.innerHTML = `
+          <div class="kpi-tile">
+            <span style="font-size: 11.5px; color: #5925DC; font-weight: 700; text-transform: uppercase;">Pagu Saldo Ads Ditugaskan Owner</span>
+            <div style="font-size: 20px; font-weight: 800; color: #5925DC;">Rp ${totalAlloc.toLocaleString('id-ID')}</div>
+            <span style="font-size: 11px; color: var(--text-muted);">Alokasi dana belanja iklan</span>
+          </div>
+
+          <div class="kpi-tile">
+            <span style="font-size: 11.5px; color: #175CD3; font-weight: 700; text-transform: uppercase;">Anggaran Terpasang di Dashboard</span>
+            <div style="font-size: 20px; font-weight: 800; color: #175CD3;">Rp ${totalInstalled.toLocaleString('id-ID')}</div>
+            <span style="font-size: 11px; color: var(--text-muted);">Total spend yang Anda pasang</span>
+          </div>
+
+          <div class="kpi-tile ${totalRemaining <= 0 ? 'urgent' : ''}">
+            <span style="font-size: 11.5px; color: ${totalRemaining <= 0 ? '#B42318' : '#027A48'}; font-weight: 700; text-transform: uppercase;">Sisa Saldo Iklan</span>
+            <div style="font-size: 20px; font-weight: 800; color: ${totalRemaining <= 0 ? '#B42318' : '#027A48'};">Rp ${totalRemaining.toLocaleString('id-ID')}</div>
+            <span style="font-size: 11px; color: var(--text-muted);">Batas penyerapan tersisa</span>
+          </div>
+
+          <div class="kpi-tile">
+            <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Proyek Kampanye</span>
+            <div style="font-size: 20px; font-weight: 800; color: #101828;">${projects.length} Proyek</div>
+            <span style="font-size: 11px; color: var(--text-muted);">Klien aktif Kalamedia</span>
+          </div>
+        `;
+      }
+    }
+
+    function renderAdsProjectsTable(data) {
+      const tbody = document.getElementById('tbody-ads-projects');
+      const isPrivileged = (data.role === 'owner' || data.role === 'admin');
+      const projects = data.projects || [];
+
+      if (projects.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${isPrivileged ? 8 : 6}" style="text-align: center; padding: 32px; color: var(--text-muted);">Belum ada data proyek atau alokasi saldo iklan.</td></tr>`;
+        return;
+      }
+
+      let html = '';
+      projects.forEach(p => {
+        const alloc = Number(p.allocated_ads_budget || 0);
+        const installed = Number(p.total_spend_installed || 0);
+        const remaining = Number(p.remaining_ads_budget || 0);
+        const contract = Number(p.contract_value || 0);
+        const margin = Number(p.agency_retained_balance || (contract - alloc));
+
+        let statusBadge = '<span class="badge" style="background: #F2F4F7; color: #344054; font-weight: 700;">Belum Ada Log</span>';
+        if (p.logs && p.logs.length > 0) {
+          const latestLog = p.logs[0];
+          const stMap = {
+            'sedang_berjalan': { label: 'Sedang Berjalan', bg: '#ECFDF3', color: '#027A48' },
+            'menunggu_saldo': { label: 'Menunggu Saldo', bg: '#EFF8FF', color: '#175CD3' },
+            'saldo_hampir_habis': { label: 'Saldo Menipis', bg: '#FEF3F2', color: '#B42318' },
+            'selesai': { label: 'Selesai', bg: '#F2F4F7', color: '#344054' }
+          };
+          const st = stMap[latestLog.status] || { label: latestLog.status, bg: '#F2F4F7', color: '#344054' };
+          statusBadge = `<span class="badge" style="background: ${st.bg}; color: ${st.color}; font-weight: 700;">${st.label}</span>`;
+        }
+
+        html += `
+          <tr>
+            <td>
+              <div style="font-weight: 800; color: #101828;">${escapeHtml(p.client_company)}</div>
+              <span style="font-size: 11.5px; color: var(--text-secondary);">${escapeHtml(p.project_name)}</span>
+            </td>
+            ${isPrivileged ? `
+              <td style="font-weight: 800; color: #101828;">
+                Rp ${contract.toLocaleString('id-ID')}
+              </td>
+            ` : ''}
+            <td style="font-weight: 800; color: #5925DC;">
+              Rp ${alloc.toLocaleString('id-ID')}
+            </td>
+            <td style="font-weight: 800; color: #175CD3;">
+              Rp ${installed.toLocaleString('id-ID')}
+            </td>
+            <td style="font-weight: 800; color: ${remaining <= 0 && alloc > 0 ? '#B42318' : '#027A48'};">
+              Rp ${remaining.toLocaleString('id-ID')}
+            </td>
+            ${isPrivileged ? `
+              <td style="font-weight: 800; color: #027A48;">
+                Rp ${margin.toLocaleString('id-ID')}
+              </td>
+            ` : ''}
+            <td>
+              ${statusBadge}
+            </td>
+            <td style="text-align: right; white-space: nowrap;">
+              <button type="button" class="btn btn-primary btn-sm" onclick="openLogAdsSpendModal(${p.project_id})" style="font-size: 11px; padding: 4px 10px;">
+                + Input Spend
+              </button>
+              ${isPrivileged ? `
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openAllocateAdsModal(${p.project_id}, ${alloc})" style="font-size: 11px; padding: 4px 8px; margin-left: 4px;">
+                  Atur Pagu
+                </button>
+              ` : ''}
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function renderAdsLogsFeed(data) {
+      const container = document.getElementById('ads-logs-feed-container');
+      const isPrivileged = (data.role === 'owner' || data.role === 'admin');
+      const isOwner = (data.role === 'owner');
+
+      // Aggregate all logs from all projects
+      let allLogs = [];
+      (data.projects || []).forEach(p => {
+        (p.logs || []).forEach(l => {
+          allLogs.push({
+            ...l,
+            client_company: p.client_company,
+            project_name: p.project_name
+          });
+        });
+      });
+
+      allLogs.sort((a, b) => b.id - a.id);
+
+      if (allLogs.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 36px; background: #F9FAFB; border-radius: var(--radius-md); border: 1px dashed var(--border-color); color: var(--text-muted);">
+            <div style="font-size: 28px; margin-bottom: 6px;">📈</div>
+            <h4 style="font-size: 14px; font-weight: 700; color: #101828; margin-bottom: 2px;">Belum Ada Riwayat Update Anggaran Terpasang</h4>
+            <p style="font-size: 12.5px; margin: 0;">Tim Ads dapat menekan tombol <b>+ Update Anggaran Terpasang & Bukti</b> untuk mencatat nominal belanja platform iklan.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+      allLogs.forEach(l => {
+        const stMap = {
+          'sedang_berjalan': { label: 'Sedang Berjalan', bg: '#ECFDF3', color: '#027A48' },
+          'menunggu_saldo': { label: 'Menunggu Saldo', bg: '#EFF8FF', color: '#175CD3' },
+          'saldo_hampir_habis': { label: 'Saldo Menipis', bg: '#FEF3F2', color: '#B42318' },
+          'selesai': { label: 'Selesai', bg: '#F2F4F7', color: '#344054' }
+        };
+        const st = stMap[l.status] || { label: l.status, bg: '#F2F4F7', color: '#344054' };
+        const isVerified = (l.is_verified_by_owner == 1);
+
+        html += `
+          <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; box-shadow: 0 1px 2px rgba(16,24,40,0.04);">
+            <div style="flex: 1; min-width: 260px;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px;">
+                <span style="font-weight: 800; font-size: 13.5px; color: #101828;">${escapeHtml(l.client_company)}</span>
+                <span class="badge" style="background: #F4F3FF; color: #5925DC; font-weight: 800; font-size: 11px;">${escapeHtml(l.platform)}</span>
+                <span class="badge" style="background: ${st.bg}; color: ${st.color}; font-weight: 700; font-size: 11px;">${st.label}</span>
+                <span style="font-size: 11.5px; color: var(--text-muted);">&bull; ${formatDate(l.created_at || l.updated_at)}</span>
+              </div>
+
+              <div style="display: flex; gap: 18px; margin-bottom: 8px; flex-wrap: wrap;">
+                <div>
+                  <span style="font-size: 11px; color: var(--text-muted); display: block;">Anggaran Terpasang:</span>
+                  <span style="font-size: 14px; font-weight: 800; color: #175CD3;">Rp ${Number(l.spend_installed || 0).toLocaleString('id-ID')}</span>
+                </div>
+                <div>
+                  <span style="font-size: 11px; color: var(--text-muted); display: block;">Pagu Saldo:</span>
+                  <span style="font-size: 14px; font-weight: 700; color: #5925DC;">Rp ${Number(l.allocated_budget || 0).toLocaleString('id-ID')}</span>
+                </div>
+                <div>
+                  <span style="font-size: 11px; color: var(--text-muted); display: block;">Sisa Saldo:</span>
+                  <span style="font-size: 14px; font-weight: 800; color: ${Number(l.remaining_budget || 0) <= 0 ? '#B42318' : '#027A48'};">Rp ${Number(l.remaining_budget || 0).toLocaleString('id-ID')}</span>
+                </div>
+              </div>
+
+              <div style="font-size: 13px; color: #344054; background: #F9FAFB; border-radius: 6px; padding: 8px 12px; margin-bottom: 6px; border: 1px solid #EAECF0;">
+                <b>Catatan Koordinasi:</b> ${escapeHtml(l.notes || 'Tidak ada catatan khusus.')}
+              </div>
+
+              <div style="font-size: 11.5px; color: var(--text-secondary);">
+                PIC Penginput: <b>${escapeHtml(l.updated_by_name || 'Tim Ads')}</b>
+              </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+              ${isVerified ? `
+                <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 11px; border: 1px solid #A6F4C5;">
+                  ✓ Terverifikasi Owner
+                </span>
+              ` : `
+                ${isOwner ? `
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="verifyAdsLog(${l.id})" style="font-size: 11px; color: #027A48; border-color: #A6F4C5; background: #ECFDF3; font-weight: 700;">
+                    ✓ Verifikasi Laporan
+                  </button>
+                ` : `
+                  <span class="badge" style="background: #FEF0C7; color: #B54708; font-weight: 700; font-size: 11px;">
+                    Menunggu Verifikasi
+                  </span>
+                `}
+              `}
+
+              ${l.attachment_proof ? `
+                <button type="button" class="btn btn-secondary btn-sm" onclick="previewAdsProof('${escapeHtml(l.attachment_proof)}')" style="font-size: 11px; font-weight: 600;">
+                  Lihat Screenshot Dashboard
+                </button>
+              ` : ''}
+
+              ${isPrivileged ? `
+                <button type="button" class="btn btn-secondary btn-sm" onclick="deleteAdsLog(${l.id})" style="font-size: 10.5px; color: #B42318; border-color: #FECDCA; padding: 2px 8px;" title="Hapus Riwayat">
+                  Hapus
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+
+      container.innerHTML = html;
+    }
+
+    function populateAdsProjectDropdowns(projects) {
+      const selectSpend = document.getElementById('ads-spend-project-id');
+      const selectAlloc = document.getElementById('ads-alloc-project-id');
+
+      let optionsHtml = '<option value="">-- Pilih Proyek Klien --</option>';
+      projects.forEach(p => {
+        optionsHtml += `<option value="${p.project_id}" data-allocated="${p.allocated_ads_budget || 0}">[${escapeHtml(p.client_company)}] ${escapeHtml(p.project_name)}</option>`;
+      });
+
+      if (selectSpend) selectSpend.innerHTML = optionsHtml;
+      if (selectAlloc) selectAlloc.innerHTML = optionsHtml;
+    }
+
+    function onAdsProjectSelectChange(selectElem) {
+      const selectedOption = selectElem.options[selectElem.selectedIndex];
+      const box = document.getElementById('box-allocated-info');
+      const txt = document.getElementById('txt-allocated-budget');
+      if (!box || !txt) return;
+
+      const alloc = Number(selectedOption ? selectedOption.getAttribute('data-allocated') || 0 : 0);
+      if (selectElem.value && alloc > 0) {
+        txt.innerText = 'Rp ' + alloc.toLocaleString('id-ID');
+        box.style.display = 'block';
+      } else if (selectElem.value) {
+        txt.innerText = 'Rp 0 (Belum dialokasikan Owner)';
+        box.style.display = 'block';
+      } else {
+        box.style.display = 'none';
+      }
+    }
+
+    function openLogAdsSpendModal(projectId = null, defaultPlatform = 'Meta Ads') {
+      const form = document.getElementById('form-update-ads-spend');
+      if (form) form.reset();
+
+      const projSelect = document.getElementById('ads-spend-project-id');
+      if (projSelect && projectId) {
+        projSelect.value = projectId;
+        onAdsProjectSelectChange(projSelect);
+      } else {
+        const box = document.getElementById('box-allocated-info');
+        if (box) box.style.display = 'none';
+      }
+
+      const platSelect = document.getElementById('ads-spend-platform');
+      if (platSelect && defaultPlatform) {
+        platSelect.value = defaultPlatform;
+      }
+
+      openModal('modal-update-ads-spend');
+    }
+
+    function openAllocateAdsModal(projectId = null, currentBudget = 0) {
+      const form = document.getElementById('form-allocate-ads-budget');
+      if (form) form.reset();
+
+      const projSelect = document.getElementById('ads-alloc-project-id');
+      if (projSelect && projectId) {
+        projSelect.value = projectId;
+      }
+
+      const amountInput = document.getElementById('ads-alloc-amount');
+      if (amountInput && currentBudget > 0) {
+        amountInput.value = Number(currentBudget).toLocaleString('id-ID');
+      }
+
+      openModal('modal-allocate-ads-budget');
+    }
+
+    async function handleLogAdsSpend(e) {
+      e.preventDefault();
+      const form = document.getElementById('form-update-ads-spend');
+      const submitBtn = document.getElementById('btn-submit-ads-spend');
+      const origText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Menyimpan...';
+
+      const formData = new FormData(form);
+      try {
+        const res = await fetch('api/ads_tracker.php?action=log_spend', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          closeModal('modal-update-ads-spend');
+          form.reset();
+          loadAdsTrackerData();
+        } else {
+          showToast(data.message || 'Gagal menyimpan anggaran iklan', 'danger');
+        }
+      } catch (err) {
+        showToast('Koneksi server gagal', 'danger');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origText;
+      }
+    }
+
+    async function handleAllocateAdsBudget(e) {
+      e.preventDefault();
+      const form = document.getElementById('form-allocate-ads-budget');
+      const submitBtn = document.getElementById('btn-submit-ads-alloc');
+      const origText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Menyimpan...';
+
+      const formData = new FormData(form);
+      try {
+        const res = await fetch('api/ads_tracker.php?action=allocate_budget', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          closeModal('modal-allocate-ads-budget');
+          form.reset();
+          loadAdsTrackerData();
+        } else {
+          showToast(data.message || 'Gagal menyimpan alokasi pagu saldo', 'danger');
+        }
+      } catch (err) {
+        showToast('Koneksi server gagal', 'danger');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origText;
+      }
+    }
+
+    async function verifyAdsLog(logId) {
+      const formData = new FormData();
+      formData.append('log_id', logId);
+      try {
+        const res = await fetch('api/ads_tracker.php?action=verify_log', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          loadAdsTrackerData();
+        } else {
+          showToast(data.message || 'Gagal memverifikasi', 'danger');
+        }
+      } catch (err) {
+        showToast('Koneksi server gagal', 'danger');
+      }
+    }
+
+    async function deleteAdsLog(logId) {
+      if (!confirm('Hapus riwayat anggaran iklan ini?')) return;
+      const formData = new FormData();
+      formData.append('log_id', logId);
+      try {
+        const res = await fetch('api/ads_tracker.php?action=delete_log', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          loadAdsTrackerData();
+        } else {
+          showToast(data.message || 'Gagal menghapus', 'danger');
+        }
+      } catch (err) {
+        showToast('Koneksi server gagal', 'danger');
+      }
+    }
+
+    function previewAdsProof(url) {
+      const img = document.getElementById('img-proof-preview');
+      const iframe = document.getElementById('iframe-proof-preview');
+
+      if (url.toLowerCase().endsWith('.pdf')) {
+        img.style.display = 'none';
+        iframe.src = url;
+        iframe.style.display = 'block';
+      } else {
+        iframe.style.display = 'none';
+        img.src = url;
+        img.style.display = 'inline-block';
+      }
+      openModal('modal-preview-ads-proof');
+    }
+
+    function formatRupiahInput(input) {
+      let val = input.value.replace(/[^0-9]/g, '');
+      if (val) {
+        input.value = Number(val).toLocaleString('id-ID');
+      } else {
+        input.value = '';
+      }
     }
   </script>
 

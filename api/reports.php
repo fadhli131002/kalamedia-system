@@ -148,6 +148,17 @@ if ($action === 'list') {
         $summary['blended_roas'] = $blendedRoas;
         $summary['avg_cpl_cpa'] = $avgCplCpa;
 
+        // STRICT WORKER FINANCIAL PRIVACY: Sensor omset/revenue klien dari karyawan & freelancer
+        if (is_karyawan() || is_freelancer()) {
+            unset($summary['total_revenue']);
+            unset($summary['blended_roas']);
+            foreach ($reports as &$rep) {
+                unset($rep['revenue']);
+                unset($rep['roas']);
+                unset($rep['roi']);
+            }
+        }
+
         echo json_encode([
             'success' => true,
             'total' => count($reports),

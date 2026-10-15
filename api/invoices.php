@@ -10,6 +10,12 @@ require_once __DIR__ . '/../config/auth.php';
 require_auth();
 release_session();
 
+// STRICT FINANCIAL PRIVACY: Karyawan dan Freelancer dilarang keras mengakses invoice
+if (is_karyawan() || is_freelancer()) {
+    echo json_encode(['success' => false, 'message' => 'Akses ditolak: Karyawan dan freelancer dilarang melihat data nominal invoice klien.']);
+    exit;
+}
+
 $db = Database::getConnection();
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 

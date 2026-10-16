@@ -144,7 +144,10 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin & Finance Dashboard - PT Kala Kausa Prima</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
 </head>
 <body>
   <div class="app-container">
@@ -233,7 +236,7 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
           </div>
 
           <!-- Pending Employee Salaries -->
-          <div class="alert-card" onclick="switchOpTab('tab-ap')" style="cursor: pointer; border-left: 4px solid #101828;">
+          <div class="alert-card" onclick="switchOpTab('tab-ap')" style="cursor: pointer; border-left: 4px solid #8932E0;">
             <div class="alert-card-info">
               <h5>Pending Gaji Tim (A/P)</h5>
               <div class="count"><?= $pendingSalaryCount ?> Karyawan</div>

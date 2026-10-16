@@ -76,7 +76,10 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Laporan Performance Marketing Klien - PT Kala Kausa Prima</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
 </head>
 <body>
   <div class="app-container">
@@ -94,7 +97,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <div class="kpi-header">
               <span class="kpi-title">Total Ad Spend Terkelola</span>
             </div>
-            <div class="kpi-value" style="color: #0F172A;">
+            <div class="kpi-value" style="color: #000000;">
               Rp <?= number_format($totalSpend, 0, ',', '.') ?>
             </div>
             <div class="kpi-meta" style="color: var(--text-secondary);">
@@ -217,11 +220,11 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
                       <!-- Client Brand -->
                       <td>
                         <div style="display: flex; align-items: center; gap: 10px;">
-                          <div style="width: 36px; height: 36px; border-radius: 8px; background: #0F172A; color: #FFFFFF; font-weight: 900; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                          <div style="width: 36px; height: 36px; border-radius: 12px; background: linear-gradient(135deg, #5D76F5 0%, #8932E0 100%); color: #FFFFFF; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                             <?= strtoupper(substr($r['client_company'] ?: $r['client_name'], 0, 2)) ?>
                           </div>
                           <div>
-                            <a href="<?= url("report-deck?id={$r['id']}") ?>" style="font-weight: 700; color: #101828; text-decoration: none; font-size: 13.5px;" class="hover-underline">
+                            <a href="<?= url("report-deck?id={$r['id']}") ?>" style="font-weight: 700; color: #000000; text-decoration: none; font-size: 13.5px;" class="hover-underline">
                               <?= htmlspecialchars($r['client_company']) ?>
                             </a>
                             <div style="font-size: 11px; color: var(--text-muted);">
@@ -233,10 +236,10 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                       <!-- Objective & Period -->
                       <td>
-                        <div style="font-weight: 700; color: #0F172A; font-size: 12.5px; margin-bottom: 2px;">
+                        <div style="font-weight: 700; color: #000000; font-size: 12.5px; margin-bottom: 2px;">
                           <?= htmlspecialchars($r['objective'] ?: 'Performance Campaign') ?>
                         </div>
-                        <span class="badge" style="background: #EEF2FF; color: #4F46E5; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">
+                        <span class="badge" style="background: rgba(137, 50, 224, 0.12); color: #8932E0; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px;">
                           <?= htmlspecialchars($r['report_period']) ?>
                         </span>
                       </td>
@@ -254,7 +257,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
                       <!-- ROAS & ROI -->
                       <td>
                         <div style="display: inline-flex; align-items: baseline; gap: 4px;">
-                          <span style="font-weight: 900; color: #4F46E5; font-size: 15px;">
+                          <span style="font-weight: 900; color: #5D76F5; font-size: 15px;">
                             <?= number_format($r['roas'], 2) ?>x
                           </span>
                           <span style="font-size: 11px; font-weight: 700; color: #059669;">
@@ -268,7 +271,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                       <!-- Conversions & CPL/CPA -->
                       <td>
-                        <span style="display: inline-flex; align-items: center; background: #0F172A; color: #FFFFFF; font-weight: 800; font-size: 11.5px; padding: 3px 9px; border-radius: 16px;">
+                        <span style="display: inline-flex; align-items: center; background: rgba(93, 118, 245, 0.12); color: #5D76F5; font-weight: 700; font-size: 11.5px; padding: 4px 10px; border-radius: 999px;">
                           <?= number_format($r['total_conversions']) ?> Conv
                         </span>
                         <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 2px;">

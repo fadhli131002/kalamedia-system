@@ -41,9 +41,12 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pengeluaran Operasional (Outflow) - PT Kala Kausa Prima</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
   <style>
-    /* Untitled UI Design System Custom Extensions */
+    /* Bankio Minimal Finance Design System Extensions */
     .expenses-header-row {
       display: flex;
       justify-content: space-between;
@@ -53,48 +56,49 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
       flex-wrap: wrap;
     }
     .expenses-page-title {
-      font-size: 24px;
-      font-weight: 700;
-      color: #101828;
+      font-size: 20px;
+      font-weight: 800;
+      color: #000000;
       margin: 0;
       line-height: 1.25;
       letter-spacing: -0.02em;
     }
     .expenses-page-subtitle {
-      font-size: 14px;
-      color: #475467;
+      font-size: 13px;
+      color: #6E7485;
       margin-top: 4px;
       margin-bottom: 0;
     }
     .btn-solid-dark {
-      background: #0F172A;
+      background: #5D76F5;
       color: #FFFFFF;
-      border: 1px solid #0F172A;
+      border: 1px solid #5D76F5;
       font-weight: 600;
       font-size: 13.5px;
       padding: 10px 18px;
-      border-radius: 8px;
+      border-radius: 14px;
       display: inline-flex;
       align-items: center;
       gap: 8px;
       cursor: pointer;
-      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-      transition: all 0.15s ease;
+      box-shadow: 0 4px 14px rgba(93, 118, 245, 0.25);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       text-decoration: none;
     }
     .btn-solid-dark:hover {
-      background: #1E293B;
-      border-color: #1E293B;
+      background: #4A63E2;
+      border-color: #4A63E2;
       color: #FFFFFF;
+      box-shadow: 0 8px 20px -4px rgba(93, 118, 245, 0.38);
       transform: translateY(-1px);
     }
     
     /* Level 1 Filter: Segmented Control Tabs */
     .segmented-control-container {
-      background: #F2F4F7;
-      border: 1px solid #EAECF0;
-      border-radius: 10px;
-      padding: 4px;
+      background: #EEF0F6;
+      border: 1px solid #ECEEF5;
+      border-radius: 999px;
+      padding: 5px;
       display: inline-flex;
       gap: 4px;
       margin-bottom: 24px;
@@ -104,34 +108,35 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
       align-items: center;
       gap: 8px;
       padding: 8px 18px;
-      border-radius: 7px;
+      border-radius: 999px;
       font-size: 13px;
-      font-weight: 500;
-      color: #475467;
+      font-weight: 600;
+      color: #6E7485;
       text-decoration: none;
-      transition: all 0.15s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: inherit;
     }
     .segmented-tab-btn:hover {
-      color: #101828;
+      color: #000000;
     }
     .segmented-tab-btn.active {
-      background: #FFFFFF;
-      color: #101828;
+      background: #5D76F5;
+      color: #FFFFFF;
       font-weight: 700;
-      box-shadow: 0 1px 3px rgba(16, 24, 40, 0.1), 0 1px 2px rgba(16, 24, 40, 0.06);
+      box-shadow: 0 4px 12px rgba(93, 118, 245, 0.28);
     }
 
     /* Level 2: Integrated Table Toolbar & Container */
     .untitled-card {
       background: #FFFFFF;
-      border: 1px solid #EAECF0;
-      border-radius: 12px;
-      box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04);
+      border: 1px solid #ECEEF5;
+      border-radius: 22px;
+      box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
       overflow: hidden;
     }
     .table-toolbar-row {
       padding: 16px 20px;
-      border-bottom: 1px solid #EAECF0;
+      border-bottom: 1px solid #ECEEF5;
       display: flex;
       justify-content: space-between;
       align-items: center;

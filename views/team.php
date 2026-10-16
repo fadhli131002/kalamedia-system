@@ -70,42 +70,45 @@ $totalClientsCount = count($allClients);
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tim & Karyawan - PT Kala Kausa Prima</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
   <style>
     .team-badge-karyawan {
-      background: #EFF8FF;
-      color: #175CD3;
-      border: 1px solid #B2DDFF;
+      background: rgba(93, 118, 245, 0.12);
+      color: #5D76F5;
+      border: 1px solid rgba(93, 118, 245, 0.2);
       font-size: 11px;
       font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
       display: inline-flex;
       align-items: center;
       gap: 4px;
     }
     .team-badge-freelancer {
-      background: #F4F3FF;
-      color: #5925DC;
-      border: 1px solid #D9D6FE;
+      background: rgba(137, 50, 224, 0.12);
+      color: #8932E0;
+      border: 1px solid rgba(137, 50, 224, 0.2);
       font-size: 11px;
       font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
       display: inline-flex;
       align-items: center;
       gap: 4px;
     }
     .client-tag-pill {
-      background: #F2F4F7;
-      color: #344054;
+      background: #F8F9FC;
+      color: #6E7485;
       font-size: 11px;
       font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 6px;
+      padding: 3px 8px;
+      border-radius: 8px;
       display: inline-block;
       margin: 2px 2px 2px 0;
-      border: 1px solid var(--border-color);
+      border: 1px solid #ECEEF5;
     }
     .checkbox-clients-grid {
       display: grid;
@@ -114,17 +117,168 @@ $totalClientsCount = count($allClients);
       max-height: 160px;
       overflow-y: auto;
       padding: 10px;
-      background: #F9FAFB;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
+      background: #F8F9FC;
+      border: 1px solid #ECEEF5;
+      border-radius: 14px;
     }
     .checkbox-client-item {
       display: flex;
       align-items: center;
       gap: 8px;
       font-size: 12.5px;
-      color: #344054;
+      color: #000000;
       cursor: pointer;
+    }
+
+    /* Bento Box Design System - Bankio Minimal Finance */
+    .bento-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    @media (min-width: 640px) {
+      .bento-metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    @media (min-width: 1024px) {
+      .bento-metrics-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    .bento-metric-card {
+      background-color: #FFFFFF;
+      border-radius: 22px;
+      padding: 24px;
+      border: 1px solid #ECEEF5;
+      box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 140px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .bento-metric-card:hover {
+      box-shadow: 0 14px 34px -8px rgba(18, 24, 48, 0.08);
+      border-color: #DDE1EE;
+      transform: translateY(-2px);
+    }
+
+    .metric-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #949AB1;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 6px;
+    }
+    .metric-value {
+      font-size: 30px;
+      font-weight: 700;
+      color: #000000;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .metric-subtitle {
+      font-size: 12px;
+      color: #6E7485;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Bento Table Card Wrapper */
+    .bento-table-card {
+      background-color: #FFFFFF;
+      border-radius: 22px;
+      border: 1px solid #ECEEF5;
+      box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
+      padding: 24px;
+      overflow: hidden;
+      margin-bottom: 28px;
+    }
+
+    /* Bento Toolbar */
+    .bento-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .bento-tabs-group {
+      display: inline-flex;
+      background: #EEF0F6;
+      padding: 5px;
+      border-radius: 999px;
+      gap: 4px;
+      border: 1px solid #ECEEF5;
+    }
+
+    .bento-tab-btn {
+      background: transparent;
+      border: none;
+      color: #6E7485;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: inherit;
+    }
+    .bento-tab-btn:hover {
+      color: #000000;
+    }
+    .bento-tab-btn.active {
+      background: #5D76F5;
+      color: #FFFFFF;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(93, 118, 245, 0.28);
+    }
+
+    .bento-search-box {
+      position: relative;
+      min-width: 280px;
+      max-width: 360px;
+      flex: 1;
+    }
+    .bento-search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      color: #949AB1;
+      pointer-events: none;
+      line-height: 1;
+    }
+    .bento-search-input {
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      border-radius: 14px;
+      border: 1px solid #ECEEF5;
+      background: #FFFFFF;
+      font-size: 13px;
+      color: #000000;
+      outline: none;
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+    .bento-search-input:focus {
+      background: #FFFFFF;
+      border-color: #5D76F5;
+      box-shadow: 0 0 0 4px rgba(93, 118, 245, 0.15);
+    }
+    .bento-search-input::placeholder {
+      color: #949AB1;
     }
   </style>
 </head>
@@ -138,21 +292,21 @@ $totalClientsCount = count($allClients);
       <div class="content-body">
 
         <!-- Top Header Card -->
-        <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div style="background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 22px; padding: 24px; margin-bottom: 22px; box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
           <div>
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-              <span class="badge" style="background: #EFF8FF; color: #175CD3; font-weight: 800; font-size: 11px;">
+              <span class="badge" style="background: rgba(93, 118, 245, 0.12); color: #5D76F5; font-weight: 700; font-size: 11px; border-radius: 999px; padding: 3px 10px; border: 1px solid rgba(93, 118, 245, 0.2);">
                 MANAJEMEN SDM & TALENTA
               </span>
-              <span style="font-size: 12px; color: var(--text-muted);">&bull;</span>
-              <span style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">
+              <span style="font-size: 12px; color: #949AB1;">&bull;</span>
+              <span style="font-size: 12px; color: #6E7485; font-weight: 600;">
                 Kalamedia Internal
               </span>
             </div>
-            <h2 style="font-size: 20px; font-weight: 800; color: #101828; margin: 0; letter-spacing: -0.3px;">
+            <h2 style="font-size: 20px; font-weight: 800; color: #000000; margin: 0; letter-spacing: -0.3px;">
               Tim & Karyawan Kalamedia
             </h2>
-            <p style="font-size: 13px; color: var(--text-secondary); margin: 4px 0 0;">
+            <p style="font-size: 13px; color: #6E7485; margin: 4px 0 0;">
               Kelola data staf in-house dan freelancer, rincian jobdesk dari Owner, penugasan klien/PT, serta akun akses login ke sistem.
             </p>
           </div>
@@ -164,47 +318,84 @@ $totalClientsCount = count($allClients);
           </div>
         </div>
 
-        <!-- KPI Metrics Grid -->
-        <div class="kpi-row" style="margin-bottom: 20px;">
-          <div class="kpi-tile">
-            <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 600;">Total Tim Aktif</span>
-            <div style="font-size: 24px; font-weight: 800; color: #101828;"><?= $totalMembers ?></div>
-            <span style="font-size: 11px; color: var(--text-muted);">Karyawan & Freelancer</span>
+        <!-- Top Metrics Summary (4-Column Bento Grid) -->
+        <div class="bento-metrics-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+          <!-- Card 1: Total Tim Aktif -->
+          <div class="bento-metric-card bg-white rounded-[20px] p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="metric-label text-xs font-bold text-slate-500 uppercase">TOTAL TIM AKTIF</div>
+              <div class="metric-value text-3xl font-extrabold text-slate-900"><?= $totalMembers ?> Orang</div>
+            </div>
+            <div class="metric-subtitle text-sm text-slate-400">
+              <span>👥 Tim Internal & Eksternal</span>
+            </div>
           </div>
 
-          <div class="kpi-tile">
-            <span style="font-size: 11.5px; color: #175CD3; font-weight: 700;">Karyawan Kalamedia</span>
-            <div style="font-size: 24px; font-weight: 800; color: #175CD3;"><?= $karyawanCount ?></div>
-            <span style="font-size: 11px; color: var(--text-muted);">Staf In-House</span>
+          <!-- Card 2: Staf In-House -->
+          <div class="bento-metric-card bg-white rounded-[20px] p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="metric-label text-xs font-bold text-slate-500 uppercase">STAF IN-HOUSE</div>
+              <div class="metric-value text-3xl font-extrabold text-slate-900"><?= $karyawanCount ?> Staf</div>
+            </div>
+            <div class="metric-subtitle text-sm text-slate-400">
+              <span>💼 Karyawan Akses Portal</span>
+            </div>
           </div>
 
-          <div class="kpi-tile">
-            <span style="font-size: 11.5px; color: #5925DC; font-weight: 700;">Freelancer</span>
-            <div style="font-size: 24px; font-weight: 800; color: #5925DC;"><?= $freelancerCount ?></div>
-            <span style="font-size: 11px; color: var(--text-muted);">Talenta Eksternal</span>
+          <!-- Card 3: Freelancer -->
+          <div class="bento-metric-card bg-white rounded-[20px] p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="metric-label text-xs font-bold text-slate-500 uppercase">FREELANCER</div>
+              <div class="metric-value text-3xl font-extrabold text-slate-900"><?= $freelancerCount ?> Talenta</div>
+            </div>
+            <div class="metric-subtitle text-sm text-slate-400">
+              <span>⚡ Talenta Eksternal</span>
+            </div>
           </div>
 
-          <div class="kpi-tile">
-            <span style="font-size: 11.5px; color: #027A48; font-weight: 600;">Klien Terdaftar</span>
-            <div style="font-size: 24px; font-weight: 800; color: #027A48;"><?= $totalClientsCount ?></div>
-            <span style="font-size: 11px; color: var(--text-muted);">Perusahaan / PT</span>
+          <!-- Card 4: Klien Terdaftar -->
+          <div class="bento-metric-card bg-white rounded-[20px] p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <div>
+              <div class="metric-label text-xs font-bold text-slate-500 uppercase">KLIEN TERDAFTAR</div>
+              <div class="metric-value text-3xl font-extrabold text-slate-900"><?= $totalClientsCount ?> Perusahaan / PT</div>
+            </div>
+            <div class="metric-subtitle text-sm text-slate-400">
+              <span>🏢 Klien Aktif</span>
+            </div>
           </div>
         </div>
 
-        <!-- Team Members Table Panel -->
-        <div class="glass-panel">
-          <div class="panel-header" style="flex-wrap: wrap; gap: 12px;">
-            <div>
-              <h3 class="panel-title">Daftar Anggota Tim & Alokasi Klien</h3>
-              <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
-                Daftar seluruh tim yang memiliki hak akses pengerjaan deliverables dan workspace.
-              </p>
+        <!-- Unified Table Toolbar & Card Wrapper (Bento Container) -->
+        <div class="bento-table-card">
+          <div style="margin-bottom: 20px;">
+            <h3 style="font-size: 18px; font-weight: 800; color: #000000; margin: 0; letter-spacing: -0.3px;">
+              Daftar Anggota Tim & Alokasi Klien
+            </h3>
+            <p style="font-size: 13px; color: #6E7485; margin: 4px 0 0;">
+              Daftar seluruh tim yang memiliki hak akses pengerjaan deliverables dan workspace.
+            </p>
+          </div>
+
+          <!-- Unified Toolbar: Filter Tabs on LEFT, Search Input on RIGHT -->
+          <div class="bento-toolbar">
+            <!-- Left: Filter Tabs -->
+            <div class="bento-tabs-group">
+              <button type="button" class="bento-tab-btn active" onclick="filterTeamRole('all', this)">Semua</button>
+              <button type="button" class="bento-tab-btn" onclick="filterTeamRole('karyawan', this)">Karyawan In-House</button>
+              <button type="button" class="bento-tab-btn" onclick="filterTeamRole('freelancer', this)">Freelancer</button>
             </div>
 
-            <div style="display: flex; gap: 8px;">
-              <button class="filter-btn active" onclick="filterTeamRole('all', this)">Semua</button>
-              <button class="filter-btn" onclick="filterTeamRole('karyawan', this)">Karyawan In-House</button>
-              <button class="filter-btn" onclick="filterTeamRole('freelancer', this)">Freelancer</button>
+            <!-- Right: Search Input -->
+            <div class="bento-search-box">
+              <span class="bento-search-icon">🔍</span>
+              <input 
+                type="text" 
+                id="team-search-input" 
+                class="bento-search-input" 
+                placeholder="Cari nama, email, atau posisi..." 
+                oninput="handleTeamSearch(this.value)"
+                autocomplete="off"
+              >
             </div>
           </div>
 
@@ -221,6 +412,13 @@ $totalClientsCount = count($allClients);
                 </tr>
               </thead>
               <tbody id="team-table-body">
+                <tr id="search-empty-team-row" style="display: none;">
+                  <td colspan="6" style="text-align: center; color: #949AB1; padding: 48px;">
+                    <div style="font-size: 26px; margin-bottom: 6px;">🔍</div>
+                    <div style="font-weight: 700; color: #000000; margin-bottom: 4px; font-size: 14px;">Tidak Ada Anggota Tim yang Cocok</div>
+                    <p style="font-size: 12.5px; color: #6E7485; margin: 0;">Silakan coba kata kunci pencarian atau filter tab lainnya.</p>
+                  </td>
+                </tr>
                 <?php if (empty($teamMembers)): ?>
                   <tr id="empty-team-row">
                     <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 48px;">
@@ -498,18 +696,49 @@ $totalClientsCount = count($allClients);
       }
     }
 
-    function filterTeamRole(role, btn) {
-      document.querySelectorAll('.panel-header .filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+    let currentRoleFilter = 'all';
+    let currentSearchQuery = '';
 
+    function filterTeamRole(role, btn) {
+      document.querySelectorAll('.bento-tab-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      currentRoleFilter = role;
+      applyTeamFilters();
+    }
+
+    function handleTeamSearch(val) {
+      currentSearchQuery = (val || '').trim().toLowerCase();
+      applyTeamFilters();
+    }
+
+    function applyTeamFilters() {
       const rows = document.querySelectorAll('.team-row');
+      let matchCount = 0;
+
       rows.forEach(r => {
-        if (role === 'all' || r.getAttribute('data-role') === role) {
+        const role = r.getAttribute('data-role') || '';
+        const rowText = r.textContent.toLowerCase();
+
+        const roleMatch = (currentRoleFilter === 'all' || role === currentRoleFilter);
+        const searchMatch = !currentSearchQuery || rowText.includes(currentSearchQuery);
+
+        if (roleMatch && searchMatch) {
           r.style.display = '';
+          matchCount++;
         } else {
           r.style.display = 'none';
         }
       });
+
+      const searchEmpty = document.getElementById('search-empty-team-row');
+      const emptyRow = document.getElementById('empty-team-row');
+      if (searchEmpty) {
+        if (matchCount === 0 && rows.length > 0) {
+          searchEmpty.style.display = '';
+        } else {
+          searchEmpty.style.display = 'none';
+        }
+      }
     }
 
     function openEditTeamModal(m) {

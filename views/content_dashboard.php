@@ -36,20 +36,23 @@ unset($c);
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Content Calendar - PT Kala Kausa Prima</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
   <!-- FullCalendar 6.1.15 JS -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
   <!-- html2pdf for Export PDF -->
   <script src="assets/js/html2pdf.bundle.min.js"></script>
   <style>
     /* ==========================================================================
-       SUPITAR CALENDAR THEME (1:1 with Slide 3 Reference)
+       SUPITAR CALENDAR THEME (Minimal Finance Bankio Variant)
        ========================================================================== */
     .supitar-calendar-card {
       background: #FFFFFF;
-      border: 1px solid #EAECF0;
-      border-radius: 16px;
-      box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06), 0 1px 2px rgba(16, 24, 40, 0.04);
+      border: 1px solid #ECEEF5;
+      border-radius: 22px;
+      box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
       display: flex;
       min-height: 820px;
       overflow: hidden;

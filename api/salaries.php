@@ -476,14 +476,14 @@ if ($action === 'download_slip_pdf') {
         </div>
 
         <!-- Employee Info Summary Grid -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8FAFC; border: 1px solid #ECEEF5; border-radius: 14px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px;">
           <div>
-            <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 120px; display: inline-block;">Status Hubungan:</span> <strong style="color: #0F172A;"><?= htmlspecialchars($sal['employment_type'] ?: 'Full-time') ?></strong></div>
-            <div><span style="color: #64748B; width: 120px; display: inline-block;">Departemen:</span> <span><?= htmlspecialchars($sal['emp_dept'] ?: 'Creative & Production') ?></span></div>
+            <div style="margin-bottom: 6px;"><span style="color: #6E7485; width: 120px; display: inline-block;">Status Hubungan:</span> <strong style="color: #000000;"><?= htmlspecialchars($sal['employment_type'] ?: 'Full-time') ?></strong></div>
+            <div><span style="color: #6E7485; width: 120px; display: inline-block;">Departemen:</span> <span><?= htmlspecialchars($sal['emp_dept'] ?: 'Creative & Production') ?></span></div>
           </div>
           <div>
-            <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 120px; display: inline-block;">Rekening Transfer:</span> <strong style="color: #0F172A;"><?= htmlspecialchars(($sal['bank_name'] ?: 'BCA') . ' - ' . ($sal['bank_account'] ?: '-')) ?></strong></div>
-            <div><span style="color: #64748B; width: 120px; display: inline-block;">Metode:</span> <span>Bank Transfer Otomatis</span></div>
+            <div style="margin-bottom: 6px;"><span style="color: #6E7485; width: 120px; display: inline-block;">Rekening Transfer:</span> <strong style="color: #000000;"><?= htmlspecialchars(($sal['bank_name'] ?: 'BCA') . ' - ' . ($sal['bank_account'] ?: '-')) ?></strong></div>
+            <div><span style="color: #6E7485; width: 120px; display: inline-block;">Metode:</span> <span>Bank Transfer Otomatis</span></div>
           </div>
         </div>
 

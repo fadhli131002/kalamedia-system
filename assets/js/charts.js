@@ -27,14 +27,14 @@ function initCashflowChart(chartData) {
     cashflowChartInstance.destroy();
   }
 
-  // Gradients for light theme
+  // Gradients for Bankio finance theme
   const revGradient = ctx.createLinearGradient(0, 0, 0, 300);
-  revGradient.addColorStop(0, 'rgba(16, 185, 129, 0.18)');
-  revGradient.addColorStop(1, 'rgba(16, 185, 129, 0.01)');
+  revGradient.addColorStop(0, 'rgba(93, 118, 245, 0.22)');
+  revGradient.addColorStop(1, 'rgba(93, 118, 245, 0.00)');
 
   const expGradient = ctx.createLinearGradient(0, 0, 0, 300);
-  expGradient.addColorStop(0, 'rgba(239, 68, 68, 0.15)');
-  expGradient.addColorStop(1, 'rgba(239, 68, 68, 0.01)');
+  expGradient.addColorStop(0, 'rgba(137, 50, 224, 0.18)');
+  expGradient.addColorStop(1, 'rgba(137, 50, 224, 0.00)');
 
   cashflowChartInstance = new Chart(ctx, {
     type: 'line',
@@ -44,12 +44,12 @@ function initCashflowChart(chartData) {
         {
           label: 'Total Revenue (Uang Masuk)',
           data: chartData.revenue,
-          borderColor: '#10B981',
+          borderColor: '#5D76F5',
           backgroundColor: revGradient,
           borderWidth: 2.5,
           fill: true,
-          tension: 0.35,
-          pointBackgroundColor: '#10B981',
+          tension: 0.4,
+          pointBackgroundColor: '#5D76F5',
           pointBorderColor: '#FFFFFF',
           pointBorderWidth: 2,
           pointRadius: 4.5,
@@ -58,12 +58,12 @@ function initCashflowChart(chartData) {
         {
           label: 'Total Expense (Uang Keluar)',
           data: chartData.expense,
-          borderColor: '#EF4444',
+          borderColor: '#8932E0',
           backgroundColor: expGradient,
           borderWidth: 2.5,
           fill: true,
-          tension: 0.35,
-          pointBackgroundColor: '#EF4444',
+          tension: 0.4,
+          pointBackgroundColor: '#8932E0',
           pointBorderColor: '#FFFFFF',
           pointBorderWidth: 2,
           pointRadius: 4.5,
@@ -83,25 +83,25 @@ function initCashflowChart(chartData) {
           position: 'top',
           align: 'end',
           labels: {
-            color: '#344054',
-            font: { family: 'Plus Jakarta Sans', size: 12, weight: 600 },
+            color: '#6E7485',
+            font: { family: "'SF Pro Rounded', 'Plus Jakarta Sans', sans-serif", size: 12, weight: 600 },
             usePointStyle: true,
             boxWidth: 8,
             padding: 16
           }
         },
         tooltip: {
-          backgroundColor: '#101828',
-          titleColor: '#FFFFFF',
-          bodyColor: '#F2F4F7',
-          borderColor: '#1D2939',
+          backgroundColor: '#FFFFFF',
+          titleColor: '#000000',
+          bodyColor: '#6E7485',
+          borderColor: '#ECEEF5',
           borderWidth: 1,
           padding: 12,
           boxPadding: 6,
           usePointStyle: true,
-          cornerRadius: 8,
-          titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: 700 },
-          bodyFont: { family: 'Plus Jakarta Sans', size: 12, weight: 500 },
+          cornerRadius: 12,
+          titleFont: { family: "'SF Pro Rounded', 'Plus Jakarta Sans', sans-serif", size: 12, weight: 700 },
+          bodyFont: { family: "'SF Pro Rounded', 'Plus Jakarta Sans', sans-serif", size: 12, weight: 500 },
           callbacks: {
             label: function (context) {
               let label = context.dataset.label || '';
@@ -114,10 +114,10 @@ function initCashflowChart(chartData) {
       },
       scales: {
         x: {
-          grid: { color: '#F2F4F7', drawBorder: false },
+          grid: { color: '#F8F9FC', drawBorder: false },
           ticks: {
-            color: '#475467',
-            font: { family: 'Plus Jakarta Sans', size: 10, weight: 500 },
+            color: '#949AB1',
+            font: { family: "'SF Pro Rounded', 'Plus Jakarta Sans', sans-serif", size: 10, weight: 600 },
             maxRotation: 0,
             minRotation: 0,
             autoSkip: true,
@@ -125,10 +125,10 @@ function initCashflowChart(chartData) {
           }
         },
         y: {
-          grid: { color: '#F2F4F7', drawBorder: false },
+          grid: { color: '#ECEEF5', drawBorder: false },
           ticks: {
-            color: '#475467',
-            font: { family: 'Plus Jakarta Sans', size: 11, weight: 500 },
+            color: '#949AB1',
+            font: { family: "'SF Pro Rounded', 'Plus Jakarta Sans', sans-serif", size: 11, weight: 600 },
             callback: function (value) {
               return formatRupiahShort(value);
             }

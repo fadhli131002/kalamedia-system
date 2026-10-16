@@ -6,10 +6,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap');
 
 .invoice-wrapper {
-  background: #F1F5F9;
+  background: #F5F5F7;
   min-height: 100vh;
   padding: 30px 15px;
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  font-family: 'SF Pro Rounded', 'Plus Jakarta Sans', 'Nunito', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
   color: #000000;
 }
 
@@ -25,25 +25,25 @@
 
 .invoice-actions-bar .btn-action-back {
   background: #FFFFFF;
-  color: #344054;
-  border: 1px solid #D0D5DD;
+  color: #6E7485;
+  border: 1px solid #ECEEF5;
   font-weight: 600;
   font-size: 13px;
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   text-decoration: none;
   transition: all 0.15s ease;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  box-shadow: 0 1px 2px rgba(18, 24, 48, 0.03);
 }
 
 .invoice-actions-bar .btn-action-back:hover {
-  background: #F9FAFB;
-  color: #101828;
-  border-color: #98A2B3;
+  background: #F8F9FC;
+  color: #000000;
+  border-color: #DDE1EE;
 }
 
 .invoice-actions-right {
@@ -128,47 +128,48 @@
 /* Secondary Action Button */
 .btn-action-secondary {
   background: #FFFFFF;
-  color: #344054;
-  border: 1px solid #D0D5DD;
+  color: #6E7485;
+  border: 1px solid #ECEEF5;
   font-weight: 600;
   font-size: 13px;
-  height: 36px;
-  padding: 0 12px;
-  border-radius: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
   text-decoration: none;
   transition: all 0.15s ease;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  box-shadow: 0 1px 2px rgba(18, 24, 48, 0.03);
 }
 .btn-action-secondary:hover {
-  background: #F9FAFB;
-  color: #101828;
-  border-color: #98A2B3;
+  background: #F8F9FC;
+  color: #000000;
+  border-color: #DDE1EE;
 }
 
 /* Primary Action Button (Download PDF) */
 .btn-action-primary {
-  background: #101828;
+  background: #5D76F5;
   color: #FFFFFF;
-  border: 1px solid #101828;
+  border: 1px solid #5D76F5;
   font-weight: 600;
   font-size: 13px;
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 8px;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
   cursor: pointer;
   transition: all 0.15s ease;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  box-shadow: 0 4px 14px rgba(93, 118, 245, 0.25);
 }
 .btn-action-primary:hover {
-  background: #1E293B;
-  border-color: #1E293B;
+  background: #4A63E2;
+  border-color: #4A63E2;
+  box-shadow: 0 8px 20px -4px rgba(93, 118, 245, 0.38);
 }
 
 .invoice-paper {

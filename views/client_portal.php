@@ -32,7 +32,10 @@ if (!$client) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Client Portal - Kalamedia</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
 </head>
 <body>
   <div class="app-container">
@@ -40,12 +43,12 @@ if (!$client) {
     <main class="main-wrapper">
       <?php require_once BASE_PATH . '/includes/header.php'; ?>
       <div class="content-body">
-        <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 50px 30px; text-align: center; margin-top: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
-          <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: #F4F3FF; color: #5925DC; border-radius: 50%; font-size: 28px; margin-bottom: 16px;">
+        <div style="background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 24px; padding: 50px 30px; text-align: center; margin-top: 20px; box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);">
+          <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: rgba(93, 118, 245, 0.12); color: #5D76F5; border-radius: 20px; font-size: 28px; margin-bottom: 16px;">
             ✦
           </div>
-          <h2 style="font-size: 20px; font-weight: 800; color: #101828; margin-bottom: 8px;">Belum Ada Klien Terdaftar</h2>
-          <p style="font-size: 14px; color: var(--text-secondary); max-width: 520px; margin: 0 auto 24px; line-height: 1.5;">
+          <h2 style="font-size: 20px; font-weight: 800; color: #000000; margin-bottom: 8px;">Belum Ada Klien Terdaftar</h2>
+          <p style="font-size: 14px; color: #6E7485; max-width: 520px; margin: 0 auto 24px; line-height: 1.5;">
             Saat ini belum ada data klien aktif di sistem Kalamedia. Anda dapat langsung membuat invoice baru untuk klien pertama atau menambahkan klien melalui menu Klien.
           </p>
           <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
@@ -100,27 +103,31 @@ $invoices = $stmtInvoices->fetchAll();
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Client Portal - <?= htmlspecialchars($client['company'] ?? 'Kalamedia') ?></title>
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
   <style>
-    /* Client Portal Custom Styles */
+    /* Client Portal Custom Styles - Minimal Finance (Bankio) */
     .portal-hero {
-      background: linear-gradient(135deg, #101828 0%, #1D2939 100%);
-      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, #5D76F5 0%, #8932E0 100%);
+      border-radius: 22px;
       padding: 32px 28px;
       color: #FFFFFF;
       margin-bottom: 24px;
-      box-shadow: 0 12px 24px -4px rgba(16, 24, 40, 0.12);
+      box-shadow: 0 14px 34px -8px rgba(93, 118, 245, 0.35);
       position: relative;
       overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.18);
     }
     .portal-hero::after {
       content: '';
       position: absolute;
       top: -60px;
       right: -60px;
-      width: 220px;
-      height: 220px;
-      background: radial-gradient(circle, rgba(99, 102, 241, 0.25) 0%, rgba(99, 102, 241, 0) 70%);
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 70%);
       border-radius: 50%;
       pointer-events: none;
     }
@@ -136,114 +143,126 @@ $invoices = $stmtInvoices->fetchAll();
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 4px 12px;
-      background: rgba(255, 255, 255, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 20px;
+      padding: 5px 14px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      border-radius: 999px;
       font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
-      color: #E0EAFF;
+      color: #FFFFFF;
+      backdrop-filter: blur(4px);
     }
     .portal-progress-wrapper {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: var(--radius-md);
-      padding: 20px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 18px;
+      padding: 20px 22px;
       margin-top: 20px;
+      backdrop-filter: blur(4px);
     }
     .portal-progress-bar-bg {
       height: 12px;
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.22);
+      border-radius: 999px;
       overflow: hidden;
-      margin: 10px 0 8px;
+      margin: 12px 0 8px;
       position: relative;
     }
     .portal-progress-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, #10B981 0%, #34D399 100%);
-      border-radius: 20px;
+      background: linear-gradient(90deg, #FFFFFF 0%, #E0EAFF 100%);
+      border-radius: 999px;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
       transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     /* Portal Stats Grid */
     .portal-stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
       margin-bottom: 24px;
     }
     .portal-stat-card {
       background: #FFFFFF;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 18px 16px;
+      border: 1px solid #ECEEF5;
+      border-radius: 22px;
+      padding: 22px 24px;
       display: flex;
       flex-direction: column;
       gap: 6px;
-      box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .portal-stat-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 8px -2px rgba(16, 24, 40, 0.08);
+      box-shadow: 0 14px 34px -8px rgba(18, 24, 48, 0.08);
+      border-color: #DDE1EE;
     }
     .portal-stat-card.highlight {
-      border-color: #FDB022;
-      background: #FFFAEB;
+      border-color: rgba(245, 158, 11, 0.35);
+      background: #FFFDF5;
     }
 
-    /* Portal Tabs */
+    /* Portal Tabs - Bankio Pill Style */
     .portal-nav-tabs {
-      display: flex;
-      gap: 8px;
-      border-bottom: 1px solid var(--border-color);
-      margin-bottom: 20px;
+      display: inline-flex;
+      gap: 6px;
+      background: #EEF0F6;
+      border: 1px solid #ECEEF5;
+      border-radius: 999px;
+      padding: 5px;
+      margin-bottom: 24px;
+      max-width: 100%;
       overflow-x: auto;
-      padding-bottom: 2px;
     }
     .portal-tab-btn {
-      padding: 10px 18px;
+      padding: 9px 18px;
       font-size: 13px;
-      font-weight: 700;
-      color: var(--text-secondary);
+      font-weight: 600;
+      color: #6E7485;
       background: transparent;
       border: none;
-      border-bottom: 2px solid transparent;
+      border-radius: 999px;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 8px;
       white-space: nowrap;
-      transition: all 0.15s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: inherit;
     }
     .portal-tab-btn:hover {
-      color: var(--text-primary);
+      color: #000000;
     }
     .portal-tab-btn.active {
-      color: var(--text-primary);
-      border-bottom-color: var(--text-primary);
+      background: #5D76F5;
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(93, 118, 245, 0.3);
+      font-weight: 700;
     }
 
     /* Deliverable Task Cards */
     .tasks-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 14px;
+      gap: 16px;
     }
     .task-card {
       background: #FFFFFF;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 20px;
-      transition: border-color 0.15s, box-shadow 0.15s;
+      border: 1px solid #ECEEF5;
+      border-radius: 20px;
+      padding: 22px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
       position: relative;
     }
     .task-card:hover {
-      border-color: #CBD5E1;
-      box-shadow: 0 4px 12px -2px rgba(16, 24, 40, 0.06);
+      border-color: #DDE1EE;
+      box-shadow: 0 14px 34px -8px rgba(18, 24, 48, 0.08);
+      transform: translateY(-2px);
     }
     .task-card.status-client_review {
       border-left: 4px solid #F59E0B;
@@ -270,34 +289,34 @@ $invoices = $stmtInvoices->fetchAll();
       gap: 6px;
       font-size: 11px;
       font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 14px;
+      padding: 4px 12px;
+      border-radius: 999px;
     }
     .badge-worker.karyawan {
-      background: #EFF8FF;
-      color: #175CD3;
-      border: 1px solid #B2DDFF;
+      background: rgba(93, 118, 245, 0.12);
+      color: #5D76F5;
+      border: 1px solid rgba(93, 118, 245, 0.2);
     }
     .badge-worker.freelancer {
-      background: #F4F3FF;
-      color: #5925DC;
-      border: 1px solid #D9D6FE;
+      background: rgba(137, 50, 224, 0.12);
+      color: #8932E0;
+      border: 1px solid rgba(137, 50, 224, 0.2);
     }
 
     /* Workflow Status Badge */
     .status-pill {
       font-size: 11px;
       font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 12px;
+      padding: 4px 12px;
+      border-radius: 999px;
       text-transform: capitalize;
       display: inline-flex;
       align-items: center;
       gap: 5px;
     }
     .status-pill.backlog { background: #F2F4F7; color: #475467; }
-    .status-pill.in_progress { background: #EFF8FF; color: #175CD3; }
-    .status-pill.internal_review { background: #EEF4FF; color: #3538CD; }
+    .status-pill.in_progress { background: rgba(93, 118, 245, 0.12); color: #5D76F5; }
+    .status-pill.internal_review { background: rgba(137, 50, 224, 0.12); color: #8932E0; }
     .status-pill.client_review { background: #FEF0C7; color: #B54708; }
     .status-pill.revision { background: #FEE4E2; color: #B42318; }
     .status-pill.approved { background: #D1FADF; color: #027A48; }
@@ -307,9 +326,9 @@ $invoices = $stmtInvoices->fetchAll();
       max-height: 380px;
       overflow-y: auto;
       padding: 16px;
-      background: #F8FAFC;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-sm);
+      background: #F8F9FC;
+      border: 1px solid #ECEEF5;
+      border-radius: 16px;
       display: flex;
       flex-direction: column;
       gap: 14px;
@@ -318,23 +337,23 @@ $invoices = $stmtInvoices->fetchAll();
     .bubble {
       max-width: 85%;
       padding: 12px 16px;
-      border-radius: 14px;
+      border-radius: 16px;
       font-size: 13px;
       line-height: 1.5;
       position: relative;
     }
     .bubble.client-bubble {
       align-self: flex-end;
-      background: #101828;
+      background: #5D76F5;
       color: #FFFFFF;
-      border-bottom-right-radius: 2px;
+      border-bottom-right-radius: 4px;
     }
     .bubble.team-bubble {
       align-self: flex-start;
       background: #FFFFFF;
-      color: #101828;
-      border: 1px solid var(--border-color);
-      border-bottom-left-radius: 2px;
+      color: #000000;
+      border: 1px solid #ECEEF5;
+      border-bottom-left-radius: 4px;
     }
     .bubble-meta {
       font-size: 10.5px;
@@ -417,29 +436,29 @@ $invoices = $stmtInvoices->fetchAll();
         <!-- 2. Portal Statistics Counters -->
         <div class="portal-stats-grid">
           <div class="portal-stat-card">
-            <span style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">Total Deliverables</span>
-            <div style="font-size: 24px; font-weight: 800; color: var(--text-primary);" id="stat-total-tasks">0</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Pekerjaan proyek aktif</span>
+            <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">TOTAL DELIVERABLES</span>
+            <div style="font-size: 30px; font-weight: 700; color: #000000; letter-spacing: -0.02em; line-height: 1.1;" id="stat-total-tasks">0</div>
+            <span style="font-size: 12px; color: #6E7485;">Pekerjaan proyek aktif</span>
           </div>
 
           <div class="portal-stat-card highlight">
-            <span style="font-size: 12px; color: #B54708; font-weight: 700; display: flex; align-items: center; gap: 4px;">
-              Butuh Review Klien
+            <span style="font-size: 11px; color: #B54708; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 4px;">
+              BUTUH REVIEW KLIEN
             </span>
-            <div style="font-size: 24px; font-weight: 800; color: #B54708;" id="stat-review-tasks">0</div>
-            <span style="font-size: 11px; color: #B54708;">Menunggu persetujuan Anda</span>
+            <div style="font-size: 30px; font-weight: 700; color: #000000; letter-spacing: -0.02em; line-height: 1.1;" id="stat-review-tasks">0</div>
+            <span style="font-size: 12px; color: #B54708; font-weight: 600;">Menunggu persetujuan Anda</span>
           </div>
 
           <div class="portal-stat-card">
-            <span style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">Sedang Dikerjakan</span>
-            <div style="font-size: 24px; font-weight: 800; color: #175CD3;" id="stat-progress-tasks">0</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Proses kreatif & revisi tim</span>
+            <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">SEDANG DIKERJAKAN</span>
+            <div style="font-size: 30px; font-weight: 700; color: #000000; letter-spacing: -0.02em; line-height: 1.1;" id="stat-progress-tasks">0</div>
+            <span style="font-size: 12px; color: #6E7485;">Proses kreatif & revisi tim</span>
           </div>
 
           <div class="portal-stat-card">
-            <span style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">Selesai & Disetujui</span>
-            <div style="font-size: 24px; font-weight: 800; color: #027A48;" id="stat-approved-tasks">0</div>
-            <span style="font-size: 11px; color: #027A48;">Deliverables telah final</span>
+            <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">SELESAI & DISETUJUI</span>
+            <div style="font-size: 30px; font-weight: 700; color: #000000; letter-spacing: -0.02em; line-height: 1.1;" id="stat-approved-tasks">0</div>
+            <span style="font-size: 12px; color: #6E7485;">Deliverables telah final</span>
           </div>
         </div>
 

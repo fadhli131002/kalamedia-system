@@ -40,18 +40,18 @@ $paymentDateFormatted = format_date($paidDate, true);
   <title>Payment Voucher #<?= htmlspecialchars($voucherNumber) ?> - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     body {
-      background: #0B0F17;
+      background: #F5F5F7;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       padding: 30px 16px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'SF Pro Rounded', 'Plus Jakarta Sans', 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
     .top-actions-bar {
       width: 100%;
@@ -68,8 +68,9 @@ $paymentDateFormatted = format_date($paidDate, true);
       color: #000000;
       width: 100%;
       max-width: 800px;
-      border-radius: 12px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      border-radius: 22px;
+      border: 1px solid #ECEEF5;
+      box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
       padding: 40px 44px;
       box-sizing: border-box;
     }
@@ -179,14 +180,14 @@ $paymentDateFormatted = format_date($paidDate, true);
     </div>
 
     <!-- Project & Client Metadata -->
-    <div class="voucher-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px;">
+    <div class="voucher-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8F9FC; border: 1px solid #ECEEF5; border-radius: 14px; padding: 16px 20px; margin-bottom: 24px; font-size: 12px;">
       <div>
-        <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 110px; display: inline-block;">Proyek Terkait:</span> <strong style="color: #0F172A;"><?= htmlspecialchars($payout['project_name']) ?></strong></div>
-        <div><span style="color: #64748B; width: 110px; display: inline-block;">Klien / Brand:</span> <span style="font-weight: 600; color: #0F172A;"><?= htmlspecialchars($payout['client_company']) ?></span></div>
+        <div style="margin-bottom: 6px;"><span style="color: #6E7485; width: 110px; display: inline-block;">Proyek Terkait:</span> <strong style="color: #000000;"><?= htmlspecialchars($payout['project_name']) ?></strong></div>
+        <div><span style="color: #6E7485; width: 110px; display: inline-block;">Klien / Brand:</span> <span style="font-weight: 600; color: #000000;"><?= htmlspecialchars($payout['client_company']) ?></span></div>
       </div>
       <div>
-        <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 110px; display: inline-block;">Metode Bayar:</span> <strong style="color: #0F172A;">Bank Transfer</strong></div>
-        <div><span style="color: #64748B; width: 110px; display: inline-block;">Akun Rekening:</span> <span style="font-weight: 600; color: #0F172A;"><?= htmlspecialchars($payout['freelancer_bank'] ?: 'BCA') ?> - <?= htmlspecialchars($payout['freelancer_account'] ?: '-') ?></span></div>
+        <div style="margin-bottom: 6px;"><span style="color: #6E7485; width: 110px; display: inline-block;">Metode Bayar:</span> <strong style="color: #000000;">Bank Transfer</strong></div>
+        <div><span style="color: #6E7485; width: 110px; display: inline-block;">Akun Rekening:</span> <span style="font-weight: 600; color: #000000;"><?= htmlspecialchars($payout['freelancer_bank'] ?: 'BCA') ?> - <?= htmlspecialchars($payout['freelancer_account'] ?: '-') ?></span></div>
       </div>
     </div>
 

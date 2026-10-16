@@ -1313,14 +1313,14 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
 
       <!-- Employee Info Summary Grid -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8FAFC; border: 1px solid #ECEEF5; border-radius: 14px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px;">
         <div>
-          <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 120px; display: inline-block;">Status Kepegawaian:</span> <strong style="color: #0F172A;" id="slip-emp-type">Full-time</strong></div>
-          <div><span style="color: #64748B; width: 120px; display: inline-block;">Departemen:</span> <span id="slip-emp-dept-2">Creative & Production</span></div>
+          <div style="margin-bottom: 6px;"><span style="color: #6E7485; width: 120px; display: inline-block;">Status Kepegawaian:</span> <strong style="color: #000000;" id="slip-emp-type">Full-time</strong></div>
+          <div><span style="color: #6E7485; width: 120px; display: inline-block;">Departemen:</span> <span id="slip-emp-dept-2">Creative & Production</span></div>
         </div>
         <div>
-          <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 120px; display: inline-block;">Rekening Transfer:</span> <strong style="color: #0F172A;" id="slip-emp-bank">-</strong></div>
-          <div><span style="color: #64748B; width: 120px; display: inline-block;">Metode:</span> <span>Bank Transfer Otomatis</span></div>
+          <div style="margin-bottom: 6px;"><span style="color: #6E7485; width: 120px; display: inline-block;">Rekening Transfer:</span> <strong style="color: #000000;" id="slip-emp-bank">-</strong></div>
+          <div><span style="color: #6E7485; width: 120px; display: inline-block;">Metode:</span> <span>Bank Transfer Otomatis</span></div>
         </div>
       </div>
 
@@ -1477,14 +1477,14 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
 
       <!-- Project & Client Metadata -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8FAFC; border: 1px solid #ECEEF5; border-radius: 14px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px;">
         <div>
-          <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 110px; display: inline-block;">Proyek Terkait:</span> <strong style="color: #0F172A;" id="vch-project-name">-</strong></div>
-          <div><span style="color: #64748B; width: 110px; display: inline-block;">Klien / Brand:</span> <span id="vch-client-company" style="font-weight: 600; color: #0F172A;">-</span></div>
+          <div style="margin-bottom: 6px;"><span style="color: #6E7485; width: 110px; display: inline-block;">Proyek Terkait:</span> <strong style="color: #000000;" id="vch-project-name">-</strong></div>
+          <div><span style="color: #6E7485; width: 110px; display: inline-block;">Klien / Brand:</span> <span id="vch-client-company" style="font-weight: 600; color: #000000;">-</span></div>
         </div>
         <div>
-          <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 110px; display: inline-block;">Metode Bayar:</span> <strong style="color: #0F172A;">Bank Transfer</strong></div>
-          <div><span style="color: #64748B; width: 110px; display: inline-block;">Akun Rekening:</span> <span id="vch-account-info" style="font-weight: 600; color: #0F172A;">-</span></div>
+          <div style="margin-bottom: 6px;"><span style="color: #6E7485; width: 110px; display: inline-block;">Metode Bayar:</span> <strong style="color: #000000;">Bank Transfer</strong></div>
+          <div><span style="color: #6E7485; width: 110px; display: inline-block;">Akun Rekening:</span> <span id="vch-account-info" style="font-weight: 600; color: #000000;">-</span></div>
         </div>
       </div>
 
@@ -1628,14 +1628,14 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
 
       <!-- Ads Account Metadata Grid -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8FAFC; border: 1px solid #ECEEF5; border-radius: 14px; padding: 14px 18px; margin-bottom: 24px; font-size: 12px;">
         <div>
-          <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 110px; display: inline-block;">Platform Iklan:</span> <strong style="color: #0F172A;" id="vch-ads-platform">Meta Ads</strong></div>
-          <div><span style="color: #64748B; width: 110px; display: inline-block;">ID Akun Iklan:</span> <span id="vch-ads-account-id" style="font-weight: 600; color: #0F172A;">-</span></div>
+          <div style="margin-bottom: 6px;"><span style="color: #6E7485; width: 110px; display: inline-block;">Platform Iklan:</span> <strong style="color: #000000;" id="vch-ads-platform">Meta Ads</strong></div>
+          <div><span style="color: #6E7485; width: 110px; display: inline-block;">ID Akun Iklan:</span> <span id="vch-ads-account-id" style="font-weight: 600; color: #000000;">-</span></div>
         </div>
         <div>
-          <div style="margin-bottom: 6px;"><span style="color: #64748B; width: 110px; display: inline-block;">Kategori Biaya:</span> <strong style="color: #0F172A;">Media Spend Outflow</strong></div>
-          <div><span style="color: #64748B; width: 110px; display: inline-block;">Akun Pengiklan:</span> <span style="font-weight: 600; color: #0F172A;">PT Kala Kausa Prima Business Manager</span></div>
+          <div style="margin-bottom: 6px;"><span style="color: #6E7485; width: 110px; display: inline-block;">Kategori Biaya:</span> <strong style="color: #000000;">Media Spend Outflow</strong></div>
+          <div><span style="color: #6E7485; width: 110px; display: inline-block;">Akun Pengiklan:</span> <span style="font-weight: 600; color: #000000;">PT Kala Kausa Prima Business Manager</span></div>
         </div>
       </div>
 

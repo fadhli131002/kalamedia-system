@@ -13,7 +13,10 @@ $users = $db->query("SELECT id, name, email, role, created_at FROM users ORDER B
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pengaturan Agensi - PT Kala Kausa Prima</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
 </head>
 <body>
   <div class="app-container">
@@ -121,8 +124,8 @@ $users = $db->query("SELECT id, name, email, role, created_at FROM users ORDER B
               </table>
             </div>
 
-            <div style="margin-top: 18px; background: #F8FAFC; border: 1px solid var(--border-color); border-left: 4px solid #101828; border-radius: var(--radius-sm); padding: 14px 16px; font-size: 12px; color: var(--text-secondary);">
-              <strong style="color: #101828;">Keamanan Sistem:</strong> Admin Finance tidak memiliki wewenang untuk mengubah pengaturan akun Owner atau menghapus arsip keuangan secara permanen.
+            <div style="margin-top: 18px; background: #F8FAFC; border: 1px solid var(--border-color); border-left: 4px solid #5D76F5; border-radius: var(--radius-sm); padding: 14px 16px; font-size: 12px; color: var(--text-secondary);">
+              <strong style="color: #000000;">Keamanan Sistem:</strong> Admin Finance tidak memiliki wewenang untuk mengubah pengaturan akun Owner atau menghapus arsip keuangan secara permanen.
             </div>
           </div>
 

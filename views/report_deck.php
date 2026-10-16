@@ -48,18 +48,22 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Performance Deck - <?= htmlspecialchars($clientCompany) ?> (<?= htmlspecialchars($report['report_period']) ?>) - PT Kala Kausa Prima</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
   <script src="assets/js/html2pdf.bundle.min.js"></script>
 
   <style>
     /* ==========================================================================
-       PITCH DECK PRESENTATION & PRINT STYLES
+       PITCH DECK PRESENTATION & PRINT STYLES - BANKIO MINIMAL FINANCE
        ========================================================================== */
     .deck-screen-wrapper {
-      background: #0F172A;
+      background: #F5F5F7;
       min-height: 100vh;
       padding-bottom: 50px;
-      color: #0F172A;
+      color: #000000;
+      font-family: 'SF Pro Rounded', 'Plus Jakarta Sans', 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
 
     /* Floating Navigation Action Bar */
@@ -67,13 +71,13 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
       position: sticky;
       top: 0;
       z-index: 100;
-      background: #1E293B;
-      border-bottom: 1px solid #334155;
-      padding: 10px 20px;
+      background: #FFFFFF;
+      border-bottom: 1px solid #ECEEF5;
+      padding: 12px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 14px rgba(18, 24, 48, 0.05);
     }
     .deck-actions-left {
       display: flex;
@@ -261,19 +265,19 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      background: #0F172A;
-      color: #F8FAFC;
+      background: #5D76F5;
+      color: #FFFFFF;
       font-size: 9px;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.8px;
       padding: 3px 8px;
-      border-radius: 14px;
+      border-radius: 999px;
     }
     .deck-title-main {
       font-size: 17px;
       font-weight: 900;
-      color: #0F172A;
+      color: #000000;
       letter-spacing: -0.3px;
       margin-top: 1px;
     }
@@ -281,17 +285,17 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
       display: inline-block;
       font-size: 11px;
       font-weight: 800;
-      color: #4F46E5;
-      background: #EEF2FF;
+      color: #5D76F5;
+      background: rgba(93, 118, 245, 0.12);
       padding: 2px 7px;
-      border-radius: 5px;
+      border-radius: 999px;
     }
 
     /* 2. Client Hero Bar & Objective */
     .deck-client-hero {
-      background: #F8FAFC;
-      border: 1px solid #E2E8F0;
-      border-radius: 8px;
+      background: #F8F9FC;
+      border: 1px solid #ECEEF5;
+      border-radius: 14px;
       padding: 10px 14px;
       display: flex;
       justify-content: space-between;
@@ -308,8 +312,8 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
     .deck-client-avatar {
       width: 36px;
       height: 36px;
-      border-radius: 8px;
-      background: #0F172A;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #5D76F5 0%, #8932E0 100%);
       color: #FFFFFF;
       font-size: 14px;
       font-weight: 900;
@@ -321,7 +325,7 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
     .deck-client-name {
       font-size: 14.5px;
       font-weight: 900;
-      color: #0F172A;
+      color: #000000;
       margin: 0;
       letter-spacing: -0.2px;
     }
@@ -408,12 +412,12 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
       background: #F0FDF4;
     }
     .deck-kpi-card.highlight-roas {
-      background: #0F172A;
+      background: linear-gradient(135deg, #5D76F5 0%, #8932E0 100%);
       color: #FFFFFF;
-      border-color: #0F172A;
+      border-color: #5D76F5;
     }
     .deck-kpi-card.highlight-conv {
-      border-left: 3.5px solid #4F46E5;
+      border-left: 3.5px solid #5D76F5;
       background: #EEF2FF;
     }
     .kpi-top-label {
@@ -421,16 +425,16 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: #64748B;
+      color: #6E7485;
       margin-bottom: 2px;
     }
     .highlight-roas .kpi-top-label {
-      color: #94A3B8;
+      color: rgba(255, 255, 255, 0.85);
     }
     .kpi-main-val {
       font-size: 17.5px;
       font-weight: 900;
-      color: #0F172A;
+      color: #000000;
       letter-spacing: -0.4px;
       line-height: 1.15;
     }
@@ -438,7 +442,7 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
       color: #047857;
     }
     .highlight-roas .kpi-main-val {
-      color: #38BDF8;
+      color: #FFFFFF;
       font-size: 20px;
     }
     .highlight-conv .kpi-main-val {
@@ -775,14 +779,14 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
         height: 0 !important;
       }
       .deck-kpi-card.highlight-roas {
-        background: #0F172A !important;
+        background: linear-gradient(135deg, #5D76F5 0%, #8932E0 100%) !important;
         color: #FFFFFF !important;
       }
       .deck-kpi-card.highlight-roas .kpi-main-val {
-        color: #38BDF8 !important;
+        color: #FFFFFF !important;
       }
       .deck-kpi-card.highlight-roas .kpi-top-label {
-        color: #94A3B8 !important;
+        color: rgba(255, 255, 255, 0.85) !important;
       }
     }
   </style>

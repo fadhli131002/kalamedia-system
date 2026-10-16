@@ -37,16 +37,19 @@ if ($isWorkerUser) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manajemen Tugas Tim - PT Kala Kausa Prima</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
   <style>
-    /* Task Management & Workspace Custom Styles */
+    /* Task Management & Workspace Custom Styles - Bankio Minimal Finance */
     .tasks-header-card {
       background: #FFFFFF;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-lg);
-      padding: 24px;
-      margin-bottom: 20px;
-      box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
+      border: 1px solid #ECEEF5;
+      border-radius: 22px;
+      padding: 24px 26px;
+      margin-bottom: 22px;
+      box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -57,49 +60,58 @@ if ($isWorkerUser) {
     .workspace-tabs-bar {
       display: inline-flex;
       gap: 6px;
-      margin-bottom: 22px;
-      background: #F2F4F7;
+      margin-bottom: 24px;
+      background: #EEF0F6;
+      border: 1px solid #ECEEF5;
       padding: 5px;
-      border-radius: 8px;
+      border-radius: 999px;
     }
     .workspace-tab-btn {
       border: none;
       background: transparent;
-      padding: 8px 18px;
-      border-radius: 6px;
+      padding: 9px 18px;
+      border-radius: 999px;
       font-size: 13px;
       font-weight: 600;
-      color: #667085;
+      color: #6E7485;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      font-family: inherit;
     }
     .workspace-tab-btn:hover {
-      color: #101828;
+      color: #000000;
     }
     .workspace-tab-btn.active {
-      background: #FFFFFF;
-      color: #101828;
+      background: #5D76F5;
+      color: #FFFFFF;
       font-weight: 700;
-      box-shadow: 0 1px 3px rgba(16,24,40,0.1);
+      box-shadow: 0 4px 14px rgba(93, 118, 245, 0.3);
     }
 
     .kpi-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 14px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
     }
     .kpi-tile {
       background: #FFFFFF;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 16px;
+      border: 1px solid #ECEEF5;
+      border-radius: 22px;
+      padding: 22px 24px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
+      box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .kpi-tile:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 34px -8px rgba(18, 24, 48, 0.08);
+      border-color: #DDE1EE;
     }
     .kpi-tile.urgent {
       border-color: #FECDCA;
@@ -113,36 +125,39 @@ if ($isWorkerUser) {
     /* Filter Bar */
     .filter-panel {
       background: #FFFFFF;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 14px 18px;
-      margin-bottom: 18px;
+      border: 1px solid #ECEEF5;
+      border-radius: 20px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
+      box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.04);
     }
 
     /* Tasks Grid / Cards */
     .tasks-grid-list {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 12px;
+      gap: 16px;
     }
     .task-item-card {
       background: #FFFFFF;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
-      padding: 18px 20px;
-      transition: all 0.15s ease;
+      border: 1px solid #ECEEF5;
+      border-radius: 20px;
+      padding: 20px 22px;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       flex-direction: column;
       gap: 12px;
+      box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
     }
     .task-item-card:hover {
-      border-color: #98A2B3;
-      box-shadow: 0 4px 12px -2px rgba(16, 24, 40, 0.06);
+      border-color: #DDE1EE;
+      box-shadow: 0 14px 34px -8px rgba(18, 24, 48, 0.08);
+      transform: translateY(-2px);
     }
     .task-item-card.has-revision {
       border-left: 4px solid #EF4444;
@@ -240,16 +255,16 @@ if ($isWorkerUser) {
     }
     .bubble.client-bubble {
       align-self: flex-start;
-      background: #101828;
+      background: #5D76F5;
       color: #FFFFFF;
-      border-bottom-left-radius: 2px;
+      border-bottom-left-radius: 4px;
     }
     .bubble.team-bubble {
       align-self: flex-end;
       background: #FFFFFF;
-      color: #101828;
-      border: 1px solid var(--border-color);
-      border-bottom-right-radius: 2px;
+      color: #000000;
+      border: 1px solid #ECEEF5;
+      border-bottom-right-radius: 4px;
     }
     .bubble-meta {
       font-size: 10.5px;
@@ -373,33 +388,33 @@ if ($isWorkerUser) {
           <!-- KPI Metrics Row -->
           <div class="kpi-row">
             <div class="kpi-tile">
-              <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 600;">Total Deliverables</span>
-              <div style="font-size: 22px; font-weight: 800; color: #101828;" id="kpi-total">0</div>
-              <span style="font-size: 11px; color: var(--text-muted);">Pekerjaan aktif</span>
+              <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">TOTAL DELIVERABLES</span>
+              <div style="font-size: 30px; font-weight: 700; color: #000000; letter-spacing: -0.02em; line-height: 1.1;" id="kpi-total">0</div>
+              <span style="font-size: 12px; color: #6E7485;">Pekerjaan aktif</span>
             </div>
 
             <div class="kpi-tile urgent">
-              <span style="font-size: 11.5px; color: #B42318; font-weight: 700;">Butuh Revisi</span>
-              <div style="font-size: 22px; font-weight: 800; color: #B42318;" id="kpi-revision">0</div>
-              <span style="font-size: 11px; color: #B42318;">Permintaan klien</span>
+              <span style="font-size: 11px; color: #B42318; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">BUTUH REVISI</span>
+              <div style="font-size: 30px; font-weight: 700; color: #B42318; letter-spacing: -0.02em; line-height: 1.1;" id="kpi-revision">0</div>
+              <span style="font-size: 12px; color: #B42318; font-weight: 600;">Permintaan klien</span>
             </div>
 
             <div class="kpi-tile review">
-              <span style="font-size: 11.5px; color: #B54708; font-weight: 700;">Menunggu Review Klien</span>
-              <div style="font-size: 22px; font-weight: 800; color: #B54708;" id="kpi-review">0</div>
-              <span style="font-size: 11px; color: #B54708;">Menunggu approval</span>
+              <span style="font-size: 11px; color: #B54708; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">REVIEW KLIEN</span>
+              <div style="font-size: 30px; font-weight: 700; color: #B54708; letter-spacing: -0.02em; line-height: 1.1;" id="kpi-review">0</div>
+              <span style="font-size: 12px; color: #B54708; font-weight: 600;">Menunggu approval</span>
             </div>
 
             <div class="kpi-tile">
-              <span style="font-size: 11.5px; color: #175CD3; font-weight: 600;">Sedang Dikerjakan</span>
-              <div style="font-size: 22px; font-weight: 800; color: #175CD3;" id="kpi-progress">0</div>
-              <span style="font-size: 11px; color: var(--text-muted);">Tahap produksi</span>
+              <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">SEDANG DIKERJAKAN</span>
+              <div style="font-size: 30px; font-weight: 700; color: #000000; letter-spacing: -0.02em; line-height: 1.1;" id="kpi-progress">0</div>
+              <span style="font-size: 12px; color: #6E7485;">Tahap produksi</span>
             </div>
 
             <div class="kpi-tile">
-              <span style="font-size: 11.5px; color: #027A48; font-weight: 600;">Selesai & Disetujui</span>
-              <div style="font-size: 22px; font-weight: 800; color: #027A48;" id="kpi-approved">0</div>
-              <span style="font-size: 11px; color: var(--text-muted);">Hasil final</span>
+              <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">SELESAI & DISETUJUI</span>
+              <div style="font-size: 30px; font-weight: 700; color: #000000; letter-spacing: -0.02em; line-height: 1.1;" id="kpi-approved">0</div>
+              <span style="font-size: 12px; color: #6E7485;">Hasil final</span>
             </div>
           </div>
 

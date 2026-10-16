@@ -112,9 +112,12 @@ foreach ($systemUsers as $su) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Executive Dashboard - PT Kala Kausa Prima</title>
-  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="assets/js/charts.js"></script>
+  <script src="assets/js/charts.js?v=bankio-1.0"></script>
 </head>
 <body>
   <div class="app-container">
@@ -326,9 +329,9 @@ foreach ($systemUsers as $su) {
             </div>
 
             <div class="payroll-cards-grid">
-              <div style="background: #F9FAFB; padding: 14px 18px; border-radius: 8px; border: 1px solid var(--border-color); border-left: 4px solid #101828;">
+              <div style="background: #F9FAFB; padding: 14px 18px; border-radius: 14px; border: 1px solid var(--border-color); border-left: 4px solid #5D76F5;">
                 <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Total Karyawan Aktif</div>
-                <div style="font-size: 20px; font-weight: 800; color: #101828; margin-top: 4px;"><?= $activeEmployeeCount ?> Orang</div>
+                <div style="font-size: 20px; font-weight: 800; color: #000000; margin-top: 4px;"><?= $activeEmployeeCount ?> Orang</div>
                 <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Tim internal creative & tech</div>
               </div>
 

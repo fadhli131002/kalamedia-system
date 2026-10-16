@@ -40,13 +40,16 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?= htmlspecialchars($pageTitle) ?> - PT Kala Kausa Prima</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=<?= time() ?>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
   <style>
-    /* Tabbed Interface Layout */
+    /* Tabbed Interface Layout - Bankio Minimal Finance */
     .tab-navigation-bar {
       display: flex;
       gap: 8px;
-      border-bottom: 2px solid #EAECF0;
+      border-bottom: 2px solid #ECEEF5;
       margin-bottom: 24px;
       overflow-x: auto;
       padding-bottom: 2px;
@@ -58,31 +61,32 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
       padding: 12px 18px;
       font-size: 13.5px;
       font-weight: 700;
-      color: #667085;
+      color: #6E7485;
       background: transparent;
       border: none;
       border-bottom: 3px solid transparent;
       margin-bottom: -2px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       white-space: nowrap;
-      border-radius: 8px 8px 0 0;
+      border-radius: 12px 12px 0 0;
+      font-family: inherit;
     }
     .tab-nav-btn:hover {
-      color: #101828;
-      background: #F9FAFB;
+      color: #000000;
+      background: #F8F9FC;
     }
     .tab-nav-btn.active {
-      color: #101828;
-      border-bottom-color: #101828;
-      background: #F8FAFC;
+      color: #5D76F5;
+      border-bottom-color: #5D76F5;
+      background: rgba(93, 118, 245, 0.05);
     }
     .tab-nav-btn .tab-step-badge {
       width: 22px;
       height: 22px;
       border-radius: 50%;
-      background: #EAECF0;
-      color: #475467;
+      background: #EEF0F6;
+      color: #6E7485;
       font-size: 11px;
       font-weight: 800;
       display: flex;
@@ -91,7 +95,7 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
       transition: all 0.2s ease;
     }
     .tab-nav-btn.active .tab-step-badge {
-      background: #101828;
+      background: #5D76F5;
       color: #FFFFFF;
     }
 
@@ -189,7 +193,7 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
     .live-calc-value {
       font-size: 18px;
       font-weight: 900;
-      color: #0F172A;
+      color: #000000;
     }
     .live-calc-meta {
       font-size: 11px;

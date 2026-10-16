@@ -23,7 +23,7 @@ function resolveActiveSessionContext(): string {
     // 1. If explicit session_name is KALASESS_CLIENT
     if (session_name() === 'KALASESS_CLIENT') {
         $slotParam = $_GET['_slot'] ?? $_POST['_slot'] ?? ($_GET['portal'] ?? ($_POST['portal'] ?? ($_GET['context'] ?? ($_POST['context'] ?? ''))));
-        if ($slotParam === 'internal') {
+        if ($slotParam === 'internal' || isset($_GET['preview'])) {
             return 'internal';
         }
         return 'client';
@@ -267,10 +267,22 @@ function require_worker() {
 }
 
 function require_client() {
-    require_auth('client');
-    if (!is_client('client') && !is_admin('internal')) {
-        header('Location: ' . url('login?context=client'));
-        exit;
+    $ctx = resolveActiveSessionContext();
+    if ($ctx === 'internal') {
+        require_auth('internal');
+        if (!is_admin('internal')) {
+            header('Location: ' . home_url_for_role(current_user_role('internal')));
+            exit;
+        }
+    } else {
+        if (!is_logged_in('client') && is_admin('internal')) {
+            return;
+        }
+        require_auth('client');
+        if (!is_client('client') && !is_admin('internal')) {
+            header('Location: ' . url('login?context=client'));
+            exit;
+        }
     }
 }
 

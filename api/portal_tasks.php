@@ -293,7 +293,8 @@ if ($action === 'list_tasks') {
             $stmt->execute($params);
             $tasks = $stmt->fetchAll();
 
-            // Overall Stats across all tasks
+            // Overall Stats across all tasks (scoped to client_id if passed)
+            $clientStatsFilter = !empty($_GET['client_id']) ? " AND client_id = " . intval($_GET['client_id']) : "";
             $stmtAllStats = $db->query("
                 SELECT 
                     COUNT(*) as total_tasks,
@@ -305,7 +306,7 @@ if ($action === 'list_tasks') {
                     SUM(CASE WHEN status = 'approved' THEN 1 ELSE 0 END) as approved_count,
                     SUM(CASE WHEN worker_type = 'karyawan' THEN 1 ELSE 0 END) as karyawan_count,
                     SUM(CASE WHEN worker_type = 'freelancer' THEN 1 ELSE 0 END) as freelancer_count
-                FROM tasks WHERE is_deleted = 0
+                FROM tasks WHERE is_deleted = 0 {$clientStatsFilter}
             ");
             $stats = $stmtAllStats->fetch();
 

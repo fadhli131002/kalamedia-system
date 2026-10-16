@@ -12,8 +12,15 @@ $db = Database::getConnection();
 
 // Determine Client ID
 $clientId = current_user_client_id();
-if (!$clientId && ($role === 'owner' || $role === 'admin')) {
-    $clientId = (int)$db->query("SELECT id FROM clients WHERE COALESCE(is_deleted,0)=0 ORDER BY id ASC LIMIT 1")->fetchColumn();
+$allActiveClients = [];
+if ($role === 'owner' || $role === 'admin') {
+    $requestedClientId = intval($_GET['client_id'] ?? 0);
+    if ($requestedClientId > 0) {
+        $clientId = $requestedClientId;
+    } else {
+        $clientId = (int)$db->query("SELECT id FROM clients WHERE COALESCE(is_deleted,0)=0 ORDER BY id ASC LIMIT 1")->fetchColumn();
+    }
+    $allActiveClients = $db->query("SELECT id, name, company FROM clients WHERE COALESCE(is_deleted,0)=0 ORDER BY company ASC")->fetchAll(PDO::FETCH_ASSOC);
 }
 
 // Fetch Client Profile
@@ -438,11 +445,31 @@ $clientReports = $stmtReports->fetchAll(PDO::FETCH_ASSOC);
 
         <!-- Preview Notice if Admin/Owner is looking at portal -->
         <?php if ($role !== 'client'): ?>
-          <div style="background: #EFF8FF; border: 1px solid #B2DDFF; border-radius: var(--radius-sm); padding: 10px 16px; margin-bottom: 16px; font-size: 12.5px; color: #175CD3; display: flex; align-items: center; justify-content: space-between;">
-            <div>
-              <strong>Mode Pratinjau Klien:</strong> Menampilkan portal untuk <b><?= htmlspecialchars($client['company']) ?></b> (PIC: <?= htmlspecialchars($client['name']) ?>).
+          <div style="background: #F0F4FF; border: 1px solid #D0DDFE; border-radius: 14px; padding: 12px 18px; margin-bottom: 20px; font-size: 13px; color: #1D2939; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 2px 6px -1px rgba(93, 118, 245, 0.08);">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <span style="background: #5D76F5; color: #FFFFFF; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.3px;">
+                MODE PREVIEW <?= strtoupper($role) ?>
+              </span>
+              <span style="color: #344054; font-weight: 600;">
+                Pratinjau Portal Klien:
+              </span>
+              <?php if (!empty($allActiveClients)): ?>
+                <select onchange="window.location.href='client-portal?preview=1&portal=internal&_slot=internal&client_id=' + this.value" style="font-size: 12.5px; font-weight: 700; color: #101828; padding: 5px 12px; border-radius: 8px; border: 1.5px solid #5D76F5; background: #FFFFFF; cursor: pointer;">
+                  <?php foreach ($allActiveClients as $ac): ?>
+                    <option value="<?= $ac['id'] ?>" <?= $clientId == $ac['id'] ? 'selected' : '' ?>>
+                      <?= htmlspecialchars($ac['company']) ?> (PIC: <?= htmlspecialchars($ac['name']) ?>)
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+              <?php else: ?>
+                <strong><?= htmlspecialchars($client['company'] ?? 'Klien') ?></strong>
+              <?php endif; ?>
             </div>
-            <a href="<?= url('admin-dashboard') ?>" class="btn btn-secondary btn-sm" style="font-size: 11px;">Kembali ke Admin</a>
+            <div>
+              <a href="<?= home_url_for_role($role) ?>" class="btn btn-secondary btn-sm" style="font-size: 12px; font-weight: 700; background: #FFFFFF; border: 1px solid #D0D5DD; color: #344054;">
+                &larr; Kembali ke Dashboard
+              </a>
+            </div>
           </div>
         <?php endif; ?>
 
@@ -897,7 +924,9 @@ $clientReports = $stmtReports->fetchAll(PDO::FETCH_ASSOC);
 
     async function loadClientTasks() {
       try {
-        const res = await fetch('api/portal_tasks.php?action=list_tasks&_slot=client');
+        const slot = '<?= ($role === "client") ? "client" : "internal" ?>';
+        const clientId = '<?= (int)$clientId ?>';
+        const res = await fetch(`api/portal_tasks.php?action=list_tasks&_slot=${slot}&portal=${slot}&client_id=${clientId}`);
         const data = await res.json();
 
         if (data.success) {
@@ -1071,7 +1100,9 @@ $clientReports = $stmtReports->fetchAll(PDO::FETCH_ASSOC);
     async function loadClientAdsData() {
       const container = document.getElementById('client-ads-container');
       try {
-        const res = await fetch('api/ads_tracker.php?action=list&_slot=client');
+        const slot = '<?= ($role === "client") ? "client" : "internal" ?>';
+        const clientId = '<?= (int)$clientId ?>';
+        const res = await fetch(`api/ads_tracker.php?action=list&_slot=${slot}&portal=${slot}&client_id=${clientId}`);
         const data = await res.json();
 
         if (!data.success || !data.projects || data.projects.length === 0) {

@@ -16,29 +16,30 @@ if (!function_exists('detect_session_context')) {
         $page = $_GET['page'] ?? '';
         $roleParam = $_POST['role'] ?? ($_GET['role'] ?? '');
         $referer = $_SERVER['HTTP_REFERER'] ?? '';
+        $isPreview = isset($_GET['preview']) || isset($_POST['preview']) || (isset($_GET['mode']) && $_GET['mode'] === 'preview');
 
+        if ($slotParam === 'internal' || $isPreview) {
+            return 'internal';
+        }
         if ($slotParam === 'client') {
             return 'client';
         }
-        if ($slotParam === 'internal') {
-            return 'internal';
-        }
 
-        if (
+        $isClientRoute = (
             $script === 'client_portal.php' ||
             strpos($uri, '/client-portal') !== false ||
             strpos($uri, 'portal=client') !== false ||
             strpos($uri, 'context=client') !== false ||
-            strpos($uri, '_slot=client') !== false
-        ) {
-            return 'client';
-        }
+            strpos($uri, '_slot=client') !== false ||
+            in_array($page, ['client-portal', 'client_portal', 'client']) ||
+            $roleParam === 'client'
+        );
 
-        if (in_array($page, ['client-portal', 'client_portal', 'client'])) {
-            return 'client';
-        }
-
-        if ($roleParam === 'client') {
+        if ($isClientRoute) {
+            // If only internal session exists, keep internal session for admin preview
+            if (isset($_COOKIE['KALASESS_INTERNAL']) && !isset($_COOKIE['KALASESS_CLIENT'])) {
+                return 'internal';
+            }
             return 'client';
         }
 
@@ -48,6 +49,9 @@ if (!function_exists('detect_session_context')) {
             strpos($referer, 'context=client') !== false ||
             strpos($referer, 'client_portal.php') !== false
         ) {
+            if (isset($_COOKIE['KALASESS_INTERNAL']) && !isset($_COOKIE['KALASESS_CLIENT'])) {
+                return 'internal';
+            }
             return 'client';
         }
 

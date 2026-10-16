@@ -144,7 +144,7 @@ $badgeLabel = $sidebarBadge;
       </a>
 
       <!-- Client Portal Preview for Admin/Owner -->
-      <a href="<?= url('client-portal') ?>" class="nav-link <?= $currentPage === 'client-portal' ? 'active' : '' ?>">
+      <a href="<?= url('client-portal?preview=1&portal=internal&_slot=internal') ?>" class="nav-link <?= $currentPage === 'client-portal' ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
         <span>Portal Klien (Preview)</span>
       </a>

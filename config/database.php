@@ -80,10 +80,10 @@ class Database {
             }
 
             // High Performance: Only run migrations if lock file does not exist (0ms overhead on requests)
-            $lockFile = BASE_PATH . '/database/.schema_v4.lock';
+            $lockFile = BASE_PATH . '/database/.schema_v5.lock';
             if (!file_exists($lockFile)) {
                 self::runMigrations(self::$instance, self::$driver);
-                @file_put_contents($lockFile, "Schema v4 initialized at " . date('Y-m-d H:i:s'));
+                @file_put_contents($lockFile, "Schema v5 initialized at " . date('Y-m-d H:i:s'));
             }
         }
         return self::$instance;
@@ -247,6 +247,22 @@ class Database {
                 is_deleted INT DEFAULT 0,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS ads_topup_transactions (
+                id {$pkDef},
+                client_id INT NOT NULL,
+                project_id INT NOT NULL,
+                uploaded_by_user_id INT DEFAULT NULL,
+                platform VARCHAR(50) NOT NULL DEFAULT 'Meta Ads',
+                topup_amount DECIMAL(15,2) NOT NULL DEFAULT 0,
+                spend_installed DECIMAL(15,2) NOT NULL DEFAULT 0,
+                transaction_date DATE NOT NULL,
+                receipt_file VARCHAR(255) NOT NULL,
+                notes TEXT DEFAULT NULL,
+                status VARCHAR(30) NOT NULL DEFAULT 'recorded',
+                is_deleted INT NOT NULL DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS employees (
@@ -466,7 +482,7 @@ class Database {
         }
 
         // 4. Ensure is_deleted on other standard tables
-        $tablesWithDeleted = ['tasks', 'invoices', 'freelancer_payouts', 'ads_spend', 'ads_budget_logs', 'salaries', 'content_planner', 'client_reports', 'performance_reports'];
+        $tablesWithDeleted = ['tasks', 'invoices', 'freelancer_payouts', 'ads_spend', 'ads_budget_logs', 'ads_topup_transactions', 'salaries', 'content_planner', 'client_reports', 'performance_reports'];
         foreach ($tablesWithDeleted as $t) {
             $cols = $getTableCols($t);
             if (!empty($cols) && !in_array('is_deleted', $cols)) {
@@ -502,7 +518,10 @@ class Database {
             'idx_invoices_client' => ['invoices', 'client_id'],
             'idx_content_client' => ['content_planner', 'client_id'],
             'idx_ads_logs_project' => ['ads_budget_logs', 'project_id, is_deleted'],
-            'idx_ads_logs_client' => ['ads_budget_logs', 'client_id, is_deleted']
+            'idx_ads_logs_client' => ['ads_budget_logs', 'client_id, is_deleted'],
+            'idx_ads_topup_client' => ['ads_topup_transactions', 'client_id, is_deleted'],
+            'idx_ads_topup_project' => ['ads_topup_transactions', 'project_id, is_deleted'],
+            'idx_ads_topup_user' => ['ads_topup_transactions', 'uploaded_by_user_id']
         ];
 
         foreach ($indexes as $idxName => [$tbl, $cols]) {

@@ -7,15 +7,20 @@
 if (is_client()) {
     $cClientId = current_user_client_id();
     ?>
-    <!-- Client Safe Modal: View Payment Receipt -->
+    <!-- Client Safe Modal: View Payment & Ads Receipt -->
     <div id="modal-view-receipt" class="modal-backdrop">
-      <div class="modal-dialog">
+      <div class="modal-dialog" style="max-width: 680px;">
         <div class="modal-header">
-          <h3 class="modal-title">Bukti Pembayaran</h3>
+          <h3 class="modal-title" id="view-receipt-title">Bukti Transaksi Saldo Iklan</h3>
           <button type="button" class="modal-close" onclick="closeModal('modal-view-receipt')">&times;</button>
         </div>
-        <div class="modal-body" style="text-align: center;">
-          <img id="receipt-preview-img" src="" alt="Bukti Transfer" style="max-width: 100%; max-height: 480px; border-radius: 8px;">
+        <div class="modal-body" style="text-align: center; padding: 16px;">
+          <img id="view-receipt-img" src="" alt="Bukti Transaksi" style="max-width: 100%; max-height: 70vh; border-radius: 8px; object-fit: contain; display: inline-block;">
+          <iframe id="view-receipt-iframe" src="" style="width: 100%; height: 70vh; border: none; border-radius: 8px; display: none;"></iframe>
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+          <a id="view-receipt-download" href="#" target="_blank" download class="btn btn-secondary btn-sm" style="font-weight: 700;">Unduh File Asli</a>
+          <button type="button" class="btn btn-primary btn-sm" onclick="closeModal('modal-view-receipt')">Tutup</button>
         </div>
       </div>
     </div>
@@ -803,6 +808,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </div>
     <div class="modal-body" style="text-align: center; background: #000; padding: 20px;">
       <img id="view-receipt-img" src="" style="max-width: 100%; max-height: 70vh; border-radius: 8px; object-fit: contain;">
+      <iframe id="view-receipt-iframe" src="" style="width: 100%; height: 70vh; border: none; border-radius: 8px; display: none;"></iframe>
     </div>
     <div class="modal-footer">
       <a id="view-receipt-download" href="" target="_blank" download class="btn btn-secondary btn-sm">Unduh File Asli</a>

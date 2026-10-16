@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Kalamedia Sidebar Navigation - Bankio Minimal Finance UI Kit
  * Multi-Role Support: Owner, Admin, Karyawan, Freelancer, Client
@@ -73,7 +73,7 @@ $badgeLabel = $sidebarBadge;
     <button class="sidebar-close-btn" onclick="closeMobileSidebar()" aria-label="Close Sidebar">&times;</button>
   </div>
 
-  <nav class="sidebar-nav">
+  <nav class="sidebar-nav" id="app-sidebar-nav">
 
     <?php if ($isClient): ?>
       <!-- CLIENT PORTAL NAVIGATION -->
@@ -213,4 +213,16 @@ $badgeLabel = $sidebarBadge;
       </div>
     </div>
   </div>
+
+  <script>
+    (function() {
+      try {
+        var nav = document.getElementById('app-sidebar-nav') || document.querySelector('.sidebar-nav');
+        var savedPos = sessionStorage.getItem('kala_sidebar_scroll');
+        if (nav && savedPos !== null) {
+          nav.scrollTop = parseInt(savedPos, 10);
+        }
+      } catch(e) {}
+    })();
+  </script>
 </aside>

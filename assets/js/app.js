@@ -88,15 +88,23 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// Anti-Jank 60FPS Sidebar & Multi-Page Transition Controller
-document.addEventListener('DOMContentLoaded', () => {
-  // Smooth page enter
-  const contentBody = document.querySelector('.content-body');
-  if (contentBody) {
-    contentBody.classList.remove('kala-page-exit');
+// 100% Rock-Solid Stable Sidebar Controller & Smooth Content Swap
+function initSidebarController() {
+  const sidebarNav = document.getElementById('app-sidebar-nav') || document.querySelector('.sidebar-nav');
+  if (sidebarNav) {
+    // Synchronously restore scroll position from sessionStorage
+    const savedPos = sessionStorage.getItem('kala_sidebar_scroll');
+    if (savedPos !== null) {
+      sidebarNav.scrollTop = parseInt(savedPos, 10);
+    }
+
+    // Persist scroll position whenever scrolled
+    sidebarNav.addEventListener('scroll', () => {
+      sessionStorage.setItem('kala_sidebar_scroll', sidebarNav.scrollTop);
+    }, { passive: true });
   }
 
-  // Smooth Sidebar Link Interception
+  // Smooth Sidebar Link Interception (Sidebar stays 100% stationary!)
   document.querySelectorAll('.sidebar-nav a.nav-link').forEach(link => {
     link.addEventListener('click', function(e) {
       const href = this.getAttribute('href');
@@ -105,30 +113,93 @@ document.addEventListener('DOMContentLoaded', () => {
       if (this.getAttribute('target') === '_blank') return;
       if (href.includes('logout')) return;
 
-      // Instant active state switch without freezing
+      // Lock current scroll position before page transition
+      if (sidebarNav) {
+        sessionStorage.setItem('kala_sidebar_scroll', sidebarNav.scrollTop);
+      }
+
+      // Instant active state switch without jumping
       document.querySelectorAll('.sidebar-nav a.nav-link').forEach(l => l.classList.remove('active'));
       this.classList.add('active');
 
-      if (typeof document.startViewTransition === 'function') {
+      // Only transition the right content area (<main>) while Sidebar stays completely fixed
+      const mainWrapper = document.querySelector('.main-wrapper') || document.querySelector('.content-body');
+      if (mainWrapper) {
         e.preventDefault();
-        document.startViewTransition(() => {
+        mainWrapper.style.transition = 'opacity 140ms ease, transform 140ms ease';
+        mainWrapper.style.opacity = '0.4';
+        mainWrapper.style.transform = 'translateY(2px)';
+        setTimeout(() => {
           window.location.href = href;
-        });
-      } else {
-        const body = document.querySelector('.content-body');
-        if (body) {
-          e.preventDefault();
-          body.classList.add('kala-page-exit');
-          requestAnimationFrame(() => {
-            setTimeout(() => {
-              window.location.href = href;
-            }, 120);
-          });
-        }
+        }, 80);
       }
     });
   });
+}
+
+// Restore on DOM ready and bfcache / pageshow
+document.addEventListener('DOMContentLoaded', initSidebarController);
+window.addEventListener('pageshow', () => {
+  const sidebarNav = document.getElementById('app-sidebar-nav') || document.querySelector('.sidebar-nav');
+  if (sidebarNav) {
+    const savedPos = sessionStorage.getItem('kala_sidebar_scroll');
+    if (savedPos !== null) {
+      sidebarNav.scrollTop = parseInt(savedPos, 10);
+    }
+  }
+  const mainWrapper = document.querySelector('.main-wrapper') || document.querySelector('.content-body');
+  if (mainWrapper) {
+    mainWrapper.style.opacity = '1';
+    mainWrapper.style.transform = 'none';
+  }
 });
+
+// Universal Lightbox Preview for Receipts (Images & PDFs)
+function previewTransactionReceipt(fileUrl, title = 'Bukti Transaksi Saldo Iklan') {
+  if (!fileUrl) {
+    showToast('File bukti transaksi tidak ditemukan.', 'warning');
+    return;
+  }
+  const modal = document.getElementById('modal-view-receipt');
+  if (!modal) {
+    window.open(fileUrl, '_blank');
+    return;
+  }
+
+  const isPdf = fileUrl.toLowerCase().endsWith('.pdf');
+  const img = document.getElementById('view-receipt-img') || document.getElementById('receipt-preview-img');
+  const iframe = document.getElementById('view-receipt-iframe');
+  const titleEl = document.getElementById('view-receipt-title');
+  const downloadBtn = document.getElementById('view-receipt-download');
+
+  if (titleEl) titleEl.innerText = title;
+  if (downloadBtn) {
+    downloadBtn.href = fileUrl;
+    downloadBtn.style.display = 'inline-flex';
+  }
+
+  if (isPdf) {
+    if (img) img.style.display = 'none';
+    if (iframe) {
+      iframe.src = fileUrl;
+      iframe.style.display = 'block';
+    } else {
+      window.open(fileUrl, '_blank');
+      return;
+    }
+  } else {
+    if (iframe) {
+      iframe.style.display = 'none';
+      iframe.src = '';
+    }
+    if (img) {
+      img.src = fileUrl;
+      img.style.display = 'inline-block';
+    }
+  }
+
+  openModal('modal-view-receipt');
+}
 
 // Fast Table Filter & Search
 function initTableSearch(inputId, tableId) {

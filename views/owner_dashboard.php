@@ -104,6 +104,32 @@ foreach ($systemUsers as $su) {
         $userCounts[$su['role']]++;
     }
 }
+
+// 9. Ads Top-Up Transactions & Budget Monitoring for Owner
+$recentAdsTopups = $db->query("
+    SELECT t.*, u.name as uploader_name, p.name as project_name, c.company as client_company,
+           COALESCE(p.allocated_ads_budget, 0) as allocated_ads_budget,
+           COALESCE((SELECT SUM(spend_installed) FROM ads_budget_logs WHERE project_id = p.id AND COALESCE(is_deleted,0) = 0), 0) as total_spend_installed
+    FROM ads_topup_transactions t
+    LEFT JOIN users u ON t.uploaded_by_user_id = u.id
+    LEFT JOIN projects p ON t.project_id = p.id
+    LEFT JOIN clients c ON t.client_id = c.id
+    WHERE COALESCE(t.is_deleted, 0) = 0
+    ORDER BY t.transaction_date DESC, t.id DESC
+    LIMIT 8
+")->fetchAll();
+
+$adsProjectsSummary = $db->query("
+    SELECT p.id, p.name as project_name, c.company as client_company,
+           COALESCE(p.allocated_ads_budget, 0) as allocated_ads_budget,
+           COALESCE((SELECT SUM(spend_installed) FROM ads_budget_logs WHERE project_id = p.id AND COALESCE(is_deleted,0) = 0), 0) as total_spend_installed,
+           (COALESCE(p.allocated_ads_budget, 0) - COALESCE((SELECT SUM(spend_installed) FROM ads_budget_logs WHERE project_id = p.id AND COALESCE(is_deleted,0) = 0), 0)) as remaining_ads_budget
+    FROM projects p
+    JOIN clients c ON p.client_id = c.id
+    WHERE COALESCE(p.is_deleted, 0) = 0 AND COALESCE(p.allocated_ads_budget, 0) > 0
+    ORDER BY p.id DESC
+    LIMIT 6
+")->fetchAll();
 ?>
 
 <!DOCTYPE html>
@@ -365,6 +391,133 @@ foreach ($systemUsers as $su) {
                 </div>
               </div>
             <?php endif; ?>
+          </div>
+
+          <!-- Monitoring Saldo Iklan & Riwayat Top-Up Tim Ads -->
+          <div class="glass-panel owner-full-width-panel" style="margin-top: 24px;">
+            <div class="panel-header" style="margin-bottom: 16px; flex-wrap: wrap; gap: 12px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 class="panel-title" style="display: flex; align-items: center; gap: 8px;">
+                  <span>Monitoring Saldo Iklan &amp; Riwayat Top-Up Tim Ads</span>
+                  <span class="badge" style="background: #EFF8FF; color: #175CD3; font-weight: 700; font-size: 11px;">Transparansi Kampanye</span>
+                </h3>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
+                  Pantau sisa pagu saldo iklan per proyek dan verifikasi struk transfer top-up yang di-upload tim Ads
+                </p>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <a href="<?= url('tasks') ?>?tab=ads" class="btn btn-secondary btn-sm" style="font-weight: 700;">
+                  Buka Pelacakan Ads &rarr;
+                </a>
+              </div>
+            </div>
+
+            <!-- Project Ads Balance Cards -->
+            <?php if (!empty($adsProjectsSummary)): ?>
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 20px;">
+                <?php foreach ($adsProjectsSummary as $ap):
+                  $alloc = floatval($ap['allocated_ads_budget']);
+                  $spend = floatval($ap['total_spend_installed']);
+                  $rem = floatval($ap['remaining_ads_budget']);
+                  $pct = $alloc > 0 ? min(100, round(($spend / $alloc) * 100)) : 0;
+                  $pctColor = ($pct >= 90) ? '#B42318' : (($pct >= 70) ? '#B54708' : '#027A48');
+                ?>
+                  <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow-xs);">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                      <div>
+                        <div style="font-size: 13.5px; font-weight: 800; color: #101828; line-height: 1.3;"><?= htmlspecialchars($ap['project_name']) ?></div>
+                        <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($ap['client_company']) ?></div>
+                      </div>
+                      <span class="badge" style="background: <?= ($pct >= 90) ? '#FEF3F2' : '#F2F4F7' ?>; color: <?= $pctColor ?>; font-weight: 800; font-size: 11px;">
+                        <?= $pct ?>% Terpakai
+                      </span>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; font-size: 11.5px; margin-bottom: 6px;">
+                      <span style="color: var(--text-secondary);">Terpasang: <b><?= format_rupiah($spend) ?></b></span>
+                      <span style="color: var(--text-secondary);">Pagu: <b><?= format_rupiah($alloc) ?></b></span>
+                    </div>
+
+                    <div style="background: #F2F4F7; height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 8px;">
+                      <div style="background: <?= $pctColor ?>; height: 100%; width: <?= $pct ?>%;"></div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; border-top: 1px dashed var(--border-color); padding-top: 6px;">
+                      <span style="color: var(--text-secondary);">Sisa Saldo:</span>
+                      <span style="font-weight: 800; color: <?= $rem <= 0 ? 'var(--danger-text)' : 'var(--success-text)' ?>;"><?= format_rupiah($rem) ?></span>
+                    </div>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            <?php endif; ?>
+
+            <!-- Table Riwayat Top-up Terbaru -->
+            <div class="table-responsive">
+              <table class="table-custom">
+                <thead>
+                  <tr>
+                    <th>TANGGAL &amp; PETUGAS ADS</th>
+                    <th>KLIEN &amp; PROYEK</th>
+                    <th>PLATFORM</th>
+                    <th>NOMINAL TOP-UP</th>
+                    <th>ANGGARAN TERPASANG</th>
+                    <th>STATUS / CATATAN</th>
+                    <th style="text-align: right;">BUKTI STRUK</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php if (empty($recentAdsTopups)): ?>
+                    <tr>
+                      <td colspan="7" style="text-align: center; padding: 28px; color: var(--text-muted);">
+                        Belum ada riwayat transaksi isi saldo Ads yang dicatat.
+                      </td>
+                    </tr>
+                  <?php else: ?>
+                    <?php foreach ($recentAdsTopups as $rt): ?>
+                      <tr>
+                        <td>
+                          <div style="font-weight: 700; color: #101828;"><?= date('d M Y', strtotime($rt['transaction_date'])) ?></div>
+                          <div style="font-size: 11px; color: var(--text-secondary);">Oleh: <?= htmlspecialchars($rt['uploader_name'] ?? 'Staff Ads') ?></div>
+                        </td>
+                        <td>
+                          <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($rt['client_company'] ?? '-') ?></div>
+                          <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($rt['project_name'] ?? '-') ?></div>
+                        </td>
+                        <td>
+                          <span class="badge" style="background: #F4F3FF; color: #5925DC; font-weight: 700; font-size: 11px;">
+                            <?= htmlspecialchars($rt['platform']) ?>
+                          </span>
+                        </td>
+                        <td style="font-weight: 800; color: #027A48;">
+                          + <?= format_rupiah($rt['topup_amount']) ?>
+                        </td>
+                        <td style="font-weight: 700; color: #101828;">
+                          <?= format_rupiah($rt['spend_installed']) ?>
+                        </td>
+                        <td>
+                          <div style="font-size: 12px; color: #101828; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="<?= htmlspecialchars($rt['notes'] ?: '-') ?>">
+                            <?= htmlspecialchars($rt['notes'] ?: '-') ?>
+                          </div>
+                          <span class="badge" style="background: #ECFDF3; color: #027A48; font-size: 10px; font-weight: 700; margin-top: 2px;">
+                            <?= ucfirst($rt['status'] ?? 'recorded') ?>
+                          </span>
+                        </td>
+                        <td style="text-align: right;">
+                          <?php if (!empty($rt['receipt_file'])): ?>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($rt['receipt_file'])) ?>', 'Bukti Transaksi Saldo <?= htmlspecialchars(addslashes($rt['platform'])) ?> - <?= htmlspecialchars(addslashes($rt['client_company'] ?? '')) ?>')" style="font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                              Lihat Bukti
+                            </button>
+                          <?php else: ?>
+                            <span style="font-size: 11px; color: var(--text-muted); font-style: italic;">Tidak ada bukti</span>
+                          <?php endif; ?>
+                        </td>
+                      </tr>
+                    <?php endforeach; ?>
+                  <?php endif; ?>
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <!-- 7. Manajemen Akun Pengguna (Karyawan, Freelance, Client & Admin) -->

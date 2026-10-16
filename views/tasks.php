@@ -500,12 +500,15 @@ if ($isWorkerUser) {
             </div>
 
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-primary btn-sm" onclick="openUploadAdsTopupModal()" style="font-weight: 700; background: #027A48; border-color: #027A48;">
+                <span>+ Upload Bukti Isi Saldo / Transaksi Ads</span>
+              </button>
               <?php if ($isAdminUser): ?>
                 <button class="btn btn-secondary btn-sm" onclick="openAllocateAdsModal()" style="font-weight: 700;">
                   <span>+ Atur Pagu Saldo Ads</span>
                 </button>
               <?php endif; ?>
-              <button class="btn btn-primary btn-sm" onclick="openLogAdsSpendModal()" style="font-weight: 700;">
+              <button class="btn btn-secondary btn-sm" onclick="openLogAdsSpendModal()" style="font-weight: 700;">
                 <span>+ Update Anggaran Terpasang & Bukti</span>
               </button>
               <button class="btn btn-secondary btn-sm" onclick="loadAdsTrackerData()">
@@ -518,6 +521,47 @@ if ($isWorkerUser) {
           <div class="kpi-row" id="ads-kpi-container">
             <div class="kpi-tile">
               <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 600;">Memuat Ringkasan...</span>
+            </div>
+          </div>
+
+          <!-- Top-Up Transactions & Proof Table Card (Automatic Sync to Client Portal) -->
+          <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <h4 style="font-size: 15px; font-weight: 800; color: #101828; margin: 0;">Riwayat & Bukti Transaksi Saldo Iklan (Ads Top-Up & Spend)</h4>
+                  <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 10.5px;">Tampil di Portal Klien</span>
+                </div>
+                <span style="font-size: 12px; color: var(--text-secondary);">
+                  Data pengisian saldo (Top-Up) yang diunggah oleh Tim Ads dan otomatis dapat ditinjau oleh Klien di Client Portal.
+                </span>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openUploadAdsTopupModal()" style="font-size: 12px; font-weight: 700; color: #027A48; border-color: #A6F4C5; background: #ECFDF3;">
+                + Upload Bukti Baru
+              </button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table-custom" id="table-ads-topups">
+                <thead>
+                  <tr>
+                    <th>TANGGAL & PETUGAS ADS</th>
+                    <th>PROYEK & KLIEN PT</th>
+                    <th>PLATFORM</th>
+                    <th>NOMINAL SALDO DIISI</th>
+                    <th>ANGGARAN TERPASANG</th>
+                    <th>CATATAN TIM ADS</th>
+                    <th>BUKTI TRANSAKSI</th>
+                    <th>STATUS</th>
+                    <?php if ($isAdminUser): ?>
+                      <th style="text-align: right;">AKSI</th>
+                    <?php endif; ?>
+                  </tr>
+                </thead>
+                <tbody id="tbody-ads-topups">
+                  <tr><td colspan="<?= $isAdminUser ? 9 : 8 ?>" style="text-align: center; padding: 24px; color: var(--text-muted);">Memuat riwayat isi saldo ads...</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -846,6 +890,92 @@ if ($isWorkerUser) {
             <button type="button" class="btn btn-secondary" onclick="closeModal('modal-update-ads-spend')">Batal</button>
             <button type="submit" class="btn btn-primary" id="btn-submit-ads-spend">
               Simpan & Koordinasikan ke Owner
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Upload Bukti Transaksi Isi Saldo Ads (Tim Ads / Workers / Admin / Owner) -->
+  <div class="modal" id="modal-upload-ads-topup">
+    <div class="modal-dialog" style="max-width: 620px;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <h4 class="modal-title">+ Upload Bukti Transaksi Isi Saldo Ads</h4>
+            <span style="font-size: 12px; color: var(--text-secondary);">Upload bukti pengisian saldo iklan klien. Otomatis tampil di Portal Klien.</span>
+          </div>
+          <button type="button" class="close-btn" onclick="closeModal('modal-upload-ads-topup')">&times;</button>
+        </div>
+
+        <form id="form-upload-ads-topup" onsubmit="handleUploadAdsTopup(event)" enctype="multipart/form-data">
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Pilih Klien / Proyek PT <span style="color:red;">*</span></label>
+              <select name="project_id" id="ads-topup-project-id" class="form-control" required onchange="onTopupProjectChange(this)">
+                <option value="">-- Pilih Proyek Klien --</option>
+              </select>
+            </div>
+
+            <!-- Pagu Saldo Info Card -->
+            <div id="topup-allocated-info" style="display: none; background: #F4F3FF; border: 1px solid #D9D6FE; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;">
+              <div style="font-size: 11px; color: #5925DC; font-weight: 700; text-transform: uppercase;">Pagu Saldo Ads Ditugaskan Owner</div>
+              <div style="font-size: 17px; font-weight: 800; color: #101828;" id="txt-topup-allocated-budget">Rp 0</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group">
+                <label class="form-label">Platform Iklan <span style="color:red;">*</span></label>
+                <select name="platform" id="ads-topup-platform" class="form-control" required>
+                  <option value="Meta Ads">Meta Ads (Instagram & FB)</option>
+                  <option value="Google Ads">Google Ads / YouTube</option>
+                  <option value="TikTok Ads">TikTok Ads</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Tanggal Transaksi <span style="color:red;">*</span></label>
+                <input type="date" name="transaction_date" id="ads-topup-date" class="form-control" value="<?= date('Y-m-d') ?>" required>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group">
+                <label class="form-label">Nominal Isi Saldo / Top-Up (Rp) <span style="color:red;">*</span></label>
+                <input type="text" name="topup_amount" id="ads-topup-amount" class="form-control" placeholder="Contoh: 2.000.000" required oninput="formatRupiahInput(this)">
+                <small style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px;">
+                  Jumlah saldo iklan yang baru saja dibayarkan.
+                </small>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Nominal Anggaran Terpasang (Rp) <span style="color:red;">*</span></label>
+                <input type="text" name="spend_installed" id="ads-topup-spend" class="form-control" placeholder="Contoh: 5.000.000" required oninput="formatRupiahInput(this)">
+                <small style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px;">
+                  Akumulasi anggaran iklan yang sedang jalan saat ini.
+                </small>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Upload Bukti Transaksi / Struk Top-Up (Wajib) <span style="color:red;">*</span></label>
+              <input type="file" name="receipt_file" id="ads-topup-file" class="form-control" accept="image/jpeg,image/png,image/webp,application/pdf" required>
+              <small style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px;">
+                Format yang didukung: JPG, PNG, WEBP, PDF (Maks. 10MB). File otomatis tersimpan di <code>assets/uploads/receipts/</code>.
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Catatan untuk Klien & Owner</label>
+              <textarea name="notes" id="ads-topup-notes" class="form-control" rows="2" placeholder="Contoh: Top-up saldo Meta Ads kampanye Oktober sudah masuk"></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-upload-ads-topup')">Batal</button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-ads-topup" style="background: #027A48; border-color: #027A48;">
+              Simpan & Sinkronkan ke Portal Klien
             </button>
           </div>
         </form>
@@ -1448,6 +1578,7 @@ if ($isWorkerUser) {
         }
         allLoadedAdsData = data;
         renderAdsSummary(data);
+        renderAdsTopupTable(data);
         renderAdsProjectsTable(data);
         renderAdsLogsFeed(data);
         populateAdsProjectDropdowns(data.projects || []);
@@ -1723,9 +1854,107 @@ if ($isWorkerUser) {
       container.innerHTML = html;
     }
 
+    function renderAdsTopupTable(data) {
+      const tbody = document.getElementById('tbody-ads-topups');
+      if (!tbody) return;
+      const isPrivileged = (data.role === 'owner' || data.role === 'admin');
+      const isOwner = (data.role === 'owner');
+      const topups = data.topup_transactions || [];
+
+      if (topups.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="${isPrivileged ? 9 : 8}" style="text-align: center; padding: 36px 20px; color: var(--text-muted); background: #FCFCFD;">
+              <div style="font-size: 26px; margin-bottom: 6px;">💳</div>
+              <div style="font-weight: 700; color: #101828; margin-bottom: 2px;">Belum Ada Bukti Transaksi Isi Saldo Ads</div>
+              <div style="font-size: 12px; margin-bottom: 12px;">Tim Ads dapat menekan tombol <b>+ Upload Bukti Isi Saldo / Transaksi Ads</b> saat selesai top-up iklan klien.</div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openUploadAdsTopupModal()" style="font-size: 11.5px; font-weight: 700; color: #027A48;">
+                + Upload Bukti Sekarang
+              </button>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      let html = '';
+      topups.forEach(t => {
+        const isVerified = (t.status === 'verified');
+        const fileUrl = t.receipt_file ? escapeHtml(t.receipt_file) : '';
+
+        html += `
+          <tr>
+            <td>
+              <div style="font-weight: 800; color: #101828;">${formatDate(t.transaction_date)}</div>
+              <small style="color: var(--text-secondary); font-size: 11px;">Oleh: <b>${escapeHtml(t.uploader_name || 'Tim Ads')}</b></small>
+            </td>
+            <td>
+              <div style="font-weight: 800; color: #101828;">${escapeHtml(t.client_company || 'Klien PT')}</div>
+              <small style="color: var(--text-muted); font-size: 11px;">${escapeHtml(t.project_name || 'Proyek')}</small>
+            </td>
+            <td>
+              <span class="badge" style="background: #F4F3FF; color: #5925DC; font-weight: 800; font-size: 11px;">
+                ${escapeHtml(t.platform)}
+              </span>
+            </td>
+            <td>
+              <span style="font-weight: 800; color: #027A48; font-size: 13.5px;">
+                Rp ${Number(t.topup_amount || 0).toLocaleString('id-ID')}
+              </span>
+            </td>
+            <td>
+              <span style="font-weight: 700; color: #101828;">
+                Rp ${Number(t.spend_installed || 0).toLocaleString('id-ID')}
+              </span>
+            </td>
+            <td>
+              <div style="max-width: 200px; font-size: 12px; color: #344054; line-height: 1.4;">
+                ${escapeHtml(t.notes || '-')}
+              </div>
+            </td>
+            <td>
+              ${fileUrl ? `
+                <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('${fileUrl}', 'Bukti Isi Saldo ${escapeHtml(t.platform)} - ${escapeHtml(t.client_company || '')}')" style="font-size: 11px; font-weight: 700; padding: 4px 10px; display: inline-flex; align-items: center; gap: 4px;">
+                  <span>Lihat Bukti</span>
+                </button>
+              ` : `
+                <span style="font-size: 11px; color: var(--text-muted); font-style: italic;">Tidak ada file</span>
+              `}
+            </td>
+            <td>
+              ${isVerified ? `
+                <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 10.5px; border: 1px solid #A6F4C5;">
+                  ✓ Terverifikasi
+                </span>
+              ` : `
+                <span class="badge" style="background: #EFF8FF; color: #175CD3; font-weight: 700; font-size: 10.5px;">
+                  Terekam
+                </span>
+              `}
+            </td>
+            ${isPrivileged ? `
+              <td style="text-align: right; white-space: nowrap;">
+                ${!isVerified && isOwner ? `
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="verifyTopupTransaction(${t.id})" style="font-size: 10.5px; color: #027A48; border-color: #A6F4C5; background: #ECFDF3; font-weight: 700; margin-right: 4px;">
+                    ✓ Verifikasi
+                  </button>
+                ` : ''}
+                <button type="button" class="btn btn-secondary btn-sm" onclick="deleteTopupTransaction(${t.id})" style="font-size: 10.5px; color: #B42318; border-color: #FECDCA; padding: 2px 8px;" title="Hapus Transaksi">
+                  Hapus
+                </button>
+              </td>
+            ` : ''}
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
     function populateAdsProjectDropdowns(projects) {
       const selectSpend = document.getElementById('ads-spend-project-id');
       const selectAlloc = document.getElementById('ads-alloc-project-id');
+      const selectTopup = document.getElementById('ads-topup-project-id');
 
       let optionsHtml = '<option value="">-- Pilih Proyek Klien --</option>';
       projects.forEach(p => {
@@ -1734,6 +1963,7 @@ if ($isWorkerUser) {
 
       if (selectSpend) selectSpend.innerHTML = optionsHtml;
       if (selectAlloc) selectAlloc.innerHTML = optionsHtml;
+      if (selectTopup) selectTopup.innerHTML = optionsHtml;
     }
 
     function onAdsProjectSelectChange(selectElem) {
@@ -1751,6 +1981,122 @@ if ($isWorkerUser) {
         box.style.display = 'block';
       } else {
         box.style.display = 'none';
+      }
+    }
+
+    function openUploadAdsTopupModal(projectId = null, defaultPlatform = 'Meta Ads') {
+      const form = document.getElementById('form-upload-ads-topup');
+      if (form) form.reset();
+
+      const dateInput = document.getElementById('ads-topup-date');
+      if (dateInput) {
+        dateInput.value = new Date().toISOString().split('T')[0];
+      }
+
+      const projSelect = document.getElementById('ads-topup-project-id');
+      if (projSelect && projectId) {
+        projSelect.value = projectId;
+        onTopupProjectChange(projSelect);
+      } else {
+        const box = document.getElementById('topup-allocated-info');
+        if (box) box.style.display = 'none';
+      }
+
+      const platSelect = document.getElementById('ads-topup-platform');
+      if (platSelect && defaultPlatform) {
+        platSelect.value = defaultPlatform;
+      }
+
+      openModal('modal-upload-ads-topup');
+    }
+
+    function onTopupProjectChange(selectElem) {
+      const selectedOption = selectElem.options[selectElem.selectedIndex];
+      const box = document.getElementById('topup-allocated-info');
+      const txt = document.getElementById('txt-topup-allocated-budget');
+      if (!box || !txt) return;
+
+      const alloc = Number(selectedOption ? selectedOption.getAttribute('data-allocated') || 0 : 0);
+      if (selectElem.value && alloc > 0) {
+        txt.innerText = 'Rp ' + alloc.toLocaleString('id-ID');
+        box.style.display = 'block';
+      } else if (selectElem.value) {
+        txt.innerText = 'Rp 0 (Belum dialokasikan Owner)';
+        box.style.display = 'block';
+      } else {
+        box.style.display = 'none';
+      }
+    }
+
+    async function handleUploadAdsTopup(e) {
+      e.preventDefault();
+      const form = document.getElementById('form-upload-ads-topup');
+      const submitBtn = document.getElementById('btn-submit-ads-topup');
+      const origText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Mengupload Bukti...';
+
+      const formData = new FormData(form);
+      try {
+        const res = await fetch('api/ads_tracker.php?action=upload_topup', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          closeModal('modal-upload-ads-topup');
+          form.reset();
+          loadAdsTrackerData();
+        } else {
+          showToast(data.message || 'Gagal mengupload bukti isi saldo', 'danger');
+        }
+      } catch (err) {
+        showToast('Koneksi server gagal', 'danger');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origText;
+      }
+    }
+
+    async function verifyTopupTransaction(transId) {
+      const formData = new FormData();
+      formData.append('transaction_id', transId);
+      try {
+        const res = await fetch('api/ads_tracker.php?action=verify_topup', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          loadAdsTrackerData();
+        } else {
+          showToast(data.message || 'Gagal memverifikasi', 'danger');
+        }
+      } catch (err) {
+        showToast('Koneksi server gagal', 'danger');
+      }
+    }
+
+    async function deleteTopupTransaction(transId) {
+      if (!confirm('Apakah Anda yakin ingin menghapus transaksi isi saldo ini?')) return;
+      const formData = new FormData();
+      formData.append('transaction_id', transId);
+      try {
+        const res = await fetch('api/ads_tracker.php?action=delete_topup', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          loadAdsTrackerData();
+        } else {
+          showToast(data.message || 'Gagal menghapus transaksi', 'danger');
+        }
+      } catch (err) {
+        showToast('Koneksi server gagal', 'danger');
       }
     }
 

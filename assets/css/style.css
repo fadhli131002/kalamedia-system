@@ -394,7 +394,7 @@ table td, .table td {
 }
 
 .sidebar-header {
-  padding: 14px 18px 12px;
+  padding: 10px 14px 8px;
   display: flex;
   align-items: center;
   border-bottom: 1px solid var(--border-color);
@@ -402,19 +402,19 @@ table td, .table td {
 }
 
 .sidebar-brand-img {
-  height: 23px;
+  height: 24px;
   width: auto;
-  max-width: 120px;
+  max-width: 110px;
   object-fit: contain;
   display: block;
 }
 
 .role-badge-sidebar {
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 3px 10px;
+  padding: 2.5px 8px;
   border-radius: 999px;
   background: rgba(93, 118, 245, 0.12);
   color: #5D76F5;
@@ -423,22 +423,22 @@ table td, .table td {
 }
 
 .brand-logo {
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
   background: linear-gradient(135deg, #5D76F5 0%, #8932E0 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 18px;
+  font-size: 16px;
   color: #FFFFFF;
-  box-shadow: 0 4px 12px rgba(93, 118, 245, 0.3);
+  box-shadow: 0 4px 10px rgba(93, 118, 245, 0.25);
   flex-shrink: 0;
 }
 
 .brand-info h2 {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
   letter-spacing: -0.3px;
   color: #000000;
@@ -446,7 +446,7 @@ table td, .table td {
 }
 
 .brand-info span {
-  font-size: 10.5px;
+  font-size: 10px;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.6px;
@@ -454,20 +454,20 @@ table td, .table td {
 }
 
 .sidebar-nav {
-  padding: 14px 12px;
+  padding: 6px 10px;
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(148, 154, 177, 0.25) transparent;
+  scrollbar-color: rgba(148, 154, 177, 0.2) transparent;
 }
 
 .sidebar-nav::-webkit-scrollbar {
-  width: 5px;
+  width: 4px;
 }
 
 .sidebar-nav::-webkit-scrollbar-track {
@@ -475,73 +475,78 @@ table td, .table td {
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb {
-  background: rgba(148, 154, 177, 0.25);
+  background: rgba(148, 154, 177, 0.22);
   border-radius: 999px;
   transition: background 0.2s ease;
 }
 
 .sidebar-nav::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 154, 177, 0.5);
+  background: rgba(148, 154, 177, 0.45);
 }
 
 .nav-section-title {
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
   text-transform: uppercase;
   color: #949AB1;
   letter-spacing: 0.06em;
-  padding: 14px 12px 6px;
+  padding: 0 10px;
+  margin: 10px 0 4px;
+  line-height: 1.2;
 }
 
 .nav-link {
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 10px 14px;
-  border-radius: 14px;
+  gap: 10px;
+  padding: 8px 12px;
+  margin-bottom: 2px;
+  border-radius: 10px;
   color: #6E7485;
   text-decoration: none;
   font-size: 13.5px;
   font-weight: 500;
-  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
+  line-height: 1.25;
+  min-height: 36px;
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), background-color 180ms ease, color 180ms ease, box-shadow 180ms ease;
   position: relative;
   will-change: transform;
 }
 
 .nav-link svg {
   display: inline-block !important;
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
   stroke-width: 2;
   flex-shrink: 0;
   stroke: currentColor;
   fill: none;
-  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), stroke 200ms ease;
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), stroke 180ms ease;
   will-change: transform;
 }
 
 .nav-link:hover:not(.active) {
   color: #5D76F5;
   background: rgba(93, 118, 245, 0.08);
-  transform: translate3d(4px, 0, 0);
+  transform: translate3d(3px, 0, 0);
 }
 
 .nav-link:hover:not(.active) svg {
   stroke: #5D76F5;
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
 .nav-link:active {
-  transform: scale(0.97);
-  transition-duration: 90ms;
+  transform: scale(0.98);
+  transition-duration: 70ms;
 }
 
 .nav-link.active {
   color: #FFFFFF !important;
   background: #5D76F5 !important;
   font-weight: 600 !important;
-  border-radius: 14px !important;
-  box-shadow: 0 6px 18px -2px rgba(93, 118, 245, 0.4) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 14px -2px rgba(93, 118, 245, 0.38) !important;
   transform: translate3d(0, 0, 0) !important;
 }
 
@@ -559,7 +564,7 @@ table td, .table td {
 .nav-link.nav-link-logout {
   color: #E11D48 !important;
   font-weight: 600;
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 .nav-link.nav-link-logout svg {
@@ -569,16 +574,16 @@ table td, .table td {
 .nav-link.nav-link-logout:hover {
   color: #BE123C !important;
   background: rgba(225, 29, 72, 0.08) !important;
-  transform: translate3d(4px, 0, 0);
+  transform: translate3d(3px, 0, 0);
 }
 
 .nav-link.nav-link-logout:hover svg {
   stroke: #BE123C !important;
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
 .nav-link.nav-link-logout:active {
-  transform: scale(0.97);
+  transform: scale(0.98);
   background: rgba(225, 29, 72, 0.14) !important;
 }
 
@@ -586,7 +591,7 @@ table td, .table td {
 .sidebar-user {
   flex-shrink: 0;
   margin-top: auto;
-  padding: 12px 14px 14px;
+  padding: 8px 12px 10px;
   border-top: 1px solid var(--border-color);
   background: #FFFFFF;
 }
@@ -594,35 +599,35 @@ table td, .table td {
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
   width: 100%;
-  padding: 9px 12px;
-  border-radius: 14px;
+  padding: 6px 10px;
+  border-radius: 10px;
   background: #F8F9FD;
   border: 1px solid #ECEEF5;
-  transition: background-color 200ms ease, border-color 200ms ease, box-shadow 200ms ease;
+  transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
 .user-profile:hover {
   background: #F1F3FB;
   border-color: #E2E5F0;
-  box-shadow: 0 2px 8px rgba(18, 24, 48, 0.04);
+  box-shadow: 0 2px 6px rgba(18, 24, 48, 0.04);
 }
 
 .avatar {
-  width: 38px;
-  height: 38px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: linear-gradient(135deg, #5D76F5 0%, #8932E0 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 13px;
+  font-size: 11.5px;
   color: #FFFFFF;
   flex-shrink: 0;
-  box-shadow: 0 4px 10px rgba(93, 118, 245, 0.25);
+  box-shadow: 0 3px 8px rgba(93, 118, 245, 0.22);
   position: relative;
 }
 

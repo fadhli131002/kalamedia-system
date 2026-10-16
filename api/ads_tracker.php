@@ -52,14 +52,21 @@ function parse_ads_amount($val): float {
 // -------------------------------------------------------------
 if ($action === 'list') {
     try {
+        $targetClientId = null;
         if ($isClientUser) {
             // STRICT CLIENT SCOPE: Only see verified ads campaign status for their own company
-            $clientId = current_user_client_id();
-            if (!$clientId) {
+            $targetClientId = current_user_client_id();
+            if (!$targetClientId) {
                 $stmtC = $db->prepare("SELECT id FROM clients WHERE email = ? LIMIT 1");
                 $stmtC->execute([$user['email']]);
-                $clientId = (int)$stmtC->fetchColumn();
+                $targetClientId = (int)$stmtC->fetchColumn();
             }
+        } elseif (!empty($_GET['client_id']) && ($isAdminUser || $isOwnerUser) && (($_GET['portal'] ?? '') === 'client' || ($_GET['_slot'] ?? '') === 'client')) {
+            $targetClientId = (int)$_GET['client_id'];
+        }
+
+        if ($targetClientId) {
+            $clientId = $targetClientId;
 
             $stmt = $db->prepare("
                 SELECT p.id as project_id, p.name as project_name, p.status as project_status,
@@ -95,10 +102,25 @@ if ($action === 'list') {
                 $p['logs'] = $logsByProject[$p['project_id']] ?? [];
             }
 
+            // Fetch Top-Up Transactions for this client
+            $stmtTopup = $db->prepare("
+                SELECT t.id, t.client_id, t.project_id, t.platform, t.topup_amount, t.spend_installed,
+                       t.transaction_date, t.receipt_file, t.notes, t.status, t.created_at,
+                       u.name as uploader_name, p.name as project_name
+                FROM ads_topup_transactions t
+                LEFT JOIN users u ON t.uploaded_by_user_id = u.id
+                LEFT JOIN projects p ON t.project_id = p.id
+                WHERE t.client_id = ? AND COALESCE(t.is_deleted, 0) = 0
+                ORDER BY t.transaction_date DESC, t.id DESC
+            ");
+            $stmtTopup->execute([$clientId]);
+            $topupTransactions = $stmtTopup->fetchAll(PDO::FETCH_ASSOC);
+
             echo json_encode([
                 'success' => true,
                 'role' => 'client',
-                'projects' => $projects
+                'projects' => $projects,
+                'topup_transactions' => $topupTransactions
             ]);
             exit;
 
@@ -143,10 +165,25 @@ if ($action === 'list') {
                 $p['logs'] = $logsByProject[$p['project_id']] ?? [];
             }
 
+            // Fetch Top-Up Transactions
+            $stmtTopup = $db->query("
+                SELECT t.id, t.client_id, t.project_id, t.platform, t.topup_amount, t.spend_installed,
+                       t.transaction_date, t.receipt_file, t.notes, t.status, t.created_at,
+                       u.name as uploader_name, p.name as project_name, c.company as client_company
+                FROM ads_topup_transactions t
+                LEFT JOIN users u ON t.uploaded_by_user_id = u.id
+                LEFT JOIN projects p ON t.project_id = p.id
+                LEFT JOIN clients c ON t.client_id = c.id
+                WHERE COALESCE(t.is_deleted, 0) = 0
+                ORDER BY t.transaction_date DESC, t.id DESC
+            ");
+            $topupTransactions = $stmtTopup->fetchAll(PDO::FETCH_ASSOC);
+
             echo json_encode([
                 'success' => true,
                 'role' => $role,
-                'projects' => $projects
+                'projects' => $projects,
+                'topup_transactions' => $topupTransactions
             ]);
             exit;
 
@@ -201,6 +238,20 @@ if ($action === 'list') {
             $totalRemainingAds = $totalAllocatedAds - $totalSpendInstalled;
             $totalRetained = $totalContract - $totalAllocatedAds;
 
+            // Fetch Top-Up Transactions for Owner/Admin
+            $stmtTopup = $db->query("
+                SELECT t.id, t.client_id, t.project_id, t.platform, t.topup_amount, t.spend_installed,
+                       t.transaction_date, t.receipt_file, t.notes, t.status, t.created_at,
+                       u.name as uploader_name, p.name as project_name, c.company as client_company
+                FROM ads_topup_transactions t
+                LEFT JOIN users u ON t.uploaded_by_user_id = u.id
+                LEFT JOIN projects p ON t.project_id = p.id
+                LEFT JOIN clients c ON t.client_id = c.id
+                WHERE COALESCE(t.is_deleted, 0) = 0
+                ORDER BY t.transaction_date DESC, t.id DESC
+            ");
+            $topupTransactions = $stmtTopup->fetchAll(PDO::FETCH_ASSOC);
+
             echo json_encode([
                 'success' => true,
                 'role' => $role,
@@ -211,7 +262,8 @@ if ($action === 'list') {
                     'total_remaining_ads' => $totalRemainingAds,
                     'total_agency_retained' => $totalRetained
                 ],
-                'projects' => $projects
+                'projects' => $projects,
+                'topup_transactions' => $topupTransactions
             ]);
             exit;
         }
@@ -442,6 +494,222 @@ if ($action === 'delete_log') {
            ->execute([$logId]);
 
         echo json_encode(['success' => true, 'message' => 'Riwayat anggaran iklan berhasil dihapus.']);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        exit;
+    }
+}
+
+// -------------------------------------------------------------
+// 6. POST: Upload Bukti Transaksi Isi Saldo Ads (Tim Ads / Workers / Admin / Owner)
+// -------------------------------------------------------------
+if ($action === 'upload_topup') {
+    if (!$isWorkerUser && !$isAdminUser && !$isOwnerUser) {
+        echo json_encode(['success' => false, 'message' => 'Akses ditolak. Hanya Tim Ads dan Admin yang dapat mengupload bukti isi saldo.']);
+        exit;
+    }
+
+    $projectId = intval($_POST['project_id'] ?? 0);
+    $platform = trim($_POST['platform'] ?? 'Meta Ads');
+    $topupAmount = parse_ads_amount($_POST['topup_amount'] ?? 0);
+    $spendInstalled = parse_ads_amount($_POST['spend_installed'] ?? 0);
+    $transactionDate = trim($_POST['transaction_date'] ?? date('Y-m-d'));
+    $notes = trim($_POST['notes'] ?? '');
+
+    $allowedPlatforms = ['Meta Ads', 'Google Ads', 'TikTok Ads'];
+    if (!in_array($platform, $allowedPlatforms)) {
+        $platform = 'Meta Ads';
+    }
+
+    if ($projectId <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Pilih proyek & klien terlebih dahulu.']);
+        exit;
+    }
+
+    if ($topupAmount <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Nominal isi saldo (Top-Up) harus lebih dari Rp 0.']);
+        exit;
+    }
+
+    if (empty($_FILES['receipt_file']['name']) || $_FILES['receipt_file']['error'] !== UPLOAD_ERR_OK) {
+        echo json_encode(['success' => false, 'message' => 'Bukti transaksi (struk / screenshot transfer) wajib diunggah!']);
+        exit;
+    }
+
+    $file = $_FILES['receipt_file'];
+    $allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'pdf'];
+    $fileExt = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+    if (!in_array($fileExt, $allowedExts)) {
+        echo json_encode(['success' => false, 'message' => 'Format file tidak didukung. Harap upload format JPG, PNG, WEBP, atau PDF.']);
+        exit;
+    }
+
+    $maxBytes = 10 * 1024 * 1024; // 10MB
+    if ($file['size'] > $maxBytes) {
+        echo json_encode(['success' => false, 'message' => 'Ukuran file bukti transaksi melebihi batas 10MB.']);
+        exit;
+    }
+
+    try {
+        $stmtP = $db->prepare("
+            SELECT p.id, p.client_id, p.name as project_name, 
+                   COALESCE(p.allocated_ads_budget, 0) as allocated_ads_budget, 
+                   c.company as client_company 
+            FROM projects p 
+            JOIN clients c ON p.client_id = c.id 
+            WHERE p.id = ?
+        ");
+        $stmtP->execute([$projectId]);
+        $proj = $stmtP->fetch();
+
+        if (!$proj) {
+            echo json_encode(['success' => false, 'message' => 'Proyek klien tidak ditemukan.']);
+            exit;
+        }
+
+        $clientId = (int)$proj['client_id'];
+
+        // Save receipt to assets/uploads/receipts/
+        $uploadDir = BASE_PATH . '/assets/uploads/receipts/';
+        if (!is_dir($uploadDir)) {
+            @mkdir($uploadDir, 0777, true);
+        }
+
+        $newFileName = 'ads_receipt_' . $projectId . '_' . date('Ymd_His') . '_' . bin2hex(random_bytes(3)) . '.' . $fileExt;
+        $destPath = $uploadDir . $newFileName;
+
+        if (!move_uploaded_file($file['tmp_name'], $destPath)) {
+            echo json_encode(['success' => false, 'message' => 'Gagal menyimpan file ke direktori server.']);
+            exit;
+        }
+
+        $receiptRelPath = 'assets/uploads/receipts/' . $newFileName;
+
+        // Insert into ads_topup_transactions
+        $stmtIns = $db->prepare("
+            INSERT INTO ads_topup_transactions (
+                client_id, project_id, uploaded_by_user_id, platform,
+                topup_amount, spend_installed, transaction_date, receipt_file,
+                notes, status, is_deleted, created_at
+            ) VALUES (
+                ?, ?, ?, ?,
+                ?, ?, ?, ?,
+                ?, 'recorded', 0, CURRENT_TIMESTAMP
+            )
+        ");
+        $stmtIns->execute([
+            $clientId,
+            $projectId,
+            $userId,
+            $platform,
+            $topupAmount,
+            $spendInstalled,
+            $transactionDate,
+            $receiptRelPath,
+            $notes
+        ]);
+        $transId = (int)$db->lastInsertId();
+
+        // Sync with ads_budget_logs for live tracker
+        $allocatedBudget = floatval($proj['allocated_ads_budget']);
+        $remainingBudget = $allocatedBudget - $spendInstalled;
+        $statusLog = ($allocatedBudget > 0 && $remainingBudget <= (0.1 * $allocatedBudget)) ? 'saldo_hampir_habis' : 'sedang_berjalan';
+
+        $db->prepare("
+            INSERT INTO ads_budget_logs (
+                project_id, client_id, platform, allocated_budget, spend_installed,
+                remaining_budget, status, notes, attachment_proof,
+                updated_by_user_id, updated_by_name, is_verified_by_owner, is_deleted,
+                created_at, updated_at
+            ) VALUES (
+                ?, ?, ?, ?, ?,
+                ?, ?, ?, ?,
+                ?, ?, 0, 0,
+                CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+            )
+        ")->execute([
+            $projectId,
+            $clientId,
+            $platform,
+            $allocatedBudget,
+            $spendInstalled,
+            $remainingBudget,
+            $statusLog,
+            "Top-Up Saldo Ads " . format_rupiah($topupAmount) . " (" . $platform . "). " . $notes,
+            $receiptRelPath,
+            $userId,
+            $user['name']
+        ]);
+
+        log_activity(
+            'ads_tracking',
+            "Isi Saldo Ads: {$proj['client_company']}",
+            "Tim Ads ({$user['name']}) mengunggah bukti isi saldo {$platform} sebesar " . format_rupiah($topupAmount) . " (Spend terpasang: " . format_rupiah($spendInstalled) . ").",
+            $topupAmount
+        );
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Bukti transaksi isi saldo sebesar ' . format_rupiah($topupAmount) . ' berhasil diunggah dan otomatis terbit di Portal Klien!',
+            'transaction_id' => $transId,
+            'receipt_file' => $receiptRelPath
+        ]);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Gagal memproses transaksi isi saldo: ' . $e->getMessage()]);
+        exit;
+    }
+}
+
+// -------------------------------------------------------------
+// 7. POST: Verify / Approve Top-Up Transaction (Owner Only)
+// -------------------------------------------------------------
+if ($action === 'verify_topup') {
+    if (!$isOwnerUser && !$isAdminUser) {
+        echo json_encode(['success' => false, 'message' => 'Akses ditolak.']);
+        exit;
+    }
+
+    $transId = intval($_POST['transaction_id'] ?? 0);
+    if ($transId <= 0) {
+        echo json_encode(['success' => false, 'message' => 'ID Transaksi tidak valid.']);
+        exit;
+    }
+
+    try {
+        $db->prepare("UPDATE ads_topup_transactions SET status = 'verified' WHERE id = ?")
+           ->execute([$transId]);
+
+        echo json_encode(['success' => true, 'message' => 'Transaksi isi saldo Ads berhasil diverifikasi!']);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        exit;
+    }
+}
+
+// -------------------------------------------------------------
+// 8. POST: Delete Top-Up Transaction (Owner / Admin Only)
+// -------------------------------------------------------------
+if ($action === 'delete_topup') {
+    if (!$isAdminUser && !$isOwnerUser) {
+        echo json_encode(['success' => false, 'message' => 'Akses ditolak.']);
+        exit;
+    }
+
+    $transId = intval($_POST['transaction_id'] ?? 0);
+    if ($transId <= 0) {
+        echo json_encode(['success' => false, 'message' => 'ID Transaksi tidak valid.']);
+        exit;
+    }
+
+    try {
+        $db->prepare("UPDATE ads_topup_transactions SET is_deleted = 1 WHERE id = ?")
+           ->execute([$transId]);
+
+        echo json_encode(['success' => true, 'message' => 'Transaksi isi saldo Ads berhasil dihapus.']);
         exit;
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);

@@ -118,6 +118,18 @@ $stmtReports = $db->prepare("
 ");
 $stmtReports->execute([$clientId]);
 $clientReports = $stmtReports->fetchAll(PDO::FETCH_ASSOC);
+
+// Fetch Ads Top-Up Transactions & Proof Receipts for this client
+$stmtAdsTopup = $db->prepare("
+    SELECT t.*, u.name as uploader_name, p.name as project_name
+    FROM ads_topup_transactions t
+    LEFT JOIN users u ON t.uploaded_by_user_id = u.id
+    LEFT JOIN projects p ON t.project_id = p.id
+    WHERE t.client_id = ? AND COALESCE(t.is_deleted, 0) = 0
+    ORDER BY t.transaction_date DESC, t.id DESC
+");
+$stmtAdsTopup->execute([$clientId]);
+$clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -573,7 +585,7 @@ $clientReports = $stmtReports->fetchAll(PDO::FETCH_ASSOC);
             <span>Laporan Performa (<?= count($clientReports) ?>)</span>
           </button>
           <button class="portal-tab-btn" onclick="switchPortalTab('ads', this)">
-            <span>Transparansi Kampanye Ads</span>
+            <span>Transparansi &amp; Bukti Saldo Ads (<?= count($clientAdsTopups) ?>)</span>
           </button>
         </div>
 
@@ -597,6 +609,95 @@ $clientReports = $stmtReports->fetchAll(PDO::FETCH_ASSOC);
           <div class="tasks-grid" id="client-tasks-container">
             <div style="text-align: center; padding: 40px; color: var(--text-muted); background: #FFF; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
               Memuat daftar pekerjaan...
+            </div>
+          </div>
+
+          <!-- Riwayat & Bukti Transaksi Saldo Iklan (Ads Top-Up & Spend) -->
+          <div class="glass-panel" style="margin-top: 28px;">
+            <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h3 class="panel-title" style="display: flex; align-items: center; gap: 8px;">
+                  <span>Riwayat &amp; Bukti Transaksi Saldo Iklan (Ads Top-Up &amp; Spend)</span>
+                  <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 11px;">Transparan &amp; Terverifikasi</span>
+                </h3>
+                <p style="font-size: 12.5px; color: var(--text-secondary); margin-top: 2px;">
+                  Bukti transparan pengisian saldo iklan (Meta Ads, Google Ads, TikTok Ads) oleh Tim Ads Kalamedia beserta lampiran struk/billing resmi.
+                </p>
+              </div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="switchPortalTab('ads', document.querySelector('.portal-tab-btn[onclick*=\'ads\']'))">
+                Buka Live Tracker Ads &rarr;
+              </button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table-custom">
+                <thead>
+                  <tr>
+                    <th>TANGGAL &amp; PETUGAS ADS</th>
+                    <th>PROYEK &amp; PLATFORM</th>
+                    <th>NOMINAL TOP-UP</th>
+                    <th>ANGGARAN TERPASANG</th>
+                    <th>CATATAN TIM ADS</th>
+                    <th style="text-align: right;">BUKTI TRANSAKSI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php if (empty($clientAdsTopups)): ?>
+                    <tr>
+                      <td colspan="6" style="text-align: center; padding: 36px; color: var(--text-muted);">
+                        <div style="font-size: 24px; margin-bottom: 6px;">💳</div>
+                        <b>Belum ada riwayat pengisian saldo iklan</b>
+                        <p style="font-size: 12px; margin: 4px 0 0;">Bukti transfer saldo iklan yang di-upload tim Ads akan otomatis muncul di sini.</p>
+                      </td>
+                    </tr>
+                  <?php else: ?>
+                    <?php foreach ($clientAdsTopups as $topup): ?>
+                      <tr>
+                        <td>
+                          <div style="font-weight: 700; color: #101828;">
+                            <?= date('d M Y', strtotime($topup['transaction_date'])) ?>
+                          </div>
+                          <div style="font-size: 11px; color: var(--text-secondary);">
+                            Petugas: <b><?= htmlspecialchars($topup['uploader_name'] ?? 'Tim Ads Kalamedia') ?></b>
+                          </div>
+                        </td>
+                        <td>
+                          <div style="font-weight: 700; color: #101828;">
+                            <?= htmlspecialchars($topup['project_name'] ?? 'Kampanye Iklan') ?>
+                          </div>
+                          <?php
+                            $pBg = '#F4F3FF'; $pCol = '#5925DC';
+                            if (stripos($topup['platform'], 'Google') !== false) { $pBg = '#EFF8FF'; $pCol = '#175CD3'; }
+                            elseif (stripos($topup['platform'], 'TikTok') !== false) { $pBg = '#F8F9FC'; $pCol = '#0C111D'; }
+                          ?>
+                          <span class="badge" style="background: <?= $pBg ?>; color: <?= $pCol ?>; font-weight: 700; font-size: 10.5px;">
+                            <?= htmlspecialchars($topup['platform']) ?>
+                          </span>
+                        </td>
+                        <td style="font-weight: 800; color: #027A48;">
+                          + Rp <?= number_format($topup['topup_amount'], 0, ',', '.') ?>
+                        </td>
+                        <td style="font-weight: 700; color: #101828;">
+                          Rp <?= number_format($topup['spend_installed'], 0, ',', '.') ?>
+                        </td>
+                        <td style="font-size: 12.5px; color: var(--text-secondary); max-width: 260px;">
+                          <?= htmlspecialchars($topup['notes'] ?: 'Pengisian saldo iklan kampanye berjalan lancar.') ?>
+                        </td>
+                        <td style="text-align: right;">
+                          <?php if (!empty($topup['receipt_file'])): ?>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($topup['receipt_file'])) ?>', 'Bukti Transaksi Top-Up Saldo <?= htmlspecialchars(addslashes($topup['platform'])) ?>')" style="font-size: 11.5px; font-weight: 700; gap: 4px; display: inline-flex; align-items: center;">
+                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                              Lihat Bukti Transaksi
+                            </button>
+                          <?php else: ?>
+                            <span style="font-size: 11.5px; color: var(--text-muted); font-style: italic;">Tidak ada lampiran</span>
+                          <?php endif; ?>
+                        </td>
+                      </tr>
+                    <?php endforeach; ?>
+                  <?php endif; ?>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -1188,6 +1289,81 @@ $clientReports = $stmtReports->fetchAll(PDO::FETCH_ASSOC);
 
           html += `</div>`;
         });
+
+        // Render Top-Up Transactions in Tab Ads
+        const topups = data.topup_transactions || [];
+        if (topups.length > 0) {
+          html += `
+            <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; margin-top: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+                <div>
+                  <h4 style="font-size: 16px; font-weight: 800; color: #101828; margin: 0 0 2px;">
+                    Riwayat &amp; Bukti Transaksi Saldo Iklan (Top-Up Real-Time)
+                  </h4>
+                  <span style="font-size: 12px; color: var(--text-secondary);">
+                    Catatan pengisian saldo iklan resmi dari Tim Ads Kalamedia beserta verifikasi struk transfer.
+                  </span>
+                </div>
+                <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700;">
+                  ${topups.length} Transaksi Terverifikasi
+                </span>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table-custom">
+                  <thead>
+                    <tr>
+                      <th>TANGGAL &amp; PETUGAS ADS</th>
+                      <th>PLATFORM</th>
+                      <th>SALDO DIISI (TOP-UP)</th>
+                      <th>ANGGARAN TERPASANG</th>
+                      <th>CATATAN KETERANGAN</th>
+                      <th style="text-align: right;">BUKTI STRUK</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+          `;
+          topups.forEach(t => {
+            const platformBadge = (t.platform || '').toLowerCase().includes('google')
+              ? 'background: #EFF8FF; color: #175CD3;'
+              : ((t.platform || '').toLowerCase().includes('tiktok') ? 'background: #F8F9FC; color: #0C111D;' : 'background: #F4F3FF; color: #5925DC;');
+
+            html += `
+              <tr>
+                <td>
+                  <div style="font-weight: 700; color: #101828;">${formatDate(t.transaction_date)}</div>
+                  <div style="font-size: 11px; color: var(--text-secondary);">Oleh: ${escapeHtml(t.uploader_name || 'Tim Ads Kalamedia')}</div>
+                </td>
+                <td>
+                  <span class="badge" style="${platformBadge} font-weight: 700; font-size: 11px;">${escapeHtml(t.platform)}</span>
+                </td>
+                <td style="font-weight: 800; color: #027A48;">
+                  + Rp ${Number(t.topup_amount || 0).toLocaleString('id-ID')}
+                </td>
+                <td style="font-weight: 700; color: #101828;">
+                  Rp ${Number(t.spend_installed || 0).toLocaleString('id-ID')}
+                </td>
+                <td style="font-size: 12px; color: var(--text-secondary); max-width: 250px;">
+                  ${escapeHtml(t.notes || 'Pengisian saldo Ads.')}
+                </td>
+                <td style="text-align: right;">
+                  ${t.receipt_file ? `
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('${escapeHtml(t.receipt_file)}', 'Bukti Transaksi Saldo Iklan')" style="font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      Lihat Bukti
+                    </button>
+                  ` : '<span style="font-size: 11px; color: var(--text-muted);">-</span>'}
+                </td>
+              </tr>
+            `;
+          });
+          html += `
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          `;
+        }
 
         container.innerHTML = html;
       } catch (err) {

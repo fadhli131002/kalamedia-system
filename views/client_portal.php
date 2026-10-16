@@ -57,7 +57,7 @@ if ($role === 'client' && $client) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
   <style>
     .expired-page {
       min-height: 100vh;
@@ -136,7 +136,7 @@ if (!$client) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
 </head>
 <body>
   <div class="app-container">
@@ -234,7 +234,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
   <style>
     /* Client Portal Custom Styles - Minimal Finance (Bankio) */
     .portal-hero {
@@ -346,9 +346,21 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
     /* Portal Stats Grid */
     .portal-stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 16px;
       margin-bottom: 22px;
+    }
+    @media (max-width: 1024px) {
+      .portal-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+    }
+    @media (max-width: 768px) {
+      .portal-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+      }
     }
     .portal-stat-card {
       background: #FFFFFF;
@@ -687,7 +699,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
         <div id="tab-pane-deliverables">
           <!-- Filter Controls -->
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="task-filter-chips">
+            <div class="touch-swipe-x" style="display: flex; gap: 8px; flex-wrap: wrap;" id="task-filter-chips">
               <button class="filter-btn active" onclick="filterClientTasks('all', this)">Semua Pekerjaan</button>
               <button class="filter-btn" onclick="filterClientTasks('client_review', this)">Butuh Review Klien</button>
               <button class="filter-btn" onclick="filterClientTasks('in_progress', this)">Sedang Dikerjakan</button>
@@ -1061,7 +1073,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
 
             <div class="form-group" style="margin-bottom: 14px;">
               <label class="form-label" style="font-size: 12px; font-weight: 700;">Tindakan / Jenis Masukan Anda</label>
-              <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;">
+              <div class="kala-feedback-type-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
                 <label style="display: flex; align-items: center; gap: 6px; padding: 8px 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; background: #FFF;">
                   <input type="radio" name="feedback_type" value="comment" checked>
                   <span>Catatan</span>

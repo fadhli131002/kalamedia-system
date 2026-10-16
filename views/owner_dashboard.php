@@ -130,6 +130,44 @@ $adsProjectsSummary = $db->query("
     ORDER BY p.id DESC
     LIMIT 6
 ")->fetchAll();
+
+// 10. Initial Cashflow Chart Data (6 Months History) for Instant Zero-Lag Rendering
+$isMysql = (Database::getDriver() === 'mysql');
+$invDateExpr = $isMysql ? "DATE_FORMAT(COALESCE(NULLIF(paid_at, ''), issue_date), '%Y-%m')" : "strftime('%Y-%m', COALESCE(NULLIF(paid_at, ''), issue_date))";
+$payDateExpr = $isMysql ? "DATE_FORMAT(COALESCE(NULLIF(paid_at, ''), created_at), '%Y-%m')" : "strftime('%Y-%m', COALESCE(NULLIF(paid_at, ''), created_at))";
+$adsDateExpr = $isMysql ? "DATE_FORMAT(spent_date, '%Y-%m')" : "strftime('%Y-%m', spent_date)";
+$salDateExpr = $isMysql ? "DATE_FORMAT(COALESCE(NULLIF(paid_at, ''), payment_date), '%Y-%m')" : "strftime('%Y-%m', COALESCE(NULLIF(paid_at, ''), payment_date))";
+
+$monthNamesIndo = [
+    1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'Mei', 6 => 'Jun',
+    7 => 'Jul', 8 => 'Agu', 9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
+];
+
+$initChartMonths = [];
+$initChartRevenue = [];
+$initChartExpense = [];
+
+for ($i = 5; $i >= 0; $i--) {
+    $mTime = strtotime("-$i months");
+    $mKey = date('Y-m', $mTime);
+    $mNum = intval(date('n', $mTime));
+    $mYear = date('Y', $mTime);
+    $initChartMonths[] = $monthNamesIndo[$mNum] . ' ' . $mYear;
+
+    $mRev = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0 AND {$invDateExpr} = '$mKey'")->fetchColumn());
+    $mPay = floatval($db->query("SELECT COALESCE(SUM(amount), 0) FROM freelancer_payouts WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0 AND {$payDateExpr} = '$mKey'")->fetchColumn());
+    $mAds = floatval($db->query("SELECT COALESCE(SUM(amount), 0) FROM ads_spend WHERE COALESCE(is_deleted, 0) = 0 AND {$adsDateExpr} = '$mKey'")->fetchColumn());
+    $mSal = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) FROM salaries WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0 AND ({$salDateExpr} = '$mKey' OR month_period = '$mKey')")->fetchColumn());
+
+    $initChartRevenue[] = $mRev;
+    $initChartExpense[] = $mPay + $mAds + $mSal;
+}
+
+$initialChartData = [
+    'labels' => $initChartMonths,
+    'revenue' => $initChartRevenue,
+    'expense' => $initChartExpense
+];
 ?>
 
 <!DOCTYPE html>
@@ -141,9 +179,7 @@ $adsProjectsSummary = $db->query("
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="assets/js/charts.js?v=bankio-typography-3.0"></script>
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
 </head>
 <body>
   <div class="app-container">
@@ -205,16 +241,27 @@ $adsProjectsSummary = $db->query("
         </div>
 
         <!-- Cashflow Chart Section -->
-        <div class="glass-panel">
-          <div class="panel-header">
+        <div class="glass-panel" style="position: relative;">
+          <div class="panel-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
             <div>
-              <h3 class="panel-title">
-                Grafik Cashflow Tren Agensi (Inflow vs Outflow)
+              <h3 class="panel-title" style="display: flex; align-items: center; gap: 8px;">
+                <span>Grafik Cashflow Tren Agensi (Inflow vs Outflow)</span>
               </h3>
-              <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Tren riwayat arus kas masuk dan biaya operasional 6 bulan terakhir</p>
+              <p style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">Tren riwayat arus kas masuk dan biaya operasional 6 bulan terakhir</p>
+            </div>
+            <!-- Interactive Legend Indicators matching Slide 2 reference -->
+            <div style="display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 600;">
+              <div onclick="toggleChartDataset(0, this)" style="display: flex; align-items: center; gap: 6px; color: #0284C7; cursor: pointer; padding: 4px 10px; background: #F0F9FF; border-radius: 6px; border: 1px solid #BAE6FD; transition: all 0.2s ease;" title="Klik untuk sembunyikan/tampilkan Inflow">
+                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #06B6D4; box-shadow: 0 0 0 2px rgba(6,182,212,0.25);"></span>
+                <span>Total Inflow (Revenue)</span>
+              </div>
+              <div onclick="toggleChartDataset(1, this)" style="display: flex; align-items: center; gap: 6px; color: #7C3AED; cursor: pointer; padding: 4px 10px; background: #F5F3FF; border-radius: 6px; border: 1px solid #DDD6FE; transition: all 0.2s ease;" title="Klik untuk sembunyikan/tampilkan Outflow">
+                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #8B5CF6; box-shadow: 0 0 0 2px rgba(139,92,246,0.25);"></span>
+                <span>Total Outflow (Expense)</span>
+              </div>
             </div>
           </div>
-          <div style="position: relative; height: 260px; width: 100%;">
+          <div class="cashflow-chart-container" style="position: relative; height: 280px; width: 100%;">
             <canvas id="cashflowChart"></canvas>
           </div>
         </div>
@@ -649,19 +696,26 @@ $adsProjectsSummary = $db->query("
 
         </div>
 
-  <?php require_once BASE_PATH . '/includes/footer.php'; ?>
-
   <script>
+    window.__INITIAL_CHART_DATA__ = <?= json_encode($initialChartData) ?>;
+
     document.addEventListener('DOMContentLoaded', () => {
-      // Load initial Cashflow chart from analytics API
-      fetch('api/analytics.php?range=month')
+      // 1. Instant zero-lag rendering from server-side prepared data
+      if (window.__INITIAL_CHART_DATA__ && typeof initCashflowChart === 'function') {
+        initCashflowChart(window.__INITIAL_CHART_DATA__);
+      }
+
+      // 2. Sync with live analytics API
+      const baseUrl = window.__KALA_BASE_URL__ || '';
+      fetch(baseUrl + '/api/analytics.php?range=month')
         .then(res => res.json())
         .then(data => {
-          if (data.chart) {
+          if (data.chart && typeof initCashflowChart === 'function') {
             initCashflowChart(data.chart);
           }
-        });
+        })
+        .catch(err => console.log('Analytics sync:', err));
     });
   </script>
-</body>
-</html>
+
+  <?php require_once BASE_PATH . '/includes/footer.php'; ?>

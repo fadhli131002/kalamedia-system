@@ -44,7 +44,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
   <style>
     /* Bankio Minimal Finance Design System Extensions */
     .expenses-header-row {

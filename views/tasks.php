@@ -40,7 +40,7 @@ if ($isWorkerUser) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
   <style>
     /* Task Management & Workspace Custom Styles - Bankio Minimal Finance */
     .tasks-header-card {
@@ -99,9 +99,22 @@ if ($isWorkerUser) {
 
     .kpi-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 18px;
       margin-bottom: 24px;
+    }
+    @media (max-width: 1024px) {
+      .kpi-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+    }
+    @media (max-width: 768px) {
+      .kpi-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+        margin-bottom: 16px !important;
+      }
     }
     .kpi-tile {
       background: #FFFFFF;
@@ -388,7 +401,7 @@ if ($isWorkerUser) {
 
           <?php if ($isWorkerUser): ?>
             <!-- Worker Info Section: Jobdesk & Assigned Clients -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 20px;">
+            <div class="kala-grid-2col" style="margin-bottom: 20px;">
               <!-- 1. Jobdesk Saya dari Owner -->
               <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
@@ -685,7 +698,7 @@ if ($isWorkerUser) {
                 <input type="text" name="title" class="form-control" placeholder="Contoh: Desain Carousel Feed Promo Merdeka" required>
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-row kala-form-row">
                 <div class="form-group">
                   <label class="form-label">Kategori Pekerjaan (Jasa Kalamedia) <span style="color:red;">*</span></label>
                   <select name="category" id="assign-category" class="form-control" onchange="onCategoryOrProjectChange()" required>
@@ -705,7 +718,7 @@ if ($isWorkerUser) {
                 </div>
               </div>
 
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-row kala-form-row">
                 <div class="form-group">
                   <label class="form-label">Mulai Pengerjaan (Start Date) <span style="color:red;">*</span></label>
                   <input type="date" name="start_date" id="assign-start-date" class="form-control" value="<?= date('Y-m-d') ?>" required>
@@ -884,7 +897,7 @@ if ($isWorkerUser) {
               <div style="font-size: 18px; font-weight: 800; color: #101828;" id="txt-allocated-budget">Rp 0</div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-row kala-form-row">
               <div class="form-group">
                 <label class="form-label">Platform Iklan <span style="color:red;">*</span></label>
                 <select name="platform" id="ads-spend-platform" class="form-control" required>
@@ -966,7 +979,7 @@ if ($isWorkerUser) {
               <div style="font-size: 17px; font-weight: 800; color: #101828;" id="txt-topup-allocated-budget">Rp 0</div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-row kala-form-row">
               <div class="form-group">
                 <label class="form-label">Platform Iklan <span style="color:red;">*</span></label>
                 <select name="platform" id="ads-topup-platform" class="form-control" required>
@@ -982,7 +995,7 @@ if ($isWorkerUser) {
               </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-row kala-form-row">
               <div class="form-group">
                 <label class="form-label">Nominal Isi Saldo / Top-Up (Rp) <span style="color:red;">*</span></label>
                 <input type="text" name="topup_amount" id="ads-topup-amount" class="form-control" placeholder="Contoh: 2.000.000" required oninput="formatRupiahInput(this)">

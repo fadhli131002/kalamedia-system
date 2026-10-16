@@ -1,149 +1,215 @@
 /**
  * Kalamedia Cashflow & Financial Visualizations (Chart.js)
- * Untitled UI Light Theme - High-Contrast Readability & Crisp Grid
+ * Modern Fintech Style (Referencing Slide 2: Smooth Area Spline, Dual Gradient Waves, Dashed Grid)
  */
 
-let cashflowChartInstance = null;
+window.cashflowChartInstance = window.cashflowChartInstance || null;
 
 function formatRupiahShort(value) {
-  if (value >= 1000000000) {
-    return 'Rp ' + (value / 1000000000).toFixed(1) + ' M';
-  } else if (value >= 1000000) {
-    return 'Rp ' + (value / 1000000).toFixed(1) + ' Jt';
-  } else if (value >= 1000) {
-    return 'Rp ' + (value / 1000).toFixed(0) + ' Rb';
+  const num = Number(value) || 0;
+  if (num === 0) return 'Rp 0';
+  if (num >= 1000000000) {
+    const val = (num / 1000000000).toFixed(1).replace(/\.0$/, '');
+    return 'Rp ' + val + ' M';
+  } else if (num >= 1000000) {
+    const val = (num / 1000000).toFixed(1).replace(/\.0$/, '');
+    return 'Rp ' + val + ' Jt';
+  } else if (num >= 1000) {
+    const val = (num / 1000).toFixed(0);
+    return 'Rp ' + val + ' Rb';
   }
-  return 'Rp ' + value;
+  return 'Rp ' + num.toLocaleString('id-ID');
 }
 
 function initCashflowChart(chartData) {
   const canvas = document.getElementById('cashflowChart');
   if (!canvas) return;
 
-  // Anti-Jank 60FPS: Defer Chart rendering to let initial page/tab animations complete smoothly
-  requestAnimationFrame(function() {
-    setTimeout(function() {
-      const targetCanvas = document.getElementById('cashflowChart');
-      if (!targetCanvas) return;
-      const ctx = targetCanvas.getContext('2d');
+  if (typeof Chart === 'undefined') {
+    console.warn('Chart.js library is not loaded yet.');
+    return;
+  }
 
-      // Destroy previous instance if any
-      if (cashflowChartInstance) {
-        cashflowChartInstance.destroy();
-      }
+  // Ensure canvas is properly sized and context is ready
+  requestAnimationFrame(function () {
+    const targetCanvas = document.getElementById('cashflowChart');
+    if (!targetCanvas) return;
+    const ctx = targetCanvas.getContext('2d');
+    if (!ctx) return;
 
-      // Gradients for Bankio finance theme
-      const revGradient = ctx.createLinearGradient(0, 0, 0, 300);
-      revGradient.addColorStop(0, 'rgba(93, 118, 245, 0.22)');
-      revGradient.addColorStop(1, 'rgba(93, 118, 245, 0.00)');
+    // Destroy previous instance if any
+    if (window.cashflowChartInstance) {
+      window.cashflowChartInstance.destroy();
+      window.cashflowChartInstance = null;
+    }
 
-      const expGradient = ctx.createLinearGradient(0, 0, 0, 300);
-      expGradient.addColorStop(0, 'rgba(137, 50, 224, 0.18)');
-      expGradient.addColorStop(1, 'rgba(137, 50, 224, 0.00)');
+    // Modern Gradient Palette based on Slide 2 reference:
+    // Cyan/Sky-Blue for Inflow (Revenue)
+    const revGradient = ctx.createLinearGradient(0, 0, 0, 260);
+    revGradient.addColorStop(0, 'rgba(6, 182, 212, 0.36)');
+    revGradient.addColorStop(0.65, 'rgba(6, 182, 212, 0.08)');
+    revGradient.addColorStop(1, 'rgba(6, 182, 212, 0.00)');
 
-      cashflowChartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: chartData.labels,
-      datasets: [
-        {
-          label: 'Total Revenue (Uang Masuk)',
-          data: chartData.revenue,
-          borderColor: '#5D76F5',
-          backgroundColor: revGradient,
-          borderWidth: 2.5,
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#5D76F5',
-          pointBorderColor: '#FFFFFF',
-          pointBorderWidth: 2,
-          pointRadius: 4.5,
-          pointHoverRadius: 6.5
-        },
-        {
-          label: 'Total Expense (Uang Keluar)',
-          data: chartData.expense,
-          borderColor: '#8932E0',
-          backgroundColor: expGradient,
-          borderWidth: 2.5,
-          fill: true,
-          tension: 0.4,
-          pointBackgroundColor: '#8932E0',
-          pointBorderColor: '#FFFFFF',
-          pointBorderWidth: 2,
-          pointRadius: 4.5,
-          pointHoverRadius: 6.5
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        mode: 'index',
-        intersect: false
+    // Violet/Purple for Outflow (Expense)
+    const expGradient = ctx.createLinearGradient(0, 0, 0, 260);
+    expGradient.addColorStop(0, 'rgba(139, 92, 246, 0.30)');
+    expGradient.addColorStop(0.65, 'rgba(139, 92, 246, 0.06)');
+    expGradient.addColorStop(1, 'rgba(139, 92, 246, 0.00)');
+
+    const revData = (chartData && Array.isArray(chartData.revenue)) ? chartData.revenue : [];
+    const expData = (chartData && Array.isArray(chartData.expense)) ? chartData.expense : [];
+    const labels = (chartData && Array.isArray(chartData.labels)) ? chartData.labels : [];
+
+    const allValues = [...revData, ...expData].map(v => Number(v) || 0);
+    const maxVal = allValues.length ? Math.max(...allValues) : 0;
+    const suggestedMax = maxVal > 0 ? Math.ceil(maxVal * 1.25) : 2000000;
+
+    window.cashflowChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: 'Total Revenue (Inflow)',
+            data: revData,
+            borderColor: '#06B6D4', // Vibrant Cyan / Sky Blue (Slide 2 reference)
+            backgroundColor: revGradient,
+            borderWidth: 2.8,
+            fill: true,
+            tension: 0.42, // Smooth Bezier spline
+            pointBackgroundColor: '#FFFFFF',
+            pointBorderColor: '#06B6D4',
+            pointBorderWidth: 2.5,
+            pointRadius: 2.5,
+            pointHoverRadius: 6,
+            pointHoverBackgroundColor: '#06B6D4',
+            pointHoverBorderColor: '#FFFFFF',
+            pointHoverBorderWidth: 2
+          },
+          {
+            label: 'Total Expense (Outflow)',
+            data: expData,
+            borderColor: '#8B5CF6', // Vibrant Purple / Violet (Slide 2 reference)
+            backgroundColor: expGradient,
+            borderWidth: 2.8,
+            fill: true,
+            tension: 0.42, // Smooth Bezier spline
+            pointBackgroundColor: '#FFFFFF',
+            pointBorderColor: '#8B5CF6',
+            pointBorderWidth: 2,
+            pointRadius: 2.5,
+            pointHoverRadius: 6,
+            pointHoverBackgroundColor: '#8B5CF6',
+            pointHoverBorderColor: '#FFFFFF',
+            pointHoverBorderWidth: 2
+          }
+        ]
       },
-      plugins: {
-        legend: {
-          position: 'top',
-          align: 'end',
-          labels: {
-            color: '#6E7485',
-            font: { family: "'SF Pro Rounded', 'Plus Jakarta Sans', sans-serif", size: 12, weight: 600 },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: {
+          duration: 750,
+          easing: 'easeOutQuart'
+        },
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            display: false // Use custom sleek HTML legend in panel header (no duplicate)
+          },
+          tooltip: {
+            backgroundColor: '#FFFFFF',
+            titleColor: '#101828',
+            bodyColor: '#475467',
+            borderColor: '#E4E7EC',
+            borderWidth: 1,
+            padding: 12,
+            boxPadding: 6,
             usePointStyle: true,
-            boxWidth: 8,
-            padding: 16
-          }
-        },
-        tooltip: {
-          backgroundColor: '#FFFFFF',
-          titleColor: '#000000',
-          bodyColor: '#6E7485',
-          borderColor: '#ECEEF5',
-          borderWidth: 1,
-          padding: 12,
-          boxPadding: 6,
-          usePointStyle: true,
-          cornerRadius: 12,
-          titleFont: { family: "'SF Pro Rounded', 'Plus Jakarta Sans', sans-serif", size: 12, weight: 700 },
-          bodyFont: { family: "'SF Pro Rounded', 'Plus Jakarta Sans', sans-serif", size: 12, weight: 500 },
-          callbacks: {
-            label: function (context) {
-              let label = context.dataset.label || '';
-              if (label) label += ': ';
-              label += 'Rp ' + Number(context.raw).toLocaleString('id-ID');
-              return label;
+            cornerRadius: 10,
+            titleFont: {
+              family: "'Plus Jakarta Sans', -apple-system, sans-serif",
+              size: 12,
+              weight: '700'
+            },
+            bodyFont: {
+              family: "'Plus Jakarta Sans', -apple-system, sans-serif",
+              size: 12,
+              weight: '500'
+            },
+            callbacks: {
+              label: function (context) {
+                let label = context.dataset.label || '';
+                if (label) label += ': ';
+                const val = Number(context.raw) || 0;
+                label += 'Rp ' + val.toLocaleString('id-ID');
+                return label;
+              }
             }
           }
-        }
-      },
-      scales: {
-        x: {
-          grid: { color: '#F8F9FC', drawBorder: false },
-          ticks: {
-            color: '#949AB1',
-            font: { family: "'SF Pro Rounded', 'Plus Jakarta Sans', sans-serif", size: 10, weight: 600 },
-            maxRotation: 0,
-            minRotation: 0,
-            autoSkip: true,
-            maxTicksLimit: 6
-          }
         },
-        y: {
-          grid: { color: '#ECEEF5', drawBorder: false },
-          ticks: {
-            color: '#949AB1',
-            font: { family: "'SF Pro Rounded', 'Plus Jakarta Sans', sans-serif", size: 11, weight: 600 },
-            callback: function (value) {
-              return formatRupiahShort(value);
+        scales: {
+          x: {
+            grid: {
+              display: false,
+              drawBorder: false
+            },
+            ticks: {
+              color: '#94A3B8',
+              font: {
+                family: "'Plus Jakarta Sans', -apple-system, sans-serif",
+                size: 11,
+                weight: '600'
+              },
+              maxRotation: 0,
+              minRotation: 0,
+              padding: 8
+            }
+          },
+          y: {
+            beginAtZero: true,
+            suggestedMin: 0,
+            suggestedMax: suggestedMax,
+            grid: {
+              color: 'rgba(226, 232, 240, 0.7)',
+              borderDash: [5, 5], // Dotted / dashed line matching Slide 2 reference
+              drawBorder: false
+            },
+            ticks: {
+              color: '#94A3B8',
+              font: {
+                family: "'Plus Jakarta Sans', -apple-system, sans-serif",
+                size: 11,
+                weight: '600'
+              },
+              maxTicksLimit: 6,
+              padding: 10,
+              callback: function (value) {
+                return formatRupiahShort(value);
+              }
             }
           }
         }
       }
-      });
-    }, 90);
+    });
   });
 }
+
+// Toggle dataset visibility on custom legend pill click
+window.toggleChartDataset = function (index, pillEl) {
+  if (!window.cashflowChartInstance) return;
+  const isHidden = window.cashflowChartInstance.isDatasetVisible(index);
+  window.cashflowChartInstance.setDatasetVisibility(index, !isHidden);
+  window.cashflowChartInstance.update();
+
+  if (pillEl) {
+    pillEl.style.opacity = isHidden ? '0.45' : '1';
+    pillEl.style.textDecoration = isHidden ? 'line-through' : 'none';
+  }
+};
 
 // Filter button switch for Owner Dashboard
 async function changeTimeRange(range, btnElement) {
@@ -151,28 +217,34 @@ async function changeTimeRange(range, btnElement) {
   document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
   if (btnElement) btnElement.classList.add('active');
 
+  const baseUrl = window.__KALA_BASE_URL__ || '';
+  const url = `${baseUrl}/api/analytics.php?range=${encodeURIComponent(range)}`;
+
   try {
-    const res = await fetch(`api/analytics.php?range=${range}`);
+    const res = await fetch(url);
     const data = await res.json();
     if (data.success) {
       // Update KPIs
-      const kpis = data.kpis.formatted;
-      const elRev = document.getElementById('kpi-revenue');
-      const elExp = document.getElementById('kpi-expense');
-      const elProfit = document.getElementById('kpi-profit');
-      const elMargin = document.getElementById('kpi-margin');
-      const elRec = document.getElementById('kpi-receivables');
+      if (data.kpis && data.kpis.formatted) {
+        const kpis = data.kpis.formatted;
+        const elRev = document.getElementById('kpi-revenue');
+        const elExp = document.getElementById('kpi-expense');
+        const elProfit = document.getElementById('kpi-profit');
+        const elMargin = document.getElementById('kpi-margin');
+        const elRec = document.getElementById('kpi-receivables');
 
-      if (elRev) elRev.innerText = kpis.revenue;
-      if (elExp) elExp.innerText = kpis.expense;
-      if (elProfit) elProfit.innerText = kpis.net_profit;
-      if (elMargin) {
-        elMargin.innerText = 'Margin ' + kpis.margin;
-        elMargin.className = `badge-margin ${parseFloat(data.kpis.profit_margin) >= 30 ? 'good' : (parseFloat(data.kpis.profit_margin) > 15 ? 'warning' : 'bad')}`;
+        if (elRev) elRev.innerText = kpis.revenue;
+        if (elExp) elExp.innerText = kpis.expense;
+        if (elProfit) elProfit.innerText = kpis.net_profit;
+        if (elMargin) {
+          elMargin.innerText = 'Margin ' + kpis.margin;
+          const numMargin = parseFloat(data.kpis.profit_margin) || 0;
+          elMargin.className = `badge-margin ${numMargin >= 30 ? 'good' : (numMargin > 15 ? 'warning' : 'bad')}`;
+        }
+        if (elRec) elRec.innerText = kpis.receivables;
       }
-      if (elRec) elRec.innerText = kpis.receivables;
 
-      // Update Chart
+      // Update Chart with new time range data
       if (data.chart) {
         initCashflowChart(data.chart);
       }

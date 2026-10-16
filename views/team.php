@@ -74,7 +74,7 @@ $totalClientsCount = count($allClients);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
   <style>
     .team-badge-karyawan {
       background: rgba(93, 118, 245, 0.12);
@@ -149,18 +149,21 @@ $totalClientsCount = count($allClients);
     /* Bento Box Design System - Bankio Minimal Finance */
     .bento-metrics-grid {
       display: grid;
-      grid-template-columns: repeat(1, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 20px;
       margin-bottom: 28px;
     }
-    @media (min-width: 640px) {
+    @media (max-width: 1024px) {
       .bento-metrics-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
       }
     }
-    @media (min-width: 1024px) {
+    @media (max-width: 768px) {
       .bento-metrics-grid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+        margin-bottom: 16px !important;
       }
     }
 

@@ -35,8 +35,12 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
 
 <header class="topbar">
   <div class="greeting-text">
-    <button class="sidebar-toggle-btn" id="sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Toggle Sidebar" style="font-size: 11px; font-weight: 700; width: auto; padding: 0 10px;">
-      Menu
+    <button class="sidebar-toggle-btn" id="sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Buka Menu Navigasi" title="Buka Menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
     </button>
     <div class="greeting-info">
       <div class="topbar-breadcrumb">

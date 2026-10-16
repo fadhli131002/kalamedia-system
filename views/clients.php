@@ -53,7 +53,7 @@ $projects = $db->query("
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
   <style>
     .client-filter-pill {
       background: #FFFFFF;
@@ -118,7 +118,7 @@ $projects = $db->query("
           </div>
 
           <!-- Filter Pills Berdasarkan 4 Jasa Kalamedia -->
-          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 16px; align-items: center;">
+          <div class="client-filter-pill-bar touch-swipe-x" style="display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 16px; align-items: center;">
             <span style="font-size: 11.5px; font-weight: 700; color: #6E7485; text-transform: uppercase; letter-spacing: 0.5px;">Sortir Jasa:</span>
             <button type="button" class="client-filter-pill active" onclick="filterClientService('all', this)">Semua Jasa</button>
             <button type="button" class="client-filter-pill" onclick="filterClientService('Kelola Sosmed', this)">Kelola Sosmed</button>

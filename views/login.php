@@ -70,7 +70,7 @@ if ($requestedContext === 'client') {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
   <style>
     .login-page {
       min-height: 100vh;
@@ -172,11 +172,18 @@ if ($requestedContext === 'client') {
     }
     @media (max-width: 480px) {
       .login-page {
-        padding: 16px;
+        padding: 16px 12px;
       }
       .login-card {
-        padding: 26px 20px;
+        padding: 24px 18px;
         border-radius: 20px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+      .login-tab-btn {
+        padding: 8px 10px;
+        font-size: 11.5px;
       }
     }
   </style>

@@ -16,7 +16,7 @@ $users = $db->query("SELECT id, name, email, role, created_at FROM users ORDER B
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
 </head>
 <body>
   <div class="app-container">
@@ -27,7 +27,7 @@ $users = $db->query("SELECT id, name, email, role, created_at FROM users ORDER B
 
       <div class="content-body">
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+        <div class="settings-grid kala-grid-2col">
           
           <!-- Agency Profile & Invoice Bank Info -->
           <div class="glass-panel">

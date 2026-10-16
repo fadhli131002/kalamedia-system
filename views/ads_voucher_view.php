@@ -42,7 +42,7 @@ $spentDateFormatted = format_date($spentDate);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
     body {
@@ -79,6 +79,10 @@ $spentDateFormatted = format_date($spentDate);
       body { background: #fff !important; padding: 0 !important; }
       .top-actions-bar { display: none !important; }
       .voucher-sheet { box-shadow: none !important; border-radius: 0 !important; padding: 20px !important; }
+    }
+    @media (max-width: 600px) {
+      .voucher-sheet { padding: 24px 18px !important; }
+      .voucher-grid-2 { grid-template-columns: 1fr !important; }
     }
   </style>
 </head>
@@ -148,7 +152,7 @@ $spentDateFormatted = format_date($spentDate);
     </div>
 
     <!-- Ads Metadata Grid -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8F9FC; border: 1px solid #ECEEF5; border-radius: 14px; padding: 16px 20px; margin-bottom: 24px; font-size: 12px;">
+    <div class="voucher-grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; background: #F8F9FC; border: 1px solid #ECEEF5; border-radius: 14px; padding: 16px 20px; margin-bottom: 24px; font-size: 12px;">
       <div>
         <div style="margin-bottom: 6px;"><span style="color: #6E7485; width: 110px; display: inline-block;">Platform Iklan:</span> <strong style="color: #000000;"><?= htmlspecialchars($ad['platform']) ?></strong></div>
         <div><span style="color: #6E7485; width: 110px; display: inline-block;">ID Akun Iklan:</span> <span style="font-weight: 600; color: #000000;"><?= htmlspecialchars($ad['account_id'] ?: '-') ?></span></div>

@@ -113,6 +113,15 @@ switch ($route) {
         require_once __DIR__ . '/views/tasks.php';
         break;
 
+    case 'dashboard':
+        $context = resolveActiveSessionContext();
+        if (is_owner($context)) {
+            require_once __DIR__ . '/views/owner_dashboard.php';
+        } else {
+            require_once __DIR__ . '/views/admin_dashboard.php';
+        }
+        break;
+
     case 'owner-dashboard':
         require_owner();
         require_once __DIR__ . '/views/owner_dashboard.php';
@@ -158,6 +167,7 @@ switch ($route) {
         require_once __DIR__ . '/views/expenses.php';
         break;
 
+    case 'payroll':
     case 'salaries':
         require_admin();
         require_once __DIR__ . '/views/salaries.php';
@@ -189,6 +199,7 @@ switch ($route) {
         require_once __DIR__ . '/views/team.php';
         break;
 
+    case 'calendar':
     case 'content-calendar':
     case 'content-planner':
         require_auth('internal');

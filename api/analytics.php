@@ -907,26 +907,57 @@ $profitMargin = $totalRevenue > 0 ? ($netProfit / $totalRevenue) * 100 : 0;
 $recQuery = "SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE status IN ('Sent', 'Draft', 'Overdue') AND COALESCE(is_deleted, 0) = 0";
 $outstandingReceivables = floatval($db->query($recQuery)->fetchColumn());
 
-// 5. Cashflow Chart Data (6 Months history)
+// 5. Cashflow Chart Data (6 Months or 12 Months history based on range)
 $chartMonths = [];
 $chartRevenue = [];
 $chartExpense = [];
 
-for ($i = 5; $i >= 0; $i--) {
-    $mTime = strtotime("-$i months");
-    $mKey = date('Y-m', $mTime);
-    $mLabel = date('M Y', $mTime);
-    $chartMonths[] = $mLabel;
+$isMysql = (Database::getDriver() === 'mysql');
+$invDateExpr = $isMysql ? "DATE_FORMAT(COALESCE(NULLIF(paid_at, ''), issue_date), '%Y-%m')" : "strftime('%Y-%m', COALESCE(NULLIF(paid_at, ''), issue_date))";
+$payDateExpr = $isMysql ? "DATE_FORMAT(COALESCE(NULLIF(paid_at, ''), created_at), '%Y-%m')" : "strftime('%Y-%m', COALESCE(NULLIF(paid_at, ''), created_at))";
+$adsDateExpr = $isMysql ? "DATE_FORMAT(spent_date, '%Y-%m')" : "strftime('%Y-%m', spent_date)";
+$salDateExpr = $isMysql ? "DATE_FORMAT(COALESCE(NULLIF(paid_at, ''), payment_date), '%Y-%m')" : "strftime('%Y-%m', COALESCE(NULLIF(paid_at, ''), payment_date))";
 
-    // Monthly revenue
-    $mRev = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0 AND strftime('%Y-%m', paid_at) = '$mKey'")->fetchColumn());
-    // Monthly expense
-    $mPay = floatval($db->query("SELECT COALESCE(SUM(amount), 0) FROM freelancer_payouts WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0 AND strftime('%Y-%m', paid_at) = '$mKey'")->fetchColumn());
-    $mAds = floatval($db->query("SELECT COALESCE(SUM(amount), 0) FROM ads_spend WHERE COALESCE(is_deleted, 0) = 0 AND strftime('%Y-%m', spent_date) = '$mKey'")->fetchColumn());
-    $mSal = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) FROM salaries WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0 AND (strftime('%Y-%m', paid_at) = '$mKey' OR month_period = '$mKey')")->fetchColumn());
+$monthNamesIndo = [
+    1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'Mei', 6 => 'Jun',
+    7 => 'Jul', 8 => 'Agu', 9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'
+];
 
-    $chartRevenue[] = $mRev;
-    $chartExpense[] = $mPay + $mAds + $mSal;
+if ($range === 'year') {
+    // 12 months for current year (Jan - Des) matching Slide 2 reference
+    $targetYear = date('Y');
+    for ($m = 1; $m <= 12; $m++) {
+        $mPad = str_pad($m, 2, '0', STR_PAD_LEFT);
+        $mKey = "$targetYear-$mPad";
+        $mLabel = $monthNamesIndo[$m];
+        $chartMonths[] = $mLabel;
+
+        $mRev = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0 AND {$invDateExpr} = '$mKey'")->fetchColumn());
+        $mPay = floatval($db->query("SELECT COALESCE(SUM(amount), 0) FROM freelancer_payouts WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0 AND {$payDateExpr} = '$mKey'")->fetchColumn());
+        $mAds = floatval($db->query("SELECT COALESCE(SUM(amount), 0) FROM ads_spend WHERE COALESCE(is_deleted, 0) = 0 AND {$adsDateExpr} = '$mKey'")->fetchColumn());
+        $mSal = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) FROM salaries WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0 AND ({$salDateExpr} = '$mKey' OR month_period = '$mKey')")->fetchColumn());
+
+        $chartRevenue[] = $mRev;
+        $chartExpense[] = $mPay + $mAds + $mSal;
+    }
+} else {
+    // 6 Months history (May - Oct)
+    for ($i = 5; $i >= 0; $i--) {
+        $mTime = strtotime("-$i months");
+        $mKey = date('Y-m', $mTime);
+        $mNum = intval(date('n', $mTime));
+        $mYear = date('Y', $mTime);
+        $mLabel = $monthNamesIndo[$mNum] . ' ' . $mYear;
+        $chartMonths[] = $mLabel;
+
+        $mRev = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0 AND {$invDateExpr} = '$mKey'")->fetchColumn());
+        $mPay = floatval($db->query("SELECT COALESCE(SUM(amount), 0) FROM freelancer_payouts WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0 AND {$payDateExpr} = '$mKey'")->fetchColumn());
+        $mAds = floatval($db->query("SELECT COALESCE(SUM(amount), 0) FROM ads_spend WHERE COALESCE(is_deleted, 0) = 0 AND {$adsDateExpr} = '$mKey'")->fetchColumn());
+        $mSal = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) FROM salaries WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0 AND ({$salDateExpr} = '$mKey' OR month_period = '$mKey')")->fetchColumn());
+
+        $chartRevenue[] = $mRev;
+        $chartExpense[] = $mPay + $mAds + $mSal;
+    }
 }
 
 // 6. Project Profitability Monitor

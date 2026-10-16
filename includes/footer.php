@@ -16,9 +16,18 @@
   $needsPdf = in_array($page, ['invoice-view', 'salary-view', 'voucher-view', 'ads-voucher-view', 'reports', 'report-deck']);
   ?>
 
+  <script>
+    window.__KALA_BASE_URL__ = <?= json_encode(get_base_url()) ?>;
+  </script>
+
   <!-- Conditional Heavy Assets Loading (Performance Boost) -->
   <?php if ($needsChart): ?>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="assets/js/chart.umd.min.js"></script>
+    <script>
+      if (typeof Chart === 'undefined') {
+        document.write('<script src="https://cdn.jsdelivr.net/npm/chart.js"><\/script>');
+      }
+    </script>
     <script src="assets/js/charts.js?v=<?= time() ?>"></script>
   <?php endif; ?>
 

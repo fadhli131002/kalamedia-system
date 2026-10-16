@@ -862,10 +862,46 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>
 
-        <!-- 4. Nomor WhatsApp (Alamat kantor dihapus!) -->
-        <div class="form-group" style="margin-bottom: 0;">
+        <!-- 4. Nomor WhatsApp -->
+        <div class="form-group">
           <label class="form-label">Nomor WhatsApp</label>
           <input type="text" name="phone" class="form-control" placeholder="081234567890">
+        </div>
+
+        <!-- 5. Jasa / Layanan Kalamedia (service_type) -->
+        <div class="form-group">
+          <label class="form-label">Pilih Jasa / Layanan Kalamedia <span style="color:red;">*</span></label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #F8F9FC; border: 1px solid #ECEEF5; border-radius: 12px; padding: 12px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; cursor: pointer; font-weight: 600; color: #101828;">
+              <input type="checkbox" name="service_type[]" value="Kelola Sosmed" checked>
+              <span>Kelola Sosmed</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; cursor: pointer; font-weight: 600; color: #101828;">
+              <input type="checkbox" name="service_type[]" value="Desain Eceran / Satuan">
+              <span>Desain Eceran / Satuan</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; cursor: pointer; font-weight: 600; color: #101828;">
+              <input type="checkbox" name="service_type[]" value="Jasa Buat Web">
+              <span>Jasa Buat Web</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; cursor: pointer; font-weight: 600; color: #101828;">
+              <input type="checkbox" name="service_type[]" value="Jasa Iklan Meta & Google">
+              <span>Jasa Iklan Meta & Google</span>
+            </label>
+          </div>
+          <small style="font-size: 11px; color: var(--text-secondary); margin-top: 4px; display: block;">Dapat memilih satu atau beberapa layanan yang dikontrak klien.</small>
+        </div>
+
+        <!-- 6. Masa Kontrak Klien -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Mulai Kontrak <span style="color:red;">*</span></label>
+            <input type="date" name="contract_start_date" id="create-client-start-date" class="form-control" value="<?= date('Y-m-d') ?>" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sampai Tanggal / Akhir Kontrak <span style="color:red;">*</span></label>
+            <input type="date" name="contract_end_date" id="create-client-end-date" class="form-control" value="<?= date('Y-m-d', strtotime('+30 days')) ?>" required>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -998,6 +1034,42 @@ document.addEventListener('DOMContentLoaded', () => {
             <input type="text" name="phone" id="edit-client-phone" class="form-control" placeholder="081234567890">
           </div>
         </div>
+
+        <!-- Jasa / Layanan Kalamedia (service_type) -->
+        <div class="form-group">
+          <label class="form-label">Pilih Jasa / Layanan Kalamedia <span style="color:red;">*</span></label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #F8F9FC; border: 1px solid #ECEEF5; border-radius: 12px; padding: 12px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; cursor: pointer; font-weight: 600; color: #101828;">
+              <input type="checkbox" name="service_type[]" value="Kelola Sosmed" class="edit-client-service-chk">
+              <span>Kelola Sosmed</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; cursor: pointer; font-weight: 600; color: #101828;">
+              <input type="checkbox" name="service_type[]" value="Desain Eceran / Satuan" class="edit-client-service-chk">
+              <span>Desain Eceran / Satuan</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; cursor: pointer; font-weight: 600; color: #101828;">
+              <input type="checkbox" name="service_type[]" value="Jasa Buat Web" class="edit-client-service-chk">
+              <span>Jasa Buat Web</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; cursor: pointer; font-weight: 600; color: #101828;">
+              <input type="checkbox" name="service_type[]" value="Jasa Iklan Meta & Google" class="edit-client-service-chk">
+              <span>Jasa Iklan Meta & Google</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Masa Kontrak Klien -->
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Mulai Kontrak <span style="color:red;">*</span></label>
+            <input type="date" name="contract_start_date" id="edit-client-start-date" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sampai Tanggal / Akhir Kontrak <span style="color:red;">*</span></label>
+            <input type="date" name="contract_end_date" id="edit-client-end-date" class="form-control" required>
+          </div>
+        </div>
+
         <div class="form-group">
           <label class="form-label">Password Akses Portal Baru (Opsional)</label>
           <div style="position: relative; display: flex; align-items: center;">
@@ -1022,8 +1094,62 @@ document.addEventListener('DOMContentLoaded', () => {
     closeModal('modal-edit-client');
     setTimeout(() => window.location.reload(), 800);
   });
+  handleAjaxForm('form-renew-client-contract', () => {
+    closeModal('modal-renew-client-contract');
+    setTimeout(() => window.location.reload(), 800);
+  });
 });
 </script>
+
+<!-- 8b-2. Modal Perpanjang Masa Kontrak Klien -->
+<div id="modal-renew-client-contract" class="modal-backdrop">
+  <div class="modal-dialog" style="max-width: 520px;">
+    <div class="modal-header">
+      <div>
+        <h3 class="modal-title">Perpanjang Masa Kontrak Klien</h3>
+        <span style="font-size: 12px; color: var(--text-secondary);">Aktifkan kembali akses akun portal klien yang habis kontrak</span>
+      </div>
+      <button type="button" class="modal-close" onclick="closeModal('modal-renew-client-contract')">&times;</button>
+    </div>
+    <form id="form-renew-client-contract" action="api/clients.php?action=renew_contract" method="POST">
+      <input type="hidden" name="client_id" id="renew-client-id">
+      <div class="modal-body">
+        <div style="background: #F8F9FC; border: 1px solid #ECEEF5; border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+          <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: #6E7485;">Klien / Perusahaan</div>
+          <div style="font-size: 16px; font-weight: 800; color: #101828; margin: 2px 0 4px;" id="renew-client-company-label">-</div>
+          <div style="font-size: 12px; color: #6E7485;" id="renew-client-current-info">-</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Mulai Kontrak Baru <span style="color:red;">*</span></label>
+            <input type="date" name="contract_start_date" id="renew-contract-start-date" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sampai Tanggal / Akhir Baru <span style="color:red;">*</span></label>
+            <input type="date" name="contract_end_date" id="renew-contract-end-date" class="form-control" required>
+          </div>
+        </div>
+
+        <div style="margin-top: 8px;">
+          <label class="form-label" style="font-size: 11px; color: var(--text-secondary);">Pilihan Cepat Durasi Perpanjangan:</label>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="setRenewDurationDays(30)">+1 Bulan (30 Hari)</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="setRenewDurationDays(90)">+3 Bulan (90 Hari)</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="setRenewDurationDays(180)">+6 Bulan (180 Hari)</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="setRenewDurationDays(365)">+1 Tahun (365 Hari)</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-renew-client-contract')">Batal</button>
+        <button type="submit" class="btn btn-primary" style="background: #027A48; border-color: #027A48;">
+          Perpanjang &amp; Aktifkan Akun Klien
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <!-- 8c. Modal Edit Data Proyek -->
 <div id="modal-edit-project" class="modal-backdrop">

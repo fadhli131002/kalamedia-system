@@ -20,7 +20,8 @@ $allClients = $db->query("
 
 // Fetch active team members (karyawan and freelancer)
 $teamMembers = $db->query("
-    SELECT u.id, u.name, u.email, u.role, u.employment_type, u.position, u.jobdesk, u.phone_wa, u.avatar, u.is_active, u.created_at
+    SELECT u.id, u.name, u.email, u.role, u.employment_type, u.position, u.jobdesk, u.phone_wa, u.avatar, u.is_active, u.created_at,
+           u.service_specialty, u.contract_start_date, u.contract_end_date
     FROM users u
     WHERE u.role IN ('karyawan', 'freelancer') AND COALESCE(u.is_deleted, 0) = 0
     ORDER BY 
@@ -110,6 +111,21 @@ $totalClientsCount = count($allClients);
       margin: 2px 2px 2px 0;
       border: 1px solid #ECEEF5;
     }
+    .service-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-bottom: 4px;
+    }
+    .service-tag-sosmed { background: #EFF8FF; color: #175CD3; border: 1px solid #B2DDFF; }
+    .service-tag-desain { background: #FDF2FA; color: #C11574; border: 1px solid #FCCEEE; }
+    .service-tag-web { background: #F4F3FF; color: #5925DC; border: 1px solid #D9D6FE; }
+    .service-tag-ads { background: #ECFDF3; color: #027A48; border: 1px solid #A6F4C5; }
+    .service-tag-default { background: #F2F4F7; color: #344054; border: 1px solid #EAECF0; }
     .checkbox-clients-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -439,7 +455,8 @@ $totalClientsCount = count($allClients);
                 <tr>
                   <th>NAMA & KONTAK</th>
                   <th>STATUS SDM</th>
-                  <th>POSISI & JOBDESK DARI OWNER</th>
+                  <th>SPESIALISASI JASA & JOBDESK</th>
+                  <th>MASA KONTRAK KERJA</th>
                   <th>KLIEN / PT YANG DIPEGANG</th>
                   <th>EMAIL LOGIN PORTAL</th>
                   <th style="text-align: right; white-space: nowrap;">AKSI</th>
@@ -447,7 +464,7 @@ $totalClientsCount = count($allClients);
               </thead>
               <tbody id="team-table-body">
                 <tr id="search-empty-team-row" style="display: none;">
-                  <td colspan="6" style="text-align: center; color: #949AB1; padding: 48px;">
+                  <td colspan="7" style="text-align: center; color: #949AB1; padding: 48px;">
                     <div style="font-size: 26px; margin-bottom: 6px;">🔍</div>
                     <div style="font-weight: 700; color: #000000; margin-bottom: 4px; font-size: 14px;">Tidak Ada Anggota Tim yang Cocok</div>
                     <p style="font-size: 12.5px; color: #6E7485; margin: 0;">Silakan coba kata kunci pencarian atau filter tab lainnya.</p>
@@ -455,7 +472,7 @@ $totalClientsCount = count($allClients);
                 </tr>
                 <?php if (empty($teamMembers)): ?>
                   <tr id="empty-team-row">
-                    <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 48px;">
+                    <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 48px;">
                       <div style="font-size: 28px; margin-bottom: 8px;">👥</div>
                       <div style="font-weight: 700; color: #101828; margin-bottom: 4px;">Belum Ada Anggota Tim</div>
                       <p style="font-size: 13px; color: var(--text-secondary); margin: 0 auto 16px; max-width: 400px;">
@@ -467,8 +484,31 @@ $totalClientsCount = count($allClients);
                     </td>
                   </tr>
                 <?php else: ?>
-                  <?php foreach ($teamMembers as $m): ?>
-                    <tr class="team-row" data-role="<?= htmlspecialchars($m['employment_type']) ?>">
+                  <?php 
+                  $today = date('Y-m-d');
+                  foreach ($teamMembers as $m): 
+                    $spec = $m['service_specialty'] ?? '';
+                    $specClass = 'service-tag-default';
+                    if (stripos($spec, 'sosmed') !== false) $specClass = 'service-tag-sosmed';
+                    elseif (stripos($spec, 'desain') !== false) $specClass = 'service-tag-desain';
+                    elseif (stripos($spec, 'web') !== false) $specClass = 'service-tag-web';
+                    elseif (stripos($spec, 'iklan') !== false) $specClass = 'service-tag-ads';
+
+                    $wStart = $m['contract_start_date'] ?? null;
+                    $wEnd = $m['contract_end_date'] ?? null;
+                    $wExpired = false;
+                    $wDaysLeft = null;
+
+                    if ($wEnd) {
+                        $diff = (int)ceil((strtotime($wEnd) - strtotime($today)) / 86400);
+                        if ($diff < 0) {
+                            $wExpired = true;
+                        } else {
+                            $wDaysLeft = $diff;
+                        }
+                    }
+                  ?>
+                    <tr class="team-row" data-role="<?= htmlspecialchars($m['employment_type']) ?>" data-specialty="<?= htmlspecialchars(strtolower($spec)) ?>">
                       <td>
                         <div style="display: flex; align-items: center; gap: 10px;">
                           <div style="width: 36px; height: 36px; border-radius: 50%; background: #EFF8FF; color: #175CD3; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0; border: 1px solid #B2DDFF;">
@@ -496,11 +536,16 @@ $totalClientsCount = count($allClients);
                       </td>
 
                       <td>
+                        <?php if (!empty($spec)): ?>
+                          <div>
+                            <span class="service-tag <?= $specClass ?>"><?= htmlspecialchars($spec) ?></span>
+                          </div>
+                        <?php endif; ?>
                         <div style="font-weight: 700; color: #101828; font-size: 12.5px; margin-bottom: 2px;">
                           <?= htmlspecialchars($m['position'] ?: 'Spesialis Tim') ?>
                         </div>
                         <?php if (!empty($m['jobdesk'])): ?>
-                          <div style="font-size: 12px; color: var(--text-secondary); max-width: 320px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="<?= htmlspecialchars($m['jobdesk']) ?>">
+                          <div style="font-size: 11.5px; color: var(--text-secondary); max-width: 280px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" title="<?= htmlspecialchars($m['jobdesk']) ?>">
                             <?= nl2br(htmlspecialchars($m['jobdesk'])) ?>
                           </div>
                         <?php else: ?>
@@ -509,8 +554,28 @@ $totalClientsCount = count($allClients);
                       </td>
 
                       <td>
+                        <?php if ($wStart && $wEnd): ?>
+                          <div style="font-size: 11.5px; color: #344054; font-weight: 600; margin-bottom: 4px;">
+                            <?= date('d M Y', strtotime($wStart)) ?> &ndash; <?= date('d M Y', strtotime($wEnd)) ?>
+                          </div>
+                        <?php else: ?>
+                          <div style="font-size: 11px; color: var(--text-muted); font-style: italic; margin-bottom: 4px;">Belum diset</div>
+                        <?php endif; ?>
+
+                        <?php if ($wExpired): ?>
+                          <span style="background: #FEF3F2; color: #B42318; border: 1px solid #FECDCA; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 999px;">
+                            🔴 Kontrak Berakhir
+                          </span>
+                        <?php elseif ($wDaysLeft !== null): ?>
+                          <span style="background: #ECFDF3; color: #027A48; border: 1px solid #A6F4C5; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 999px;">
+                            🟢 Aktif • Sisa <?= $wDaysLeft ?> Hari
+                          </span>
+                        <?php endif; ?>
+                      </td>
+
+                      <td>
                         <?php if (!empty($m['assigned_clients'])): ?>
-                          <div style="display: flex; flex-wrap: wrap; max-width: 280px;">
+                          <div style="display: flex; flex-wrap: wrap; max-width: 260px;">
                             <?php foreach ($m['assigned_clients'] as $ac): ?>
                               <span class="client-tag-pill"><?= htmlspecialchars($ac['company']) ?></span>
                             <?php endforeach; ?>
@@ -574,9 +639,31 @@ $totalClientsCount = count($allClients);
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Posisi / Spesialisasi <span style="color:red;">*</span></label>
-            <input type="text" name="position" class="form-control" placeholder="Contoh: Meta & Google Ads Specialist, Graphic Designer, Video Editor" required>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Bidang Jasa / Spesialisasi Kalamedia <span style="color:red;">*</span></label>
+              <select name="service_specialty" class="form-select" required>
+                <option value="Kelola Sosmed">Kelola Sosmed (Social Media Management)</option>
+                <option value="Desain Eceran / Satuan">Desain Eceran / Satuan (Desain 1-an)</option>
+                <option value="Jasa Buat Web">Jasa Buat Web (Website &amp; Landing Page)</option>
+                <option value="Jasa Iklan Meta & Google">Jasa Iklan Meta &amp; Google (Meta Ads &amp; Google Ads)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Posisi / Jabatan Spesifik <span style="color:red;">*</span></label>
+              <input type="text" name="position" class="form-control" placeholder="Contoh: Meta & Google Ads Specialist, Graphic Designer" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Mulai Kontrak Kerja <span style="color:red;">*</span></label>
+              <input type="date" name="contract_start_date" class="form-control" value="<?= date('Y-m-d') ?>" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Akhir Kontrak Kerja <span style="color:red;">*</span></label>
+              <input type="date" name="contract_end_date" class="form-control" value="<?= date('Y-m-d', strtotime('+6 months')) ?>" required>
+            </div>
           </div>
 
           <div class="form-group">
@@ -658,9 +745,31 @@ $totalClientsCount = count($allClients);
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">Posisi / Spesialisasi <span style="color:red;">*</span></label>
-            <input type="text" name="position" id="edit-team-position" class="form-control" required>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Bidang Jasa / Spesialisasi Kalamedia <span style="color:red;">*</span></label>
+              <select name="service_specialty" id="edit-team-specialty" class="form-select" required>
+                <option value="Kelola Sosmed">Kelola Sosmed (Social Media Management)</option>
+                <option value="Desain Eceran / Satuan">Desain Eceran / Satuan (Desain 1-an)</option>
+                <option value="Jasa Buat Web">Jasa Buat Web (Website &amp; Landing Page)</option>
+                <option value="Jasa Iklan Meta & Google">Jasa Iklan Meta &amp; Google (Meta Ads &amp; Google Ads)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Posisi / Jabatan Spesifik <span style="color:red;">*</span></label>
+              <input type="text" name="position" id="edit-team-position" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Mulai Kontrak Kerja <span style="color:red;">*</span></label>
+              <input type="date" name="contract_start_date" id="edit-team-start-date" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Akhir Kontrak Kerja <span style="color:red;">*</span></label>
+              <input type="date" name="contract_end_date" id="edit-team-end-date" class="form-control" required>
+            </div>
           </div>
 
           <div class="form-group">
@@ -779,7 +888,10 @@ $totalClientsCount = count($allClients);
       document.getElementById('edit-team-id').value = m.id || '';
       document.getElementById('edit-team-name').value = m.name || '';
       document.getElementById('edit-team-emp-type').value = m.employment_type || 'karyawan';
+      document.getElementById('edit-team-specialty').value = m.service_specialty || 'Kelola Sosmed';
       document.getElementById('edit-team-position').value = m.position || '';
+      document.getElementById('edit-team-start-date').value = m.contract_start_date || '';
+      document.getElementById('edit-team-end-date').value = m.contract_end_date || '';
       document.getElementById('edit-team-jobdesk').value = m.jobdesk || '';
       document.getElementById('edit-team-email').value = m.email || '';
       document.getElementById('edit-team-phone').value = m.phone_wa || '';

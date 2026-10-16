@@ -80,10 +80,10 @@ class Database {
             }
 
             // High Performance: Only run migrations if lock file does not exist (0ms overhead on requests)
-            $lockFile = BASE_PATH . '/database/.schema_v5.lock';
+            $lockFile = BASE_PATH . '/database/.schema_v6.lock';
             if (!file_exists($lockFile)) {
                 self::runMigrations(self::$instance, self::$driver);
-                @file_put_contents($lockFile, "Schema v5 initialized at " . date('Y-m-d H:i:s'));
+                @file_put_contents($lockFile, "Schema v6 initialized at " . date('Y-m-d H:i:s'));
             }
         }
         return self::$instance;
@@ -430,6 +430,15 @@ class Database {
             if (!in_array('client_id', $userCols)) {
                 $db->exec("ALTER TABLE users ADD COLUMN client_id INT DEFAULT NULL");
             }
+            if (!in_array('service_specialty', $userCols)) {
+                $db->exec("ALTER TABLE users ADD COLUMN service_specialty VARCHAR(150) DEFAULT 'Kelola Sosmed'");
+            }
+            if (!in_array('contract_start_date', $userCols)) {
+                $db->exec("ALTER TABLE users ADD COLUMN contract_start_date DATE DEFAULT NULL");
+            }
+            if (!in_array('contract_end_date', $userCols)) {
+                $db->exec("ALTER TABLE users ADD COLUMN contract_end_date DATE DEFAULT NULL");
+            }
             if (!in_array('is_active', $userCols)) {
                 $db->exec("ALTER TABLE users ADD COLUMN is_active INT DEFAULT 1");
             }
@@ -452,6 +461,18 @@ class Database {
             if (!in_array('package_name', $clientCols)) {
                 $db->exec("ALTER TABLE clients ADD COLUMN package_name VARCHAR(100) DEFAULT 'Social Media & Performance Ads'");
             }
+            if (!in_array('service_type', $clientCols)) {
+                $db->exec("ALTER TABLE clients ADD COLUMN service_type VARCHAR(200) DEFAULT 'Kelola Sosmed'");
+            }
+            if (!in_array('contract_start_date', $clientCols)) {
+                $db->exec("ALTER TABLE clients ADD COLUMN contract_start_date DATE DEFAULT NULL");
+            }
+            if (!in_array('contract_end_date', $clientCols)) {
+                $db->exec("ALTER TABLE clients ADD COLUMN contract_end_date DATE DEFAULT NULL");
+            }
+            if (!in_array('contract_status', $clientCols)) {
+                $db->exec("ALTER TABLE clients ADD COLUMN contract_status VARCHAR(30) DEFAULT 'active'");
+            }
             if (!in_array('status', $clientCols)) {
                 $db->exec("ALTER TABLE clients ADD COLUMN status VARCHAR(30) DEFAULT 'Active'");
             }
@@ -470,6 +491,18 @@ class Database {
                 $db->exec("ALTER TABLE projects ADD COLUMN project_name VARCHAR(200) DEFAULT NULL");
                 $db->exec("UPDATE projects SET project_name = name WHERE project_name IS NULL OR project_name = ''");
             }
+            if (!in_array('service_type', $projCols)) {
+                $db->exec("ALTER TABLE projects ADD COLUMN service_type VARCHAR(200) DEFAULT 'Kelola Sosmed'");
+            }
+            if (!in_array('contract_start_date', $projCols)) {
+                $db->exec("ALTER TABLE projects ADD COLUMN contract_start_date DATE DEFAULT NULL");
+            }
+            if (!in_array('contract_end_date', $projCols)) {
+                $db->exec("ALTER TABLE projects ADD COLUMN contract_end_date DATE DEFAULT NULL");
+            }
+            if (!in_array('contract_status', $projCols)) {
+                $db->exec("ALTER TABLE projects ADD COLUMN contract_status VARCHAR(30) DEFAULT 'active'");
+            }
             if (!in_array('progress_percent', $projCols)) {
                 $db->exec("ALTER TABLE projects ADD COLUMN progress_percent DECIMAL(5,2) DEFAULT 0");
             }
@@ -480,6 +513,55 @@ class Database {
                 $db->exec("ALTER TABLE projects ADD COLUMN is_deleted INT DEFAULT 0");
             }
         }
+
+        // 3b. Migrate `employees` table columns
+        $empCols = $getTableCols('employees');
+        if (!empty($empCols)) {
+            if (!in_array('service_specialty', $empCols)) {
+                $db->exec("ALTER TABLE employees ADD COLUMN service_specialty VARCHAR(150) DEFAULT 'Kelola Sosmed'");
+            }
+            if (!in_array('contract_start_date', $empCols)) {
+                $db->exec("ALTER TABLE employees ADD COLUMN contract_start_date DATE DEFAULT NULL");
+            }
+            if (!in_array('contract_end_date', $empCols)) {
+                $db->exec("ALTER TABLE employees ADD COLUMN contract_end_date DATE DEFAULT NULL");
+            }
+        }
+
+        // 3c. Migrate `tasks` table columns
+        $taskCols = $getTableCols('tasks');
+        if (!empty($taskCols)) {
+            if (!in_array('start_date', $taskCols)) {
+                $db->exec("ALTER TABLE tasks ADD COLUMN start_date DATE DEFAULT NULL");
+            }
+        }
+
+        // Populate sensible default contract dates for existing active clients, team & tasks
+        try {
+            $db->exec("
+                UPDATE clients 
+                SET contract_start_date = COALESCE(contract_start_date, date('now', '-30 days')),
+                    contract_end_date = COALESCE(contract_end_date, date('now', '+90 days')),
+                    contract_status = CASE 
+                        WHEN contract_end_date IS NOT NULL AND contract_end_date < date('now') THEN 'expired' 
+                        ELSE 'active' 
+                    END,
+                    service_type = COALESCE(service_type, 'Kelola Sosmed')
+                WHERE contract_start_date IS NULL OR contract_end_date IS NULL OR service_type IS NULL
+            ");
+            $db->exec("
+                UPDATE users
+                SET contract_start_date = COALESCE(contract_start_date, date('now', '-60 days')),
+                    contract_end_date = COALESCE(contract_end_date, date('now', '+180 days')),
+                    service_specialty = COALESCE(service_specialty, 'Kelola Sosmed')
+                WHERE role IN ('karyawan', 'freelancer') AND (contract_start_date IS NULL OR contract_end_date IS NULL OR service_specialty IS NULL)
+            ");
+            $db->exec("
+                UPDATE tasks
+                SET start_date = COALESCE(start_date, due_date, date('now'))
+                WHERE start_date IS NULL
+            ");
+        } catch (Exception $e) {}
 
         // 4. Ensure is_deleted on other standard tables
         $tablesWithDeleted = ['tasks', 'invoices', 'freelancer_payouts', 'ads_spend', 'ads_budget_logs', 'ads_topup_transactions', 'salaries', 'content_planner', 'client_reports', 'performance_reports'];

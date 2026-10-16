@@ -543,6 +543,8 @@ function fillClientModal(c) {
   const emailEl = document.getElementById('edit-client-email');
   const phoneEl = document.getElementById('edit-client-phone');
   const addrEl = document.getElementById('edit-client-address');
+  const startEl = document.getElementById('edit-client-start-date');
+  const endEl = document.getElementById('edit-client-end-date');
 
   if (idEl) idEl.value = c.id || '';
   if (compEl) compEl.value = c.company || '';
@@ -550,11 +552,79 @@ function fillClientModal(c) {
   if (emailEl) emailEl.value = c.email || '';
   if (phoneEl) phoneEl.value = c.phone || '';
   if (addrEl) addrEl.value = c.address || '';
+  if (startEl) startEl.value = c.contract_start_date || '';
+  if (endEl) endEl.value = c.contract_end_date || '';
+
+  // Service checkboxes
+  const rawServices = c.service_type ? c.service_type.split(',').map(s => s.trim()) : [];
+  document.querySelectorAll('.edit-client-service-chk').forEach(cb => {
+    cb.checked = rawServices.includes(cb.value);
+  });
+
   const pwEl = document.getElementById('edit-client-password');
   if (pwEl) pwEl.value = '';
 
   openModal('modal-edit-client');
 }
+
+window.openRenewClientModal = function(client) {
+  if (typeof client === 'number' || typeof client === 'string') {
+    fetch(`api/clients.php?action=get_client&id=${client}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.client) {
+          setupRenewModal(data.client);
+        } else {
+          showToast(data.message || 'Gagal memuat data klien', 'danger');
+        }
+      })
+      .catch(() => showToast('Gagal menghubungi server', 'danger'));
+  } else if (typeof client === 'object' && client !== null) {
+    setupRenewModal(client);
+  }
+};
+
+function setupRenewModal(c) {
+  const idEl = document.getElementById('renew-client-id');
+  const labelEl = document.getElementById('renew-client-company-label');
+  const infoEl = document.getElementById('renew-client-current-info');
+  const startEl = document.getElementById('renew-contract-start-date');
+  const endEl = document.getElementById('renew-contract-end-date');
+
+  if (idEl) idEl.value = c.id || '';
+  if (labelEl) labelEl.textContent = (c.company || 'Klien') + (c.name ? ` (PIC: ${c.name})` : '');
+
+  const curStart = c.contract_start_date || '-';
+  const curEnd = c.contract_end_date || '-';
+  const curStatus = c.contract_status === 'expired' ? '🔴 Kontrak Berakhir / Nonaktif' : '🟢 Aktif';
+  if (infoEl) {
+    infoEl.innerHTML = `Masa Kontrak Sebelumnya: <b>${curStart}</b> s/d <b>${curEnd}</b> &bull; Status: <b>${curStatus}</b>`;
+  }
+
+  // Suggest new start date: today
+  const today = new Date().toISOString().slice(0, 10);
+  if (startEl) startEl.value = today;
+
+  // Default renewal: 30 days
+  setRenewDurationDays(30);
+
+  openModal('modal-renew-client-contract');
+}
+
+window.setRenewDurationDays = function(days) {
+  const startEl = document.getElementById('renew-contract-start-date');
+  const endEl = document.getElementById('renew-contract-end-date');
+  if (!endEl) return;
+
+  const baseDateStr = (startEl && startEl.value) ? startEl.value : new Date().toISOString().slice(0, 10);
+  const baseDate = new Date(baseDateStr);
+  baseDate.setDate(baseDate.getDate() + parseInt(days, 10));
+
+  const yyyy = baseDate.getFullYear();
+  const mm = String(baseDate.getMonth() + 1).padStart(2, '0');
+  const dd = String(baseDate.getDate()).padStart(2, '0');
+  endEl.value = `${yyyy}-${mm}-${dd}`;
+};
 
 window.confirmDeleteClient = function(id, companyName) {
   window.showConfirmDeleteModal({

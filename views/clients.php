@@ -7,6 +7,7 @@ require_admin();
 $db = Database::getConnection();
 
 // Fetch all active clients with project count and total invoiced
+// Fetch all active clients with project count and total invoiced
 $clients = $db->query("
     SELECT c.*,
            (SELECT COUNT(*) FROM projects WHERE client_id = c.id AND COALESCE(is_deleted, 0) = 0) as total_projects,
@@ -16,6 +17,20 @@ $clients = $db->query("
     WHERE COALESCE(c.is_deleted, 0) = 0
     ORDER BY c.id DESC
 ")->fetchAll();
+
+// Batch query: Fetch assigned team members per client
+$assignedTeamRows = $db->query("
+    SELECT ec.client_id, u.id, u.name, u.role, u.employment_type, u.position
+    FROM employee_clients ec
+    JOIN users u ON ec.user_id = u.id
+    WHERE COALESCE(u.is_deleted, 0) = 0
+    ORDER BY u.name ASC
+")->fetchAll();
+
+$teamByClient = [];
+foreach ($assignedTeamRows as $r) {
+    $teamByClient[(int)$r['client_id']][] = $r;
+}
 
 // Fetch all active projects with calculated costs & margins
 $projects = $db->query("
@@ -39,6 +54,44 @@ $projects = $db->query("
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
+  <style>
+    .client-filter-pill {
+      background: #FFFFFF;
+      border: 1px solid #D0D5DD;
+      color: #344054;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .client-filter-pill:hover {
+      background: #F9FAFB;
+      border-color: #98A2B3;
+    }
+    .client-filter-pill.active {
+      background: linear-gradient(135deg, #5D76F5 0%, #8932E0 100%);
+      color: #FFFFFF;
+      border-color: transparent;
+      box-shadow: 0 2px 6px rgba(93, 118, 245, 0.35);
+    }
+    .service-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin: 2px 2px 2px 0;
+    }
+    .service-tag-sosmed { background: #EFF8FF; color: #175CD3; border: 1px solid #B2DDFF; }
+    .service-tag-desain { background: #FDF2FA; color: #C11574; border: 1px solid #FCCEEE; }
+    .service-tag-web { background: #F4F3FF; color: #5925DC; border: 1px solid #D9D6FE; }
+    .service-tag-ads { background: #ECFDF3; color: #027A48; border: 1px solid #A6F4C5; }
+    .service-tag-default { background: #F2F4F7; color: #344054; border: 1px solid #EAECF0; }
+  </style>
 </head>
 <body>
   <div class="app-container">
@@ -51,12 +104,12 @@ $projects = $db->query("
 
         <!-- 1. Clients Database Panel -->
         <div class="glass-panel">
-          <div class="panel-header">
+          <div class="panel-header" style="flex-wrap: wrap; gap: 12px;">
             <div>
               <h3 class="panel-title">
                 Database Klien & Brand Agensi
               </h3>
-              <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Daftar seluruh klien dan riwayat penagihan</p>
+              <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Daftar seluruh klien, masa kontrak layanan, dan alokasi tim PIC</p>
             </div>
 
             <button class="btn btn-primary btn-sm" onclick="openModal('modal-create-client')">
@@ -64,47 +117,141 @@ $projects = $db->query("
             </button>
           </div>
 
+          <!-- Filter Pills Berdasarkan 4 Jasa Kalamedia -->
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 16px; align-items: center;">
+            <span style="font-size: 11.5px; font-weight: 700; color: #6E7485; text-transform: uppercase; letter-spacing: 0.5px;">Sortir Jasa:</span>
+            <button type="button" class="client-filter-pill active" onclick="filterClientService('all', this)">Semua Jasa</button>
+            <button type="button" class="client-filter-pill" onclick="filterClientService('Kelola Sosmed', this)">Kelola Sosmed</button>
+            <button type="button" class="client-filter-pill" onclick="filterClientService('Desain Eceran', this)">Desain Eceran / Satuan</button>
+            <button type="button" class="client-filter-pill" onclick="filterClientService('Jasa Buat Web', this)">Jasa Buat Web</button>
+            <button type="button" class="client-filter-pill" onclick="filterClientService('Jasa Iklan', this)">Jasa Iklan Meta & Google</button>
+          </div>
+
           <div class="table-responsive">
             <table class="table-custom">
               <thead>
                 <tr>
-                  <th>NAMA PERUSAHAAN</th>
-                  <th>NAMA</th>
-                  <th>EMAIL & TELEPON</th>
-                  <th>TOTAL PROYEK</th>
-                  <th>TOTAL DITAGIHKAN</th>
-                  <th>STATUS PEMBAYARAN</th>
+                  <th>NAMA PERUSAHAAN & PIC</th>
+                  <th>LAYANAN / JASA</th>
+                  <th>TIM PIC (PENANGGUNG JAWAB)</th>
+                  <th>MASA KONTRAK & STATUS</th>
+                  <th>TOTAL PROYEK & BIAYA</th>
                   <th style="text-align: right; white-space: nowrap;">AKSI</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="clients-table-body">
+                <tr id="empty-filtered-clients" style="display: none;">
+                  <td colspan="6" style="text-align: center; color: #949AB1; padding: 40px;">
+                    <div style="font-size: 24px; margin-bottom: 6px;">🔍</div>
+                    <div style="font-weight: 700; color: #101828;">Tidak Ada Klien pada Kategori Jasa Ini</div>
+                    <div style="font-size: 12px; color: #6E7485;">Pilih "Semua Jasa" untuk melihat seluruh klien.</div>
+                  </td>
+                </tr>
                 <?php if (empty($clients)): ?>
-                  <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 32px;">Belum ada data klien terdaftar.</td></tr>
+                  <tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 32px;">Belum ada data klien terdaftar.</td></tr>
                 <?php else: ?>
-                  <?php foreach ($clients as $c): ?>
-                    <tr>
+                  <?php 
+                  $today = date('Y-m-d');
+                  foreach ($clients as $c): 
+                    $cServices = !empty($c['service_type']) ? explode(',', $c['service_type']) : [];
+                    $assignedTeam = $teamByClient[(int)$c['id']] ?? [];
+
+                    $endDate = !empty($c['contract_end_date']) ? $c['contract_end_date'] : null;
+                    $startDate = !empty($c['contract_start_date']) ? $c['contract_start_date'] : null;
+                    $isExpired = false;
+                    $daysRemaining = null;
+
+                    if ($endDate) {
+                        $diffDays = (int)ceil((strtotime($endDate) - strtotime($today)) / 86400);
+                        if ($diffDays < 0 || ($c['contract_status'] ?? '') === 'expired') {
+                            $isExpired = true;
+                        } else {
+                            $daysRemaining = $diffDays;
+                        }
+                    }
+                  ?>
+                    <tr class="client-data-row" data-services="<?= htmlspecialchars(strtolower($c['service_type'] ?? '')) ?>">
                       <td>
                         <div class="clickable-client-link" onclick="openProjectFinancialDetailModal(0, <?= $c['id'] ?>)" title="Lihat Rincian Alokasi Keuangan Klien">
-                          <span style="font-size: 14px; font-weight: 700;"><?= htmlspecialchars($c['company']) ?></span>
+                          <span style="font-size: 14px; font-weight: 800; color: #101828;"><?= htmlspecialchars($c['company']) ?></span>
                         </div>
+                        <div style="font-weight: 600; color: #344054; font-size: 12px; margin-top: 2px;">PIC: <?= htmlspecialchars($c['name'] ?: '-') ?></div>
+                        <div style="color: var(--text-secondary); font-size: 11px;"><?= htmlspecialchars($c['email'] ?: '') ?> <?= !empty($c['phone']) ? '• ' . htmlspecialchars($c['phone']) : '' ?></div>
                       </td>
-                      <td style="font-weight: 600; color: #101828;"><?= htmlspecialchars($c['name']) ?></td>
+
                       <td>
-                        <div style="color: #101828; font-size: 12px;"><?= htmlspecialchars($c['email']) ?></div>
-                        <div style="color: var(--text-secondary); font-size: 11px;"><?= htmlspecialchars($c['phone']) ?></div>
-                      </td>
-                      <td>
-                        <span style="font-weight: 700; color: #101828; background: #F2F4F7; padding: 3px 8px; border-radius: 4px; font-size: 11.5px;">
-                          <?= $c['total_projects'] ?> Proyek
-                        </span>
-                      </td>
-                      <td style="font-weight: 700; color: #101828;"><?= format_rupiah($c['total_invoiced']) ?></td>
-                      <td>
-                        <div style="font-size: 11px; color: var(--success-text); font-weight: 700;">Lunas: <?= format_rupiah($c['total_paid']) ?></div>
-                        <?php if ($c['total_invoiced'] > $c['total_paid']): ?>
-                          <div style="font-size: 10.5px; color: var(--warning-text); font-weight: 600;">Sisa: <?= format_rupiah($c['total_invoiced'] - $c['total_paid']) ?></div>
+                        <?php if (empty($cServices)): ?>
+                          <span style="font-size: 11px; color: var(--text-muted); font-style: italic;">Belum diatur</span>
+                        <?php else: ?>
+                          <div style="display: flex; flex-wrap: wrap; gap: 4px; max-width: 220px;">
+                            <?php foreach ($cServices as $s): 
+                              $s = trim($s);
+                              $tagClass = 'service-tag-default';
+                              if (stripos($s, 'sosmed') !== false) $tagClass = 'service-tag-sosmed';
+                              elseif (stripos($s, 'desain') !== false) $tagClass = 'service-tag-desain';
+                              elseif (stripos($s, 'web') !== false) $tagClass = 'service-tag-web';
+                              elseif (stripos($s, 'iklan') !== false) $tagClass = 'service-tag-ads';
+                            ?>
+                              <span class="service-tag <?= $tagClass ?>"><?= htmlspecialchars($s) ?></span>
+                            <?php endforeach; ?>
+                          </div>
                         <?php endif; ?>
                       </td>
+
+                      <td>
+                        <?php if (empty($assignedTeam)): ?>
+                          <span style="font-size: 11.5px; color: var(--text-tertiary); font-style: italic;">Belum ada PIC teralokasi</span>
+                        <?php else: ?>
+                          <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <?php foreach ($assignedTeam as $atm): ?>
+                              <div style="font-size: 12px; font-weight: 700; color: #101828; display: inline-flex; align-items: center; gap: 4px;">
+                                <span style="width: 6px; height: 6px; border-radius: 50%; background: #5D76F5; display: inline-block;"></span>
+                                <?= htmlspecialchars($atm['name']) ?>
+                                <span style="font-size: 10px; color: #6E7485; font-weight: 500;">(<?= htmlspecialchars($atm['position'] ?: 'Staff') ?>)</span>
+                              </div>
+                            <?php endforeach; ?>
+                          </div>
+                        <?php endif; ?>
+                      </td>
+
+                      <td>
+                        <?php if ($startDate && $endDate): ?>
+                          <div style="font-size: 11.5px; color: #344054; font-weight: 600; margin-bottom: 4px;">
+                            <?= date('d M Y', strtotime($startDate)) ?> &ndash; <?= date('d M Y', strtotime($endDate)) ?>
+                          </div>
+                        <?php else: ?>
+                          <div style="font-size: 11px; color: var(--text-muted); font-style: italic; margin-bottom: 4px;">Tanggal belum diset</div>
+                        <?php endif; ?>
+
+                        <?php if ($isExpired): ?>
+                          <div style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                            <span style="background: #FEF3F2; color: #B42318; border: 1px solid #FECDCA; font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 999px;">
+                              🔴 Kontrak Berakhir
+                            </span>
+                            <button type="button" class="btn btn-sm" onclick='openRenewClientModal(<?= json_encode($c, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' style="background: #027A48; color: #FFF; border: none; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; cursor: pointer;">
+                              + Perpanjang Kontrak
+                            </button>
+                          </div>
+                        <?php else: ?>
+                          <div style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                            <span style="background: #ECFDF3; color: #027A48; border: 1px solid #A6F4C5; font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 999px;">
+                              🟢 Aktif <?= $daysRemaining !== null ? "• Sisa {$daysRemaining} Hari" : '' ?>
+                            </span>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick='openRenewClientModal(<?= json_encode($c, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' style="font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px;">
+                              Perpanjang
+                            </button>
+                          </div>
+                        <?php endif; ?>
+                      </td>
+
+                      <td>
+                        <span style="font-weight: 700; color: #101828; background: #F2F4F7; padding: 2px 6px; border-radius: 4px; font-size: 11px;">
+                          <?= $c['total_projects'] ?> Proyek
+                        </span>
+                        <div style="font-weight: 700; color: #101828; font-size: 12px; margin-top: 3px;"><?= format_rupiah($c['total_invoiced']) ?></div>
+                        <div style="font-size: 10.5px; color: var(--success-text); font-weight: 700;">Lunas: <?= format_rupiah($c['total_paid']) ?></div>
+                      </td>
+
                       <td style="text-align: right; white-space: nowrap;">
                         <div style="display: inline-flex; gap: 6px; justify-content: flex-end; align-items: center;">
                           <button type="button" class="btn btn-secondary btn-sm" onclick='openEditClientModal(<?= json_encode($c, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Edit Data Klien" style="padding: 5px 12px; font-size: 12px; border-radius: 6px; font-weight: 600;">
@@ -218,5 +365,31 @@ $projects = $db->query("
 
   <?php require_once BASE_PATH . '/includes/modals.php'; ?>
   <?php require_once BASE_PATH . '/includes/footer.php'; ?>
+
+  <script>
+    function filterClientService(serviceKey, btn) {
+      document.querySelectorAll('.client-filter-pill').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const rows = document.querySelectorAll('.client-data-row');
+      let visibleCount = 0;
+      const key = (serviceKey || '').toLowerCase();
+
+      rows.forEach(r => {
+        const rowServices = r.getAttribute('data-services') || '';
+        if (key === 'all' || rowServices.includes(key)) {
+          r.style.display = '';
+          visibleCount++;
+        } else {
+          r.style.display = 'none';
+        }
+      });
+
+      const emptyEl = document.getElementById('empty-filtered-clients');
+      if (emptyEl) {
+        emptyEl.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
+      }
+    }
+  </script>
 </body>
 </html>

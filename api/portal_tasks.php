@@ -104,7 +104,7 @@ if ($action === 'list_tasks') {
             // Fetch Tasks
             $stmt = $db->prepare("
                 SELECT t.id, t.project_id, t.client_id, t.title, t.description, t.category,
-                       t.worker_type, t.priority, t.status, t.deliverable_link, t.due_date,
+                       t.worker_type, t.priority, t.status, t.deliverable_link, t.start_date, t.due_date,
                        t.created_at, t.updated_at,
                        p.name as project_name,
                        u.name as worker_name, u.role as worker_role, u.employment_type as worker_emp_type,
@@ -257,16 +257,22 @@ if ($action === 'list_tasks') {
                 $where[] = "t.priority = ?";
                 $params[] = $_GET['priority'];
             }
+            if (!empty($_GET['service_type']) && $_GET['service_type'] !== 'all') {
+                $where[] = "(c.service_type LIKE ? OR t.category LIKE ?)";
+                $params[] = '%' . $_GET['service_type'] . '%';
+                $params[] = '%' . $_GET['service_type'] . '%';
+            }
 
             $sqlWhere = implode(" AND ", $where);
 
             $stmt = $db->prepare("
                 SELECT t.id, t.project_id, t.client_id, t.title, t.description, t.category,
-                       t.worker_type, t.priority, t.status, t.deliverable_link, t.due_date,
+                       t.worker_type, t.priority, t.status, t.deliverable_link, t.start_date, t.due_date,
                        t.created_at, t.updated_at,
                        p.name as project_name,
-                       c.company as client_company, c.name as client_pic,
+                       c.company as client_company, c.name as client_pic, c.service_type as client_service_type,
                        u.name as worker_name, u.role as worker_role, u.employment_type as worker_emp_type, u.position as worker_position, u.jobdesk as worker_jobdesk,
+                       u.service_specialty as worker_specialty,
                        u.avatar as worker_avatar, u.phone_wa as worker_phone,
                        u_by.name as assigned_by_name,
                        (SELECT COUNT(*) FROM task_feedbacks WHERE task_id = t.id) as feedbacks_count,
@@ -410,14 +416,25 @@ if ($action === 'assign_task') {
     $projectId = (int)($_POST['project_id'] ?? 0);
     $title = trim($_POST['title'] ?? '');
     $description = trim($_POST['description'] ?? '');
-    $category = trim($_POST['category'] ?? 'design');
+    $category = trim($_POST['category'] ?? 'Kelola Sosmed');
     $assignedTo = (int)($_POST['assigned_to_user_id'] ?? 0);
     $priority = trim($_POST['priority'] ?? 'medium');
+    $startDate = trim($_POST['start_date'] ?? '');
     $dueDate = trim($_POST['due_date'] ?? '');
     $deliverableLink = trim($_POST['deliverable_link'] ?? '');
 
     if (empty($title) || !$projectId || !$assignedTo) {
         echo json_encode(['success' => false, 'message' => 'Judul tugas, proyek, dan PIC wajib diisi']);
+        exit;
+    }
+
+    if (empty($startDate) || empty($dueDate)) {
+        echo json_encode(['success' => false, 'message' => 'Mulai pengerjaan (start_date) dan tenggat selesai (due_date) wajib diisi']);
+        exit;
+    }
+
+    if ($dueDate < $startDate) {
+        echo json_encode(['success' => false, 'message' => 'Tenggat selesai (due_date) tidak boleh lebih awal dari tanggal mulai pengerjaan (start_date)']);
         exit;
     }
 
@@ -434,8 +451,11 @@ if ($action === 'assign_task') {
 
         $clientIdOfProject = (int)$proj['client_id'];
 
-        // Determine worker_type (karyawan vs freelancer)
-        $stmtU = $db->prepare("SELECT id, name, role, employment_type, phone_wa FROM users WHERE id = ?");
+        // Determine worker_type (karyawan vs freelancer) & validate contracts
+        $stmtU = $db->prepare("
+            SELECT id, name, role, employment_type, phone_wa, service_specialty, contract_start_date, contract_end_date, is_active 
+            FROM users WHERE id = ?
+        ");
         $stmtU->execute([$assignedTo]);
         $assignee = $stmtU->fetch();
 
@@ -444,14 +464,39 @@ if ($action === 'assign_task') {
             exit;
         }
 
+        // VALIDASI MASA KONTRAK KERJA KARYAWAN
+        if (!empty($assignee['contract_start_date']) && !empty($assignee['contract_end_date'])) {
+            if ($startDate < $assignee['contract_start_date'] || $dueDate > $assignee['contract_end_date']) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => "Gagal: Masa tugas ({$startDate} s/d {$dueDate}) tidak boleh kurang dari atau melebihi masa kontrak kerja {$assignee['name']} ({$assignee['contract_start_date']} s/d {$assignee['contract_end_date']})."
+                ]);
+                exit;
+            }
+        }
+
+        // VALIDASI MASA KONTRAK KLIEN
+        $stmtCl = $db->prepare("SELECT company, contract_start_date, contract_end_date, contract_status FROM clients WHERE id = ?");
+        $stmtCl->execute([$clientIdOfProject]);
+        $clientData = $stmtCl->fetch();
+        if ($clientData && !empty($clientData['contract_end_date'])) {
+            if (($clientData['contract_status'] ?? '') === 'expired' || $dueDate > $clientData['contract_end_date']) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => "Gagal: Tenggat tugas ({$dueDate}) melebihi masa kontrak klien {$clientData['company']} ({$clientData['contract_end_date']}). Silakan perpanjang kontrak klien terlebih dahulu."
+                ]);
+                exit;
+            }
+        }
+
         $workerType = ($assignee['role'] === 'freelancer' || $assignee['employment_type'] === 'freelance') ? 'freelancer' : 'karyawan';
 
         $insert = $db->prepare("
             INSERT INTO tasks (
                 project_id, client_id, assigned_to_user_id, assigned_by_user_id,
                 title, description, category, worker_type, priority, status,
-                deliverable_link, due_date
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'backlog', ?, ?)
+                deliverable_link, start_date, due_date
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'backlog', ?, ?, ?)
         ");
         $insert->execute([
             $projectId,
@@ -464,11 +509,12 @@ if ($action === 'assign_task') {
             $workerType,
             $priority,
             $deliverableLink ?: null,
-            $dueDate ?: null
+            $startDate,
+            $dueDate
         ]);
         $newTaskId = (int)$db->lastInsertId();
 
-        log_activity('task', "Tugas Baru Dibagikan: {$title}", "Ditugaskan ke {$assignee['name']} ({$workerType}) untuk proyek {$proj['project_name']}");
+        log_activity('task', "Tugas Baru Dibagikan: {$title}", "Ditugaskan ke {$assignee['name']} ({$workerType}) untuk proyek {$proj['project_name']} ({$startDate} s/d {$dueDate})");
 
         // Trigger webhook to notify worker
         triggerWorkerWebhook([
@@ -478,6 +524,7 @@ if ($action === 'assign_task') {
             'project_name' => $proj['project_name'],
             'category' => $category,
             'priority' => $priority,
+            'start_date' => $startDate,
             'due_date' => $dueDate,
             'worker_id' => $assignedTo,
             'worker_name' => $assignee['name'],
@@ -719,7 +766,8 @@ if ($action === 'team_members') {
 
     try {
         $stmt = $db->query("
-            SELECT id, name, email, role, employment_type, position, phone_wa, avatar
+            SELECT id, name, email, role, employment_type, position, phone_wa, avatar,
+                   service_specialty, contract_start_date, contract_end_date
             FROM users
             WHERE role IN ('karyawan', 'freelancer', 'admin', 'owner')
               AND (is_active IS NULL OR is_active = 1)
@@ -755,7 +803,8 @@ if ($action === 'projects_dropdown') {
     try {
         $stmt = $db->query("
             SELECT p.id as project_id, p.name as project_name, p.client_id,
-                   c.company as client_company, c.name as client_pic
+                   c.company as client_company, c.name as client_pic,
+                   c.service_type, c.contract_start_date, c.contract_end_date, c.contract_status
             FROM projects p
             JOIN clients c ON p.client_id = c.id
             WHERE p.is_deleted = 0 AND c.is_deleted = 0

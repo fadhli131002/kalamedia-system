@@ -49,6 +49,41 @@ if ($action === 'login') {
             }
 
             if ($user['role'] === 'client') {
+                // Strict validation: Check client contract expiration
+                $clientId = !empty($user['client_id']) ? (int)$user['client_id'] : null;
+                $cRow = null;
+                if ($clientId) {
+                    $stmtC = $db->prepare("SELECT id, company, contract_end_date, contract_status, is_deleted FROM clients WHERE id = ? LIMIT 1");
+                    $stmtC->execute([$clientId]);
+                    $cRow = $stmtC->fetch(PDO::FETCH_ASSOC);
+                } else {
+                    $stmtC = $db->prepare("SELECT id, company, contract_end_date, contract_status, is_deleted FROM clients WHERE email = ? LIMIT 1");
+                    $stmtC->execute([$user['email']]);
+                    $cRow = $stmtC->fetch(PDO::FETCH_ASSOC);
+                }
+
+                if ($cRow) {
+                    $today = date('Y-m-d');
+                    $isExpired = false;
+                    if (!empty($cRow['contract_end_date']) && $today > $cRow['contract_end_date']) {
+                        $isExpired = true;
+                        $db->prepare("UPDATE clients SET contract_status = 'expired', status = 'expired' WHERE id = ?")->execute([$cRow['id']]);
+                        $db->prepare("UPDATE users SET is_active = 0 WHERE id = ?")->execute([$user['id']]);
+                    } elseif (($cRow['contract_status'] ?? '') === 'expired' || ($cRow['is_deleted'] ?? 0) == 1) {
+                        $isExpired = true;
+                        $db->prepare("UPDATE users SET is_active = 0 WHERE id = ?")->execute([$user['id']]);
+                    }
+
+                    if ($isExpired) {
+                        $formattedDate = !empty($cRow['contract_end_date']) ? date('d F Y', strtotime($cRow['contract_end_date'])) : 'tanggal yang ditentukan';
+                        echo json_encode([
+                            'success' => false,
+                            'message' => "Masa kontrak layanan Anda telah berakhir pada {$formattedDate}. Silakan hubungi tim Kalamedia untuk perpanjangan kontrak."
+                        ]);
+                        exit;
+                    }
+                }
+
                 if (function_exists('switch_session_context')) {
                     switch_session_context('client');
                 }

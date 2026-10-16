@@ -51,6 +51,25 @@ if ($action === 'create_client') {
     $phone = trim($_POST['phone'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
+    // Service & Contract parameters
+    $services = $_POST['service_type'] ?? ($_POST['services'] ?? 'Kelola Sosmed');
+    if (is_array($services)) {
+        $serviceType = implode(', ', array_filter(array_map('trim', $services)));
+    } else {
+        $serviceType = trim(strval($services));
+    }
+    if (empty($serviceType)) {
+        $serviceType = 'Kelola Sosmed';
+    }
+
+    $contractStartDate = !empty($_POST['contract_start_date']) ? trim($_POST['contract_start_date']) : date('Y-m-d');
+    $contractEndDate = !empty($_POST['contract_end_date']) ? trim($_POST['contract_end_date']) : date('Y-m-d', strtotime('+30 days'));
+
+    $today = date('Y-m-d');
+    $contractStatus = ($today > $contractEndDate) ? 'expired' : 'active';
+    $clientStatus = ($contractStatus === 'expired') ? 'expired' : 'Active';
+    $userActive = ($contractStatus === 'expired') ? 0 : 1;
+
     if (empty($name) || empty($company) || empty($email)) {
         echo json_encode(['success' => false, 'message' => 'Nama, nama perusahaan/PT, dan email login wajib diisi.']);
         exit;
@@ -70,11 +89,11 @@ if ($action === 'create_client') {
 
         if ($existingClientId) {
             $clientId = (int)$existingClientId;
-            $db->prepare("UPDATE clients SET name = ?, email = ?, phone = ?, company_name = ?, pic_name = ? WHERE id = ?")
-               ->execute([$name, $email, $phone, $company, $name, $clientId]);
+            $db->prepare("UPDATE clients SET name = ?, email = ?, phone = ?, company_name = ?, pic_name = ?, service_type = ?, contract_start_date = ?, contract_end_date = ?, contract_status = ?, status = ? WHERE id = ?")
+               ->execute([$name, $email, $phone, $company, $name, $serviceType, $contractStartDate, $contractEndDate, $contractStatus, $clientStatus, $clientId]);
         } else {
-            $stmt = $db->prepare("INSERT INTO clients (name, company, company_name, pic_name, email, phone, status, is_deleted) VALUES (?, ?, ?, ?, ?, ?, 'Active', 0)");
-            $stmt->execute([$name, $company, $company, $name, $email, $phone]);
+            $stmt = $db->prepare("INSERT INTO clients (name, company, company_name, pic_name, email, phone, service_type, contract_start_date, contract_end_date, contract_status, status, is_deleted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)");
+            $stmt->execute([$name, $company, $company, $name, $email, $phone, $serviceType, $contractStartDate, $contractEndDate, $contractStatus, $clientStatus]);
             $clientId = (int)$db->lastInsertId();
         }
 
@@ -84,8 +103,11 @@ if ($action === 'create_client') {
         $hasProject = $chkProj->fetchColumn();
         if (!$hasProject) {
             $projectName = 'Project ' . $company;
-            $db->prepare("INSERT INTO projects (client_id, name, project_name, contract_value, target_margin_percent, status, start_date) VALUES (?, ?, ?, 0, 30, 'In Progress', ?)")
-               ->execute([$clientId, $projectName, $projectName, date('Y-m-d')]);
+            $db->prepare("INSERT INTO projects (client_id, name, project_name, service_type, contract_start_date, contract_end_date, contract_status, contract_value, target_margin_percent, status, start_date) VALUES (?, ?, ?, ?, ?, ?, ?, 0, 30, 'In Progress', ?)")
+               ->execute([$clientId, $projectName, $projectName, $serviceType, $contractStartDate, $contractEndDate, $contractStatus, $contractStartDate]);
+        } else {
+            $db->prepare("UPDATE projects SET service_type = ?, contract_start_date = ?, contract_end_date = ?, contract_status = ? WHERE id = ?")
+               ->execute([$serviceType, $contractStartDate, $contractEndDate, $contractStatus, $hasProject]);
         }
 
         // 3. Create or Update Client User Account for Portal Access
@@ -96,18 +118,18 @@ if ($action === 'create_client') {
 
         if ($existingUserId) {
             $db->prepare("
-                UPDATE users SET name = ?, password = ?, role = 'client', client_id = ?, phone_wa = ?, is_active = 1, is_deleted = 0
+                UPDATE users SET name = ?, password = ?, role = 'client', client_id = ?, phone_wa = ?, is_active = ?, is_deleted = 0
                 WHERE id = ?
-            ")->execute([$name, $hashedPw, $clientId, $phone, $existingUserId]);
+            ")->execute([$name, $hashedPw, $clientId, $phone, $userActive, $existingUserId]);
         } else {
             $db->prepare("
                 INSERT INTO users (name, email, password, role, employment_type, client_id, phone_wa, is_active, is_deleted)
-                VALUES (?, ?, ?, 'client', 'client', ?, ?, 1, 0)
-            ")->execute([$name, $email, $hashedPw, $clientId, $phone]);
+                VALUES (?, ?, ?, 'client', 'client', ?, ?, ?, 0)
+            ")->execute([$name, $email, $hashedPw, $clientId, $phone, $userActive]);
         }
 
         $db->commit();
-        log_activity('client', "Klien Baru & Akses Portal Dibuat: $company", "Nama: $name ($email)");
+        log_activity('client', "Klien Baru & Akses Portal Dibuat: $company", "Layanan: $serviceType, Kontrak: $contractStartDate s/d $contractEndDate");
 
         echo json_encode([
             'success' => true,
@@ -146,6 +168,24 @@ if ($action === 'update_client') {
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
 
+    $services = $_POST['service_type'] ?? ($_POST['services'] ?? 'Kelola Sosmed');
+    if (is_array($services)) {
+        $serviceType = implode(', ', array_filter(array_map('trim', $services)));
+    } else {
+        $serviceType = trim(strval($services));
+    }
+    if (empty($serviceType)) {
+        $serviceType = 'Kelola Sosmed';
+    }
+
+    $contractStartDate = !empty($_POST['contract_start_date']) ? trim($_POST['contract_start_date']) : date('Y-m-d');
+    $contractEndDate = !empty($_POST['contract_end_date']) ? trim($_POST['contract_end_date']) : date('Y-m-d', strtotime('+30 days'));
+
+    $today = date('Y-m-d');
+    $contractStatus = ($today > $contractEndDate) ? 'expired' : 'active';
+    $clientStatus = ($contractStatus === 'expired') ? 'expired' : 'Active';
+    $userActive = ($contractStatus === 'expired') ? 0 : 1;
+
     if ($id <= 0 || empty($name) || empty($company)) {
         echo json_encode(['success' => false, 'message' => 'Nama dan nama perusahaan wajib diisi.']);
         exit;
@@ -154,8 +194,17 @@ if ($action === 'update_client') {
     $password = trim($_POST['password'] ?? '');
 
     try {
-        $stmt = $db->prepare("UPDATE clients SET name = ?, company = ?, company_name = ?, pic_name = ?, email = ?, phone = ? WHERE id = ?");
-        $stmt->execute([$name, $company, $company, $name, $email, $phone, $id]);
+        $stmt = $db->prepare("
+            UPDATE clients 
+            SET name = ?, company = ?, company_name = ?, pic_name = ?, email = ?, phone = ?,
+                service_type = ?, contract_start_date = ?, contract_end_date = ?, contract_status = ?, status = ?
+            WHERE id = ?
+        ");
+        $stmt->execute([$name, $company, $company, $name, $email, $phone, $serviceType, $contractStartDate, $contractEndDate, $contractStatus, $clientStatus, $id]);
+
+        // Sync to project
+        $db->prepare("UPDATE projects SET service_type = ?, contract_start_date = ?, contract_end_date = ?, contract_status = ? WHERE client_id = ?")
+           ->execute([$serviceType, $contractStartDate, $contractEndDate, $contractStatus, $id]);
 
         // Sync to users table for Client Portal access
         $userStmt = $db->prepare("SELECT id FROM users WHERE client_id = ? OR email = ? LIMIT 1");
@@ -165,21 +214,81 @@ if ($action === 'update_client') {
         if ($existingUserId) {
             if (!empty($password)) {
                 $hashedPw = password_hash($password, PASSWORD_BCRYPT);
-                $db->prepare("UPDATE users SET name = ?, email = ?, password = ?, role = 'client', client_id = ?, phone_wa = ?, is_active = 1, is_deleted = 0 WHERE id = ?")
-                   ->execute([$name, $email, $hashedPw, $id, $phone, $existingUserId]);
+                $db->prepare("UPDATE users SET name = ?, email = ?, password = ?, role = 'client', client_id = ?, phone_wa = ?, is_active = ?, is_deleted = 0 WHERE id = ?")
+                   ->execute([$name, $email, $hashedPw, $id, $phone, $userActive, $existingUserId]);
             } else {
-                $db->prepare("UPDATE users SET name = ?, email = ?, role = 'client', client_id = ?, phone_wa = ?, is_active = 1, is_deleted = 0 WHERE id = ?")
-                   ->execute([$name, $email, $id, $phone, $existingUserId]);
+                $db->prepare("UPDATE users SET name = ?, email = ?, role = 'client', client_id = ?, phone_wa = ?, is_active = ?, is_deleted = 0 WHERE id = ?")
+                   ->execute([$name, $email, $id, $phone, $userActive, $existingUserId]);
             }
         } elseif (!empty($password)) {
             $hashedPw = password_hash($password, PASSWORD_BCRYPT);
-            $db->prepare("INSERT INTO users (name, email, password, role, employment_type, client_id, phone_wa, is_active, is_deleted) VALUES (?, ?, ?, 'client', 'client', ?, ?, 1, 0)")
-               ->execute([$name, $email, $hashedPw, $id, $phone]);
+            $db->prepare("INSERT INTO users (name, email, password, role, employment_type, client_id, phone_wa, is_active, is_deleted) VALUES (?, ?, ?, 'client', 'client', ?, ?, ?, 0)")
+               ->execute([$name, $email, $hashedPw, $id, $phone, $userActive]);
         }
 
-        log_activity('client', "Data Klien Diperbarui: $company", "Nomor Kontak: $phone, Nama: $name");
+        log_activity('client', "Data Klien Diperbarui: $company", "Layanan: $serviceType, Masa Kontrak: $contractStartDate s/d $contractEndDate");
 
-        echo json_encode(['success' => true, 'message' => 'Data klien berhasil diperbarui!']);
+        echo json_encode(['success' => true, 'message' => 'Data klien dan masa kontrak berhasil diperbarui!']);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        exit;
+    }
+}
+
+// 3b. RENEW CLIENT CONTRACT
+if ($action === 'renew_contract') {
+    if (!is_admin()) {
+        echo json_encode(['success' => false, 'message' => 'Hanya Owner dan Admin yang dapat memperpanjang kontrak klien.']);
+        exit;
+    }
+    $id = intval($_POST['client_id'] ?? ($_POST['id'] ?? 0));
+    $startDate = !empty($_POST['contract_start_date']) ? trim($_POST['contract_start_date']) : date('Y-m-d');
+    $endDate = !empty($_POST['contract_end_date']) ? trim($_POST['contract_end_date']) : '';
+
+    if ($id <= 0 || empty($endDate)) {
+        echo json_encode(['success' => false, 'message' => 'Tanggal akhir perpanjangan kontrak wajib diisi.']);
+        exit;
+    }
+
+    try {
+        $stmt = $db->prepare("SELECT company, email FROM clients WHERE id = ?");
+        $stmt->execute([$id]);
+        $client = $stmt->fetch();
+        if (!$client) {
+            echo json_encode(['success' => false, 'message' => 'Klien tidak ditemukan.']);
+            exit;
+        }
+
+        $today = date('Y-m-d');
+        $contractStatus = ($today > $endDate) ? 'expired' : 'active';
+        $clientStatus = ($contractStatus === 'expired') ? 'expired' : 'Active';
+        $userActive = ($contractStatus === 'expired') ? 0 : 1;
+
+        $db->prepare("
+            UPDATE clients 
+            SET contract_start_date = ?, contract_end_date = ?, contract_status = ?, status = ?
+            WHERE id = ?
+        ")->execute([$startDate, $endDate, $contractStatus, $clientStatus, $id]);
+
+        $db->prepare("
+            UPDATE projects 
+            SET contract_start_date = ?, contract_end_date = ?, contract_status = ?
+            WHERE client_id = ?
+        ")->execute([$startDate, $endDate, $contractStatus, $id]);
+
+        // Reactivate user portal login
+        $db->prepare("
+            UPDATE users SET is_active = ?, is_deleted = 0 WHERE client_id = ? OR email = ?
+        ")->execute([$userActive, $id, $client['email']]);
+
+        log_activity('client', "Kontrak Klien Diperpanjang: {$client['company']}", "Masa baru: $startDate s/d $endDate (Status: $contractStatus)");
+
+        $formattedEnd = date('d M Y', strtotime($endDate));
+        echo json_encode([
+            'success' => true,
+            'message' => "Masa kontrak {$client['company']} berhasil diperpanjang hingga {$formattedEnd} dan akun portal aktif kembali!"
+        ]);
         exit;
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);

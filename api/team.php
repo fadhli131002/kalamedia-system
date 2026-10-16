@@ -27,7 +27,8 @@ release_session();
 if ($action === 'list') {
     try {
         $stmt = $db->query("
-            SELECT u.id, u.name, u.email, u.role, u.employment_type, u.position, u.jobdesk, u.phone_wa, u.avatar, u.is_active, u.created_at
+            SELECT u.id, u.name, u.email, u.role, u.employment_type, u.position, u.jobdesk, u.phone_wa, u.avatar, u.is_active, u.created_at,
+                   u.service_specialty, u.contract_start_date, u.contract_end_date
             FROM users u
             WHERE u.role IN ('karyawan', 'freelancer') AND COALESCE(u.is_deleted, 0) = 0
             ORDER BY 
@@ -80,7 +81,8 @@ if ($action === 'get_member') {
 
     try {
         $stmt = $db->prepare("
-            SELECT id, name, email, role, employment_type, position, jobdesk, phone_wa, avatar, is_active
+            SELECT id, name, email, role, employment_type, position, jobdesk, phone_wa, avatar, is_active,
+                   service_specialty, contract_start_date, contract_end_date
             FROM users
             WHERE id = ? AND COALESCE(is_deleted, 0) = 0
         ");
@@ -120,6 +122,10 @@ if ($action === 'save') {
     $email = trim($_POST['email'] ?? '');
     $password = trim($_POST['password'] ?? '');
     $phoneWa = trim($_POST['phone_wa'] ?? '');
+    $serviceSpecialty = trim($_POST['service_specialty'] ?? '');
+    $contractStartDate = trim($_POST['contract_start_date'] ?? '');
+    $contractEndDate = trim($_POST['contract_end_date'] ?? '');
+
     $clientIds = $_POST['client_ids'] ?? [];
     if (!is_array($clientIds)) {
         $clientIds = array_filter(array_map('intval', explode(',', strval($clientIds))));
@@ -132,6 +138,16 @@ if ($action === 'save') {
 
     if (empty($email)) {
         echo json_encode(['success' => false, 'message' => 'Email login wajib diisi']);
+        exit;
+    }
+
+    if (empty($contractStartDate) || empty($contractEndDate)) {
+        echo json_encode(['success' => false, 'message' => 'Masa kontrak kerja (Tanggal Mulai dan Akhir Kontrak) wajib diisi']);
+        exit;
+    }
+
+    if ($contractEndDate < $contractStartDate) {
+        echo json_encode(['success' => false, 'message' => 'Tanggal akhir kontrak tidak boleh sebelum tanggal mulai']);
         exit;
     }
 
@@ -154,10 +170,16 @@ if ($action === 'save') {
             $hashedPw = password_hash($password, PASSWORD_BCRYPT);
 
             $stmt = $db->prepare("
-                INSERT INTO users (name, email, password, role, employment_type, position, jobdesk, phone_wa, is_active, is_deleted)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, 0)
+                INSERT INTO users (
+                    name, email, password, role, employment_type, position, jobdesk, phone_wa,
+                    service_specialty, contract_start_date, contract_end_date, is_active, is_deleted
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 0)
             ");
-            $stmt->execute([$name, $email, $hashedPw, $role, $employmentType, $position, $jobdesk, $phoneWa]);
+            $stmt->execute([
+                $name, $email, $hashedPw, $role, $employmentType, $position, $jobdesk, $phoneWa,
+                $serviceSpecialty, $contractStartDate, $contractEndDate
+            ]);
             $userId = (int)$db->lastInsertId();
 
             // Also sync to employees table for salary slips if not exists
@@ -165,9 +187,12 @@ if ($action === 'save') {
             $chkEmp->execute([$email]);
             if (!$chkEmp->fetchColumn()) {
                 $db->prepare("
-                    INSERT INTO employees (name, position, department, employment_type, email, phone, status)
-                    VALUES (?, ?, 'Creative & Operational', ?, ?, ?, 'Active')
-                ")->execute([$name, $position ?: 'Team Specialist', ($employmentType === 'freelancer' ? 'Freelance' : 'Full-time'), $email, $phoneWa]);
+                    INSERT INTO employees (name, position, department, employment_type, email, phone, status, service_specialty, contract_start_date, contract_end_date)
+                    VALUES (?, ?, 'Creative & Operational', ?, ?, ?, 'Active', ?, ?, ?)
+                ")->execute([
+                    $name, $position ?: 'Team Specialist', ($employmentType === 'freelancer' ? 'Freelance' : 'Full-time'),
+                    $email, $phoneWa, $serviceSpecialty, $contractStartDate, $contractEndDate
+                ]);
             }
 
             $actionMsg = "Karyawan / Tim Baru Ditambahkan: $name ($employmentType)";
@@ -185,17 +210,25 @@ if ($action === 'save') {
                 $hashedPw = password_hash($password, PASSWORD_BCRYPT);
                 $stmt = $db->prepare("
                     UPDATE users 
-                    SET name = ?, email = ?, password = ?, role = ?, employment_type = ?, position = ?, jobdesk = ?, phone_wa = ?
+                    SET name = ?, email = ?, password = ?, role = ?, employment_type = ?, position = ?, jobdesk = ?, phone_wa = ?,
+                        service_specialty = ?, contract_start_date = ?, contract_end_date = ?
                     WHERE id = ?
                 ");
-                $stmt->execute([$name, $email, $hashedPw, $role, $employmentType, $position, $jobdesk, $phoneWa, $id]);
+                $stmt->execute([
+                    $name, $email, $hashedPw, $role, $employmentType, $position, $jobdesk, $phoneWa,
+                    $serviceSpecialty, $contractStartDate, $contractEndDate, $id
+                ]);
             } else {
                 $stmt = $db->prepare("
                     UPDATE users 
-                    SET name = ?, email = ?, role = ?, employment_type = ?, position = ?, jobdesk = ?, phone_wa = ?
+                    SET name = ?, email = ?, role = ?, employment_type = ?, position = ?, jobdesk = ?, phone_wa = ?,
+                        service_specialty = ?, contract_start_date = ?, contract_end_date = ?
                     WHERE id = ?
                 ");
-                $stmt->execute([$name, $email, $role, $employmentType, $position, $jobdesk, $phoneWa, $id]);
+                $stmt->execute([
+                    $name, $email, $role, $employmentType, $position, $jobdesk, $phoneWa,
+                    $serviceSpecialty, $contractStartDate, $contractEndDate, $id
+                ]);
             }
 
             $userId = $id;
@@ -203,9 +236,13 @@ if ($action === 'save') {
             // Sync to employees table
             $db->prepare("
                 UPDATE employees 
-                SET name = ?, position = ?, phone = ?, employment_type = ?
+                SET name = ?, position = ?, phone = ?, employment_type = ?,
+                    service_specialty = ?, contract_start_date = ?, contract_end_date = ?
                 WHERE email = ?
-            ")->execute([$name, $position ?: 'Team Specialist', $phoneWa, ($employmentType === 'freelancer' ? 'Freelance' : 'Full-time'), $email]);
+            ")->execute([
+                $name, $position ?: 'Team Specialist', $phoneWa, ($employmentType === 'freelancer' ? 'Freelance' : 'Full-time'),
+                $serviceSpecialty, $contractStartDate, $contractEndDate, $email
+            ]);
 
             $actionMsg = "Data Karyawan Diperbarui: $name";
         }

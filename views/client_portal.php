@@ -31,6 +31,100 @@ if ($clientId > 0) {
     $client = $stmtClient->fetch();
 }
 
+// Strict Client Security: Block expired client from portal
+if ($role === 'client' && $client) {
+    $today = date('Y-m-d');
+    $isContractExpired = false;
+    if (!empty($client['contract_end_date']) && $today > $client['contract_end_date']) {
+        $isContractExpired = true;
+        $db->prepare("UPDATE clients SET contract_status = 'expired', status = 'expired' WHERE id = ?")->execute([$client['id']]);
+        if (!empty($user['id'])) {
+            $db->prepare("UPDATE users SET is_active = 0 WHERE id = ?")->execute([$user['id']]);
+        }
+    } elseif (($client['contract_status'] ?? '') === 'expired') {
+        $isContractExpired = true;
+    }
+
+    if ($isContractExpired) {
+        $formattedEndDate = !empty($client['contract_end_date']) ? date('d F Y', strtotime($client['contract_end_date'])) : 'tanggal yang ditentukan';
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masa Kontrak Berakhir - <?= htmlspecialchars($client['company'] ?? 'Kalamedia') ?></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
+  <style>
+    .expired-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: #F8F9FC;
+      background-image: radial-gradient(circle at 10% 20%, rgba(239, 68, 68, 0.05) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(93, 118, 245, 0.05) 0%, transparent 40%);
+      font-family: var(--font-sans);
+    }
+    .expired-card {
+      max-width: 540px;
+      width: 100%;
+      background: #FFFFFF;
+      border: 1px solid #ECEEF5;
+      border-radius: 24px;
+      padding: 44px 36px;
+      text-align: center;
+      box-shadow: 0 20px 40px -15px rgba(18, 24, 48, 0.08);
+    }
+  </style>
+</head>
+<body class="expired-page">
+  <div class="expired-card">
+    <div style="width: 72px; height: 72px; margin: 0 auto 20px; border-radius: 50%; background: #FEF3F2; color: #D92D20; display: flex; align-items: center; justify-content: center; font-size: 32px; border: 1px solid #FEE4E2;">
+      ⏳
+    </div>
+    <span class="badge" style="background: #FEF3F2; color: #B42318; font-weight: 800; font-size: 11.5px; padding: 4px 12px; margin-bottom: 12px;">
+      STATUS: KONTRAK SELESAI / EXPIRED
+    </span>
+    <h2 style="font-size: 22px; font-weight: 800; color: #101828; margin: 8px 0 12px;">
+      Akses Layanan Ditangguhkan
+    </h2>
+    <p style="font-size: 14.5px; color: #475467; line-height: 1.6; margin-bottom: 24px;">
+      Masa kontrak layanan Anda telah berakhir pada <b><?= $formattedEndDate ?></b>. Silakan hubungi tim Kalamedia untuk perpanjangan kontrak.
+    </p>
+    <div style="background: #F8F9FC; border: 1px solid #ECEEF5; border-radius: 12px; padding: 14px; margin-bottom: 24px; font-size: 13px; color: #344054; text-align: left;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+        <span style="color: #667085;">Klien / Perusahaan:</span>
+        <b><?= htmlspecialchars($client['company'] ?? '-') ?></b>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+        <span style="color: #667085;">Layanan Terdaftar:</span>
+        <b><?= htmlspecialchars($client['service_type'] ?? 'Kelola Sosmed') ?></b>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span style="color: #667085;">Akhir Kontrak:</span>
+        <span style="color: #B42318; font-weight: 700;"><?= $formattedEndDate ?></span>
+      </div>
+    </div>
+    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+      <a href="https://wa.me/62895361622252?text=Halo%20Tim%20Kalamedia,%20saya%20ingin%20memperpanjang%20kontrak%20layanan%20<?= urlencode($client['company']) ?>" target="_blank" class="btn btn-primary" style="font-weight: 700; background: #027A48; border-color: #027A48;">
+        Hubungi WhatsApp Tim Kalamedia
+      </a>
+      <a href="api/auth.php?action=logout&_slot=client" class="btn btn-secondary" style="font-weight: 600;">
+        Keluar (Logout)
+      </a>
+    </div>
+  </div>
+</body>
+</html>
+<?php
+        exit;
+    }
+}
+
 if (!$client) {
 ?>
 <!DOCTYPE html>

@@ -4,8 +4,35 @@
  * Multi-Slot Session Support: Allows concurrent logins across tabs for Owner and Client
  */
 
+if (function_exists('check_and_expire_client_contracts')) {
+    check_and_expire_client_contracts();
+}
+
 $requestedContext = $_GET['context'] ?? '';
 $isSwitch = isset($_GET['switch']);
+
+// Check if logged-in client is expired
+if (is_logged_in('client')) {
+    $cUser = current_user('client');
+    if ($cUser) {
+        $cDb = Database::getConnection();
+        $stmtCChk = $cDb->prepare("
+            SELECT c.id, c.contract_status, c.contract_end_date, u.is_active 
+            FROM users u
+            LEFT JOIN clients c ON u.client_id = c.id OR u.email = c.email
+            WHERE u.id = ? LIMIT 1
+        ");
+        $stmtCChk->execute([$cUser['id']]);
+        $cRowChk = $stmtCChk->fetch(PDO::FETCH_ASSOC);
+        if ($cRowChk && ($cRowChk['contract_status'] === 'expired' || ($cRowChk['is_active'] ?? 1) == 0)) {
+            unset($_SESSION['kala_auth']['client']);
+            unset($_SESSION['kala_client_portal']);
+            if (isset($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'client') {
+                unset($_SESSION['user']);
+            }
+        }
+    }
+}
 
 // Check session based on requested context
 if ($requestedContext === 'client') {

@@ -225,7 +225,33 @@ function current_portal(): string {
     return 'worker';
 }
 
+function check_and_expire_client_contracts(?PDO $db = null): void {
+    try {
+        if (!$db) {
+            $db = Database::getConnection();
+        }
+        $today = date('Y-m-d');
+        // Find clients whose contract has expired
+        $stmt = $db->prepare("
+            SELECT id FROM clients 
+            WHERE contract_end_date IS NOT NULL 
+              AND contract_end_date < ? 
+              AND contract_status != 'expired' 
+              AND COALESCE(is_deleted, 0) = 0
+        ");
+        $stmt->execute([$today]);
+        $expiredClientIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+        if (!empty($expiredClientIds)) {
+            $inClause = implode(',', array_map('intval', $expiredClientIds));
+            $db->exec("UPDATE clients SET contract_status = 'expired', status = 'expired' WHERE id IN ($inClause)");
+            $db->exec("UPDATE users SET is_active = 0 WHERE role = 'client' AND client_id IN ($inClause)");
+        }
+    } catch (Throwable $e) {}
+}
+
 function require_auth(?string $context = null) {
+    check_and_expire_client_contracts();
     if (!is_logged_in($context)) {
         $uri = $_SERVER['REQUEST_URI'] ?? '';
         $isApi = (strpos($uri, '/api/') !== false) ||

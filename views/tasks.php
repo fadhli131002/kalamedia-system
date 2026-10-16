@@ -287,6 +287,41 @@ if ($isWorkerUser) {
       align-items: center;
       gap: 6px;
     }
+    .client-filter-pill {
+      background: #FFFFFF;
+      border: 1px solid #D0D5DD;
+      color: #344054;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .client-filter-pill:hover {
+      background: #F9FAFB;
+      border-color: #98A2B3;
+    }
+    .client-filter-pill.active {
+      background: linear-gradient(135deg, #5D76F5 0%, #8932E0 100%);
+      color: #FFFFFF;
+      border-color: transparent;
+      box-shadow: 0 2px 6px rgba(93, 118, 245, 0.35);
+    }
+    .service-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+    }
+    .service-tag-sosmed { background: #EFF8FF; color: #175CD3; border: 1px solid #B2DDFF; }
+    .service-tag-desain { background: #FDF2FA; color: #C11574; border: 1px solid #FCCEEE; }
+    .service-tag-web { background: #F4F3FF; color: #5925DC; border: 1px solid #D9D6FE; }
+    .service-tag-ads { background: #ECFDF3; color: #027A48; border: 1px solid #A6F4C5; }
+    .service-tag-default { background: #F2F4F7; color: #344054; border: 1px solid #EAECF0; }
   </style>
 </head>
 <body>
@@ -432,38 +467,40 @@ if ($isWorkerUser) {
           </div>
 
           <!-- Filter Panel -->
-          <div class="filter-panel">
+          <div class="filter-panel" style="display: flex; flex-direction: column; align-items: stretch; gap: 12px;">
+            <!-- Sortir Berdasarkan 4 Jasa Kalamedia -->
             <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-              <div class="date-filter-group" id="status-filter-group">
-                <button class="filter-btn active" onclick="filterByStatus('all', this)">Semua</button>
-                <button class="filter-btn" onclick="filterByStatus('revision', this)">Revisi</button>
-                <button class="filter-btn" onclick="filterByStatus('client_review', this)">Review Klien</button>
-                <button class="filter-btn" onclick="filterByStatus('in_progress', this)">In Progress</button>
-                <button class="filter-btn" onclick="filterByStatus('approved', this)">Selesai</button>
-              </div>
-
-              <?php if ($isAdminUser): ?>
-                <!-- SDM Type Filter -->
-                <select id="filter-worker-type" class="form-control" style="width: auto; padding: 6px 12px; font-size: 12px; font-weight: 600;" onchange="applyFilters()">
-                  <option value="">Semua SDM</option>
-                  <option value="karyawan">Karyawan (In-House)</option>
-                  <option value="freelancer">Freelancer</option>
-                </select>
-              <?php endif; ?>
-
-              <!-- Category Filter -->
-              <select id="filter-category" class="form-control" style="width: auto; padding: 6px 12px; font-size: 12px; font-weight: 600;" onchange="applyFilters()">
-                <option value="">Semua Kategori</option>
-                <option value="design">Desain Grafis</option>
-                <option value="video">Produksi Video</option>
-                <option value="copywriting">Copywriting</option>
-                <option value="ads">Meta / TikTok Ads</option>
-                <option value="web">Web Development</option>
-              </select>
+              <span style="font-size: 11.5px; font-weight: 700; color: #6E7485; text-transform: uppercase; letter-spacing: 0.5px;">Sortir Jasa:</span>
+              <button type="button" class="client-filter-pill active task-service-pill" onclick="filterTaskService('all', this)">Semua Jasa</button>
+              <button type="button" class="client-filter-pill task-service-pill" onclick="filterTaskService('Kelola Sosmed', this)">Kelola Sosmed</button>
+              <button type="button" class="client-filter-pill task-service-pill" onclick="filterTaskService('Desain Eceran', this)">Desain Eceran / Satuan</button>
+              <button type="button" class="client-filter-pill task-service-pill" onclick="filterTaskService('Jasa Buat Web', this)">Jasa Buat Web</button>
+              <button type="button" class="client-filter-pill task-service-pill" onclick="filterTaskService('Jasa Iklan', this)">Jasa Iklan Meta & Google</button>
             </div>
 
-            <div style="font-size: 12px; color: var(--text-muted);" id="tasks-count-label">
-              Menampilkan 0 tugas
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                <div class="date-filter-group" id="status-filter-group">
+                  <button class="filter-btn active" onclick="filterByStatus('all', this)">Semua Status</button>
+                  <button class="filter-btn" onclick="filterByStatus('revision', this)">Revisi</button>
+                  <button class="filter-btn" onclick="filterByStatus('client_review', this)">Review Klien</button>
+                  <button class="filter-btn" onclick="filterByStatus('in_progress', this)">In Progress</button>
+                  <button class="filter-btn" onclick="filterByStatus('approved', this)">Selesai</button>
+                </div>
+
+                <?php if ($isAdminUser): ?>
+                  <!-- SDM Type Filter -->
+                  <select id="filter-worker-type" class="form-control" style="width: auto; padding: 6px 12px; font-size: 12px; font-weight: 600;" onchange="applyFilters()">
+                    <option value="">Semua SDM</option>
+                    <option value="karyawan">Karyawan (In-House)</option>
+                    <option value="freelancer">Freelancer</option>
+                  </select>
+                <?php endif; ?>
+              </div>
+
+              <div style="font-size: 12px; color: var(--text-muted);" id="tasks-count-label">
+                Menampilkan 0 tugas
+              </div>
             </div>
           </div>
 
@@ -637,9 +674,10 @@ if ($isWorkerUser) {
             <div class="modal-body">
               <div class="form-group">
                 <label class="form-label">Pilih Proyek & Klien <span style="color:red;">*</span></label>
-                <select name="project_id" id="assign-project-id" class="form-control" required>
+                <select name="project_id" id="assign-project-id" class="form-control" onchange="onCategoryOrProjectChange()" required>
                   <option value="">-- Pilih Proyek Klien --</option>
                 </select>
+                <div id="assign-project-contract-info" style="display:none; font-size: 11.5px; font-weight: 600; color: #475467; margin-top: 4px;"></div>
               </div>
 
               <div class="form-group">
@@ -649,40 +687,44 @@ if ($isWorkerUser) {
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <div class="form-group">
-                  <label class="form-label">Kategori Pekerjaan <span style="color:red;">*</span></label>
-                  <select name="category" class="form-control" required>
-                    <option value="design">Desain Grafis (Feed / Story / Banner)</option>
-                    <option value="video">Produksi Video (Reels / TikTok / Motion)</option>
-                    <option value="copywriting">Copywriting & Naskah Konten</option>
-                    <option value="ads">Setup & Optimasi Ads (Meta/TikTok/Google)</option>
-                    <option value="web">Web & Landing Page Development</option>
-                    <option value="other">Deliverables Lainnya</option>
+                  <label class="form-label">Kategori Pekerjaan (Jasa Kalamedia) <span style="color:red;">*</span></label>
+                  <select name="category" id="assign-category" class="form-control" onchange="onCategoryOrProjectChange()" required>
+                    <option value="Kelola Sosmed">Kelola Sosmed (Social Media Management)</option>
+                    <option value="Desain Eceran / Satuan">Desain Eceran / Satuan (Desain 1-an)</option>
+                    <option value="Jasa Buat Web">Jasa Buat Web (Website &amp; Landing Page)</option>
+                    <option value="Jasa Iklan Meta & Google">Jasa Iklan Meta &amp; Google (Meta Ads &amp; Google Ads)</option>
                   </select>
                 </div>
 
                 <div class="form-group">
                   <label class="form-label">Tugaskan Kepada (PIC) <span style="color:red;">*</span></label>
-                  <select name="assigned_to_user_id" id="assign-member-id" class="form-control" required>
+                  <select name="assigned_to_user_id" id="assign-member-id" class="form-control" onchange="onAssignMemberChange()" required>
                     <option value="">-- Pilih Anggota Tim / Freelancer --</option>
                   </select>
+                  <div id="assign-worker-contract-info" style="display:none; font-size: 11.5px; font-weight: 700; color: #175CD3; margin-top: 4px; padding: 4px 8px; background: #EFF8FF; border-radius: 4px; border: 1px solid #B2DDFF;"></div>
                 </div>
               </div>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <div class="form-group">
-                  <label class="form-label">Prioritas Tugas</label>
-                  <select name="priority" class="form-control">
-                    <option value="medium" selected>Medium</option>
-                    <option value="high">High (Tinggi)</option>
-                    <option value="urgent">Urgent (Segera)</option>
-                    <option value="low">Low (Santai)</option>
-                  </select>
+                  <label class="form-label">Mulai Pengerjaan (Start Date) <span style="color:red;">*</span></label>
+                  <input type="date" name="start_date" id="assign-start-date" class="form-control" value="<?= date('Y-m-d') ?>" required>
                 </div>
 
                 <div class="form-group">
-                  <label class="form-label">Tenggat Waktu (Deadline) <span style="color:red;">*</span></label>
-                  <input type="date" name="due_date" class="form-control" value="<?= date('Y-m-d', strtotime('+3 days')) ?>" required>
+                  <label class="form-label">Tenggat Selesai (Deadline) <span style="color:red;">*</span></label>
+                  <input type="date" name="due_date" id="assign-due-date" class="form-control" value="<?= date('Y-m-d', strtotime('+3 days')) ?>" required>
                 </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Prioritas Tugas</label>
+                <select name="priority" class="form-control">
+                  <option value="medium" selected>Medium</option>
+                  <option value="high">High (Tinggi)</option>
+                  <option value="urgent">Urgent (Segera)</option>
+                  <option value="low">Low (Santai)</option>
+                </select>
               </div>
 
               <div class="form-group">
@@ -1111,6 +1153,15 @@ if ($isWorkerUser) {
       }
     }
 
+    let currentServiceFilter = 'all';
+
+    function filterTaskService(serviceKey, btn) {
+      currentServiceFilter = serviceKey;
+      document.querySelectorAll('.task-service-pill').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      applyFilters();
+    }
+
     function filterByStatus(status, btn) {
       currentFilterStatus = status;
       document.querySelectorAll('#status-filter-group .filter-btn').forEach(b => b.classList.remove('active'));
@@ -1120,7 +1171,6 @@ if ($isWorkerUser) {
 
     function applyFilters() {
       const workerType = document.getElementById('filter-worker-type') ? document.getElementById('filter-worker-type').value : '';
-      const category = document.getElementById('filter-category') ? document.getElementById('filter-category').value : '';
 
       let filtered = allLoadedTasks;
 
@@ -1132,9 +1182,14 @@ if ($isWorkerUser) {
       if (workerType) {
         filtered = filtered.filter(t => t.worker_type === workerType);
       }
-      // Category filter
-      if (category) {
-        filtered = filtered.filter(t => t.category === category);
+      // Service filter
+      if (currentServiceFilter !== 'all') {
+        const key = currentServiceFilter.toLowerCase();
+        filtered = filtered.filter(t => {
+          const cat = (t.category || '').toLowerCase();
+          const srv = (t.client_service_type || '').toLowerCase();
+          return cat.includes(key) || srv.includes(key);
+        });
       }
 
       document.getElementById('tasks-count-label').innerText = `Menampilkan ${filtered.length} tugas`;
@@ -1163,22 +1218,21 @@ if ($isWorkerUser) {
         'approved': { label: 'Disetujui', class: 'approved' }
       };
 
-      const categoryMap = {
-        'design': 'Desain Grafis',
-        'video': 'Produksi Video',
-        'copywriting': 'Copywriting',
-        'ads': 'Meta / Ads Campaign',
-        'web': 'Web Development',
-        'other': 'Deliverable'
-      };
-
       let html = '';
       tasks.forEach(t => {
         const sInfo = statusMap[t.status] || { label: t.status, class: 'backlog' };
         const isFreelance = (t.worker_type === 'freelancer');
+        const workerSpec = t.worker_specialty ? ` • ${escapeHtml(t.worker_specialty)}` : '';
         const workerBadge = isFreelance 
-          ? `<span class="badge-worker freelancer">Freelancer: <b>${escapeHtml(t.worker_name || 'Talent')}</b></span>`
-          : `<span class="badge-worker karyawan">In-House: <b>${escapeHtml(t.worker_name || 'Staff')}</b></span>`;
+          ? `<span class="badge-worker freelancer">Freelancer: <b>${escapeHtml(t.worker_name || 'Talent')}</b>${workerSpec}</span>`
+          : `<span class="badge-worker karyawan">In-House: <b>${escapeHtml(t.worker_name || 'Staff')}</b>${workerSpec}</span>`;
+
+        let catLabel = t.category || 'Kelola Sosmed';
+        let catClass = 'service-tag-default';
+        if (catLabel.toLowerCase().includes('sosmed')) catClass = 'service-tag-sosmed';
+        else if (catLabel.toLowerCase().includes('desain')) catClass = 'service-tag-desain';
+        else if (catLabel.toLowerCase().includes('web')) catClass = 'service-tag-web';
+        else if (catLabel.toLowerCase().includes('iklan') || catLabel.toLowerCase().includes('ads')) catClass = 'service-tag-ads';
 
         const hasRevision = (t.status === 'revision');
         const hasReview = (t.status === 'client_review');
@@ -1186,6 +1240,7 @@ if ($isWorkerUser) {
 
         const cardExtraClass = hasRevision ? 'has-revision' : (hasReview ? 'has-review' : (isApproved ? 'is-approved' : ''));
         const unreadFeedbacks = parseInt(t.unread_feedbacks_count) || 0;
+        const dateRangeText = (t.start_date ? formatDate(t.start_date) : '-') + ' s/d ' + (t.due_date ? formatDate(t.due_date) : '-');
 
         html += `
           <div class="task-item-card ${cardExtraClass}">
@@ -1194,8 +1249,8 @@ if ($isWorkerUser) {
                 <span class="status-pill ${sInfo.class}">
                   <span>${sInfo.label}</span>
                 </span>
-                <span class="badge" style="background: #F2F4F7; color: var(--text-secondary); font-size: 10.5px; font-weight: 700;">
-                  ${categoryMap[t.category] || t.category}
+                <span class="service-tag ${catClass}">
+                  ${escapeHtml(catLabel)}
                 </span>
                 <span class="badge-priority ${t.priority || 'medium'}">
                   ${t.priority ? t.priority.toUpperCase() : 'MEDIUM'}
@@ -1205,7 +1260,7 @@ if ($isWorkerUser) {
 
               <div style="display: flex; align-items: center; gap: 10px;">
                 <span style="font-size: 11.5px; color: var(--text-muted);">
-                  <span>Deadline: <b>${t.due_date ? formatDate(t.due_date) : '-'}</b></span>
+                  <span>Waktu Pengerjaan: <b>${dateRangeText}</b></span>
                 </span>
                 <?php if ($isAdminUser): ?>
                   <button type="button" class="btn btn-secondary btn-sm" onclick="deleteTask(${t.id})" style="padding: 3px 8px; font-size: 11px; font-weight: 600; color: #B42318;" title="Hapus Tugas">
@@ -1270,16 +1325,21 @@ if ($isWorkerUser) {
     }
 
     <?php if ($isAdminUser): ?>
+      let globalProjects = [];
+      let globalMembers = [];
+
       async function loadDropdowns() {
         try {
           // 1. Projects Dropdown
           const resP = await fetch('api/portal_tasks.php?action=projects_dropdown');
           const dataP = await resP.json();
           if (dataP.success) {
+            globalProjects = dataP.projects || [];
             const selectP = document.getElementById('assign-project-id');
             let pHtml = '<option value="">-- Pilih Proyek Klien --</option>';
-            dataP.projects.forEach(p => {
-              pHtml += `<option value="${p.project_id}">${escapeHtml(p.client_company)} - ${escapeHtml(p.project_name)}</option>`;
+            globalProjects.forEach(p => {
+              const srv = p.service_type ? ` [${p.service_type}]` : '';
+              pHtml += `<option value="${p.project_id}">${escapeHtml(p.client_company)}${escapeHtml(srv)} - ${escapeHtml(p.project_name)}</option>`;
             });
             selectP.innerHTML = pHtml;
           }
@@ -1288,16 +1348,143 @@ if ($isWorkerUser) {
           const resM = await fetch('api/portal_tasks.php?action=team_members');
           const dataM = await resM.json();
           if (dataM.success) {
-            const selectM = document.getElementById('assign-member-id');
-            let mHtml = '<option value="">-- Pilih Anggota Tim / Freelancer --</option>';
-            dataM.members.forEach(m => {
-              const label = (m.role === 'freelancer' || m.employment_type === 'freelance') ? 'Freelancer' : 'Karyawan In-House';
-              mHtml += `<option value="${m.id}">[${label}] ${escapeHtml(m.name)}</option>`;
-            });
-            selectM.innerHTML = mHtml;
+            globalMembers = dataM.members || [];
+            renderAssignMembersDropdown();
           }
         } catch (err) {
           console.error(err);
+        }
+      }
+
+      function renderAssignMembersDropdown() {
+        const selectM = document.getElementById('assign-member-id');
+        if (!selectM) return;
+
+        const projId = document.getElementById('assign-project-id')?.value;
+        const category = document.getElementById('assign-category')?.value || '';
+
+        const selectedProj = globalProjects.find(p => String(p.project_id) === String(projId));
+        const clientService = selectedProj?.service_type || '';
+
+        // Show client contract info if project selected
+        const projInfoEl = document.getElementById('assign-project-contract-info');
+        if (projInfoEl) {
+          if (selectedProj && selectedProj.contract_start_date && selectedProj.contract_end_date) {
+            const isExp = selectedProj.contract_status === 'expired';
+            projInfoEl.style.display = 'block';
+            projInfoEl.innerHTML = `Masa Kontrak Klien: <b>${selectedProj.contract_start_date} s/d ${selectedProj.contract_end_date}</b> ${isExp ? '<span style="color:#B42318;">(KONTRAK KLIEN HABIS)</span>' : '<span style="color:#027A48;">(Aktif)</span>'}`;
+          } else {
+            projInfoEl.style.display = 'none';
+          }
+        }
+
+        let targetKey = category;
+        if (!targetKey && clientService) targetKey = clientService;
+
+        const today = new Date().toISOString().slice(0, 10);
+        const recommended = [];
+        const others = [];
+
+        globalMembers.forEach(m => {
+          const isContractActive = !m.contract_end_date || m.contract_end_date >= today;
+          const specialtyMatch = targetKey && m.service_specialty && (
+            m.service_specialty.toLowerCase().includes(targetKey.toLowerCase()) ||
+            targetKey.toLowerCase().includes(m.service_specialty.toLowerCase())
+          );
+
+          if (specialtyMatch && isContractActive) {
+            recommended.push(m);
+          } else {
+            others.push(m);
+          }
+        });
+
+        let mHtml = '<option value="">-- Pilih Anggota Tim / Freelancer --</option>';
+
+        if (recommended.length > 0) {
+          mHtml += `<optgroup label="⭐ Rekomendasi (Sesuai Jasa '${targetKey}' & Kontrak Aktif)">`;
+          recommended.forEach(m => {
+            const label = (m.role === 'freelancer' || m.employment_type === 'freelance') ? 'Freelancer' : 'Karyawan In-House';
+            const spec = m.service_specialty ? ` (${m.service_specialty})` : '';
+            mHtml += `<option value="${m.id}">⭐ [${label}] ${escapeHtml(m.name)}${escapeHtml(spec)}</option>`;
+          });
+          mHtml += `</optgroup>`;
+        }
+
+        mHtml += `<optgroup label="Anggota Tim Lainnya">`;
+        others.forEach(m => {
+          const label = (m.role === 'freelancer' || m.employment_type === 'freelance') ? 'Freelancer' : 'Karyawan In-House';
+          const spec = m.service_specialty ? ` (${m.service_specialty})` : '';
+          const isExpired = m.contract_end_date && m.contract_end_date < today;
+          const expLabel = isExpired ? ' [KONTRAK HABIS]' : '';
+          mHtml += `<option value="${m.id}">[${label}] ${escapeHtml(m.name)}${escapeHtml(spec)}${expLabel}</option>`;
+        });
+        mHtml += `</optgroup>`;
+
+        selectM.innerHTML = mHtml;
+
+        // Auto-select first recommended if available
+        if (recommended.length > 0) {
+          selectM.value = recommended[0].id;
+        }
+        onAssignMemberChange();
+      }
+
+      function onCategoryOrProjectChange() {
+        renderAssignMembersDropdown();
+      }
+
+      function onAssignMemberChange() {
+        const memberId = document.getElementById('assign-member-id')?.value;
+        const infoEl = document.getElementById('assign-worker-contract-info');
+        const startInput = document.getElementById('assign-start-date');
+        const dueInput = document.getElementById('assign-due-date');
+        const projId = document.getElementById('assign-project-id')?.value;
+        const selectedProj = globalProjects.find(p => String(p.project_id) === String(projId));
+
+        if (!memberId) {
+          if (infoEl) infoEl.style.display = 'none';
+          if (startInput) { startInput.removeAttribute('min'); startInput.removeAttribute('max'); }
+          if (dueInput) { dueInput.removeAttribute('min'); dueInput.removeAttribute('max'); }
+          return;
+        }
+
+        const worker = globalMembers.find(m => String(m.id) === String(memberId));
+        if (!worker) return;
+
+        const wStart = worker.contract_start_date;
+        const wEnd = worker.contract_end_date;
+
+        if (wStart && wEnd) {
+          if (infoEl) {
+            infoEl.style.display = 'block';
+            infoEl.innerHTML = `Masa kontrak kerja <b>${escapeHtml(worker.name)}</b>: <b>${wStart}</b> s/d <b>${wEnd}</b>`;
+          }
+
+          let minDate = wStart;
+          let maxDate = wEnd;
+
+          if (selectedProj && selectedProj.contract_end_date) {
+            if (selectedProj.contract_end_date < maxDate) {
+              maxDate = selectedProj.contract_end_date;
+            }
+          }
+
+          if (startInput) {
+            startInput.min = minDate;
+            startInput.max = maxDate;
+            if (startInput.value < minDate) startInput.value = minDate;
+            if (startInput.value > maxDate) startInput.value = maxDate;
+          }
+
+          if (dueInput) {
+            dueInput.min = minDate;
+            dueInput.max = maxDate;
+            if (dueInput.value < minDate) dueInput.value = minDate;
+            if (dueInput.value > maxDate) dueInput.value = maxDate;
+          }
+        } else {
+          if (infoEl) infoEl.style.display = 'none';
         }
       }
 

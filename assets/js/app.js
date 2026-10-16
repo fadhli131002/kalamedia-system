@@ -39,36 +39,95 @@ function showToast(message, type = 'info') {
 
   setTimeout(() => {
     toast.style.opacity = '0';
-    toast.style.transform = 'translateY(10px)';
-    toast.style.transition = 'all 0.3s ease';
-    setTimeout(() => toast.remove(), 300);
+    toast.style.transform = 'translate3d(0, 10px, 0)';
+    toast.style.transition = 'opacity 240ms cubic-bezier(0.22, 1, 0.36, 1), transform 240ms cubic-bezier(0.22, 1, 0.36, 1)';
+    setTimeout(() => toast.remove(), 250);
   }, 4000);
 }
 
-// Modal Control
+// Modal Control with Smooth 60FPS Soft Spring Pop & Fade
 function openModal(modalId) {
   const modal = document.getElementById(modalId);
-  if (modal) {
+  if (!modal) return;
+  document.body.style.overflow = 'hidden';
+  modal.style.display = 'flex';
+  requestAnimationFrame(() => {
     modal.classList.add('show');
-    document.body.style.overflow = 'hidden';
-  }
+    modal.classList.add('active');
+  });
 }
 
 function closeModal(modalId) {
   const modal = document.getElementById(modalId);
-  if (modal) {
-    modal.classList.remove('show');
-    document.body.style.overflow = 'auto';
-  }
+  if (!modal) return;
+  modal.classList.remove('show');
+  modal.classList.remove('active');
+  setTimeout(() => {
+    if (!modal.classList.contains('show') && !modal.classList.contains('active')) {
+      modal.style.display = 'none';
+      if (!document.querySelector('.modal.show, .modal-backdrop.show, .modal.active, .modal-backdrop.active')) {
+        document.body.style.overflow = 'auto';
+      }
+    }
+  }, 200);
 }
 
 // Close modal when clicking outside dialog
 document.addEventListener('click', (e) => {
   if (e.target.classList.contains('modal-backdrop') || e.target.classList.contains('modal')) {
-    e.target.classList.remove('show');
-    e.target.classList.remove('active');
-    document.body.style.overflow = 'auto';
+    const targetId = e.target.id;
+    if (targetId) {
+      closeModal(targetId);
+    } else {
+      e.target.classList.remove('show', 'active');
+      setTimeout(() => {
+        e.target.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }, 200);
+    }
   }
+});
+
+// Anti-Jank 60FPS Sidebar & Multi-Page Transition Controller
+document.addEventListener('DOMContentLoaded', () => {
+  // Smooth page enter
+  const contentBody = document.querySelector('.content-body');
+  if (contentBody) {
+    contentBody.classList.remove('kala-page-exit');
+  }
+
+  // Smooth Sidebar Link Interception
+  document.querySelectorAll('.sidebar-nav a.nav-link').forEach(link => {
+    link.addEventListener('click', function(e) {
+      const href = this.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
+      if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+      if (this.getAttribute('target') === '_blank') return;
+      if (href.includes('logout')) return;
+
+      // Instant active state switch without freezing
+      document.querySelectorAll('.sidebar-nav a.nav-link').forEach(l => l.classList.remove('active'));
+      this.classList.add('active');
+
+      if (typeof document.startViewTransition === 'function') {
+        e.preventDefault();
+        document.startViewTransition(() => {
+          window.location.href = href;
+        });
+      } else {
+        const body = document.querySelector('.content-body');
+        if (body) {
+          e.preventDefault();
+          body.classList.add('kala-page-exit');
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              window.location.href = href;
+            }, 120);
+          });
+        }
+      }
+    });
+  });
 });
 
 // Fast Table Filter & Search

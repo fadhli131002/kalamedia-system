@@ -43,7 +43,7 @@ if ($requestedContext === 'client') {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
   <style>
     .login-page {
       min-height: 100vh;
@@ -85,9 +85,18 @@ if ($requestedContext === 'client') {
       cursor: pointer;
       background: transparent;
       color: #6E7485;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms cubic-bezier(0.22, 1, 0.36, 1), transform 150ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease;
       text-align: center;
       font-family: inherit;
+      will-change: transform;
+    }
+    .login-tab-btn:hover:not(.active) {
+      color: #000000;
+      transform: translate3d(0, -1px, 0);
+    }
+    .login-tab-btn:active {
+      transform: scale(0.96);
+      transition-duration: 90ms;
     }
     .login-tab-btn.active {
       background: #5D76F5;
@@ -102,7 +111,7 @@ if ($requestedContext === 'client') {
       padding: 12px 16px;
       font-size: 13.5px;
       color: #000000;
-      transition: all 0.2s ease;
+      transition: border-color 200ms ease, box-shadow 200ms ease;
       font-family: inherit;
     }
     .login-card .form-control:focus {
@@ -120,14 +129,19 @@ if ($requestedContext === 'client') {
       font-size: 14px;
       font-weight: 600;
       box-shadow: 0 8px 20px -4px rgba(93, 118, 245, 0.38);
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease;
       cursor: pointer;
+      will-change: transform;
     }
     .login-card .btn-primary:hover {
       background: #4A63E2;
       border-color: #4A63E2;
       box-shadow: 0 10px 24px -4px rgba(93, 118, 245, 0.45);
-      transform: translateY(-1px);
+      transform: translate3d(0, -1.5px, 0);
+    }
+    .login-card .btn-primary:active {
+      transform: translate3d(0, 0.5px, 0) scale(0.96);
+      transition-duration: 90ms;
     }
     @media (max-width: 480px) {
       .login-page {
@@ -185,7 +199,7 @@ if ($requestedContext === 'client') {
         </div>
         <div style="position: relative; display: flex; align-items: center;">
           <input type="password" name="password" id="login-password" class="form-control" placeholder="••••••••" required style="padding-right: 68px;">
-          <button type="button" onclick="togglePasswordVisibility('login-password', this)" style="position: absolute; right: 8px; background: #F8F9FC; border: 1px solid #ECEEF5; border-radius: 10px; padding: 5px 10px; font-size: 11px; font-weight: 700; color: #6E7485; cursor: pointer; transition: all 0.15s ease;">
+          <button type="button" onclick="togglePasswordVisibility('login-password', this)" style="position: absolute; right: 8px; background: #F8F9FC; border: 1px solid #ECEEF5; border-radius: 10px; padding: 5px 10px; font-size: 11px; font-weight: 700; color: #6E7485; cursor: pointer; transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;">
             Lihat
           </button>
         </div>
@@ -199,7 +213,7 @@ if ($requestedContext === 'client') {
     </form>
   </div>
 
-  <script src="assets/js/app.js"></script>
+  <script src="assets/js/app.js?v=bankio-smooth-2.0"></script>
   <script>
     function setLoginContext(ctx) {
       document.getElementById('auth_context_input').value = ctx;

@@ -73,7 +73,7 @@ $totalClientsCount = count($allClients);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
   <style>
     .team-badge-karyawan {
       background: rgba(93, 118, 245, 0.12);
@@ -158,12 +158,13 @@ $totalClientsCount = count($allClients);
       flex-direction: column;
       justify-content: space-between;
       min-height: 140px;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms ease;
+      will-change: transform;
     }
     .bento-metric-card:hover {
       box-shadow: 0 14px 34px -8px rgba(18, 24, 48, 0.08);
       border-color: #DDE1EE;
-      transform: translateY(-2px);
+      transform: translate3d(0, -2px, 0);
     }
 
     .metric-label {
@@ -231,11 +232,17 @@ $totalClientsCount = count($allClients);
       padding: 8px 18px;
       border-radius: 999px;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms cubic-bezier(0.22, 1, 0.36, 1), transform 150ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease;
       font-family: inherit;
+      will-change: transform;
     }
-    .bento-tab-btn:hover {
+    .bento-tab-btn:hover:not(.active) {
       color: #000000;
+      transform: translate3d(0, -1px, 0);
+    }
+    .bento-tab-btn:active {
+      transform: scale(0.96);
+      transition-duration: 90ms;
     }
     .bento-tab-btn.active {
       background: #5D76F5;
@@ -270,7 +277,7 @@ $totalClientsCount = count($allClients);
       color: #000000;
       outline: none;
       font-family: inherit;
-      transition: all 0.2s ease;
+      transition: border-color 200ms ease, box-shadow 200ms ease;
     }
     .bento-search-input:focus {
       background: #FFFFFF;

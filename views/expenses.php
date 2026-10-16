@@ -44,7 +44,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
   <style>
     /* Bankio Minimal Finance Design System Extensions */
     .expenses-header-row {
@@ -82,15 +82,20 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
       gap: 8px;
       cursor: pointer;
       box-shadow: 0 4px 14px rgba(93, 118, 245, 0.25);
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease;
       text-decoration: none;
+      will-change: transform;
     }
     .btn-solid-dark:hover {
       background: #4A63E2;
       border-color: #4A63E2;
       color: #FFFFFF;
       box-shadow: 0 8px 20px -4px rgba(93, 118, 245, 0.38);
-      transform: translateY(-1px);
+      transform: translate3d(0, -1.5px, 0);
+    }
+    .btn-solid-dark:active {
+      transform: translate3d(0, 0.5px, 0) scale(0.96);
+      transition-duration: 90ms;
     }
     
     /* Level 1 Filter: Segmented Control Tabs */
@@ -113,11 +118,17 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
       font-weight: 600;
       color: #6E7485;
       text-decoration: none;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms cubic-bezier(0.22, 1, 0.36, 1), transform 150ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease;
       font-family: inherit;
+      will-change: transform;
     }
-    .segmented-tab-btn:hover {
+    .segmented-tab-btn:hover:not(.active) {
       color: #000000;
+      transform: translate3d(0, -1px, 0);
+    }
+    .segmented-tab-btn:active {
+      transform: scale(0.96);
+      transition-duration: 90ms;
     }
     .segmented-tab-btn.active {
       background: #5D76F5;
@@ -174,7 +185,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
       color: #101828;
       background: #FFFFFF;
       box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-      transition: all 0.15s ease;
+      transition: border-color 200ms ease, box-shadow 200ms ease;
       outline: none;
       box-sizing: border-box;
     }
@@ -215,13 +226,19 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
       gap: 6px;
       cursor: pointer;
       box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-      transition: all 0.15s ease;
+      transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, color 200ms ease, border-color 200ms ease;
       text-decoration: none;
+      will-change: transform;
     }
     .btn-ghost-outlined:hover {
       background: #F9FAFB;
       border-color: #B2BAC6;
       color: #1D2939;
+      transform: translate3d(0, -1.5px, 0);
+    }
+    .btn-ghost-outlined:active {
+      transform: translate3d(0, 0.5px, 0) scale(0.96);
+      transition-duration: 90ms;
     }
 
     /* Table Typography & Rows */
@@ -308,13 +325,19 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
       gap: 5px;
       cursor: pointer;
       box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-      transition: all 0.15s ease;
+      transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, color 200ms ease, border-color 200ms ease;
       white-space: nowrap;
+      will-change: transform;
     }
     .btn-action-outline:hover {
       background: #F9FAFB;
       border-color: #B2BAC6;
       color: #101828;
+      transform: translate3d(0, -1px, 0);
+    }
+    .btn-action-outline:active {
+      transform: scale(0.96);
+      transition-duration: 90ms;
     }
     .btn-action-upload {
       height: 34px;
@@ -329,13 +352,19 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
       align-items: center;
       gap: 5px;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, border-color 200ms ease;
       white-space: nowrap;
+      will-change: transform;
     }
     .btn-action-upload:hover {
       background: #F2F4F7;
       border-color: #98A2B3;
       color: #101828;
+      transform: translate3d(0, -1px, 0);
+    }
+    .btn-action-upload:active {
+      transform: scale(0.96);
+      transition-duration: 90ms;
     }
     .btn-icon-square {
       width: 34px;
@@ -349,12 +378,18 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
       justify-content: center;
       cursor: pointer;
       box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-      transition: all 0.15s ease;
+      transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+      will-change: transform;
     }
     .btn-icon-square:hover {
       background: #F9FAFB;
       border-color: #B2BAC6;
       color: #101828;
+      transform: translate3d(0, -1px, 0);
+    }
+    .btn-icon-square:active {
+      transform: scale(0.96);
+      transition-duration: 90ms;
     }
     .btn-icon-delete {
       width: 34px;
@@ -368,12 +403,17 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
       justify-content: center;
       cursor: pointer;
       box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-      transition: all 0.15s ease;
+      transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, border-color 200ms ease;
+      will-change: transform;
     }
     .btn-icon-delete:hover {
       background: #FEE4E2;
       border-color: #FDA29B;
-      color: #B42318;
+      transform: translate3d(0, -1px, 0);
+    }
+    .btn-icon-delete:active {
+      transform: scale(0.96);
+      transition-duration: 90ms;
     }
   </style>
 </head>

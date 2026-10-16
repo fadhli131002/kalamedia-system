@@ -51,7 +51,7 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
   <script src="assets/js/html2pdf.bundle.min.js"></script>
 
   <style>
@@ -1128,7 +1128,7 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
     </div>
   </div>
 
-  <script src="assets/js/app.js"></script>
+  <script src="assets/js/app.js?v=bankio-smooth-2.0"></script>
   <script>
     function exportDeckToPdf() {
       const element = document.getElementById('printable-deck-canvas');

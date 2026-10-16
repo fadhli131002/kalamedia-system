@@ -40,7 +40,7 @@ if ($isWorkerUser) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
   <style>
     /* Task Management & Workspace Custom Styles - Bankio Minimal Finance */
     .tasks-header-card {
@@ -75,14 +75,20 @@ if ($isWorkerUser) {
       font-weight: 600;
       color: #6E7485;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms cubic-bezier(0.22, 1, 0.36, 1), transform 150ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       font-family: inherit;
+      will-change: transform;
     }
-    .workspace-tab-btn:hover {
+    .workspace-tab-btn:hover:not(.active) {
       color: #000000;
+      transform: translate3d(0, -1px, 0);
+    }
+    .workspace-tab-btn:active {
+      transform: scale(0.96);
+      transition-duration: 90ms;
     }
     .workspace-tab-btn.active {
       background: #5D76F5;
@@ -106,13 +112,19 @@ if ($isWorkerUser) {
       flex-direction: column;
       gap: 6px;
       box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms ease;
+      will-change: transform;
     }
     .kpi-tile:hover {
-      transform: translateY(-2px);
+      transform: translate3d(0, -2px, 0);
       box-shadow: 0 14px 34px -8px rgba(18, 24, 48, 0.08);
       border-color: #DDE1EE;
     }
+    .kpi-tile:nth-child(1) { animation: kalaCardEnter 280ms cubic-bezier(0.22, 1, 0.36, 1) 0ms both; }
+    .kpi-tile:nth-child(2) { animation: kalaCardEnter 280ms cubic-bezier(0.22, 1, 0.36, 1) 35ms both; }
+    .kpi-tile:nth-child(3) { animation: kalaCardEnter 280ms cubic-bezier(0.22, 1, 0.36, 1) 70ms both; }
+    .kpi-tile:nth-child(4) { animation: kalaCardEnter 280ms cubic-bezier(0.22, 1, 0.36, 1) 105ms both; }
+    .kpi-tile:nth-child(5) { animation: kalaCardEnter 280ms cubic-bezier(0.22, 1, 0.36, 1) 140ms both; }
     .kpi-tile.urgent {
       border-color: #FECDCA;
       background: #FEF3F2;
@@ -148,16 +160,17 @@ if ($isWorkerUser) {
       border: 1px solid #ECEEF5;
       border-radius: 20px;
       padding: 20px 22px;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms ease;
       display: flex;
       flex-direction: column;
       gap: 12px;
       box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
+      will-change: transform;
     }
     .task-item-card:hover {
       border-color: #DDE1EE;
       box-shadow: 0 14px 34px -8px rgba(18, 24, 48, 0.08);
-      transform: translateY(-2px);
+      transform: translate3d(0, -2px, 0);
     }
     .task-item-card.has-revision {
       border-left: 4px solid #EF4444;
@@ -902,7 +915,7 @@ if ($isWorkerUser) {
     </div>
   </div>
 
-  <script src="assets/js/app.js"></script>
+  <script src="assets/js/app.js?v=bankio-smooth-2.0"></script>
   <script>
     let allLoadedTasks = [];
     let currentFilterStatus = 'all';

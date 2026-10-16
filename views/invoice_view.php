@@ -100,8 +100,8 @@ $waUrl = !empty($waPhone)
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
-  <link rel="stylesheet" href="assets/css/invoice.css?v=bankio-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
+  <link rel="stylesheet" href="assets/css/invoice.css?v=bankio-smooth-2.0">
 </head>
 <body class="invoice-wrapper">
 

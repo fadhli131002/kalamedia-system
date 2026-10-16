@@ -43,7 +43,7 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
   <style>
     /* Tabbed Interface Layout - Bankio Minimal Finance */
     .tab-navigation-bar {
@@ -67,7 +67,7 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
       border-bottom: 3px solid transparent;
       margin-bottom: -2px;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms cubic-bezier(0.22, 1, 0.36, 1), border-color 200ms cubic-bezier(0.22, 1, 0.36, 1);
       white-space: nowrap;
       border-radius: 12px 12px 0 0;
       font-family: inherit;
@@ -92,7 +92,7 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s ease;
+      transition: background-color 200ms ease, color 200ms ease;
     }
     .tab-nav-btn.active .tab-step-badge {
       background: #5D76F5;
@@ -101,7 +101,7 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
 
     .tab-pane-content {
       display: none;
-      animation: fadeIn 0.25s ease-in-out;
+      animation: kalaPageEnter 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
     }
     .tab-pane-content.active {
       display: block;
@@ -213,7 +213,7 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
       border-radius: 12px;
       padding: 20px;
       background: #FAFAFA;
-      transition: all 0.2s ease;
+      transition: border-color 200ms ease, background-color 200ms ease;
       position: relative;
     }
     .creative-upload-card:hover {
@@ -685,7 +685,7 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
     </main>
   </div>
 
-  <script src="assets/js/app.js"></script>
+  <script src="assets/js/app.js?v=bankio-smooth-2.0"></script>
   <script>
     // Tab switching logic
     function switchTab(tabIndex) {

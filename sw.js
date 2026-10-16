@@ -1,7 +1,9 @@
 // Kalamedia Progressive Web App (PWA) Service Worker
-const CACHE_NAME = 'kalamedia-pwa-v4-bankio';
+const CACHE_NAME = 'kalamedia-pwa-v5-smooth-60fps';
 const urlsToCache = [
   'assets/css/style.css',
+  'assets/js/app.js',
+  'assets/js/charts.js',
   'assets/img/Logo-1.webp'
 ];
 

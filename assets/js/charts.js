@@ -20,23 +20,28 @@ function initCashflowChart(chartData) {
   const canvas = document.getElementById('cashflowChart');
   if (!canvas) return;
 
-  const ctx = canvas.getContext('2d');
+  // Anti-Jank 60FPS: Defer Chart rendering to let initial page/tab animations complete smoothly
+  requestAnimationFrame(function() {
+    setTimeout(function() {
+      const targetCanvas = document.getElementById('cashflowChart');
+      if (!targetCanvas) return;
+      const ctx = targetCanvas.getContext('2d');
 
-  // Destroy previous instance if any
-  if (cashflowChartInstance) {
-    cashflowChartInstance.destroy();
-  }
+      // Destroy previous instance if any
+      if (cashflowChartInstance) {
+        cashflowChartInstance.destroy();
+      }
 
-  // Gradients for Bankio finance theme
-  const revGradient = ctx.createLinearGradient(0, 0, 0, 300);
-  revGradient.addColorStop(0, 'rgba(93, 118, 245, 0.22)');
-  revGradient.addColorStop(1, 'rgba(93, 118, 245, 0.00)');
+      // Gradients for Bankio finance theme
+      const revGradient = ctx.createLinearGradient(0, 0, 0, 300);
+      revGradient.addColorStop(0, 'rgba(93, 118, 245, 0.22)');
+      revGradient.addColorStop(1, 'rgba(93, 118, 245, 0.00)');
 
-  const expGradient = ctx.createLinearGradient(0, 0, 0, 300);
-  expGradient.addColorStop(0, 'rgba(137, 50, 224, 0.18)');
-  expGradient.addColorStop(1, 'rgba(137, 50, 224, 0.00)');
+      const expGradient = ctx.createLinearGradient(0, 0, 0, 300);
+      expGradient.addColorStop(0, 'rgba(137, 50, 224, 0.18)');
+      expGradient.addColorStop(1, 'rgba(137, 50, 224, 0.00)');
 
-  cashflowChartInstance = new Chart(ctx, {
+      cashflowChartInstance = new Chart(ctx, {
     type: 'line',
     data: {
       labels: chartData.labels,
@@ -135,7 +140,8 @@ function initCashflowChart(chartData) {
           }
         }
       }
-    }
+      });
+    }, 90);
   });
 }
 

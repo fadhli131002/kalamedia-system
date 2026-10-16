@@ -83,7 +83,60 @@
   --shadow-lg: 0 16px 32px -8px rgba(18, 24, 48, 0.08);
   --shadow-modal: 0 20px 40px -10px rgba(18, 24, 48, 0.12);
   
-  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  /* GPU-Accelerated 60FPS Animation Easing & Timing */
+  --ease-out-natural: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-tactile: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-fast: 150ms cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-base: 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-smooth: 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  --transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, opacity 200ms ease;
+}
+
+/* Native View Transitions (Zero-Flicker Multi-Page Transitions) */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root) {
+  animation: 160ms cubic-bezier(0.22, 1, 0.36, 1) both kalaPageExit;
+}
+
+::view-transition-new(root) {
+  animation: 260ms cubic-bezier(0.22, 1, 0.36, 1) both kalaPageEnter;
+}
+
+/* Page & Component 60FPS Micro-Animations */
+@keyframes kalaPageEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes kalaPageExit {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0) scale(0.995);
+  }
+}
+
+@keyframes kalaCardEnter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 * {
@@ -118,10 +171,12 @@ body {
   bottom: 0;
   background: rgba(16, 24, 40, 0.4);
   backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   z-index: 998;
   opacity: 0;
   visibility: hidden;
-  transition: all 0.25s ease;
+  transition: opacity 240ms cubic-bezier(0.22, 1, 0.36, 1), visibility 240ms ease;
+  will-change: opacity;
 }
 
 .sidebar-overlay.active {
@@ -273,8 +328,9 @@ body {
   text-decoration: none;
   font-size: 13.5px;
   font-weight: 500;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, color 200ms ease, box-shadow 200ms ease;
   position: relative;
+  will-change: transform;
 }
 
 .nav-link svg {
@@ -285,16 +341,24 @@ body {
   flex-shrink: 0;
   stroke: currentColor;
   fill: none;
-  transition: all 0.2s ease;
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), stroke 200ms ease;
+  will-change: transform;
 }
 
-.nav-link:hover {
+.nav-link:hover:not(.active) {
   color: #5D76F5;
   background: rgba(93, 118, 245, 0.08);
+  transform: translate3d(4px, 0, 0);
 }
 
-.nav-link:hover svg {
+.nav-link:hover:not(.active) svg {
   stroke: #5D76F5;
+  transform: scale(1.08);
+}
+
+.nav-link:active {
+  transform: scale(0.97);
+  transition-duration: 90ms;
 }
 
 .nav-link.active {
@@ -303,10 +367,12 @@ body {
   font-weight: 600 !important;
   border-radius: 14px !important;
   box-shadow: 0 6px 18px -2px rgba(93, 118, 245, 0.4) !important;
+  transform: translate3d(0, 0, 0) !important;
 }
 
 .nav-link.active svg {
   stroke: #FFFFFF !important;
+  transform: none !important;
 }
 
 .nav-link.active::before {
@@ -622,7 +688,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  transition: all 0.15s ease;
+  transition: color 0.15s ease;
 }
 .clickable-client-link:hover {
   color: #2563EB;
@@ -643,11 +709,19 @@ body {
   max-width: 1440px;
   width: 100%;
   margin: 0 auto;
+  animation: kalaPageEnter 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
+}
+
+.content-body.kala-page-exit {
+  animation: kalaPageExit 140ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  pointer-events: none;
 }
 
 /* ==========================================================================
-   3. BUTTONS (BANKIO MINIMAL FINANCE SYSTEM)
+   3. BUTTONS (BANKIO MINIMAL FINANCE SYSTEM - 60FPS TACTILE INTERACTIONS)
    ========================================================================== */
+button,
 .btn {
   display: inline-flex;
   align-items: center;
@@ -659,10 +733,22 @@ body {
   font-weight: 600;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: var(--transition);
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, color 200ms ease, border-color 200ms ease;
   text-decoration: none;
   font-family: inherit;
   white-space: nowrap;
+  will-change: transform;
+}
+
+button:hover,
+.btn:hover {
+  transform: translate3d(0, -1.5px, 0);
+}
+
+button:active,
+.btn:active {
+  transform: translate3d(0, 0.5px, 0) scale(0.96) !important;
+  transition-duration: 90ms !important;
 }
 
 /* Primary Action Button (Finance Blue #5D76F5) */
@@ -677,13 +763,14 @@ body {
   background: #4A63E2;
   border-color: #4A63E2;
   box-shadow: 0 8px 20px -4px rgba(93, 118, 245, 0.38);
-  transform: translateY(-1px);
+  transform: translate3d(0, -1.5px, 0);
 }
 
 .btn-primary:active {
   background: #3C55D6;
   border-color: #3C55D6;
-  transform: translateY(0);
+  transform: translate3d(0, 0.5px, 0) scale(0.96) !important;
+  transition-duration: 90ms !important;
 }
 
 /* Secondary Button (Outlined Minimal White) */
@@ -698,6 +785,13 @@ body {
   background: #F8F9FC;
   color: #000000;
   border-color: #DDE1EE;
+  box-shadow: 0 4px 12px rgba(18, 24, 48, 0.05);
+  transform: translate3d(0, -1.5px, 0);
+}
+
+.btn-secondary:active {
+  transform: translate3d(0, 0.5px, 0) scale(0.96) !important;
+  transition-duration: 90ms !important;
 }
 
 /* Success Button */
@@ -710,6 +804,9 @@ body {
 
 .btn-success:hover {
   background: #059669;
+  border-color: #059669;
+  box-shadow: 0 8px 18px -3px rgba(16, 185, 129, 0.35);
+  transform: translate3d(0, -1.5px, 0);
 }
 
 /* Danger Button */
@@ -722,6 +819,7 @@ body {
 .btn-danger:hover {
   background: #FFE4E6;
   color: #BE123C;
+  transform: translate3d(0, -1.5px, 0);
 }
 
 .btn-sm {
@@ -731,7 +829,7 @@ body {
 }
 
 /* ==========================================================================
-   4. CARDS & KPI METRIC PANELS (BANKIO 22PX BENTO)
+   4. CARDS & KPI METRIC PANELS (BANKIO 22PX BENTO & STAGGERED ENTRANCE)
    ========================================================================== */
 .kpi-grid {
   display: grid;
@@ -746,17 +844,53 @@ body {
   border-radius: 22px;
   padding: 24px;
   box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
-  transition: var(--transition);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms ease;
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  will-change: transform;
 }
 
 .kpi-card:hover {
-  box-shadow: 0 14px 34px -8px rgba(18, 24, 48, 0.08);
+  box-shadow: 0 14px 34px -8px rgba(18, 24, 48, 0.08), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
   border-color: #DDE1EE;
-  transform: translateY(-2px);
+  transform: translate3d(0, -2px, 0);
+}
+
+/* Staggered entrance for KPI cards */
+.kpi-grid > *:nth-child(1),
+.bento-kpi-grid > *:nth-child(1),
+.stat-cards-grid > *:nth-child(1),
+.stats-grid > *:nth-child(1) {
+  animation: kalaCardEnter 280ms cubic-bezier(0.22, 1, 0.36, 1) 0ms both;
+  will-change: transform, opacity;
+}
+.kpi-grid > *:nth-child(2),
+.bento-kpi-grid > *:nth-child(2),
+.stat-cards-grid > *:nth-child(2),
+.stats-grid > *:nth-child(2) {
+  animation: kalaCardEnter 280ms cubic-bezier(0.22, 1, 0.36, 1) 35ms both;
+  will-change: transform, opacity;
+}
+.kpi-grid > *:nth-child(3),
+.bento-kpi-grid > *:nth-child(3),
+.stat-cards-grid > *:nth-child(3),
+.stats-grid > *:nth-child(3) {
+  animation: kalaCardEnter 280ms cubic-bezier(0.22, 1, 0.36, 1) 70ms both;
+  will-change: transform, opacity;
+}
+.kpi-grid > *:nth-child(4),
+.bento-kpi-grid > *:nth-child(4),
+.stat-cards-grid > *:nth-child(4),
+.stats-grid > *:nth-child(4) {
+  animation: kalaCardEnter 280ms cubic-bezier(0.22, 1, 0.36, 1) 105ms both;
+  will-change: transform, opacity;
+}
+.kpi-grid > *:nth-child(n+5),
+.bento-kpi-grid > *:nth-child(n+5) {
+  animation: kalaCardEnter 280ms cubic-bezier(0.22, 1, 0.36, 1) 140ms both;
+  will-change: transform, opacity;
 }
 
 .kpi-header {
@@ -1083,28 +1217,34 @@ body {
 }
 
 /* ==========================================================================
-   6. MODAL SYSTEM (UNTITLED UI PURE WHITE)
+   6. MODAL SYSTEM (BANKIO 60FPS SOFT SPRING POP & FADE OVERLAY)
    ========================================================================== */
 .modal,
 .modal-backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(16, 24, 40, 0.6);
+  inset: 0;
+  background: rgba(18, 24, 48, 0.45);
   backdrop-filter: blur(4px);
-  display: none;
+  -webkit-backdrop-filter: blur(4px);
+  display: flex !important;
   align-items: center;
   justify-content: center;
   z-index: 99999;
   padding: 20px;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 180ms cubic-bezier(0.22, 1, 0.36, 1), visibility 180ms ease;
+  will-change: opacity;
 }
 
 .modal.show,
 .modal.active,
-.modal-backdrop.show {
-  display: flex !important;
+.modal-backdrop.show,
+.modal-backdrop.active {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
 
 .modal-dialog {
@@ -1116,8 +1256,19 @@ body {
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 20px 40px -10px rgba(18, 24, 48, 0.12);
-  animation: modalFadeIn 0.2s ease-out;
   color: #000000;
+  opacity: 0;
+  transform: translate3d(0, 12px, 0) scale(0.96);
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+.modal.show .modal-dialog,
+.modal.active .modal-dialog,
+.modal-backdrop.show .modal-dialog,
+.modal-backdrop.active .modal-dialog {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
 }
 
 .modal-dialog.modal-lg {
@@ -1133,9 +1284,18 @@ body {
   max-width: 440px;
   padding: 26px;
   box-shadow: 0 20px 40px -10px rgba(18, 24, 48, 0.12);
-  animation: modalFadeIn 0.2s ease-out;
   color: #000000;
   text-align: left;
+  opacity: 0;
+  transform: translate3d(0, 12px, 0) scale(0.96);
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1), opacity 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+}
+
+.modal-backdrop.show .modal-confirm-dialog,
+.modal-backdrop.active .modal-confirm-dialog {
+  opacity: 1 !important;
+  transform: translate3d(0, 0, 0) scale(1) !important;
 }
 
 .confirm-icon-badge {
@@ -1605,73 +1765,7 @@ body {
   }
 }
 
-/* KPI Grid & Cards */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.kpi-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 18px 20px;
-  box-shadow: var(--shadow-xs);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition: var(--transition);
-}
-
-.kpi-card:hover {
-  box-shadow: var(--shadow-sm);
-  border-color: #D0D5DD;
-}
-
-.kpi-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.kpi-title {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-muted);
-}
-
-.kpi-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.kpi-value {
-  font-size: 22px;
-  font-weight: 800;
-  color: #101828;
-  letter-spacing: -0.3px;
-  margin-bottom: 6px;
-  word-break: break-word;
-}
-
-.kpi-meta {
-  font-size: 12px;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-}
+/* Note: KPI Grid & Cards styled in Section 4 with 22px Bankio Bento and staggered 60fps entrance */
 
 /* ==========================================================================
    9. CONTENT CALENDAR & PLANNER WORKSPACE
@@ -2011,7 +2105,7 @@ body {
   padding: 4px 6px !important;
   margin-bottom: 3px !important;
   cursor: pointer !important;
-  transition: all 0.15s ease !important;
+  transition: transform 0.15s var(--ease-out-natural, cubic-bezier(0.22, 1, 0.36, 1)), box-shadow 0.15s ease, filter 0.15s ease !important;
 }
 
 .fc-event:hover {

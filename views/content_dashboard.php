@@ -39,7 +39,7 @@ unset($c);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
   <!-- FullCalendar 6.1.15 JS -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
   <!-- html2pdf for Export PDF -->
@@ -151,7 +151,7 @@ unset($c);
       color: #101828;
       outline: none;
       box-sizing: border-box;
-      transition: all 0.15s ease;
+      transition: border-color 200ms ease, box-shadow 200ms ease;
     }
     .supitar-search-wrap input:focus {
       border-color: #2563EB;
@@ -213,7 +213,7 @@ unset($c);
       justify-content: center;
       border-radius: 50%;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: background-color 150ms ease, color 150ms ease;
       user-select: none;
     }
     .supitar-mini-cell:hover {
@@ -337,11 +337,17 @@ unset($c);
       font-weight: 600;
       color: #344054;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, border-color 200ms ease;
+      will-change: transform;
     }
     .supitar-btn-today:hover {
       background: #F9FAFB;
       border-color: #98A2B3;
+      transform: translate3d(0, -1px, 0);
+    }
+    .supitar-btn-today:active {
+      transform: scale(0.96);
+      transition-duration: 90ms;
     }
     .supitar-arrow-group {
       display: flex;
@@ -358,6 +364,7 @@ unset($c);
       padding: 0 6px;
       line-height: 1;
       border-radius: 4px;
+      transition: background-color 150ms ease, color 150ms ease;
     }
     .supitar-arrow-btn:hover { color: #101828; background: #F2F4F7; }
 
@@ -383,7 +390,7 @@ unset($c);
       padding: 5px 12px;
       border-radius: 6px;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
     }
     .supitar-view-btn.active {
       background: #FFFFFF;
@@ -454,7 +461,7 @@ unset($c);
       line-height: 1.3 !important;
       border: none !important;
       cursor: pointer !important;
-      transition: all 0.15s ease !important;
+      transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 150ms ease !important;
       white-space: nowrap !important;
       overflow: hidden !important;
       text-overflow: ellipsis !important;
@@ -517,7 +524,7 @@ unset($c);
       border-right: none !important;
       border-bottom: none !important;
       cursor: pointer !important;
-      transition: all 0.15s ease !important;
+      transition: transform 150ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 150ms ease !important;
       box-sizing: border-box !important;
     }
     .fc-timegrid-event:hover {
@@ -642,8 +649,12 @@ unset($c);
   let searchDebounceTimer = null;
 
   document.addEventListener('DOMContentLoaded', function() {
-    initFullCalendar();
-    renderMiniCalendar(currentMiniDate);
+    requestAnimationFrame(function() {
+      setTimeout(function() {
+        initFullCalendar();
+        renderMiniCalendar(currentMiniDate);
+      }, 90);
+    });
   });
 
   function initFullCalendar() {

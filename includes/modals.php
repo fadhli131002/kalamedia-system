@@ -2,6 +2,101 @@
 /**
  * Global Modals for Quick Actions & Uploads
  */
+
+// CLIENT ISOLATION: Clients must never receive internal financial/HR/admin creation modals
+if (is_client()) {
+    $cClientId = current_user_client_id();
+    ?>
+    <!-- Client Safe Modal: View Payment Receipt -->
+    <div id="modal-view-receipt" class="modal-backdrop">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title">Bukti Pembayaran</h3>
+          <button type="button" class="modal-close" onclick="closeModal('modal-view-receipt')">&times;</button>
+        </div>
+        <div class="modal-body" style="text-align: center;">
+          <img id="receipt-preview-img" src="" alt="Bukti Transfer" style="max-width: 100%; max-height: 480px; border-radius: 8px;">
+        </div>
+      </div>
+    </div>
+
+    <!-- Client Safe Modal: Calendar Export PDF (Strictly Scoped) -->
+    <div id="modal-export-content-pdf" class="modal-backdrop">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3 class="modal-title">Ekspor Jadwal Konten (PDF)</h3>
+          <button type="button" class="modal-close" onclick="closeModal('modal-export-content-pdf')">&times;</button>
+        </div>
+        <form id="form-export-content-pdf" action="api/content.php" method="GET" target="_blank">
+          <input type="hidden" name="action" value="export_pdf">
+          <input type="hidden" name="_slot" value="client">
+          <input type="hidden" name="portal" value="client">
+          <input type="hidden" name="client_id" value="<?= $cClientId ?>">
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Rentang Waktu</label>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px;">
+                <label style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #FFFFFF; border: 1.5px solid #2563EB; border-radius: 8px; cursor: pointer;" id="label-export-mode-month">
+                  <input type="radio" name="range_type" value="month" checked onchange="toggleExportRangeMode(this.value)" style="accent-color: #2563EB;">
+                  <span style="font-size: 13px; font-weight: 700; color: #101828;">Bulanan</span>
+                </label>
+                <label style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: #FFFFFF; border: 1.5px solid #D0D5DD; border-radius: 8px; cursor: pointer;" id="label-export-mode-custom">
+                  <input type="radio" name="range_type" value="custom" onchange="toggleExportRangeMode(this.value)" style="accent-color: #2563EB;">
+                  <span style="font-size: 13px; font-weight: 700; color: #101828;">Kustom Tanggal</span>
+                </label>
+              </div>
+            </div>
+            <div class="form-group" id="export-month-wrap">
+              <label class="form-label">Bulan *</label>
+              <input type="month" name="month" id="export-month-input" class="form-control" value="<?= date('Y-m') ?>">
+            </div>
+            <div class="form-row" id="export-custom-range-wrap" style="display: none;">
+              <div class="form-group">
+                <label class="form-label">Dari Tanggal *</label>
+                <input type="date" name="start_date" id="export-start-date" class="form-control" value="<?= date('Y-m-01') ?>">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Sampai Tanggal *</label>
+                <input type="date" name="end_date" id="export-end-date" class="form-control" value="<?= date('Y-m-t') ?>">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Platform</label>
+                <select name="platform" class="form-select">
+                  <option value="all">-- Semua Platform --</option>
+                  <option value="Instagram">Instagram</option>
+                  <option value="TikTok">TikTok</option>
+                  <option value="YouTube">YouTube</option>
+                  <option value="Meta Ads">Meta Ads (FB/IG)</option>
+                  <option value="LinkedIn">LinkedIn</option>
+                  <option value="Website">Website & Blog</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                  <option value="all">-- Semua Status --</option>
+                  <option value="Published">Published (Tayang)</option>
+                  <option value="Scheduled">Scheduled (Terjadwal)</option>
+                  <option value="Approved">Approved</option>
+                  <option value="Review">In Review</option>
+                  <option value="Draft">Draft</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-export-content-pdf')">Batal</button>
+            <button type="submit" class="btn btn-primary">Unduh PDF</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <?php
+    return;
+}
+
 $db = Database::getConnection();
 $allClients = $db->query("SELECT id, name, company FROM clients ORDER BY company ASC")->fetchAll();
 $allProjects = $db->query("SELECT p.id, p.client_id, p.name, c.company FROM projects p JOIN clients c ON p.client_id = c.id ORDER BY p.id DESC")->fetchAll();

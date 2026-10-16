@@ -41,8 +41,8 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
   <title>Manajemen Invoice - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
 </head>
 <body>
   <div class="app-container">
@@ -57,26 +57,26 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
         <div class="kpi-grid">
           <div class="kpi-card">
             <div class="kpi-header">
-              <span class="kpi-title">Total Ditagihkan</span>
+              <span class="kpi-title"><?= $isClientUser ? 'Total Tagihan Saya' : 'Total Ditagihkan' ?></span>
             </div>
             <div class="kpi-value"><?= format_rupiah($totalBilled) ?></div>
-            <div class="kpi-meta">Akumulasi seluruh invoice aktif</div>
+            <div class="kpi-meta"><?= $isClientUser ? 'Akumulasi seluruh tagihan proyek' : 'Akumulasi seluruh invoice aktif' ?></div>
           </div>
 
           <div class="kpi-card">
             <div class="kpi-header">
-              <span class="kpi-title">Sudah Dilunasi</span>
+              <span class="kpi-title"><?= $isClientUser ? 'Tagihan Lunas' : 'Sudah Dilunasi' ?></span>
             </div>
             <div class="kpi-value" style="color: var(--success-text);"><?= format_rupiah($totalPaid) ?></div>
-            <div class="kpi-meta" style="color: var(--success-text); font-weight: 600;">&bull; Dana telah diterima</div>
+            <div class="kpi-meta" style="color: var(--success-text); font-weight: 600;">&bull; <?= $isClientUser ? 'Pembayaran terverifikasi' : 'Dana telah diterima' ?></div>
           </div>
 
           <div class="kpi-card">
             <div class="kpi-header">
-              <span class="kpi-title">Menunggu Pelunasan</span>
+              <span class="kpi-title"><?= $isClientUser ? 'Belum Dibayar' : 'Menunggu Pelunasan' ?></span>
             </div>
             <div class="kpi-value" style="color: var(--warning-text);"><?= format_rupiah($totalUnpaid) ?></div>
-            <div class="kpi-meta" style="color: var(--warning-text); font-weight: 600;">&bull; Piutang belum dibayar</div>
+            <div class="kpi-meta" style="color: var(--warning-text); font-weight: 600;">&bull; <?= $isClientUser ? 'Menunggu pembayaran' : 'Piutang belum dibayar' ?></div>
           </div>
         </div>
 
@@ -84,17 +84,21 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
         <div class="glass-panel">
           <!-- Section Title & Subtitle -->
           <div style="margin-bottom: 18px;">
-            <h3 style="font-size: 18px; font-weight: 700; color: #101828; margin: 0 0 4px 0; letter-spacing: -0.2px;">Daftar Tagihan & Penagihan (Invoices)</h3>
-            <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Kelola invoice klien, status pembayaran & generate PDF</p>
+            <h3 style="font-size: 18px; font-weight: 700; color: #101828; margin: 0 0 4px 0; letter-spacing: -0.2px;">
+              <?= $isClientUser ? 'Riwayat Tagihan & Invoice Saya' : 'Daftar Tagihan & Penagihan (Invoices)' ?>
+            </h3>
+            <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">
+              <?= $isClientUser ? 'Pantau status pembayaran invoice dan unduh dokumen invoice resmi PT Kala Kausa Prima' : 'Kelola invoice klien, status pembayaran & generate PDF' ?>
+            </p>
           </div>
 
           <!-- Unified Toolbar Row -->
           <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
             <!-- Left Side: Status Filter Tabs -->
             <div class="date-filter-group">
-              <a href="<?= url('invoices?status=all') ?>" class="filter-btn <?= $filterStatus === 'all' ? 'active' : '' ?>">Semua</a>
-              <a href="<?= url('invoices?status=Paid') ?>" class="filter-btn <?= $filterStatus === 'Paid' ? 'active' : '' ?>">Paid</a>
-              <a href="<?= url('invoices?status=Draft') ?>" class="filter-btn <?= $filterStatus === 'Draft' ? 'active' : '' ?>">Draft</a>
+              <a href="<?= url('invoices?status=all' . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" class="filter-btn <?= $filterStatus === 'all' ? 'active' : '' ?>">Semua</a>
+              <a href="<?= url('invoices?status=Paid' . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" class="filter-btn <?= $filterStatus === 'Paid' ? 'active' : '' ?>">Paid</a>
+              <a href="<?= url('invoices?status=Draft' . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" class="filter-btn <?= $filterStatus === 'Draft' ? 'active' : '' ?>">Draft</a>
             </div>
 
             <!-- Right Side: Search Bar -->
@@ -125,7 +129,7 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
                   <?php foreach ($invoices as $inv): ?>
                     <tr>
                       <td style="font-weight: 700; white-space: nowrap;">
-                        <a href="<?= url('invoice-view?id=' . $inv['id']) ?>" style="color: #101828; text-decoration: none; font-weight: 700; font-family: inherit;">
+                        <a href="<?= url('invoice-view?id=' . $inv['id'] . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" style="color: #101828; text-decoration: none; font-weight: 700; font-family: inherit;">
                           #<?= htmlspecialchars($inv['invoice_number']) ?>
                         </a>
                       </td>
@@ -154,7 +158,7 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
                       </td>
                       <td style="text-align: right; white-space: nowrap;">
                         <div style="display: inline-flex; gap: 8px; justify-content: flex-end; align-items: center;">
-                          <a href="<?= url('invoice-view?id=' . $inv['id']) ?>" class="btn btn-secondary btn-sm" style="padding: 6px 12px; font-size: 12px; font-weight: 600; color: #344054; border: 1px solid #D0D5DD; background: #FFFFFF; border-radius: 8px; text-decoration: none;" title="Lihat & Unduh PDF">
+                          <a href="<?= url('invoice-view?id=' . $inv['id'] . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" class="btn btn-secondary btn-sm" style="padding: 6px 12px; font-size: 12px; font-weight: 600; color: #344054; border: 1px solid #D0D5DD; background: #FFFFFF; border-radius: 8px; text-decoration: none;" title="Lihat & Unduh PDF">
                             <span>Lihat Invoice</span>
                           </a>
 

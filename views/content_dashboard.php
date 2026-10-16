@@ -10,19 +10,34 @@ require_auth();
 $db = Database::getConnection();
 $portal = current_portal();
 $isOwner = ($portal === 'owner');
+$isClientUser = is_client();
+$clientId = current_user_client_id();
 
 // Pre-defined client colors matching Slide 3
 $clientColorPalette = ['#2563EB', '#EC4899', '#16A34A', '#8B5CF6', '#F59E0B', '#06B6D4', '#EF4444', '#6366F1'];
 
-// Fetch all clients
-$clients = $db->query("
-    SELECT c.id, c.name, c.company,
-           COUNT(cp.id) as total_contents
-    FROM clients c
-    LEFT JOIN content_planner cp ON c.id = cp.client_id AND COALESCE(cp.is_deleted, 0) = 0
-    GROUP BY c.id
-    ORDER BY c.company ASC
-")->fetchAll();
+// Fetch clients (strictly scoped if client)
+if ($isClientUser && $clientId) {
+    $stmtClients = $db->prepare("
+        SELECT c.id, c.name, c.company,
+               COUNT(cp.id) as total_contents
+        FROM clients c
+        LEFT JOIN content_planner cp ON c.id = cp.client_id AND COALESCE(cp.is_deleted, 0) = 0
+        WHERE c.id = ?
+        GROUP BY c.id
+    ");
+    $stmtClients->execute([$clientId]);
+    $clients = $stmtClients->fetchAll();
+} else {
+    $clients = $db->query("
+        SELECT c.id, c.name, c.company,
+               COUNT(cp.id) as total_contents
+        FROM clients c
+        LEFT JOIN content_planner cp ON c.id = cp.client_id AND COALESCE(cp.is_deleted, 0) = 0
+        GROUP BY c.id
+        ORDER BY c.company ASC
+    ")->fetchAll();
+}
 
 foreach ($clients as $idx => &$c) {
     $c['color_hex'] = $clientColorPalette[$idx % count($clientColorPalette)];
@@ -38,8 +53,8 @@ unset($c);
   <title>Content Calendar - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
   <!-- FullCalendar 6.1.15 JS -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
   <!-- html2pdf for Export PDF -->
@@ -592,9 +607,11 @@ unset($c);
             </div>
 
             <!-- + Add Event Button (Slide 3 Blue CTA) -->
+            <?php if (!$isClientUser && ($portal === 'owner' || $portal === 'admin' || is_admin())): ?>
             <button type="button" class="supitar-btn-add-cal" onclick="openCreateContentModal()">
               + Tambah Jadwal
             </button>
+            <?php endif; ?>
           </div>
 
           <!-- MAIN CALENDAR PANEL -->
@@ -666,9 +683,9 @@ unset($c);
       headerToolbar: false, // Use our custom Slide 3 topbar
       locale: 'en',
       firstDay: 0, // Sunday first day like Slide 3
-      editable: true,
-      droppable: true,
-      selectable: true,
+      editable: <?= $isClientUser ? 'false' : 'true' ?>,
+      droppable: <?= $isClientUser ? 'false' : 'true' ?>,
+      selectable: <?= $isClientUser ? 'false' : 'true' ?>,
       dayMaxEvents: 4,
       height: 'auto',
       navLinks: true,
@@ -698,6 +715,8 @@ unset($c);
         url.searchParams.append('action', 'get_events');
         url.searchParams.append('start', info.startStr);
         url.searchParams.append('end', info.endStr);
+        url.searchParams.append('_slot', '<?= $isClientUser ? "client" : "internal" ?>');
+        url.searchParams.append('portal', '<?= $isClientUser ? "client" : "internal" ?>');
         if (selectedClientIds.length > 0) {
           url.searchParams.append('client_ids', selectedClientIds.join(','));
         } else {
@@ -777,16 +796,22 @@ unset($c);
         }
       },
 
-      // Click Date Cell -> Add Event on that date & time
+      // Click Date Cell -> Add Event on that date & time (Admin/Owner only)
       dateClick: function(info) {
+        if (<?= $isClientUser ? 'true' : 'false' ?>) {
+          return;
+        }
         const dateStr = info.dateStr.split('T')[0];
         const timeStr = info.dateStr.split('T')[1] ? info.dateStr.split('T')[1].substring(0, 5) : '10:00';
         openCreateContentModal(dateStr, timeStr);
       },
 
-      // Click Event -> Edit Modal
+      // Click Event -> Edit Modal (Admin/Owner only)
       eventClick: function(info) {
         info.jsEvent.preventDefault();
+        if (<?= $isClientUser ? 'true' : 'false' ?>) {
+          return;
+        }
         openEditContentModal(info.event.id);
       },
 

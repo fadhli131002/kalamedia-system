@@ -31,6 +31,14 @@ if (!$report) {
     die("Laporan kinerja performa klien tidak ditemukan atau telah dihapus.");
 }
 
+// Client Role Security Check: Strict Data Isolation
+if (is_client()) {
+    $clientUserId = current_user_client_id();
+    if ($clientUserId && (int)$report['client_id'] !== $clientUserId) {
+        die("Akses ditolak: Anda tidak memiliki akses ke laporan kinerja performa ini.");
+    }
+}
+
 $clientPic = !empty($report['client_name']) ? $report['client_name'] : $report['client_company'];
 $clientCompany = $report['client_company'] ?: $report['client_name'];
 
@@ -50,8 +58,8 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
   <title>Performance Deck - <?= htmlspecialchars($clientCompany) ?> (<?= htmlspecialchars($report['report_period']) ?>) - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
   <script src="assets/js/html2pdf.bundle.min.js"></script>
 
   <style>
@@ -63,7 +71,7 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
       min-height: 100vh;
       padding-bottom: 50px;
       color: #000000;
-      font-family: 'SF Pro Rounded', 'Plus Jakarta Sans', 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: var(--font-sans);
     }
 
     /* Floating Navigation Action Bar */
@@ -1128,7 +1136,7 @@ $capturedIS = max(0, 100 - floatval($report['lost_is_budget']) - floatval($repor
     </div>
   </div>
 
-  <script src="assets/js/app.js?v=bankio-smooth-2.0"></script>
+  <script src="assets/js/app.js?v=bankio-typography-3.0"></script>
   <script>
     function exportDeckToPdf() {
       const element = document.getElementById('printable-deck-canvas');

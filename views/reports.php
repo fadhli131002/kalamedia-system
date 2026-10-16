@@ -7,6 +7,11 @@
 require_auth();
 $db = Database::getConnection();
 
+$isClientUser = is_client();
+$clientId = current_user_client_id();
+
+$statClientWhere = ($isClientUser && $clientId) ? " AND client_id = " . intval($clientId) : "";
+
 // 1. Fetch Summary Aggregate Metrics
 $stats = $db->query("
     SELECT 
@@ -18,7 +23,7 @@ $stats = $db->query("
         COALESCE(SUM(ads_impressions), 0) as total_impressions,
         COALESCE(AVG(roas), 0) as avg_roas
     FROM performance_reports 
-    WHERE COALESCE(is_deleted, 0) = 0
+    WHERE COALESCE(is_deleted, 0) = 0 $statClientWhere
 ")->fetch(PDO::FETCH_ASSOC);
 
 $totalSpend = floatval($stats['total_spend'] ?? 0);
@@ -28,10 +33,17 @@ $totalConversions = intval($stats['total_conversions'] ?? 0);
 $avgCplCpa = $totalConversions > 0 ? round($totalSpend / $totalConversions, 2) : 0;
 
 // 2. Fetch Clients for Filter Dropdown
-$allClients = $db->query("SELECT id, name, company FROM clients ORDER BY company ASC")->fetchAll(PDO::FETCH_ASSOC);
+if ($isClientUser && $clientId) {
+    $stmtC = $db->prepare("SELECT id, name, company FROM clients WHERE id = ?");
+    $stmtC->execute([$clientId]);
+    $allClients = $stmtC->fetchAll(PDO::FETCH_ASSOC);
+    $selectedClient = $clientId;
+} else {
+    $allClients = $db->query("SELECT id, name, company FROM clients ORDER BY company ASC")->fetchAll(PDO::FETCH_ASSOC);
+    $selectedClient = intval($_GET['client_id'] ?? 0);
+}
 
 // 3. Filter Parameters
-$selectedClient = intval($_GET['client_id'] ?? 0);
 $selectedPeriod = trim($_GET['period'] ?? $_GET['month'] ?? '');
 $searchQuery = trim($_GET['search'] ?? '');
 
@@ -78,8 +90,8 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <title>Laporan Performance Marketing Klien - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
 </head>
 <body>
   <div class="app-container">
@@ -157,9 +169,11 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
               </p>
             </div>
 
-            <a href="<?= url('reports-form') ?>" class="btn btn-primary btn-sm">
-              <span>+ Buat Laporan Performance Baru</span>
-            </a>
+            <?php if (!$isClientUser && (is_owner() || is_admin())): ?>
+              <a href="<?= url('reports-form') ?>" class="btn btn-primary btn-sm">
+                <span>+ Buat Laporan Performance Baru</span>
+              </a>
+            <?php endif; ?>
           </div>
 
           <!-- Filters Row -->
@@ -168,6 +182,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <input type="text" name="search" class="form-control" placeholder="Cari klien, objektif kampanye, atau konsep materi..." value="<?= htmlspecialchars($searchQuery) ?>">
             </div>
 
+            <?php if (!$isClientUser): ?>
             <div style="width: 200px;">
               <select name="client_id" class="form-select" onchange="this.form.submit()">
                 <option value="">Semua Klien</option>
@@ -178,6 +193,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <?php endforeach; ?>
               </select>
             </div>
+            <?php endif; ?>
 
             <button type="submit" class="btn btn-secondary btn-sm" style="padding: 9px 14px;">
               Filter
@@ -208,10 +224,14 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <td colspan="6" style="text-align: center; padding: 48px 16px; color: var(--text-secondary);">
                       <div style="font-size: 32px; margin-bottom: 8px;">📊</div>
                       <div style="font-weight: 700; font-size: 15px; color: #101828;">Belum Ada Laporan Performance Marketing</div>
-                      <p style="font-size: 12.5px; margin-top: 4px;">Mulai dengan menerbitkan laporan deck performa pertama untuk klien Anda.</p>
-                      <a href="<?= url('reports-form') ?>" class="btn btn-primary btn-sm" style="margin-top: 14px; display: inline-flex;">
-                        + Buat Laporan Performance Sekarang
-                      </a>
+                      <p style="font-size: 12.5px; margin-top: 4px;">
+                        <?= $isClientUser ? 'Belum ada dokumen laporan performa yang diterbitkan untuk akun Anda.' : 'Mulai dengan menerbitkan laporan deck performa pertama untuk klien Anda.' ?>
+                      </p>
+                      <?php if (!$isClientUser && (is_owner() || is_admin())): ?>
+                        <a href="<?= url('reports-form') ?>" class="btn btn-primary btn-sm" style="margin-top: 14px; display: inline-flex;">
+                          + Buat Laporan Performance Sekarang
+                        </a>
+                      <?php endif; ?>
                     </td>
                   </tr>
                 <?php else: ?>
@@ -282,17 +302,19 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
                       <!-- Actions -->
                       <td style="text-align: right;">
                         <div style="display: inline-flex; align-items: center; gap: 6px;">
-                          <a href="<?= url("report-deck?id={$r['id']}") ?>" class="btn btn-primary btn-sm" style="padding: 5px 10px;" title="Buka Pitch Deck">
+                          <a href="<?= url("report-deck?id={$r['id']}&portal=client&_slot=client") ?>" class="btn btn-primary btn-sm" style="padding: 5px 10px;" title="Buka Pitch Deck">
                             <span>Deck</span>
                           </a>
 
-                          <a href="<?= url("reports-form?id={$r['id']}") ?>" class="btn btn-secondary btn-sm" style="padding: 5px 10px; font-weight: 600;" title="Edit Data Laporan">
-                            <span>Edit</span>
-                          </a>
+                          <?php if (!$isClientUser && (is_owner() || is_admin())): ?>
+                            <a href="<?= url("reports-form?id={$r['id']}") ?>" class="btn btn-secondary btn-sm" style="padding: 5px 10px; font-weight: 600;" title="Edit Data Laporan">
+                              <span>Edit</span>
+                            </a>
 
-                          <button type="button" class="btn btn-secondary btn-sm" style="padding: 5px 10px; color: var(--danger-text); font-weight: 600;" onclick="deleteReport(<?= $r['id'] ?>, '<?= htmlspecialchars(addslashes($r['client_company'])) ?>', '<?= htmlspecialchars($r['report_period']) ?>')" title="Hapus Laporan">
-                            <span>Hapus</span>
-                          </button>
+                            <button type="button" class="btn btn-secondary btn-sm" style="padding: 5px 10px; color: var(--danger-text); font-weight: 600;" onclick="deleteReport(<?= $r['id'] ?>, '<?= htmlspecialchars(addslashes($r['client_company'])) ?>', '<?= htmlspecialchars($r['report_period']) ?>')" title="Hapus Laporan">
+                              <span>Hapus</span>
+                            </button>
+                          <?php endif; ?>
                         </div>
                       </td>
                     </tr>
@@ -307,7 +329,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </main>
   </div>
 
-  <script src="assets/js/app.js?v=bankio-smooth-2.0"></script>
+  <script src="assets/js/app.js?v=bankio-typography-3.0"></script>
   <script>
     async function deleteReport(id, company, period) {
       if (!confirm(`Apakah Anda yakin ingin menghapus laporan performa ${company} periode ${period}?`)) {

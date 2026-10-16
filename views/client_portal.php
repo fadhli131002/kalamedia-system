@@ -34,8 +34,8 @@ if (!$client) {
   <title>Client Portal - Kalamedia</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
 </head>
 <body>
   <div class="app-container">
@@ -52,12 +52,18 @@ if (!$client) {
             Saat ini belum ada data klien aktif di sistem Kalamedia. Anda dapat langsung membuat invoice baru untuk klien pertama atau menambahkan klien melalui menu Klien.
           </p>
           <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
-            <button type="button" class="btn btn-primary" onclick="openModal('modal-create-invoice')">
-              + Buat Invoice Baru
-            </button>
-            <a href="<?= url('clients') ?>" class="btn btn-secondary">
-              Kelola Data Klien
-            </a>
+            <?php if ($role === 'owner' || $role === 'admin'): ?>
+              <button type="button" class="btn btn-primary" onclick="openModal('modal-create-invoice')">
+                + Buat Invoice Baru
+              </button>
+              <a href="<?= url('clients') ?>" class="btn btn-secondary">
+                Kelola Data Klien
+              </a>
+            <?php else: ?>
+              <a href="<?= url('client-portal?tab=deliverables&portal=client&_slot=client') ?>" class="btn btn-primary">
+                Segarkan Portal
+              </a>
+            <?php endif; ?>
           </div>
         </div>
       </div>
@@ -96,6 +102,15 @@ $stmtInvoices = $db->prepare("
 ");
 $stmtInvoices->execute([$clientId]);
 $invoices = $stmtInvoices->fetchAll();
+
+// Fetch Performance Marketing Reports for this client
+$stmtReports = $db->prepare("
+    SELECT * FROM performance_reports
+    WHERE client_id = ? AND COALESCE(is_deleted,0)=0
+    ORDER BY id DESC
+");
+$stmtReports->execute([$clientId]);
+$clientReports = $stmtReports->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -105,16 +120,16 @@ $invoices = $stmtInvoices->fetchAll();
   <title>Client Portal - <?= htmlspecialchars($client['company'] ?? 'Kalamedia') ?></title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
   <style>
     /* Client Portal Custom Styles - Minimal Finance (Bankio) */
     .portal-hero {
       background: linear-gradient(135deg, #5D76F5 0%, #8932E0 100%);
-      border-radius: 22px;
-      padding: 32px 28px;
-      color: #FFFFFF;
-      margin-bottom: 24px;
+      border-radius: 20px;
+      padding: 26px 26px;
+      color: #FFFFFF !important;
+      margin-bottom: 22px;
       box-shadow: 0 14px 34px -8px rgba(93, 118, 245, 0.35);
       position: relative;
       overflow: hidden;
@@ -131,13 +146,31 @@ $invoices = $stmtInvoices->fetchAll();
       border-radius: 50%;
       pointer-events: none;
     }
+    .portal-hero * {
+      color: #FFFFFF;
+    }
+    .portal-hero h1,
+    .portal-hero .portal-hero-title {
+      color: #FFFFFF !important;
+      font-size: 20px !important;
+      font-weight: 800 !important;
+      margin: 10px 0 6px !important;
+      letter-spacing: -0.3px !important;
+      line-height: 1.25 !important;
+    }
+    .portal-hero p,
+    .portal-hero .portal-hero-desc {
+      color: rgba(255, 255, 255, 0.92) !important;
+      font-size: 13px !important;
+      line-height: 1.5 !important;
+    }
     .portal-hero-top {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       gap: 16px;
       flex-wrap: wrap;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
     .portal-brand-badge {
       display: inline-flex;
@@ -151,23 +184,42 @@ $invoices = $stmtInvoices->fetchAll();
       font-weight: 700;
       letter-spacing: 0.5px;
       text-transform: uppercase;
-      color: #FFFFFF;
+      color: #FFFFFF !important;
       backdrop-filter: blur(4px);
+    }
+    .portal-brand-badge span {
+      color: #FFFFFF !important;
     }
     .portal-progress-wrapper {
       background: rgba(255, 255, 255, 0.14);
       border: 1px solid rgba(255, 255, 255, 0.22);
-      border-radius: 18px;
-      padding: 20px 22px;
-      margin-top: 20px;
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-top: 16px;
       backdrop-filter: blur(4px);
     }
+    .portal-progress-wrapper span,
+    .portal-progress-wrapper div {
+      color: #FFFFFF !important;
+    }
+    #portal-progress-text {
+      color: rgba(255, 255, 255, 0.92) !important;
+      font-size: 12.5px !important;
+      margin-top: 2px !important;
+    }
+    #portal-progress-percent {
+      color: #FFFFFF !important;
+      font-size: 22px !important;
+      font-weight: 800 !important;
+      letter-spacing: -0.3px !important;
+      line-height: 1.2 !important;
+    }
     .portal-progress-bar-bg {
-      height: 12px;
+      height: 10px;
       background: rgba(255, 255, 255, 0.22);
       border-radius: 999px;
       overflow: hidden;
-      margin: 12px 0 8px;
+      margin: 10px 0 6px;
       position: relative;
     }
     .portal-progress-bar-fill {
@@ -182,17 +234,18 @@ $invoices = $stmtInvoices->fetchAll();
     .portal-stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      margin-bottom: 24px;
+      gap: 16px;
+      margin-bottom: 22px;
     }
     .portal-stat-card {
       background: #FFFFFF;
       border: 1px solid #ECEEF5;
-      border-radius: 22px;
-      padding: 22px 24px;
+      border-radius: 18px;
+      padding: 16px 18px;
+      min-height: 105px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      justify-content: space-between;
       box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
       transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms ease;
       will-change: transform;
@@ -203,8 +256,8 @@ $invoices = $stmtInvoices->fetchAll();
       border-color: #DDE1EE;
     }
     .portal-stat-card.highlight {
-      border-color: rgba(245, 158, 11, 0.35);
-      background: #FFFDF5;
+      border-color: #FEDF89;
+      background: #FFFAEB;
     }
 
     /* Portal Tabs - Bankio Pill Style */
@@ -398,21 +451,21 @@ $invoices = $stmtInvoices->fetchAll();
           <div class="portal-hero-top">
             <div>
               <div class="portal-brand-badge">
-                <span><?= htmlspecialchars($client['company']) ?></span>
-                <span>&bull;</span>
-                <span><?= htmlspecialchars($client['package_name'] ?? 'Social Media & Performance Ads') ?></span>
+                <span style="color: #FFFFFF !important;"><?= htmlspecialchars($client['company']) ?></span>
+                <span style="color: rgba(255, 255, 255, 0.6) !important;">&bull;</span>
+                <span style="color: #FFFFFF !important;"><?= htmlspecialchars($client['package_name'] ?? 'Social Media & Performance Ads') ?></span>
               </div>
-              <h1 style="font-size: 24px; font-weight: 800; margin: 12px 0 6px; letter-spacing: -0.4px;">
+              <h1 class="portal-hero-title" style="font-size: 20px; font-weight: 800; margin: 10px 0 6px; letter-spacing: -0.3px; color: #FFFFFF !important;">
                 <?= htmlspecialchars($project['name'] ?? 'Kampanye Digital & Produksi Konten') ?>
               </h1>
-              <p style="font-size: 13.5px; opacity: 0.85; margin: 0; max-width: 640px;">
+              <p class="portal-hero-desc" style="font-size: 13px; color: rgba(255, 255, 255, 0.92) !important; margin: 0; max-width: 640px; line-height: 1.5;">
                 Selamat datang di Client Portal Kalamedia. Di sini Anda dapat memantau pengerjaan seluruh deliverable, meninjau hasil karya tim, dan memberikan revisi atau persetujuan secara transparan.
               </p>
             </div>
 
             <div style="text-align: right;">
-              <span style="font-size: 11px; opacity: 0.75; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">PIC Kalamedia Agensi</span>
-              <div style="font-size: 14px; font-weight: 800; margin-top: 2px;">Tim Kalamedia</div>
+              <span style="font-size: 11px; color: rgba(255, 255, 255, 0.8) !important; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">PIC Kalamedia Agensi</span>
+              <div style="font-size: 14px; font-weight: 800; margin-top: 2px; color: #FFFFFF !important;">Tim Kalamedia</div>
               <a href="https://wa.me/628881124215" target="_blank" class="btn btn-sm" style="margin-top: 8px; background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.3); font-size: 11.5px; font-weight: 700;">
                 Hubungi via WhatsApp
               </a>
@@ -423,14 +476,14 @@ $invoices = $stmtInvoices->fetchAll();
           <div class="portal-progress-wrapper">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <div>
-                <span style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #E0EAFF;">
+                <span style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #FFFFFF !important;">
                   Progres Pengerjaan Keseluruhan Deliverables
                 </span>
-                <div style="font-size: 12.5px; opacity: 0.9; margin-top: 2px;" id="portal-progress-text">
+                <div style="font-size: 12.5px; color: rgba(255, 255, 255, 0.92) !important; margin-top: 2px;" id="portal-progress-text">
                   Memuat data pengerjaan...
                 </div>
               </div>
-              <div style="font-size: 28px; font-weight: 900; letter-spacing: -0.5px;" id="portal-progress-percent">
+              <div style="font-size: 22px; font-weight: 800; letter-spacing: -0.3px; color: #FFFFFF !important; line-height: 1.2;" id="portal-progress-percent">
                 0%
               </div>
             </div>
@@ -444,28 +497,36 @@ $invoices = $stmtInvoices->fetchAll();
         <!-- 2. Portal Statistics Counters -->
         <div class="portal-stats-grid">
           <div class="portal-stat-card">
-            <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">TOTAL DELIVERABLES</span>
-            <div style="font-size: 30px; font-weight: 700; color: #000000; letter-spacing: -0.02em; line-height: 1.1;" id="stat-total-tasks">0</div>
+            <div>
+              <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">TOTAL DELIVERABLES</span>
+              <div style="font-size: 22px; font-weight: 800; color: #101828; letter-spacing: -0.02em; line-height: 1.2; margin: 4px 0;" id="stat-total-tasks">0</div>
+            </div>
             <span style="font-size: 12px; color: #6E7485;">Pekerjaan proyek aktif</span>
           </div>
 
           <div class="portal-stat-card highlight">
-            <span style="font-size: 11px; color: #B54708; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 4px;">
-              BUTUH REVIEW KLIEN
-            </span>
-            <div style="font-size: 30px; font-weight: 700; color: #000000; letter-spacing: -0.02em; line-height: 1.1;" id="stat-review-tasks">0</div>
+            <div>
+              <span style="font-size: 11px; color: #B54708; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 4px;">
+                BUTUH REVIEW KLIEN
+              </span>
+              <div style="font-size: 22px; font-weight: 800; color: #B54708; letter-spacing: -0.02em; line-height: 1.2; margin: 4px 0;" id="stat-review-tasks">0</div>
+            </div>
             <span style="font-size: 12px; color: #B54708; font-weight: 600;">Menunggu persetujuan Anda</span>
           </div>
 
           <div class="portal-stat-card">
-            <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">SEDANG DIKERJAKAN</span>
-            <div style="font-size: 30px; font-weight: 700; color: #000000; letter-spacing: -0.02em; line-height: 1.1;" id="stat-progress-tasks">0</div>
+            <div>
+              <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">SEDANG DIKERJAKAN</span>
+              <div style="font-size: 22px; font-weight: 800; color: #101828; letter-spacing: -0.02em; line-height: 1.2; margin: 4px 0;" id="stat-progress-tasks">0</div>
+            </div>
             <span style="font-size: 12px; color: #6E7485;">Proses kreatif & revisi tim</span>
           </div>
 
           <div class="portal-stat-card">
-            <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">SELESAI & DISETUJUI</span>
-            <div style="font-size: 30px; font-weight: 700; color: #000000; letter-spacing: -0.02em; line-height: 1.1;" id="stat-approved-tasks">0</div>
+            <div>
+              <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">SELESAI & DISETUJUI</span>
+              <div style="font-size: 22px; font-weight: 800; color: #101828; letter-spacing: -0.02em; line-height: 1.2; margin: 4px 0;" id="stat-approved-tasks">0</div>
+            </div>
             <span style="font-size: 12px; color: #6E7485;">Deliverables telah final</span>
           </div>
         </div>
@@ -473,13 +534,16 @@ $invoices = $stmtInvoices->fetchAll();
         <!-- 3. Navigation Tabs -->
         <div class="portal-nav-tabs">
           <button class="portal-tab-btn active" onclick="switchPortalTab('deliverables', this)">
-            <span>Daftar Pekerjaan & Tim Pelaksana</span>
+            <span>Progress & Deliverables</span>
           </button>
           <button class="portal-tab-btn" onclick="switchPortalTab('calendar', this)">
             <span>Kalender Konten (<?= count($contents) ?>)</span>
           </button>
           <button class="portal-tab-btn" onclick="switchPortalTab('invoices', this)">
             <span>Tagihan / Invoices (<?= count($invoices) ?>)</span>
+          </button>
+          <button class="portal-tab-btn" onclick="switchPortalTab('reports', this)">
+            <span>Laporan Performa (<?= count($clientReports) ?>)</span>
           </button>
           <button class="portal-tab-btn" onclick="switchPortalTab('ads', this)">
             <span>Transparansi Kampanye Ads</span>
@@ -615,7 +679,7 @@ $invoices = $stmtInvoices->fetchAll();
                           </span>
                         </td>
                         <td style="text-align: right;">
-                          <a href="<?= url('invoice-view') ?>?id=<?= $inv['id'] ?>" class="btn btn-secondary btn-sm" style="font-size: 11.5px; font-weight: 700;">
+                          <a href="<?= url('invoice-view') ?>?id=<?= $inv['id'] ?>&portal=client&_slot=client" class="btn btn-secondary btn-sm" style="font-size: 11.5px; font-weight: 700;">
                             Lihat / Cetak PDF
                           </a>
                         </td>
@@ -628,7 +692,74 @@ $invoices = $stmtInvoices->fetchAll();
           </div>
         </div>
 
-        <!-- TAB 4: Client Live Ads Transparency -->
+        <!-- TAB 4: Performance Reports (Pitch Deck & Blended Economics) -->
+        <div id="tab-pane-reports" style="display: none;">
+          <div class="glass-panel">
+            <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h3 class="panel-title">Laporan Kinerja Full-Funnel Performance Marketing</h3>
+                <p style="font-size: 12.5px; color: var(--text-secondary); margin-top: 2px;">
+                  Dokumen laporan hasil kampanye paid ads dan strategi performa resmi agensi Kalamedia Creative.
+                </p>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table-custom">
+                <thead>
+                  <tr>
+                    <th>PERIODE LAPORAN</th>
+                    <th>OBJEKTIF KAMPANYE</th>
+                    <th>TOTAL AD SPEND</th>
+                    <th>GROSS REVENUE</th>
+                    <th>BLENDED ROAS</th>
+                    <th style="text-align: right;">AKSI</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php if (empty($clientReports)): ?>
+                    <tr>
+                      <td colspan="6" style="text-align: center; padding: 32px; color: var(--text-muted);">
+                        Belum ada dokumen laporan performa untuk periode aktif.
+                      </td>
+                    </tr>
+                  <?php else: ?>
+                    <?php foreach ($clientReports as $rep): ?>
+                      <tr>
+                        <td style="font-weight: 800; color: #101828;">
+                          <?= htmlspecialchars($rep['report_period'] ?? 'Periode Berjalan') ?>
+                        </td>
+                        <td>
+                          <span class="badge" style="background: #F2F4F7; color: #101828; font-weight: 700;">
+                            <?= htmlspecialchars($rep['objective'] ?? 'Sales & Leads') ?>
+                          </span>
+                        </td>
+                        <td style="font-weight: 700;">
+                          Rp <?= number_format($rep['total_ad_spend'] ?? 0, 0, ',', '.') ?>
+                        </td>
+                        <td style="font-weight: 700; color: #027A48;">
+                          Rp <?= number_format($rep['revenue'] ?? 0, 0, ',', '.') ?>
+                        </td>
+                        <td>
+                          <span class="badge" style="background: #EEF2FF; color: #4338CA; font-weight: 800;">
+                            <?= number_format($rep['roas'] ?? 0, 2) ?>x
+                          </span>
+                        </td>
+                        <td style="text-align: right;">
+                          <a href="<?= url('report-deck?id=' . $rep['id'] . '&portal=client&_slot=client') ?>" class="btn btn-secondary btn-sm" style="font-size: 11.5px; font-weight: 700;">
+                            <span>Lihat Deck Laporan</span>
+                          </a>
+                        </td>
+                      </tr>
+                    <?php endforeach; ?>
+                  <?php endif; ?>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 5: Client Live Ads Transparency -->
         <div id="tab-pane-ads" style="display: none;">
           <div class="glass-panel">
             <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
@@ -746,18 +877,27 @@ $invoices = $stmtInvoices->fetchAll();
     </div>
   </div>
 
-  <script src="assets/js/app.js?v=bankio-smooth-2.0"></script>
+  <script src="assets/js/app.js?v=bankio-typography-3.0"></script>
   <script>
     let currentTasksList = [];
 
     // Initialize Client Portal Data
     document.addEventListener('DOMContentLoaded', () => {
       loadClientTasks();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const activeTab = urlParams.get('tab');
+      if (activeTab && ['deliverables', 'calendar', 'invoices', 'reports', 'ads'].includes(activeTab)) {
+        const targetBtn = document.querySelector(`.portal-tab-btn[onclick*="'${activeTab}'"]`);
+        if (targetBtn) {
+          switchPortalTab(activeTab, targetBtn);
+        }
+      }
     });
 
     async function loadClientTasks() {
       try {
-        const res = await fetch('api/portal_tasks.php?action=list_tasks');
+        const res = await fetch('api/portal_tasks.php?action=list_tasks&_slot=client');
         const data = await res.json();
 
         if (data.success) {
@@ -909,7 +1049,7 @@ $invoices = $stmtInvoices->fetchAll();
       document.querySelectorAll('.portal-tab-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
-      ['deliverables', 'calendar', 'invoices', 'ads'].forEach(t => {
+      ['deliverables', 'calendar', 'invoices', 'reports', 'ads'].forEach(t => {
         const pane = document.getElementById('tab-pane-' + t);
         if (pane) {
           if (t === tabName) {
@@ -931,7 +1071,7 @@ $invoices = $stmtInvoices->fetchAll();
     async function loadClientAdsData() {
       const container = document.getElementById('client-ads-container');
       try {
-        const res = await fetch('api/ads_tracker.php?action=list');
+        const res = await fetch('api/ads_tracker.php?action=list&_slot=client');
         const data = await res.json();
 
         if (!data.success || !data.projects || data.projects.length === 0) {
@@ -1031,7 +1171,7 @@ $invoices = $stmtInvoices->fetchAll();
 
     async function openFeedbackModal(taskId) {
       try {
-        const res = await fetch(`api/portal_tasks.php?action=get_task_details&id=${taskId}`);
+        const res = await fetch(`api/portal_tasks.php?action=get_task_details&id=${taskId}&_slot=client`);
         const data = await res.json();
 
         if (data.success) {
@@ -1118,6 +1258,7 @@ $invoices = $stmtInvoices->fetchAll();
       submitBtn.innerHTML = 'Mengirim...';
 
       const formData = new FormData(form);
+      formData.append('_slot', 'client');
 
       try {
         const res = await fetch('api/portal_tasks.php?action=submit_feedback', {
@@ -1150,6 +1291,7 @@ $invoices = $stmtInvoices->fetchAll();
       formData.append('task_id', taskId);
       formData.append('feedback_type', 'approval');
       formData.append('message', 'Hasil kerja telah disetujui (Approved) secara resmi oleh Klien. Pekerjaan siap dipublikasikan!');
+      formData.append('_slot', 'client');
 
       try {
         const res = await fetch('api/portal_tasks.php?action=submit_feedback', {

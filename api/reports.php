@@ -15,6 +15,12 @@ release_session();
 $db = Database::getConnection();
 $action = $_GET['action'] ?? $_POST['action'] ?? 'list';
 
+// CLIENT PRIVILEGE RESTRICTION: Client is read-only
+if (is_client() && in_array($action, ['save', 'delete', 'upload_creative', 'upload_image'])) {
+    echo json_encode(['success' => false, 'message' => 'Akses ditolak: Klien tidak memiliki hak untuk mengubah laporan performa.']);
+    exit;
+}
+
 // Helper function to handle creative screenshot file uploads
 function handleCreativeUpload(string $fileKey, ?string $existingUrl = null): ?string {
     if (!isset($_FILES[$fileKey]) || $_FILES[$fileKey]['error'] === UPLOAD_ERR_NO_FILE) {
@@ -87,7 +93,15 @@ if ($action === 'list') {
         $where = ["COALESCE(r.is_deleted, 0) = 0"];
         $params = [];
 
-        if ($clientId > 0) {
+        if (is_client()) {
+            $cId = current_user_client_id();
+            if ($cId) {
+                $where[] = "r.client_id = ?";
+                $params[] = $cId;
+            } else {
+                $where[] = "1 = 0";
+            }
+        } elseif ($clientId > 0) {
             $where[] = "r.client_id = ?";
             $params[] = $clientId;
         }
@@ -196,6 +210,14 @@ if ($action === 'get_details') {
         if (!$report) {
             echo json_encode(['success' => false, 'message' => 'Laporan kinerja performa tidak ditemukan.']);
             exit;
+        }
+
+        if (is_client()) {
+            $clientAuthId = current_user_client_id();
+            if ($clientAuthId && (int)$report['client_id'] !== (int)$clientAuthId) {
+                echo json_encode(['success' => false, 'message' => 'Akses ditolak: Dokumen laporan ini bukan milik perusahaan Anda.']);
+                exit;
+            }
         }
 
         echo json_encode([

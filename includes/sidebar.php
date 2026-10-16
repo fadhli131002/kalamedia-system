@@ -19,11 +19,42 @@ $homeUrl = home_url_for_role();
 $roleLabelMap = [
     'owner' => 'OWNER',
     'admin' => 'ADMIN',
-    'karyawan' => 'STAFF',
+    'karyawan' => 'KARYAWAN',
     'freelancer' => 'FREELANCER',
     'client' => 'CLIENT'
 ];
-$badgeLabel = $roleLabelMap[$role] ?? strtoupper($role);
+
+$activeName = $currentUser['name'] ?? '';
+if ($role === 'owner') {
+    $sidebarProfileName = 'Owner';
+    $sidebarAvatar = 'OW';
+    $sidebarBadge = 'OWNER';
+} elseif ($role === 'admin') {
+    $sidebarProfileName = 'Admin';
+    $sidebarAvatar = 'AD';
+    $sidebarBadge = 'ADMIN';
+} elseif ($role === 'client') {
+    $sidebarProfileName = htmlspecialchars($activeName ?: 'Client');
+    $cleanName = trim(preg_replace('/[^a-zA-Z0-9]/', '', $activeName));
+    $sidebarAvatar = strtoupper(substr($cleanName ?: 'CL', 0, 2));
+    $sidebarBadge = 'CLIENT';
+} elseif ($role === 'karyawan') {
+    $sidebarProfileName = htmlspecialchars($activeName ?: 'Karyawan');
+    $cleanName = trim(preg_replace('/[^a-zA-Z0-9]/', '', $activeName));
+    $sidebarAvatar = strtoupper(substr($cleanName ?: 'KA', 0, 2));
+    $sidebarBadge = 'KARYAWAN';
+} elseif ($role === 'freelancer') {
+    $sidebarProfileName = htmlspecialchars($activeName ?: 'Freelancer');
+    $cleanName = trim(preg_replace('/[^a-zA-Z0-9]/', '', $activeName));
+    $sidebarAvatar = strtoupper(substr($cleanName ?: 'FR', 0, 2));
+    $sidebarBadge = 'FREELANCER';
+} else {
+    $sidebarProfileName = htmlspecialchars($activeName ?: 'User');
+    $cleanName = trim(preg_replace('/[^a-zA-Z0-9]/', '', $activeName));
+    $sidebarAvatar = strtoupper(substr($cleanName ?: 'US', 0, 2));
+    $sidebarBadge = strtoupper($role ?: 'USER');
+}
+$badgeLabel = $sidebarBadge;
 ?>
 
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
@@ -48,22 +79,22 @@ $badgeLabel = $roleLabelMap[$role] ?? strtoupper($role);
       <!-- CLIENT PORTAL NAVIGATION -->
       <div class="nav-section-title">Client Portal</div>
 
-      <a href="<?= url('client-portal') ?>" class="nav-link <?= $currentPage === 'client-portal' ? 'active' : '' ?>">
+      <a href="<?= url('client-portal?tab=deliverables&portal=client&_slot=client') ?>" class="nav-link <?= ($currentPage === 'client-portal' && (!isset($_GET['tab']) || $_GET['tab'] === 'deliverables')) ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
         <span>Progress & Deliverables</span>
       </a>
 
-      <a href="<?= url('content-calendar') ?>" class="nav-link <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
+      <a href="<?= url('client-portal?tab=calendar&portal=client&_slot=client') ?>" class="nav-link <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'calendar') || in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span>Kalender Konten</span>
       </a>
 
-      <a href="<?= url('invoices') ?>" class="nav-link <?= in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
+      <a href="<?= url('client-portal?tab=invoices&portal=client&_slot=client') ?>" class="nav-link <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'invoices') || in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span>Tagihan / Invoices</span>
       </a>
 
-      <a href="<?= url('reports') ?>" class="nav-link <?= in_array($currentPage, ['reports', 'report-deck']) ? 'active' : '' ?>">
+      <a href="<?= url('client-portal?tab=reports&portal=client&_slot=client') ?>" class="nav-link <?= ($currentPage === 'client-portal' && in_array(($_GET['tab'] ?? ''), ['reports', 'ads'])) || in_array($currentPage, ['reports', 'report-deck']) ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         <span>Laporan Performa</span>
       </a>
@@ -162,8 +193,8 @@ $badgeLabel = $roleLabelMap[$role] ?? strtoupper($role);
       $sbLogoutContext = ($currentPage === 'client-portal' || is_client()) ? 'client' : 'internal';
     ?>
     <div class="nav-section-title">Sesi Akun</div>
-    <a href="<?= url('logout') ?>?context=<?= $sbLogoutContext ?>" class="nav-link" style="color: #E11D48; font-weight: 700;">
-      <svg viewBox="0 0 24 24" style="stroke: #E11D48;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    <a href="<?= url('logout') ?>?context=<?= $sbLogoutContext ?>&portal=<?= $sbLogoutContext ?>&_slot=<?= $sbLogoutContext ?>" class="nav-link nav-link-logout">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       <span>Keluar (Logout)</span>
     </a>
 
@@ -171,30 +202,15 @@ $badgeLabel = $roleLabelMap[$role] ?? strtoupper($role);
 
   <div class="sidebar-user">
     <div class="user-profile">
-      <?php
-        if ($isOwner) {
-            $sidebarProfileName = 'Owner';
-            $sidebarAvatar = 'OW';
-        } elseif ($role === 'admin') {
-            $sidebarProfileName = 'Admin';
-            $sidebarAvatar = 'AD';
-        } else {
-            $sidebarProfileName = htmlspecialchars($currentUser['name'] ?? 'User Kalamedia');
-            $sidebarAvatar = strtoupper(substr($currentUser['name'] ?? 'User', 0, 2));
-        }
-      ?>
       <div class="avatar">
         <?= $sidebarAvatar ?>
       </div>
       <div class="user-details">
         <h4><?= $sidebarProfileName ?></h4>
         <span class="role-badge">
-          <?= $badgeLabel ?>
+          <?= $sidebarBadge ?>
         </span>
       </div>
     </div>
-    <a href="<?= url('logout') ?>?context=<?= $sbLogoutContext ?>" class="btn-logout" title="Keluar dari sistem">
-      Keluar (Logout)
-    </a>
   </div>
 </aside>

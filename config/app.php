@@ -4,10 +4,83 @@
  * Core Application Configuration
  */
 
+if (!function_exists('detect_session_context')) {
+    function detect_session_context(): string {
+        if (!empty($GLOBALS['__ACTIVE_SESSION_CONTEXT_OVERRIDE__'])) {
+            return $GLOBALS['__ACTIVE_SESSION_CONTEXT_OVERRIDE__'];
+        }
+
+        $uri = $_SERVER['REQUEST_URI'] ?? '';
+        $script = basename($_SERVER['SCRIPT_NAME'] ?? '');
+        $slotParam = $_GET['_slot'] ?? $_POST['_slot'] ?? $_GET['portal'] ?? $_POST['portal'] ?? $_GET['context'] ?? $_POST['context'] ?? $_POST['auth_context'] ?? $_GET['auth_context'] ?? $_SERVER['HTTP_X_KALA_SLOT'] ?? $_SERVER['HTTP_X_AUTH_CONTEXT'] ?? '';
+        $page = $_GET['page'] ?? '';
+        $roleParam = $_POST['role'] ?? ($_GET['role'] ?? '');
+        $referer = $_SERVER['HTTP_REFERER'] ?? '';
+
+        if ($slotParam === 'client') {
+            return 'client';
+        }
+        if ($slotParam === 'internal') {
+            return 'internal';
+        }
+
+        if (
+            $script === 'client_portal.php' ||
+            strpos($uri, '/client-portal') !== false ||
+            strpos($uri, 'portal=client') !== false ||
+            strpos($uri, 'context=client') !== false ||
+            strpos($uri, '_slot=client') !== false
+        ) {
+            return 'client';
+        }
+
+        if (in_array($page, ['client-portal', 'client_portal', 'client'])) {
+            return 'client';
+        }
+
+        if ($roleParam === 'client') {
+            return 'client';
+        }
+
+        if (
+            strpos($referer, '/client-portal') !== false ||
+            strpos($referer, 'portal=client') !== false ||
+            strpos($referer, 'context=client') !== false ||
+            strpos($referer, 'client_portal.php') !== false
+        ) {
+            return 'client';
+        }
+
+        return 'internal';
+    }
+}
+
+if (!function_exists('switch_session_context')) {
+    function switch_session_context(string $context): void {
+        $GLOBALS['__ACTIVE_SESSION_CONTEXT_OVERRIDE__'] = $context;
+        $targetName = ($context === 'client') ? 'KALASESS_CLIENT' : 'KALASESS_INTERNAL';
+        if (headers_sent()) {
+            return;
+        }
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            if (session_name() === $targetName) {
+                return;
+            }
+            session_write_close();
+        }
+        ini_set('session.gc_maxlifetime', 7200);
+        ini_set('session.cookie_lifetime', 7200);
+        session_name($targetName);
+        session_start();
+    }
+}
+
 if (session_status() === PHP_SESSION_NONE) {
     // 2-hour session lifetime (7200 seconds)
     ini_set('session.gc_maxlifetime', 7200);
     ini_set('session.cookie_lifetime', 7200);
+    $activeCtx = detect_session_context();
+    session_name($activeCtx === 'client' ? 'KALASESS_CLIENT' : 'KALASESS_INTERNAL');
     session_start();
 }
 

@@ -73,7 +73,7 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
     <?php endif; ?>
 
     <!-- Role Context Actions -->
-    <?php if ($isAdminUser): ?>
+    <?php if (($userRole === 'owner' || $userRole === 'admin') && !$isClientUser && !in_array($userRole, ['client', 'karyawan', 'freelancer'])): ?>
       <button class="btn btn-primary btn-sm btn-create-invoice" onclick="openModal('modal-create-invoice')">
         <span>+ Buat Invoice</span>
       </button>

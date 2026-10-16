@@ -15,6 +15,12 @@ release_session();
 $db = Database::getConnection();
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
+// CLIENT PRIVILEGE RESTRICTION: Read-only access for Client
+if (is_client() && in_array($action, ['create', 'update', 'delete', 'update_date', 'update_status', 'add_custom_calendar', 'duplicate'])) {
+    echo json_encode(['success' => false, 'message' => 'Akses ditolak: Klien tidak memiliki hak untuk mengubah jadwal konten.']);
+    exit;
+}
+
 // Pre-defined client colors palette matching Slide 3
 $clientColorPalette = [
     '#3B82F6', // Blue
@@ -233,8 +239,16 @@ if ($action === 'get_events') {
         $params[] = $endDate;
     }
 
-    // Filter by client IDs (multi-select)
-    if (!empty($clientIdsRaw)) {
+    // Filter by client IDs (strictly locked to current client if client role)
+    if (is_client()) {
+        $cId = current_user_client_id();
+        if ($cId) {
+            $where[] = "cp.client_id = ?";
+            $params[] = $cId;
+        } else {
+            $where[] = "1 = 0";
+        }
+    } elseif (!empty($clientIdsRaw)) {
         $clientIds = array_filter(array_map('intval', explode(',', $clientIdsRaw)));
         if (!empty($clientIds)) {
             $inPlaceholders = implode(',', array_fill(0, count($clientIds), '?'));

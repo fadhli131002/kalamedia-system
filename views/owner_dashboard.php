@@ -114,10 +114,10 @@ foreach ($systemUsers as $su) {
   <title>Executive Dashboard - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="assets/js/charts.js?v=bankio-smooth-2.0"></script>
+  <script src="assets/js/charts.js?v=bankio-typography-3.0"></script>
 </head>
 <body>
   <div class="app-container">

@@ -9,13 +9,13 @@ $isSwitch = isset($_GET['switch']);
 
 // Check session based on requested context
 if ($requestedContext === 'client') {
-    if (!empty($_SESSION['kala_client_portal']['logged_in']) && !$isSwitch) {
-        header('Location: ' . url('client-portal'));
+    if (is_logged_in('client') && !$isSwitch) {
+        header('Location: ' . url('client-portal?tab=deliverables&portal=client&_slot=client'));
         exit;
     }
     $activeContext = 'client';
 } elseif ($requestedContext === 'internal') {
-    if (!empty($_SESSION['kala_internal']['logged_in']) && !$isSwitch) {
+    if (is_logged_in('internal') && !$isSwitch) {
         header('Location: ' . home_url_for_role(current_user_role('internal')));
         exit;
     }
@@ -23,11 +23,11 @@ if ($requestedContext === 'client') {
 } else {
     // Default flow:
     if (!$isSwitch) {
-        if (!empty($_SESSION['kala_internal']['logged_in'])) {
+        if (is_logged_in('internal') && !is_logged_in('client')) {
             header('Location: ' . home_url_for_role(current_user_role('internal')));
             exit;
-        } elseif (!empty($_SESSION['kala_client_portal']['logged_in'])) {
-            header('Location: ' . url('client-portal'));
+        } elseif (is_logged_in('client') && !is_logged_in('internal')) {
+            header('Location: ' . url('client-portal?tab=deliverables&portal=client&_slot=client'));
             exit;
         }
     }
@@ -42,8 +42,8 @@ if ($requestedContext === 'client') {
   <title>Login - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
   <style>
     .login-page {
       min-height: 100vh;
@@ -55,7 +55,7 @@ if ($requestedContext === 'client') {
       background-image: 
         radial-gradient(circle at 15% 20%, rgba(93, 118, 245, 0.08) 0%, transparent 45%), 
         radial-gradient(circle at 85% 80%, rgba(137, 50, 224, 0.06) 0%, transparent 45%);
-      font-family: 'SF Pro Rounded', 'Plus Jakarta Sans', 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: var(--font-sans);
     }
     .login-card {
       width: 100%;
@@ -186,6 +186,8 @@ if ($requestedContext === 'client') {
 
     <form id="form-login" action="api/auth.php?action=login" method="POST">
       <input type="hidden" name="auth_context" id="auth_context_input" value="<?= $activeContext ?>">
+      <input type="hidden" name="_slot" id="auth_slot_input" value="<?= $activeContext ?>">
+      <input type="hidden" name="portal" id="auth_portal_input" value="<?= $activeContext ?>">
 
       <div class="form-group" style="margin-bottom: 16px;">
         <label class="form-label" id="label-email" style="font-weight: 600; color: #000000; margin-bottom: 6px; font-size: 12.5px; display: block;">Alamat Email</label>
@@ -213,10 +215,12 @@ if ($requestedContext === 'client') {
     </form>
   </div>
 
-  <script src="assets/js/app.js?v=bankio-smooth-2.0"></script>
+  <script src="assets/js/app.js?v=bankio-typography-3.0"></script>
   <script>
     function setLoginContext(ctx) {
       document.getElementById('auth_context_input').value = ctx;
+      if (document.getElementById('auth_slot_input')) document.getElementById('auth_slot_input').value = ctx;
+      if (document.getElementById('auth_portal_input')) document.getElementById('auth_portal_input').value = ctx;
       const tabInternal = document.getElementById('tab-btn-internal');
       const tabClient = document.getElementById('tab-btn-client');
       const title = document.getElementById('login-title');

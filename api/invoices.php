@@ -16,6 +16,13 @@ if (is_karyawan() || is_freelancer()) {
     exit;
 }
 
+// CLIENT MUTATION RESTRICTION: Client is read-only
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
+if (is_client() && in_array($action, ['create', 'update', 'delete', 'mark_paid', 'update_status', 'upload_receipt', 'confirm_payment', 'project_detail'])) {
+    echo json_encode(['success' => false, 'message' => 'Akses ditolak: Klien tidak memiliki izin mengubah data invoice.']);
+    exit;
+}
+
 $db = Database::getConnection();
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 
@@ -409,6 +416,14 @@ if ($action === 'get_details') {
         exit;
     }
 
+    if (is_client()) {
+        $clientAuthId = current_user_client_id();
+        if ($clientAuthId && (int)$invoice['client_id'] !== (int)$clientAuthId) {
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Invoice ini bukan milik perusahaan Anda.']);
+            exit;
+        }
+    }
+
     $itemsStmt = $db->prepare("SELECT * FROM invoice_items WHERE invoice_id = ?");
     $itemsStmt->execute([$invoiceId]);
     $invoice['items'] = $itemsStmt->fetchAll();
@@ -433,6 +448,14 @@ if ($action === 'download_pdf') {
     if (!$invoice) {
         header('Content-Type: text/plain');
         die("Invoice tidak ditemukan atau telah dihapus.");
+    }
+
+    if (is_client()) {
+        $clientAuthId = current_user_client_id();
+        if ($clientAuthId && (int)$invoice['client_id'] !== (int)$clientAuthId) {
+            header('Content-Type: text/plain');
+            die("Akses ditolak: Invoice ini bukan milik perusahaan Anda.");
+        }
     }
 
     $itemsStmt = $db->prepare("SELECT * FROM invoice_items WHERE invoice_id = ?");

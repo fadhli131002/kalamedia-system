@@ -9,7 +9,7 @@
   background: #F5F5F7;
   min-height: 100vh;
   padding: 30px 15px;
-  font-family: 'SF Pro Rounded', 'Plus Jakarta Sans', 'Nunito', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif) !important;
   color: #000000;
 }
 

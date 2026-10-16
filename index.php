@@ -22,8 +22,9 @@ if (empty($route)) {
 
 // Default route resolution
 if (empty($route)) {
-    if (is_logged_in()) {
-        $role = current_user_role();
+    $context = resolveActiveSessionContext();
+    if (is_logged_in($context)) {
+        $role = current_user_role($context);
         if ($role === 'client') {
             $route = 'client-portal';
         } elseif ($role === 'karyawan' || $role === 'freelancer') {
@@ -34,6 +35,13 @@ if (empty($route)) {
             $route = 'admin-dashboard';
         }
     } else {
+        if (is_logged_in('internal')) {
+            header('Location: ' . home_url_for_role(current_user_role('internal')));
+            exit;
+        } elseif (is_logged_in('client')) {
+            header('Location: ' . url('client-portal'));
+            exit;
+        }
         $route = 'login';
     }
 }
@@ -49,17 +57,37 @@ switch ($route) {
         break;
 
     case 'logout':
-        $context = $_GET['context'] ?? '';
-        if ($context === 'client') {
-            unset($_SESSION['kala_client_portal']);
-            if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'client') {
-                unset($_SESSION['user']);
+        $context = $_GET['context'] ?? ($_GET['portal'] ?? ($_GET['_slot'] ?? resolveActiveSessionContext()));
+        if ($context === 'client' || session_name() === 'KALASESS_CLIENT') {
+            if (function_exists('switch_session_context')) {
+                switch_session_context('client');
             }
-        } elseif ($context === 'internal') {
-            unset($_SESSION['kala_internal']);
-            if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] !== 'client') {
-                unset($_SESSION['user']);
+            $_SESSION = [];
+            if (ini_get("session.use_cookies")) {
+                $params = session_get_cookie_params();
+                setcookie('KALASESS_CLIENT', '', time() - 42000,
+                    $params["path"], $params["domain"],
+                    $params["secure"], $params["httponly"]
+                );
             }
+            session_destroy();
+            header('Location: ' . url('login?context=client'));
+            exit;
+        } elseif ($context === 'internal' || session_name() === 'KALASESS_INTERNAL') {
+            if (function_exists('switch_session_context')) {
+                switch_session_context('internal');
+            }
+            $_SESSION = [];
+            if (ini_get("session.use_cookies")) {
+                $params = session_get_cookie_params();
+                setcookie('KALASESS_INTERNAL', '', time() - 42000,
+                    $params["path"], $params["domain"],
+                    $params["secure"], $params["httponly"]
+                );
+            }
+            session_destroy();
+            header('Location: ' . url('login?context=internal'));
+            exit;
         } else {
             $_SESSION = [];
             if (ini_get("session.use_cookies")) {
@@ -70,9 +98,9 @@ switch ($route) {
                 );
             }
             session_destroy();
+            header('Location: ' . url('login'));
+            exit;
         }
-        header('Location: ' . url('login'));
-        exit;
 
     case 'client-portal':
         require_client();
@@ -96,7 +124,13 @@ switch ($route) {
         break;
 
     case 'invoices':
-        require_admin(); // Strict protection: Workers cannot view invoices
+        require_auth();
+        $invRole = current_user_role();
+        if ($invRole === 'karyawan' || $invRole === 'freelancer') {
+            // Workers forbidden from viewing invoice amounts
+            header('Location: ' . url('tasks'));
+            exit;
+        }
         require_once __DIR__ . '/views/invoices.php';
         break;
 

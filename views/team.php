@@ -72,8 +72,8 @@ $totalClientsCount = count($allClients);
   <title>Tim & Karyawan - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
   <style>
     .team-badge-karyawan {
       background: rgba(93, 118, 245, 0.12);
@@ -150,14 +150,14 @@ $totalClientsCount = count($allClients);
 
     .bento-metric-card {
       background-color: #FFFFFF;
-      border-radius: 22px;
-      padding: 24px;
+      border-radius: 20px;
+      padding: 18px 20px;
       border: 1px solid #ECEEF5;
       box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 140px;
+      min-height: 110px;
       transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms ease;
       will-change: transform;
     }
@@ -176,12 +176,27 @@ $totalClientsCount = count($allClients);
       margin-bottom: 6px;
     }
     .metric-value {
-      font-size: 30px;
-      font-weight: 700;
-      color: #000000;
-      line-height: 1.1;
+      font-size: 22px;
+      font-weight: 800;
+      color: #101828;
+      line-height: 1.2;
       letter-spacing: -0.02em;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+    }
+    .metric-num {
+      font-size: 24px;
+      font-weight: 800;
+      color: #101828;
+      line-height: 1.15;
+    }
+    .metric-unit {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6E7485;
+      letter-spacing: normal;
     }
     .metric-subtitle {
       font-size: 12px;
@@ -328,45 +343,57 @@ $totalClientsCount = count($allClients);
         <!-- Top Metrics Summary (4-Column Bento Grid) -->
         <div class="bento-metrics-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           <!-- Card 1: Total Tim Aktif -->
-          <div class="bento-metric-card bg-white rounded-[20px] p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <div class="bento-metric-card">
             <div>
-              <div class="metric-label text-xs font-bold text-slate-500 uppercase">TOTAL TIM AKTIF</div>
-              <div class="metric-value text-3xl font-extrabold text-slate-900"><?= $totalMembers ?> Orang</div>
+              <div class="metric-label">TOTAL TIM AKTIF</div>
+              <div class="metric-value">
+                <span class="metric-num"><?= $totalMembers ?></span>
+                <span class="metric-unit">Orang</span>
+              </div>
             </div>
-            <div class="metric-subtitle text-sm text-slate-400">
+            <div class="metric-subtitle">
               <span>👥 Tim Internal & Eksternal</span>
             </div>
           </div>
 
           <!-- Card 2: Staf In-House -->
-          <div class="bento-metric-card bg-white rounded-[20px] p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <div class="bento-metric-card">
             <div>
-              <div class="metric-label text-xs font-bold text-slate-500 uppercase">STAF IN-HOUSE</div>
-              <div class="metric-value text-3xl font-extrabold text-slate-900"><?= $karyawanCount ?> Staf</div>
+              <div class="metric-label">STAF IN-HOUSE</div>
+              <div class="metric-value">
+                <span class="metric-num"><?= $karyawanCount ?></span>
+                <span class="metric-unit">Staf</span>
+              </div>
             </div>
-            <div class="metric-subtitle text-sm text-slate-400">
+            <div class="metric-subtitle">
               <span>💼 Karyawan Akses Portal</span>
             </div>
           </div>
 
           <!-- Card 3: Freelancer -->
-          <div class="bento-metric-card bg-white rounded-[20px] p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <div class="bento-metric-card">
             <div>
-              <div class="metric-label text-xs font-bold text-slate-500 uppercase">FREELANCER</div>
-              <div class="metric-value text-3xl font-extrabold text-slate-900"><?= $freelancerCount ?> Talenta</div>
+              <div class="metric-label">FREELANCER</div>
+              <div class="metric-value">
+                <span class="metric-num"><?= $freelancerCount ?></span>
+                <span class="metric-unit">Talenta</span>
+              </div>
             </div>
-            <div class="metric-subtitle text-sm text-slate-400">
+            <div class="metric-subtitle">
               <span>⚡ Talenta Eksternal</span>
             </div>
           </div>
 
           <!-- Card 4: Klien Terdaftar -->
-          <div class="bento-metric-card bg-white rounded-[20px] p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <div class="bento-metric-card">
             <div>
-              <div class="metric-label text-xs font-bold text-slate-500 uppercase">KLIEN TERDAFTAR</div>
-              <div class="metric-value text-3xl font-extrabold text-slate-900"><?= $totalClientsCount ?> Perusahaan / PT</div>
+              <div class="metric-label">KLIEN TERDAFTAR</div>
+              <div class="metric-value">
+                <span class="metric-num"><?= $totalClientsCount ?></span>
+                <span class="metric-unit">Perusahaan / PT</span>
+              </div>
             </div>
-            <div class="metric-subtitle text-sm text-slate-400">
+            <div class="metric-subtitle">
               <span>🏢 Klien Aktif</span>
             </div>
           </div>

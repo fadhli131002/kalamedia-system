@@ -39,8 +39,8 @@ if ($isWorkerUser) {
   <title>Manajemen Tugas Tim - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=bankio-smooth-2.0">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=bankio-typography-3.0">
   <style>
     /* Task Management & Workspace Custom Styles - Bankio Minimal Finance */
     .tasks-header-card {
@@ -402,31 +402,31 @@ if ($isWorkerUser) {
           <div class="kpi-row">
             <div class="kpi-tile">
               <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">TOTAL DELIVERABLES</span>
-              <div style="font-size: 30px; font-weight: 700; color: #000000; letter-spacing: -0.02em; line-height: 1.1;" id="kpi-total">0</div>
+              <div style="font-size: 24px; font-weight: 800; color: #101828; letter-spacing: -0.02em; line-height: 1.2;" id="kpi-total">0</div>
               <span style="font-size: 12px; color: #6E7485;">Pekerjaan aktif</span>
             </div>
 
             <div class="kpi-tile urgent">
               <span style="font-size: 11px; color: #B42318; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">BUTUH REVISI</span>
-              <div style="font-size: 30px; font-weight: 700; color: #B42318; letter-spacing: -0.02em; line-height: 1.1;" id="kpi-revision">0</div>
+              <div style="font-size: 24px; font-weight: 800; color: #B42318; letter-spacing: -0.02em; line-height: 1.2;" id="kpi-revision">0</div>
               <span style="font-size: 12px; color: #B42318; font-weight: 600;">Permintaan klien</span>
             </div>
 
             <div class="kpi-tile review">
               <span style="font-size: 11px; color: #B54708; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">REVIEW KLIEN</span>
-              <div style="font-size: 30px; font-weight: 700; color: #B54708; letter-spacing: -0.02em; line-height: 1.1;" id="kpi-review">0</div>
+              <div style="font-size: 24px; font-weight: 800; color: #B54708; letter-spacing: -0.02em; line-height: 1.2;" id="kpi-review">0</div>
               <span style="font-size: 12px; color: #B54708; font-weight: 600;">Menunggu approval</span>
             </div>
 
             <div class="kpi-tile">
               <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">SEDANG DIKERJAKAN</span>
-              <div style="font-size: 30px; font-weight: 700; color: #000000; letter-spacing: -0.02em; line-height: 1.1;" id="kpi-progress">0</div>
+              <div style="font-size: 24px; font-weight: 800; color: #101828; letter-spacing: -0.02em; line-height: 1.2;" id="kpi-progress">0</div>
               <span style="font-size: 12px; color: #6E7485;">Tahap produksi</span>
             </div>
 
             <div class="kpi-tile">
               <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">SELESAI & DISETUJUI</span>
-              <div style="font-size: 30px; font-weight: 700; color: #000000; letter-spacing: -0.02em; line-height: 1.1;" id="kpi-approved">0</div>
+              <div style="font-size: 24px; font-weight: 800; color: #101828; letter-spacing: -0.02em; line-height: 1.2;" id="kpi-approved">0</div>
               <span style="font-size: 12px; color: #6E7485;">Hasil final</span>
             </div>
           </div>
@@ -915,7 +915,7 @@ if ($isWorkerUser) {
     </div>
   </div>
 
-  <script src="assets/js/app.js?v=bankio-smooth-2.0"></script>
+  <script src="assets/js/app.js?v=bankio-typography-3.0"></script>
   <script>
     let allLoadedTasks = [];
     let currentFilterStatus = 'all';

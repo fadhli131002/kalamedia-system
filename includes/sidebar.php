@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Kalamedia Sidebar Navigation - Bankio Minimal Finance UI Kit
  * Multi-Role Support: Owner, Admin, Karyawan, Freelancer, Client
@@ -103,12 +103,12 @@ $badgeLabel = $sidebarBadge;
       <!-- WORKER & FREELANCER NAVIGATION -->
       <div class="nav-section-title">Workspace Tim</div>
 
-      <a href="<?= url('tasks') ?>" class="nav-link <?= in_array($currentPage, ['tasks', 'team-workspace']) ? 'active' : '' ?>">
+      <a href="<?= url('tasks?_slot=internal') ?>" class="nav-link <?= in_array($currentPage, ['tasks', 'team-workspace']) ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         <span>Tugas Saya & Progres</span>
       </a>
 
-      <a href="<?= url('content-calendar') ?>" class="nav-link <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
+      <a href="<?= url('content-calendar?_slot=internal') ?>" class="nav-link <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span>Kalender Konten</span>
       </a>
@@ -118,12 +118,12 @@ $badgeLabel = $sidebarBadge;
       <div class="nav-section-title">Menu Utama</div>
 
       <?php if ($isOwner): ?>
-        <a href="<?= url('owner-dashboard') ?>" class="nav-link <?= $currentPage === 'owner-dashboard' ? 'active' : '' ?>">
+        <a href="<?= url('owner-dashboard?_slot=internal') ?>" class="nav-link <?= $currentPage === 'owner-dashboard' ? 'active' : '' ?>">
           <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
           <span>Executive Dashboard</span>
         </a>
       <?php else: ?>
-        <a href="<?= url('admin-dashboard') ?>" class="nav-link <?= $currentPage === 'admin-dashboard' ? 'active' : '' ?>">
+        <a href="<?= url('admin-dashboard?_slot=internal') ?>" class="nav-link <?= $currentPage === 'admin-dashboard' ? 'active' : '' ?>">
           <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
           <span>Admin Dashboard</span>
         </a>
@@ -132,13 +132,13 @@ $badgeLabel = $sidebarBadge;
       <div class="nav-section-title">Manajemen Operasional</div>
 
       <!-- Task Assignment & SDM Management -->
-      <a href="<?= url('tasks') ?>" class="nav-link <?= in_array($currentPage, ['tasks', 'team-workspace']) ? 'active' : '' ?>">
+      <a href="<?= url('tasks?_slot=internal') ?>" class="nav-link <?= in_array($currentPage, ['tasks', 'team-workspace']) ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         <span>Pembagian Tugas Tim</span>
       </a>
 
       <!-- Team & Employees Management -->
-      <a href="<?= url('team') ?>" class="nav-link <?= in_array($currentPage, ['team', 'employees-management']) ? 'active' : '' ?>">
+      <a href="<?= url('team?_slot=internal') ?>" class="nav-link <?= in_array($currentPage, ['team', 'employees-management']) ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
         <span>Tim & Karyawan</span>
       </a>
@@ -149,39 +149,39 @@ $badgeLabel = $sidebarBadge;
         <span>Portal Klien (Preview)</span>
       </a>
 
-      <a href="<?= url('invoices') ?>" class="nav-link <?= in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
+      <a href="<?= url('invoices?_slot=internal') ?>" class="nav-link <?= in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         <span>Invoice & Penagihan</span>
       </a>
 
-      <a href="<?= url('expenses') ?>" class="nav-link <?= $currentPage === 'expenses' ? 'active' : '' ?>">
+      <a href="<?= url('expenses?_slot=internal') ?>" class="nav-link <?= $currentPage === 'expenses' ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><circle cx="17" cy="15" r="1.5"/></svg>
         <span>Pengeluaran Operasional</span>
       </a>
 
-      <a href="<?= url('salaries') ?>" class="nav-link <?= in_array($currentPage, ['salaries', 'salary-view']) ? 'active' : '' ?>">
+      <a href="<?= url('salaries?_slot=internal') ?>" class="nav-link <?= in_array($currentPage, ['salaries', 'salary-view']) ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><line x1="6" y1="12" x2="6.01" y2="12"/><line x1="18" y1="12" x2="18.01" y2="12"/></svg>
         <span>Penggajian Karyawan</span>
       </a>
 
-      <a href="<?= url('clients') ?>" class="nav-link <?= $currentPage === 'clients' ? 'active' : '' ?>">
+      <a href="<?= url('clients?_slot=internal') ?>" class="nav-link <?= $currentPage === 'clients' ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
         <span>Klien & Proyek</span>
       </a>
 
-      <a href="<?= url('reports') ?>" class="nav-link <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
+      <a href="<?= url('reports?_slot=internal') ?>" class="nav-link <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         <span>Laporan Klien</span>
       </a>
 
-      <a href="<?= url('content-calendar') ?>" class="nav-link <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
+      <a href="<?= url('content-calendar?_slot=internal') ?>" class="nav-link <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span>Kalender Konten</span>
       </a>
 
       <?php if ($isOwner): ?>
         <div class="nav-section-title">Konfigurasi</div>
-        <a href="<?= url('settings') ?>" class="nav-link <?= $currentPage === 'settings' ? 'active' : '' ?>">
+        <a href="<?= url('settings?_slot=internal') ?>" class="nav-link <?= $currentPage === 'settings' ? 'active' : '' ?>">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           <span>Pengaturan Agensi</span>
         </a>

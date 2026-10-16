@@ -124,8 +124,12 @@ switch ($route) {
         break;
 
     case 'invoices':
-        require_auth();
-        $invRole = current_user_role();
+        require_auth('internal');
+        $invRole = current_user_role('internal');
+        if ($invRole === 'client') {
+            header('Location: ' . url('client-portal?tab=invoices&portal=client&_slot=client'));
+            exit;
+        }
         if ($invRole === 'karyawan' || $invRole === 'freelancer') {
             // Workers forbidden from viewing invoice amounts
             header('Location: ' . url('tasks'));
@@ -135,8 +139,12 @@ switch ($route) {
         break;
 
     case 'invoice-view':
-        require_auth();
-        $invRole = current_user_role();
+        require_auth('internal');
+        $invRole = current_user_role('internal');
+        if ($invRole === 'client') {
+            header('Location: ' . url('client-portal?tab=invoices&portal=client&_slot=client'));
+            exit;
+        }
         if ($invRole === 'karyawan' || $invRole === 'freelancer') {
             // Workers forbidden from viewing invoice amounts
             header('Location: ' . url('tasks'));
@@ -183,12 +191,12 @@ switch ($route) {
 
     case 'content-calendar':
     case 'content-planner':
-        require_auth();
+        require_auth('internal');
         require_once __DIR__ . '/views/content_dashboard.php';
         break;
 
     case 'reports':
-        require_auth();
+        require_auth('internal');
         require_once __DIR__ . '/views/reports.php';
         break;
 
@@ -199,7 +207,7 @@ switch ($route) {
 
     case 'report-view':
     case 'report-deck':
-        require_auth();
+        require_auth('internal');
         require_once __DIR__ . '/views/report_deck.php';
         break;
 
@@ -210,8 +218,10 @@ switch ($route) {
 
     default:
         // If unknown route, redirect based on login status
-        if (is_logged_in()) {
-            header('Location: ' . home_url_for_role());
+        if (is_logged_in('internal')) {
+            header('Location: ' . home_url_for_role(current_user_role('internal')));
+        } elseif (is_logged_in('client')) {
+            header('Location: ' . url('client-portal?portal=client&_slot=client'));
         } else {
             header('Location: ' . url('login'));
         }

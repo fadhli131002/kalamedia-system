@@ -234,7 +234,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.1">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.3">
   <style>
     /* Client Portal Custom Styles - Minimal Finance (Bankio) */
     .portal-hero {
@@ -385,48 +385,207 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
       background: #FFFAEB;
     }
 
-    /* Portal Tabs - Bankio Pill Style */
+    /* Portal Tabs - Modern Segmented Boxed Bar */
     .portal-nav-tabs {
       display: inline-flex;
       gap: 6px;
-      background: #EEF0F6;
-      border: 1px solid #ECEEF5;
-      border-radius: 999px;
-      padding: 5px;
-      margin-bottom: 24px;
+      background: #F1F4F9;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 14px;
+      padding: 6px;
+      margin-bottom: 22px;
       max-width: 100%;
       overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      box-shadow: inset 0 1px 2px rgba(18, 24, 48, 0.04);
+    }
+    .portal-nav-tabs::-webkit-scrollbar {
+      display: none;
     }
     .portal-tab-btn {
       padding: 9px 18px;
       font-size: 13px;
       font-weight: 600;
-      color: #6E7485;
-      background: transparent;
-      border: none;
-      border-radius: 999px;
+      color: #475467;
+      background: #FFFFFF;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 10px;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 8px;
       white-space: nowrap;
-      transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms cubic-bezier(0.22, 1, 0.36, 1), transform 150ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease;
+      flex-shrink: 0;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+      transition: all 180ms cubic-bezier(0.22, 1, 0.36, 1);
       font-family: inherit;
       will-change: transform;
     }
     .portal-tab-btn:hover:not(.active) {
-      color: #000000;
-      transform: translate3d(0, -1px, 0);
+      color: #101828;
+      background: #F8FAFC;
+      border-color: #CBD5E1;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 6px rgba(16, 24, 40, 0.06);
     }
     .portal-tab-btn:active {
-      transform: scale(0.96);
+      transform: scale(0.97);
       transition-duration: 90ms;
     }
     .portal-tab-btn.active {
-      background: #5D76F5;
-      color: #FFFFFF;
-      box-shadow: 0 4px 14px rgba(93, 118, 245, 0.3);
+      background: #5D76F5 !important;
+      color: #FFFFFF !important;
+      border-color: #5D76F5 !important;
+      box-shadow: 0 4px 14px rgba(93, 118, 245, 0.32) !important;
       font-weight: 700;
+    }
+    .portal-tab-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #F2F4F7;
+      color: #475467;
+      line-height: 1.1;
+      transition: background 180ms ease, color 180ms ease;
+    }
+    .portal-tab-btn.active .portal-tab-badge {
+      background: rgba(255, 255, 255, 0.25);
+      color: #FFFFFF;
+    }
+
+    /* Filter & Search Toolbar (Modern Boxed Controls) */
+    .portal-filter-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .portal-filter-chips-track {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      white-space: nowrap;
+      scrollbar-width: none;
+      padding: 2px 2px 4px 2px;
+      max-width: 100%;
+    }
+    .portal-filter-chips-track::-webkit-scrollbar {
+      display: none;
+    }
+    .portal-chip-btn,
+    #task-filter-chips .filter-btn {
+      background: #FFFFFF !important;
+      border: 1.5px solid #D0D5DD !important;
+      color: #344054 !important;
+      border-radius: 10px !important;
+      padding: 8px 16px !important;
+      font-size: 12.5px !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+      box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04) !important;
+      transition: all 180ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+      font-family: inherit !important;
+      line-height: 1.2 !important;
+      text-decoration: none !important;
+    }
+    .portal-chip-btn:hover:not(.active),
+    #task-filter-chips .filter-btn:hover:not(.active) {
+      background: #F8F9FC !important;
+      border-color: #98A2B3 !important;
+      color: #101828 !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 3px 6px rgba(16, 24, 40, 0.06) !important;
+    }
+    .portal-chip-btn:active,
+    #task-filter-chips .filter-btn:active {
+      transform: scale(0.97) !important;
+    }
+    .portal-chip-btn.active,
+    #task-filter-chips .filter-btn.active {
+      background: #5D76F5 !important;
+      border-color: #5D76F5 !important;
+      color: #FFFFFF !important;
+      font-weight: 700 !important;
+      box-shadow: 0 4px 12px rgba(93, 118, 245, 0.28) !important;
+    }
+    .portal-chip-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: #F2F4F7;
+      color: #344054;
+      line-height: 1.1;
+      transition: background 180ms ease, color 180ms ease;
+    }
+    .portal-chip-btn.active .portal-chip-badge,
+    #task-filter-chips .filter-btn.active .portal-chip-badge {
+      background: rgba(255, 255, 255, 0.25);
+      color: #FFFFFF;
+    }
+
+    /* Search Text Box */
+    .portal-search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-width: 240px;
+      max-width: 320px;
+      flex-grow: 1;
+    }
+    .portal-search-icon {
+      position: absolute;
+      left: 12px;
+      font-size: 13px;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+    .portal-search-input {
+      width: 100%;
+      height: 38px;
+      padding: 6px 32px 6px 34px;
+      border-radius: 10px;
+      border: 1.5px solid #D0D5DD;
+      background: #FFFFFF;
+      color: #101828;
+      font-size: 12.5px;
+      font-family: inherit;
+      box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04);
+      outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+    .portal-search-input:focus {
+      border-color: #5D76F5;
+      box-shadow: 0 0 0 3.5px rgba(93, 118, 245, 0.15);
+    }
+    .portal-search-input::placeholder {
+      color: #98A2B3;
+      font-size: 12px;
+    }
+    .portal-search-clear {
+      position: absolute;
+      right: 10px;
+      background: transparent;
+      border: none;
+      color: #98A2B3;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+    .portal-search-clear:hover {
+      color: #101828;
     }
 
     /* Deliverable Task Cards */
@@ -706,15 +865,48 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
         -webkit-overflow-scrolling: touch !important;
         scrollbar-width: none !important;
         gap: 6px !important;
-        padding-bottom: 4px !important;
-        margin-bottom: 14px !important;
+        padding: 5px !important;
+        margin-bottom: 16px !important;
+        width: 100% !important;
+        border-radius: 12px !important;
       }
       .portal-tab-btn {
         flex-shrink: 0 !important;
         white-space: nowrap !important;
-        padding: 7px 14px !important;
+        padding: 8px 14px !important;
         font-size: 12px !important;
-        border-radius: 999px !important;
+        border-radius: 9px !important;
+      }
+      .portal-filter-toolbar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        margin-bottom: 14px !important;
+      }
+      .portal-filter-chips-track {
+        width: 100% !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        gap: 6px !important;
+        padding-bottom: 4px !important;
+      }
+      .portal-chip-btn,
+      #task-filter-chips .filter-btn {
+        padding: 7px 13px !important;
+        font-size: 12px !important;
+        border-radius: 9px !important;
+      }
+      .portal-search-box {
+        min-width: 100% !important;
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      .portal-search-input {
+        width: 100% !important;
+        height: 38px !important;
+        font-size: 12.5px !important;
       }
     }
   </style>
@@ -848,39 +1040,69 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
           </div>
         </div>
 
-        <!-- 3. Navigation Tabs -->
+        <!-- 3. Navigation Tabs (Modern Segmented Boxed Bar) -->
         <div class="portal-nav-tabs">
           <button class="portal-tab-btn active" onclick="switchPortalTab('deliverables', this)">
             <span>Progress & Deliverables</span>
           </button>
           <button class="portal-tab-btn" onclick="switchPortalTab('calendar', this)">
-            <span>Kalender Konten (<?= count($contents) ?>)</span>
+            <span>Kalender Konten</span>
+            <span class="portal-tab-badge"><?= count($contents) ?></span>
           </button>
           <button class="portal-tab-btn" onclick="switchPortalTab('invoices', this)">
-            <span>Tagihan / Invoices (<?= count($invoices) ?>)</span>
+            <span>Tagihan / Invoices</span>
+            <span class="portal-tab-badge"><?= count($invoices) ?></span>
           </button>
           <button class="portal-tab-btn" onclick="switchPortalTab('reports', this)">
-            <span>Laporan Performa (<?= count($clientReports) ?>)</span>
+            <span>Laporan Performa</span>
+            <span class="portal-tab-badge"><?= count($clientReports) ?></span>
           </button>
           <button class="portal-tab-btn" onclick="switchPortalTab('ads', this)">
-            <span>Transparansi &amp; Bukti Saldo Ads (<?= count($clientAdsTopups) ?>)</span>
+            <span>Bukti Saldo Ads</span>
+            <span class="portal-tab-badge"><?= count($clientAdsTopups) ?></span>
           </button>
         </div>
 
         <!-- TAB 1: Deliverables & Team Tasks -->
         <div id="tab-pane-deliverables">
-          <!-- Filter Controls -->
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
-            <div class="touch-swipe-x" style="display: flex; gap: 8px; flex-wrap: wrap;" id="task-filter-chips">
-              <button class="filter-btn active" onclick="filterClientTasks('all', this)">Semua Pekerjaan</button>
-              <button class="filter-btn" onclick="filterClientTasks('client_review', this)">Butuh Review Klien</button>
-              <button class="filter-btn" onclick="filterClientTasks('in_progress', this)">Sedang Dikerjakan</button>
-              <button class="filter-btn" onclick="filterClientTasks('approved', this)">Disetujui</button>
+          <!-- Filter Controls & Search Box (Modern Boxed Controls) -->
+          <div class="portal-filter-toolbar">
+            <div class="portal-filter-chips-track touch-swipe-x" id="task-filter-chips">
+              <button type="button" class="portal-chip-btn filter-btn active" onclick="filterClientTasks('all', this)">
+                <span>Semua Pekerjaan</span>
+                <span class="portal-chip-badge" id="filter-count-all">0</span>
+              </button>
+              <button type="button" class="portal-chip-btn filter-btn" onclick="filterClientTasks('client_review', this)">
+                <span>Butuh Review Klien</span>
+                <span class="portal-chip-badge" id="filter-count-review">0</span>
+              </button>
+              <button type="button" class="portal-chip-btn filter-btn" onclick="filterClientTasks('in_progress', this)">
+                <span>Sedang Dikerjakan</span>
+                <span class="portal-chip-badge" id="filter-count-progress">0</span>
+              </button>
+              <button type="button" class="portal-chip-btn filter-btn" onclick="filterClientTasks('approved', this)">
+                <span>Disetujui</span>
+                <span class="portal-chip-badge" id="filter-count-approved">0</span>
+              </button>
             </div>
 
-            <div style="font-size: 12px; color: var(--text-muted);">
-              Klik pada pekerjaan untuk melihat rincian & memberi masukan.
+            <div class="portal-search-box">
+              <span class="portal-search-icon">🔍</span>
+              <input 
+                type="text" 
+                id="client-task-search-input" 
+                class="portal-search-input" 
+                placeholder="Cari nama deliverable..." 
+                oninput="handleClientTaskSearch(this.value)"
+                autocomplete="off"
+              >
+              <button type="button" class="portal-search-clear" id="portal-search-clear-btn" onclick="clearClientTaskSearch()" style="display:none;" title="Bersihkan pencarian">&times;</button>
             </div>
+          </div>
+
+          <div style="font-size: 12px; color: #6E7485; margin: -6px 0 16px 2px; display: flex; align-items: center; gap: 6px;">
+            <span>💡</span>
+            <span>Klik pada deliverable untuk melihat detail, riwayat feedback, dan persetujuan (approve).</span>
           </div>
 
           <!-- Tasks List Container -->
@@ -1286,6 +1508,8 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
   <script src="assets/js/app.js?v=bankio-typography-3.0"></script>
   <script>
     let currentTasksList = [];
+    let currentTaskFilter = 'all';
+    let currentTaskSearchQuery = '';
 
     // Initialize Client Portal Data
     document.addEventListener('DOMContentLoaded', () => {
@@ -1311,37 +1535,114 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
         if (data.success) {
           currentTasksList = data.tasks || [];
           renderProgress(data.metrics);
-          renderTasks(currentTasksList);
+          applyClientTaskFilters();
         } else {
-          showToast(data.message || 'Gagal memuat data portal', 'danger');
+          renderTasks([]);
         }
       } catch (err) {
-        showToast('Koneksi server gagal memuat data', 'danger');
+        renderTasks([]);
       }
     }
 
     function renderProgress(m) {
       if (!m) return;
-      document.getElementById('stat-total-tasks').innerText = m.total_tasks || 0;
-      document.getElementById('stat-review-tasks').innerText = m.client_review_count || 0;
-      document.getElementById('stat-progress-tasks').innerText = (m.in_progress_count || 0) + (m.revision_count || 0);
-      document.getElementById('stat-approved-tasks').innerText = m.approved_count || 0;
+      const total = m.total_tasks || 0;
+      const review = m.client_review_count || 0;
+      const progress = (m.in_progress_count || 0) + (m.revision_count || 0);
+      const approved = m.approved_count || 0;
+
+      document.getElementById('stat-total-tasks').innerText = total;
+      document.getElementById('stat-review-tasks').innerText = review;
+      document.getElementById('stat-progress-tasks').innerText = progress;
+      document.getElementById('stat-approved-tasks').innerText = approved;
+
+      // Update Boxed Filter Badges
+      const bAll = document.getElementById('filter-count-all');
+      if (bAll) bAll.innerText = total;
+      const bReview = document.getElementById('filter-count-review');
+      if (bReview) bReview.innerText = review;
+      const bProgress = document.getElementById('filter-count-progress');
+      if (bProgress) bProgress.innerText = progress;
+      const bApproved = document.getElementById('filter-count-approved');
+      if (bApproved) bApproved.innerText = approved;
 
       const pct = m.overall_progress || 0;
       document.getElementById('portal-progress-percent').innerText = pct + '%';
       document.getElementById('portal-progress-fill').style.width = pct + '%';
       document.getElementById('portal-progress-text').innerText = 
-        `${m.approved_count || 0} dari ${m.total_tasks || 0} Deliverables telah disetujui (Approved).`;
+        `${approved} dari ${total} Deliverables telah disetujui (Approved).`;
+    }
+
+    function applyClientTaskFilters() {
+      let filtered = currentTasksList.slice();
+
+      if (currentTaskFilter === 'client_review') {
+        filtered = filtered.filter(t => t.status === 'client_review' || t.status === 'revision');
+      } else if (currentTaskFilter === 'in_progress') {
+        filtered = filtered.filter(t => t.status === 'in_progress');
+      } else if (currentTaskFilter === 'approved') {
+        filtered = filtered.filter(t => t.status === 'approved');
+      }
+
+      if (currentTaskSearchQuery && currentTaskSearchQuery.trim() !== '') {
+        const q = currentTaskSearchQuery.trim().toLowerCase();
+        filtered = filtered.filter(t => {
+          const title = (t.title || '').toLowerCase();
+          const desc = (t.description || '').toLowerCase();
+          const cat = (t.category || '').toLowerCase();
+          const worker = (t.worker_name || '').toLowerCase();
+          return title.includes(q) || desc.includes(q) || cat.includes(q) || worker.includes(q);
+        });
+      }
+
+      renderTasks(filtered);
+    }
+
+    function filterClientTasks(filter, btn) {
+      document.querySelectorAll('#task-filter-chips .filter-btn, #task-filter-chips .portal-chip-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentTaskFilter = filter;
+      applyClientTaskFilters();
+    }
+
+    function handleClientTaskSearch(query) {
+      currentTaskSearchQuery = query;
+      const clearBtn = document.getElementById('portal-search-clear-btn');
+      if (clearBtn) {
+        clearBtn.style.display = (query && query.length > 0) ? 'inline-block' : 'none';
+      }
+      applyClientTaskFilters();
+    }
+
+    function clearClientTaskSearch() {
+      const input = document.getElementById('client-task-search-input');
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+      handleClientTaskSearch('');
     }
 
     function renderTasks(tasks) {
       const container = document.getElementById('client-tasks-container');
       if (!tasks || tasks.length === 0) {
+        const isSearch = currentTaskSearchQuery && currentTaskSearchQuery.trim() !== '';
         container.innerHTML = `
-          <div style="text-align: center; padding: 48px 24px; background: #FFF; border: 1px solid var(--border-color); border-radius: var(--radius-md);">
-            <div style="font-size: 32px; margin-bottom: 8px;">📋</div>
-            <h4 style="font-size: 15px; font-weight: 800; color: #101828; margin-bottom: 4px;">Tidak Ada Pekerjaan pada Kategori Ini</h4>
-            <p style="font-size: 12.5px; color: var(--text-secondary); margin: 0;">Semua deliverable pada filter ini telah terselesaikan atau belum dibuat.</p>
+          <div style="text-align: center; padding: 48px 24px; background: #FFF; border: 1.5px solid var(--border-color); border-radius: 16px; box-shadow: 0 1px 3px rgba(16,24,40,0.03);">
+            <div style="font-size: 32px; margin-bottom: 8px;">${isSearch ? '🔍' : '📋'}</div>
+            <h4 style="font-size: 15px; font-weight: 800; color: #101828; margin-bottom: 4px;">
+              ${isSearch ? 'Tidak Ada Deliverable yang Cocok' : 'Tidak Ada Pekerjaan pada Kategori Ini'}
+            </h4>
+            <p style="font-size: 12.5px; color: var(--text-secondary); margin: 0;">
+              ${isSearch 
+                ? `Tidak ditemukan deliverable dengan kata kunci "<b>${escapeHtml(currentTaskSearchQuery)}</b>". Coba gunakan kata kunci lain.` 
+                : 'Semua deliverable pada filter ini telah terselesaikan atau belum dibuat.'}
+            </p>
+            ${isSearch ? `
+              <button type="button" class="btn btn-secondary btn-sm" onclick="clearClientTaskSearch()" style="margin-top: 14px; font-weight: 700;">
+                Bersihkan Filter Pencarian
+              </button>
+            ` : ''}
           </div>
         `;
         return;
@@ -1438,20 +1739,6 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
       });
 
       container.innerHTML = html;
-    }
-
-    function filterClientTasks(filter, btn) {
-      document.querySelectorAll('#task-filter-chips .filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-
-      if (filter === 'all') {
-        renderTasks(currentTasksList);
-      } else if (filter === 'client_review') {
-        renderTasks(currentTasksList.filter(t => t.status === 'client_review' || t.status === 'revision'));
-      } else {
-        renderTasks(currentTasksList.filter(t => t.status === filter));
-      }
-    }
 
     function switchPortalTab(tabName, btn) {
       document.querySelectorAll('.portal-tab-btn').forEach(b => b.classList.remove('active'));

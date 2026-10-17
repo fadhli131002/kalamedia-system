@@ -849,28 +849,37 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
       }
 
       .portal-nav-tabs {
-        display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 6px !important;
-        padding: 6px !important;
+        display: inline-flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        gap: 2px !important;
+        background: #F3F4F6 !important;
+        padding: 3px !important;
+        border-radius: 8px !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        scrollbar-width: none !important;
+        -webkit-overflow-scrolling: touch !important;
         margin-bottom: 16px !important;
-        width: 100% !important;
-        border-radius: 14px !important;
-        overflow: visible !important;
         box-sizing: border-box !important;
+      }
+      .portal-nav-tabs::-webkit-scrollbar {
+        display: none !important;
       }
       .portal-nav-tabs .portal-tab-btn:first-child {
-        grid-column: 1 / -1 !important;
+        grid-column: auto !important;
       }
       .portal-tab-btn {
-        width: 100% !important;
+        width: auto !important;
         white-space: nowrap !important;
-        padding: 9px 10px !important;
-        font-size: 11.5px !important;
-        border-radius: 9px !important;
+        padding: 6px 12px !important;
+        font-size: 12px !important;
+        border-radius: 6px !important;
         justify-content: center !important;
         box-sizing: border-box !important;
-        flex-shrink: unset !important;
+        flex: 0 0 auto !important;
       }
 
       .portal-filter-toolbar {
@@ -881,23 +890,34 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
       }
       .portal-filter-chips-track,
       #task-filter-chips {
-        display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 8px !important;
-        width: 100% !important;
-        overflow: visible !important;
+        display: inline-flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        gap: 2px !important;
+        background: #F3F4F6 !important;
+        padding: 3px !important;
+        border-radius: 8px !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        scrollbar-width: none !important;
+        -webkit-overflow-scrolling: touch !important;
         box-sizing: border-box !important;
-        padding: 0 !important;
+      }
+      .portal-filter-chips-track::-webkit-scrollbar,
+      #task-filter-chips::-webkit-scrollbar {
+        display: none !important;
       }
       .portal-chip-btn,
       #task-filter-chips .filter-btn {
-        width: 100% !important;
-        padding: 8px 10px !important;
-        font-size: 11.5px !important;
-        border-radius: 9px !important;
+        width: auto !important;
+        padding: 6px 12px !important;
+        font-size: 12px !important;
+        border-radius: 6px !important;
         justify-content: center !important;
         box-sizing: border-box !important;
-        flex-shrink: unset !important;
+        flex: 0 0 auto !important;
       }
       .portal-search-box {
         min-width: 100% !important;
@@ -1017,13 +1037,13 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
             <div class="kpi-meta">Pekerjaan proyek aktif</div>
           </div>
 
-          <div class="kpi-card" style="border-color: #FEDF89; background: #FFFAEB;">
+          <div class="kpi-card">
             <div class="kpi-header">
-              <span class="kpi-title" style="color: #B54708;">Butuh Review Klien</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B54708" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span class="kpi-title">Butuh Review Klien</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             </div>
-            <div class="kpi-value" style="color: #B54708;" id="stat-review-tasks">0</div>
-            <div class="kpi-meta" style="color: #B54708;">Menunggu persetujuan Anda</div>
+            <div class="kpi-value" id="stat-review-tasks">0</div>
+            <div class="kpi-meta">Menunggu persetujuan Anda</div>
           </div>
 
           <div class="kpi-card">

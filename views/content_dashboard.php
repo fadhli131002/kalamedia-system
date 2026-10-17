@@ -89,21 +89,52 @@ unset($c);
       .supitar-main-panel {
         width: 100% !important;
         padding: 14px 10px !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
+        overflow-x: hidden !important;
+      }
+      .supitar-topbar {
+        min-width: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+      }
+      .supitar-topbar-left {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 8px !important;
+      }
+      .supitar-month-heading {
+        font-size: 17px !important;
+      }
+      .supitar-topbar-right {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 8px !important;
       }
       .calendar-scroll-wrapper {
         width: 100% !important;
+        max-width: 100% !important;
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch !important;
         touch-action: pan-x pan-y !important;
         padding-bottom: 8px;
+        margin-top: 4px;
+        scrollbar-width: thin !important;
+      }
+      .calendar-scroll-wrapper::-webkit-scrollbar {
+        height: 4px;
+      }
+      .calendar-scroll-wrapper::-webkit-scrollbar-thumb {
+        background: #E2E8F0;
+        border-radius: 4px;
       }
       .supitar-fc-container, #calendar {
-        min-width: 680px !important;
-      }
-      .supitar-topbar {
-        min-width: 680px !important;
+        min-width: 600px !important;
       }
     }
 
@@ -340,10 +371,47 @@ unset($c);
       color: #101828;
       margin: 0;
       letter-spacing: -0.2px;
+      white-space: nowrap;
+    }
+    .supitar-nav-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .supitar-arrow-group {
+      display: inline-flex;
+      align-items: center;
+      background: #F8F9FA;
+      border: 1px solid #EAECEF;
+      border-radius: 8px;
+      padding: 2px;
+      gap: 1px;
+    }
+    .supitar-arrow-btn {
+      background: transparent;
+      border: none;
+      color: #475467;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: background 150ms ease, color 150ms ease;
+      padding: 0;
+      line-height: 1;
+    }
+    .supitar-arrow-btn:hover {
+      background: #FFFFFF;
+      color: #111827;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
     .supitar-btn-today {
       background: #FFFFFF;
-      border: 1px solid #D0D5DD;
+      border: 1px solid #EAECEF;
       border-radius: 8px;
       height: 32px;
       padding: 0 12px;
@@ -351,36 +419,20 @@ unset($c);
       font-weight: 600;
       color: #344054;
       cursor: pointer;
-      transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, border-color 200ms ease;
-      will-change: transform;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 150ms ease, border-color 150ms ease;
+      white-space: nowrap;
     }
     .supitar-btn-today:hover {
       background: #F9FAFB;
-      border-color: #98A2B3;
-      transform: translate3d(0, -1px, 0);
+      border-color: #D0D5DD;
     }
     .supitar-btn-today:active {
       transform: scale(0.96);
       transition-duration: 90ms;
     }
-    .supitar-arrow-group {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .supitar-arrow-btn {
-      background: transparent;
-      border: none;
-      color: #667085;
-      font-size: 18px;
-      font-weight: 600;
-      cursor: pointer;
-      padding: 0 6px;
-      line-height: 1;
-      border-radius: 4px;
-      transition: background-color 150ms ease, color 150ms ease;
-    }
-    .supitar-arrow-btn:hover { color: #101828; background: #F2F4F7; }
 
     .supitar-topbar-right {
       display: flex;
@@ -389,28 +441,50 @@ unset($c);
     }
 
     .supitar-view-switcher {
-      display: flex;
-      background: #F2F4F7;
+      display: inline-flex;
+      background: #F3F4F6;
       padding: 3px;
       border-radius: 8px;
       gap: 2px;
+      box-sizing: border-box;
     }
     .supitar-view-btn {
       background: transparent;
       border: none;
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 600;
-      color: #667085;
+      color: #4B5563;
       padding: 5px 12px;
       border-radius: 6px;
       cursor: pointer;
       transition: background-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+      white-space: nowrap;
     }
     .supitar-view-btn.active {
       background: #FFFFFF;
-      color: #101828;
+      color: #111827;
       font-weight: 700;
       box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+    }
+    .supitar-btn-export {
+      background: #FFFFFF;
+      border: 1px solid #EAECEF;
+      border-radius: 8px;
+      height: 32px;
+      padding: 0 12px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #344054;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 150ms ease, border-color 150ms ease;
+      white-space: nowrap;
+    }
+    .supitar-btn-export:hover {
+      background: #F9FAFB;
+      border-color: #D0D5DD;
     }
 
     /* FullCalendar Overrides for Slide 3 Look */
@@ -419,19 +493,23 @@ unset($c);
     }
     .fc {
       font-family: inherit !important;
-      --fc-border-color: #F2F4F7 !important;
+      --fc-border-color: #EAECF0 !important;
       --fc-page-bg-color: #FFFFFF !important;
     }
     .fc-theme-standard th {
-      border: 1px solid #F2F4F7 !important;
-      background: #FFFFFF !important;
-      padding: 10px 0 !important;
+      border: 1px solid #EAECF0 !important;
+      background: #F8FAFC !important;
+      padding: 8px 0 !important;
     }
     .fc-col-header-cell-cushion {
-      color: #667085 !important;
-      font-size: 12px !important;
-      font-weight: 600 !important;
+      color: #475467 !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.5px !important;
       text-decoration: none !important;
+      display: inline-block !important;
+      white-space: nowrap !important;
     }
     .fc-theme-standard td {
       border: 1px solid #F2F4F7 !important;
@@ -620,25 +698,28 @@ unset($c);
             <div class="supitar-topbar">
               <div class="supitar-topbar-left">
                 <h2 id="cal-header-title" class="supitar-month-heading">Agustus 2026</h2>
-                <button type="button" class="supitar-btn-today" onclick="calGoToday()">Hari Ini</button>
-                <div class="supitar-arrow-group">
-                  <button type="button" class="supitar-arrow-btn" onclick="calPrev()">‹</button>
-                  <button type="button" class="supitar-arrow-btn" onclick="calNext()">›</button>
+                <div class="supitar-nav-controls">
+                  <div class="supitar-arrow-group">
+                    <button type="button" class="supitar-arrow-btn" onclick="calPrev()" title="Sebelumnya">‹</button>
+                    <button type="button" class="supitar-arrow-btn" onclick="calNext()" title="Berikutnya">›</button>
+                  </div>
+                  <button type="button" class="supitar-btn-today" onclick="calGoToday()">Hari Ini</button>
                 </div>
               </div>
 
               <div class="supitar-topbar-right">
-                <!-- Export PDF Action Button with Filter Modal -->
-                <button type="button" class="supitar-btn-today" onclick="openExportContentModal()" style="display: inline-flex; align-items: center; gap: 6px;" title="Ekspor Jadwal Konten ke PDF">
-                  <span>Ekspor PDF</span>
-                </button>
-
                 <!-- Segmented View Switcher -->
                 <div class="supitar-view-switcher">
                   <button type="button" class="supitar-view-btn" id="btn-view-day" onclick="calChangeView('timeGridDay', this)">Harian</button>
                   <button type="button" class="supitar-view-btn" id="btn-view-week" onclick="calChangeView('timeGridWeek', this)">Mingguan</button>
                   <button type="button" class="supitar-view-btn active" id="btn-view-month" onclick="calChangeView('dayGridMonth', this)">Bulanan</button>
                 </div>
+
+                <!-- Export PDF Action Button with Filter Modal -->
+                <button type="button" class="supitar-btn-export" onclick="openExportContentModal()" title="Ekspor Jadwal Konten ke PDF">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  <span>Ekspor PDF</span>
+                </button>
               </div>
             </div>
 
@@ -695,8 +776,18 @@ unset($c);
       slotDuration: '01:00:00',
       slotLabelInterval: '01:00:00',
       allDaySlot: false,
-      expandRows: true,
-      dayHeaderFormat: { weekday: 'long', month: 'short', day: 'numeric', omitCommas: true },
+      // View-specific header formats
+      views: {
+        dayGridMonth: {
+          dayHeaderFormat: { weekday: 'short' }
+        },
+        timeGridWeek: {
+          dayHeaderFormat: { weekday: 'short', day: 'numeric', omitCommas: true }
+        },
+        timeGridDay: {
+          dayHeaderFormat: { weekday: 'long', month: 'short', day: 'numeric', omitCommas: true }
+        }
+      },
       slotLabelFormat: {
         hour: 'numeric',
         minute: '2-digit',

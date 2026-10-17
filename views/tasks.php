@@ -40,9 +40,12 @@ if ($isWorkerUser) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.6">
   <style>
     /* Task Management & Workspace Custom Styles - Bankio Minimal Finance */
+    .mobile-text { display: none; }
+    .desktop-text { display: inline; }
+
     .tasks-header-card {
       background: #FFFFFF;
       border: 1px solid #ECEEF5;
@@ -57,51 +60,60 @@ if ($isWorkerUser) {
       gap: 16px;
     }
 
+    /* Workspace Tabs Bar - Modern Segmented Boxed Bar */
     .workspace-tabs-bar {
       display: inline-flex;
       gap: 6px;
-      margin-bottom: 24px;
-      background: #EEF0F6;
-      border: 1px solid #ECEEF5;
-      padding: 5px;
-      border-radius: 999px;
+      margin-bottom: 22px;
+      background: #F1F4F9;
+      border: 1.5px solid #E2E8F0;
+      padding: 6px;
+      border-radius: 14px;
+      max-width: 100%;
+      box-shadow: inset 0 1px 2px rgba(18, 24, 48, 0.04);
     }
     .workspace-tab-btn {
-      border: none;
-      background: transparent;
       padding: 9px 18px;
-      border-radius: 999px;
       font-size: 13px;
       font-weight: 600;
-      color: #6E7485;
+      color: #475467;
+      background: #FFFFFF;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 10px;
       cursor: pointer;
-      transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms cubic-bezier(0.22, 1, 0.36, 1), transform 150ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      white-space: nowrap;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+      transition: all 180ms cubic-bezier(0.22, 1, 0.36, 1);
       font-family: inherit;
       will-change: transform;
     }
     .workspace-tab-btn:hover:not(.active) {
-      color: #000000;
-      transform: translate3d(0, -1px, 0);
+      color: #101828;
+      background: #F8FAFC;
+      border-color: #CBD5E1;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 6px rgba(16, 24, 40, 0.06);
     }
     .workspace-tab-btn:active {
-      transform: scale(0.96);
+      transform: scale(0.97);
       transition-duration: 90ms;
     }
     .workspace-tab-btn.active {
-      background: #5D76F5;
-      color: #FFFFFF;
+      background: #5D76F5 !important;
+      color: #FFFFFF !important;
+      border-color: #5D76F5 !important;
       font-weight: 700;
-      box-shadow: 0 4px 14px rgba(93, 118, 245, 0.3);
+      box-shadow: 0 4px 14px rgba(93, 118, 245, 0.32) !important;
     }
 
     .kpi-row {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 18px;
-      margin-bottom: 24px;
+      gap: 16px;
+      margin-bottom: 22px;
     }
     @media (max-width: 1024px) {
       .kpi-row {
@@ -109,21 +121,15 @@ if ($isWorkerUser) {
         gap: 12px;
       }
     }
-    @media (max-width: 768px) {
-      .kpi-row {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 10px !important;
-        margin-bottom: 16px !important;
-      }
-    }
     .kpi-tile {
       background: #FFFFFF;
       border: 1px solid #ECEEF5;
-      border-radius: 22px;
-      padding: 22px 24px;
+      border-radius: 20px;
+      padding: 20px 22px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      justify-content: space-between;
+      min-height: 105px;
       box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
       transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 220ms cubic-bezier(0.22, 1, 0.36, 1), border-color 220ms ease;
       will-change: transform;
@@ -147,19 +153,225 @@ if ($isWorkerUser) {
       background: #FFFAEB;
     }
 
-    /* Filter Bar */
+    /* Filter Panel - Modern Boxed Controls */
     .filter-panel {
       background: #FFFFFF;
       border: 1px solid #ECEEF5;
       border-radius: 20px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
+      padding: 20px;
+      margin-bottom: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.04);
+    }
+    .task-services-section,
+    .task-status-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .task-filter-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .task-filter-title {
+      font-size: 11.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #475467;
+    }
+    .task-filter-hint {
+      font-size: 11px;
+      color: #98A2B3;
+      font-weight: 500;
+    }
+    .task-services-track {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 2px;
+      max-width: 100%;
+    }
+    .task-services-track::-webkit-scrollbar {
+      display: none;
+    }
+    .task-service-pill {
+      background: #FFFFFF;
+      border: 1.5px solid #D0D5DD;
+      color: #344054;
+      border-radius: 10px;
+      padding: 7px 16px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+      transition: all 180ms cubic-bezier(0.22, 1, 0.36, 1);
+      font-family: inherit;
+      line-height: 1.2;
+    }
+    .task-service-pill:hover:not(.active) {
+      background: #F8FAFC;
+      border-color: #98A2B3;
+      color: #101828;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 6px rgba(16, 24, 40, 0.06);
+    }
+    .task-service-pill:active {
+      transform: scale(0.97);
+    }
+    .task-service-pill.active {
+      background: #5D76F5 !important;
+      border-color: #5D76F5 !important;
+      color: #FFFFFF !important;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(93, 118, 245, 0.28) !important;
+    }
+
+    .task-status-grid {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .task-status-grid .filter-btn {
+      background: #FFFFFF !important;
+      border: 1.5px solid #D0D5DD !important;
+      color: #344054 !important;
+      border-radius: 10px !important;
+      padding: 7px 16px !important;
+      font-size: 12.5px !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      white-space: nowrap !important;
+      flex-shrink: 0 !important;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04) !important;
+      transition: all 180ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+      font-family: inherit !important;
+      line-height: 1.2 !important;
+    }
+    .task-status-grid .filter-btn:hover:not(.active) {
+      background: #F8FAFC !important;
+      border-color: #98A2B3 !important;
+      color: #101828 !important;
+      transform: translateY(-1px) !important;
+      box-shadow: 0 3px 6px rgba(16, 24, 40, 0.06) !important;
+    }
+    .task-status-grid .filter-btn:active {
+      transform: scale(0.97) !important;
+    }
+    .task-status-grid .filter-btn.active {
+      background: #5D76F5 !important;
+      border-color: #5D76F5 !important;
+      color: #FFFFFF !important;
+      font-weight: 700 !important;
+      box-shadow: 0 4px 12px rgba(93, 118, 245, 0.28) !important;
+    }
+
+    .task-bottom-toolbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
-      box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.04);
+      padding-top: 10px;
+      border-top: 1px dashed #E2E8F0;
+    }
+    .task-bottom-left-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      flex-grow: 1;
+    }
+    .task-select-wrap {
+      min-width: 200px;
+    }
+    .task-sdm-select {
+      height: 38px;
+      border-radius: 10px;
+      border: 1.5px solid #D0D5DD;
+      background: #FFFFFF;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #344054;
+      padding: 6px 12px;
+    }
+    .task-search-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-width: 240px;
+      max-width: 320px;
+      flex-grow: 1;
+    }
+    .task-search-icon {
+      position: absolute;
+      left: 12px;
+      font-size: 13px;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+    .task-search-input {
+      width: 100%;
+      height: 38px;
+      padding: 6px 32px 6px 34px;
+      border-radius: 10px;
+      border: 1.5px solid #D0D5DD;
+      background: #FFFFFF;
+      color: #101828;
+      font-size: 12.5px;
+      font-family: inherit;
+      box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04);
+      outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+    .task-search-input:focus {
+      border-color: #5D76F5;
+      box-shadow: 0 0 0 3.5px rgba(93, 118, 245, 0.15);
+    }
+    .task-search-input::placeholder {
+      color: #98A2B3;
+      font-size: 12px;
+    }
+    .task-search-clear {
+      position: absolute;
+      right: 10px;
+      background: transparent;
+      border: none;
+      color: #98A2B3;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+    .task-search-clear:hover {
+      color: #101828;
+    }
+    .task-count-pill {
+      font-size: 12px;
+      font-weight: 600;
+      color: #64748B;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      padding: 7px 14px;
+      border-radius: 999px;
+      white-space: nowrap;
     }
 
     /* Tasks Grid / Cards */
@@ -335,6 +547,184 @@ if ($isWorkerUser) {
     .service-tag-web { background: #F4F3FF; color: #5925DC; border: 1px solid #D9D6FE; }
     .service-tag-ads { background: #ECFDF3; color: #027A48; border: 1px solid #A6F4C5; }
     .service-tag-default { background: #F2F4F7; color: #344054; border: 1px solid #EAECF0; }
+
+    @media (max-width: 768px) {
+      .mobile-text { display: inline !important; }
+      .desktop-text { display: none !important; }
+
+      .tasks-header-card {
+        padding: 16px 14px !important;
+        border-radius: 18px !important;
+        margin-bottom: 16px !important;
+        gap: 12px !important;
+      }
+      .tasks-header-actions {
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+      }
+      .tasks-header-actions .btn {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+      }
+
+      /* Workspace Tabs Bar: 2 Columns Side-by-Side */
+      .workspace-tabs-bar {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        width: 100% !important;
+        gap: 6px !important;
+        padding: 5px !important;
+        border-radius: 14px !important;
+        box-sizing: border-box !important;
+        margin-bottom: 16px !important;
+      }
+      .workspace-tab-btn {
+        width: 100% !important;
+        padding: 9px 6px !important;
+        font-size: 11.5px !important;
+        border-radius: 9px !important;
+        justify-content: center !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+        box-sizing: border-box !important;
+      }
+
+      /* Balanced KPI Tiles Grid: 1 Hero card + 2x2 grid */
+      .kpi-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+        margin-bottom: 16px !important;
+      }
+      .kpi-row > .kpi-tile:first-child {
+        grid-column: 1 / -1 !important;
+        background: linear-gradient(135deg, #F8FAFC 0%, #EEF2F6 100%) !important;
+        border-color: #DDE1EE !important;
+      }
+      .kpi-row > .kpi-tile:last-child,
+      .kpi-row > *:last-child:nth-child(odd) {
+        grid-column: auto !important;
+      }
+      .kpi-tile {
+        padding: 12px 14px !important;
+        border-radius: 14px !important;
+        min-height: auto !important;
+      }
+      .kpi-tile > span:first-child {
+        font-size: 9.5px !important;
+        letter-spacing: 0.04em !important;
+      }
+      .kpi-tile > div {
+        font-size: 18px !important;
+        margin: 2px 0 !important;
+      }
+      .kpi-tile > span:last-child {
+        font-size: 10.5px !important;
+      }
+
+      /* Filter Panel */
+      .filter-panel {
+        padding: 14px !important;
+        border-radius: 16px !important;
+        gap: 12px !important;
+        margin-bottom: 16px !important;
+      }
+      .task-filter-title {
+        font-size: 11px !important;
+      }
+      .task-filter-hint {
+        font-size: 10px !important;
+      }
+      .task-services-track {
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+        padding-bottom: 4px !important;
+        width: 100% !important;
+      }
+      .task-service-pill {
+        padding: 7px 13px !important;
+        font-size: 11.5px !important;
+        border-radius: 9px !important;
+      }
+      #status-filter-group.task-status-grid,
+      .task-status-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+        overflow: visible !important;
+        flex-wrap: unset !important;
+      }
+      #status-filter-group.task-status-grid .filter-btn:first-child,
+      .task-status-grid .filter-btn:first-child {
+        grid-column: 1 / -1 !important;
+      }
+      #status-filter-group.task-status-grid .filter-btn,
+      .task-status-grid .filter-btn {
+        width: 100% !important;
+        padding: 8px 10px !important;
+        font-size: 11.5px !important;
+        border-radius: 9px !important;
+        justify-content: center !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+        box-sizing: border-box !important;
+        flex-shrink: unset !important;
+      }
+      .task-bottom-toolbar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        padding-top: 10px !important;
+      }
+      .task-bottom-left-group {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        gap: 8px !important;
+      }
+      .task-select-wrap,
+      .task-sdm-select {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .task-search-wrap {
+        width: 100% !important;
+        min-width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .task-search-input {
+        width: 100% !important;
+        height: 38px !important;
+        font-size: 12.5px !important;
+        box-sizing: border-box !important;
+      }
+      .task-count-pill {
+        width: 100% !important;
+        text-align: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+      }
+
+      /* Section 2 Ads Tracker Header Actions */
+      .ads-tracker-header-actions {
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+      }
+      .ads-tracker-header-actions .btn {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -369,7 +759,7 @@ if ($isWorkerUser) {
             </p>
           </div>
 
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <div class="tasks-header-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
             <?php if ($isAdminUser): ?>
               <button class="btn btn-primary btn-sm" onclick="openAssignTaskModal()">
                 <span>+ Bagi Tugas Baru (Assign)</span>
@@ -387,10 +777,12 @@ if ($isWorkerUser) {
         <!-- Section Switcher Tabs -->
         <div class="workspace-tabs-bar">
           <button type="button" class="workspace-tab-btn active" id="tab-btn-tasks" onclick="switchTaskWorkspaceTab('tasks')">
-            Deliverables & Penugasan Tim
+            <span class="desktop-text">Deliverables &amp; Penugasan Tim</span>
+            <span class="mobile-text">Deliverables Tim</span>
           </button>
           <button type="button" class="workspace-tab-btn" id="tab-btn-ads" onclick="switchTaskWorkspaceTab('ads')">
-            Pelacakan & Koordinasi Anggaran Ads
+            <span class="desktop-text">Pelacakan &amp; Koordinasi Anggaran Ads</span>
+            <span class="mobile-text">Pelacakan Ads</span>
           </button>
         </div>
 
@@ -480,38 +872,67 @@ if ($isWorkerUser) {
           </div>
 
           <!-- Filter Panel -->
-          <div class="filter-panel" style="display: flex; flex-direction: column; align-items: stretch; gap: 12px;">
-            <!-- Sortir Berdasarkan 4 Jasa Kalamedia -->
-            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-              <span style="font-size: 11.5px; font-weight: 700; color: #6E7485; text-transform: uppercase; letter-spacing: 0.5px;">Sortir Jasa:</span>
-              <button type="button" class="client-filter-pill active task-service-pill" onclick="filterTaskService('all', this)">Semua Jasa</button>
-              <button type="button" class="client-filter-pill task-service-pill" onclick="filterTaskService('Kelola Sosmed', this)">Kelola Sosmed</button>
-              <button type="button" class="client-filter-pill task-service-pill" onclick="filterTaskService('Desain Eceran', this)">Desain Eceran / Satuan</button>
-              <button type="button" class="client-filter-pill task-service-pill" onclick="filterTaskService('Jasa Buat Web', this)">Jasa Buat Web</button>
-              <button type="button" class="client-filter-pill task-service-pill" onclick="filterTaskService('Jasa Iklan', this)">Jasa Iklan Meta & Google</button>
+          <div class="filter-panel">
+            <!-- Row 1: Kategori Jasa (Smooth Touch Track) -->
+            <div class="task-services-section">
+              <div class="task-filter-header-bar">
+                <span class="task-filter-title">Kategori Layanan</span>
+                <span class="task-filter-hint">Geser untuk memilih spesialisasi jasa</span>
+              </div>
+              <div class="task-services-track">
+                <button type="button" class="task-service-pill active" onclick="filterTaskService('all', this)">
+                  <span>Semua Jasa</span>
+                </button>
+                <button type="button" class="task-service-pill" onclick="filterTaskService('Kelola Sosmed', this)">
+                  <span>Kelola Sosmed</span>
+                </button>
+                <button type="button" class="task-service-pill" onclick="filterTaskService('Desain Eceran', this)">
+                  <span>Desain Eceran / Satuan</span>
+                </button>
+                <button type="button" class="task-service-pill" onclick="filterTaskService('Jasa Buat Web', this)">
+                  <span>Jasa Buat Web</span>
+                </button>
+                <button type="button" class="task-service-pill" onclick="filterTaskService('Jasa Iklan', this)">
+                  <span>Jasa Iklan Meta &amp; Google</span>
+                </button>
+              </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
-              <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-                <div class="date-filter-group" id="status-filter-group">
-                  <button class="filter-btn active" onclick="filterByStatus('all', this)">Semua Status</button>
-                  <button class="filter-btn" onclick="filterByStatus('revision', this)">Revisi</button>
-                  <button class="filter-btn" onclick="filterByStatus('client_review', this)">Review Klien</button>
-                  <button class="filter-btn" onclick="filterByStatus('in_progress', this)">In Progress</button>
-                  <button class="filter-btn" onclick="filterByStatus('approved', this)">Selesai</button>
-                </div>
+            <!-- Row 2: Status Pekerjaan (2-Column Grid on Mobile) -->
+            <div class="task-status-section">
+              <div class="task-filter-header-bar">
+                <span class="task-filter-title">Status Pekerjaan</span>
+              </div>
+              <div class="task-status-grid" id="status-filter-group">
+                <button type="button" class="filter-btn active" onclick="filterByStatus('all', this)">Semua Status</button>
+                <button type="button" class="filter-btn" onclick="filterByStatus('revision', this)">Revisi</button>
+                <button type="button" class="filter-btn" onclick="filterByStatus('client_review', this)">Review Klien</button>
+                <button type="button" class="filter-btn" onclick="filterByStatus('in_progress', this)">In Progress</button>
+                <button type="button" class="filter-btn" onclick="filterByStatus('approved', this)">Selesai</button>
+              </div>
+            </div>
 
+            <!-- Row 3: SDM Dropdown, Search Box, & Task Counter -->
+            <div class="task-bottom-toolbar">
+              <div class="task-bottom-left-group">
                 <?php if ($isAdminUser): ?>
-                  <!-- SDM Type Filter -->
-                  <select id="filter-worker-type" class="form-control" style="width: auto; padding: 6px 12px; font-size: 12px; font-weight: 600;" onchange="applyFilters()">
-                    <option value="">Semua SDM</option>
-                    <option value="karyawan">Karyawan (In-House)</option>
-                    <option value="freelancer">Freelancer</option>
-                  </select>
+                  <div class="task-select-wrap">
+                    <select id="filter-worker-type" class="form-control task-sdm-select" onchange="applyFilters()">
+                      <option value="">Semua SDM (Karyawan &amp; Freelancer)</option>
+                      <option value="karyawan">Karyawan (In-House)</option>
+                      <option value="freelancer">Freelancer</option>
+                    </select>
+                  </div>
                 <?php endif; ?>
+
+                <div class="task-search-wrap">
+                  <span class="task-search-icon">🔍</span>
+                  <input type="text" id="task-search-input" class="form-control task-search-input" placeholder="Cari deliverables, klien, PIC..." oninput="handleTaskSearch()">
+                  <button type="button" class="task-search-clear" id="task-search-clear-btn" style="display: none;" onclick="clearTaskSearch()">&times;</button>
+                </div>
               </div>
 
-              <div style="font-size: 12px; color: var(--text-muted);" id="tasks-count-label">
+              <div class="task-count-pill" id="tasks-count-label">
                 Menampilkan 0 tugas
               </div>
             </div>
@@ -549,7 +970,7 @@ if ($isWorkerUser) {
               </p>
             </div>
 
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <div class="ads-tracker-header-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
               <button class="btn btn-primary btn-sm" onclick="openUploadAdsTopupModal()" style="font-weight: 700; background: #027A48; border-color: #027A48;">
                 <span>+ Upload Bukti Isi Saldo / Transaksi Ads</span>
               </button>
@@ -1182,6 +1603,25 @@ if ($isWorkerUser) {
       applyFilters();
     }
 
+    function handleTaskSearch() {
+      const searchInput = document.getElementById('task-search-input');
+      const clearBtn = document.getElementById('task-search-clear-btn');
+      if (clearBtn) {
+        clearBtn.style.display = searchInput && searchInput.value ? 'block' : 'none';
+      }
+      applyFilters();
+    }
+
+    function clearTaskSearch() {
+      const searchInput = document.getElementById('task-search-input');
+      if (searchInput) {
+        searchInput.value = '';
+      }
+      const clearBtn = document.getElementById('task-search-clear-btn');
+      if (clearBtn) clearBtn.style.display = 'none';
+      applyFilters();
+    }
+
     function applyFilters() {
       const workerType = document.getElementById('filter-worker-type') ? document.getElementById('filter-worker-type').value : '';
 
@@ -1202,6 +1642,20 @@ if ($isWorkerUser) {
           const cat = (t.category || '').toLowerCase();
           const srv = (t.client_service_type || '').toLowerCase();
           return cat.includes(key) || srv.includes(key);
+        });
+      }
+      // Search keyword filter
+      const searchInput = document.getElementById('task-search-input');
+      const searchKey = searchInput ? searchInput.value.trim().toLowerCase() : '';
+      if (searchKey) {
+        filtered = filtered.filter(t => {
+          const title = (t.title || '').toLowerCase();
+          const desc = (t.description || '').toLowerCase();
+          const clientName = (t.client_company || t.company || '').toLowerCase();
+          const picName = (t.pic_name || '').toLowerCase();
+          const workerName = (t.worker_name || t.user_name || '').toLowerCase();
+          const deliverable = (t.deliverable_type || '').toLowerCase();
+          return title.includes(searchKey) || desc.includes(searchKey) || clientName.includes(searchKey) || picName.includes(searchKey) || workerName.includes(searchKey) || deliverable.includes(searchKey);
         });
       }
 

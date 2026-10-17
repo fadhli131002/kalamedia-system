@@ -74,7 +74,7 @@ $totalClientsCount = count($allClients);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
   <style>
     .team-badge-karyawan {
       background: rgba(93, 118, 245, 0.12);
@@ -233,7 +233,7 @@ $totalClientsCount = count($allClients);
       border: 1px solid #ECEEF5;
       box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
       padding: 24px;
-      overflow: hidden;
+      overflow: visible;
       margin-bottom: 28px;
     }
 
@@ -246,6 +246,39 @@ $totalClientsCount = count($allClients);
       margin-bottom: 24px;
       flex-wrap: wrap;
       gap: 16px;
+    }
+
+    @media (max-width: 768px) {
+      .team-top-header-card {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+      }
+      .team-top-header-card .btn-primary {
+        width: 100% !important;
+        justify-content: center !important;
+      }
+      .bento-toolbar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+      }
+      .bento-tabs-group {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: space-between !important;
+      }
+      .bento-tab-btn {
+        flex: 1 !important;
+        text-align: center !important;
+        padding: 8px 6px !important;
+        font-size: 12px !important;
+      }
+      .bento-search-box {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+      }
     }
 
     .bento-tabs-group {
@@ -333,7 +366,7 @@ $totalClientsCount = count($allClients);
       <div class="content-body">
 
         <!-- Top Header Card -->
-        <div style="background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 22px; padding: 24px; margin-bottom: 22px; box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div class="team-top-header-card" style="background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 22px; padding: 24px; margin-bottom: 22px; box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
           <div>
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
               <span class="badge" style="background: rgba(93, 118, 245, 0.12); color: #5D76F5; font-weight: 700; font-size: 11px; border-radius: 999px; padding: 3px 10px; border: 1px solid rgba(93, 118, 245, 0.2);">
@@ -419,7 +452,7 @@ $totalClientsCount = count($allClients);
         </div>
 
         <!-- Unified Table Toolbar & Card Wrapper (Bento Container) -->
-        <div class="bento-table-card">
+        <div class="bento-table-card" style="overflow: visible; min-width: 0; max-width: 100%;">
           <div style="margin-bottom: 20px;">
             <h3 style="font-size: 18px; font-weight: 800; color: #000000; margin: 0; letter-spacing: -0.3px;">
               Daftar Anggota Tim & Alokasi Klien
@@ -452,17 +485,17 @@ $totalClientsCount = count($allClients);
             </div>
           </div>
 
-          <div class="table-responsive">
-            <table class="table-custom">
+          <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
+            <table class="table-custom" style="min-width: 860px; width: 100%;">
               <thead>
                 <tr>
-                  <th>NAMA & KONTAK</th>
-                  <th>STATUS SDM</th>
-                  <th>SPESIALISASI JASA & JOBDESK</th>
-                  <th>MASA KONTRAK KERJA</th>
-                  <th>KLIEN / PT YANG DIPEGANG</th>
-                  <th>EMAIL LOGIN PORTAL</th>
-                  <th style="text-align: right; white-space: nowrap;">AKSI</th>
+                  <th style="min-width: 220px; white-space: nowrap;">NAMA &amp; KONTAK</th>
+                  <th style="min-width: 130px; white-space: nowrap;">STATUS SDM</th>
+                  <th style="min-width: 200px; white-space: nowrap;">SPESIALISASI JASA &amp; JOBDESK</th>
+                  <th style="min-width: 150px; white-space: nowrap;">MASA KONTRAK KERJA</th>
+                  <th style="min-width: 180px; white-space: nowrap;">KLIEN / PT YANG DIPEGANG</th>
+                  <th style="min-width: 160px; white-space: nowrap;">EMAIL LOGIN PORTAL</th>
+                  <th style="min-width: 120px; text-align: right; white-space: nowrap;">AKSI</th>
                 </tr>
               </thead>
               <tbody id="team-table-body">
@@ -512,7 +545,7 @@ $totalClientsCount = count($allClients);
                     }
                   ?>
                     <tr class="team-row" data-role="<?= htmlspecialchars($m['employment_type']) ?>" data-specialty="<?= htmlspecialchars(strtolower($spec)) ?>">
-                      <td>
+                      <td style="min-width: 220px; white-space: nowrap;">
                         <div style="display: flex; align-items: center; gap: 10px;">
                           <div style="width: 36px; height: 36px; border-radius: 50%; background: #EFF8FF; color: #175CD3; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; flex-shrink: 0; border: 1px solid #B2DDFF;">
                             <?= strtoupper(substr($m['name'], 0, 2)) ?>
@@ -530,7 +563,7 @@ $totalClientsCount = count($allClients);
                         </div>
                       </td>
 
-                      <td>
+                      <td style="min-width: 130px; white-space: nowrap;">
                         <?php if ($m['employment_type'] === 'freelancer'): ?>
                           <span class="team-badge-freelancer">Freelancer</span>
                         <?php else: ?>
@@ -538,7 +571,7 @@ $totalClientsCount = count($allClients);
                         <?php endif; ?>
                       </td>
 
-                      <td>
+                      <td style="min-width: 200px;">
                         <?php if (!empty($spec)): ?>
                           <div>
                             <span class="service-tag <?= $specClass ?>"><?= htmlspecialchars($spec) ?></span>
@@ -556,7 +589,7 @@ $totalClientsCount = count($allClients);
                         <?php endif; ?>
                       </td>
 
-                      <td>
+                      <td style="min-width: 150px; white-space: nowrap;">
                         <?php if ($wStart && $wEnd): ?>
                           <div style="font-size: 11.5px; color: #344054; font-weight: 600; margin-bottom: 4px;">
                             <?= date('d M Y', strtotime($wStart)) ?> &ndash; <?= date('d M Y', strtotime($wEnd)) ?>
@@ -576,9 +609,9 @@ $totalClientsCount = count($allClients);
                         <?php endif; ?>
                       </td>
 
-                      <td>
+                      <td style="min-width: 180px;">
                         <?php if (!empty($m['assigned_clients'])): ?>
-                          <div style="display: flex; flex-wrap: wrap; max-width: 260px;">
+                          <div style="display: flex; flex-wrap: wrap; max-width: 260px; gap: 4px;">
                             <?php foreach ($m['assigned_clients'] as $ac): ?>
                               <span class="client-tag-pill"><?= htmlspecialchars($ac['company']) ?></span>
                             <?php endforeach; ?>
@@ -588,7 +621,7 @@ $totalClientsCount = count($allClients);
                         <?php endif; ?>
                       </td>
 
-                      <td>
+                      <td style="min-width: 160px; white-space: nowrap;">
                         <div style="font-size: 12.5px; color: #101828; font-weight: 600;">
                           <?= htmlspecialchars($m['email']) ?>
                         </div>
@@ -597,7 +630,7 @@ $totalClientsCount = count($allClients);
                         </span>
                       </td>
 
-                      <td style="text-align: right; white-space: nowrap;">
+                      <td style="min-width: 120px; text-align: right; white-space: nowrap;">
                         <div style="display: inline-flex; gap: 6px; justify-content: flex-end; align-items: center;">
                           <button type="button" class="btn btn-secondary btn-sm" onclick='openEditTeamModal(<?= json_encode($m, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' style="padding: 5px 12px; font-size: 12px; font-weight: 600;">
                             Edit
@@ -826,9 +859,6 @@ $totalClientsCount = count($allClients);
     </div>
   </div>
 
-  <?php require_once BASE_PATH . '/includes/modals.php'; ?>
-  <?php require_once BASE_PATH . '/includes/footer.php'; ?>
-
   <script>
     function togglePasswordVisibility(inputId, btn) {
       const input = document.getElementById(inputId);
@@ -946,5 +976,4 @@ $totalClientsCount = count($allClients);
       });
     });
   </script>
-</body>
-</html>
+  <?php require_once BASE_PATH . '/includes/footer.php'; ?>

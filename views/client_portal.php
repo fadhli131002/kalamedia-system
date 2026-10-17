@@ -57,7 +57,7 @@ if ($role === 'client' && $client) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
   <style>
     .expired-page {
       min-height: 100vh;
@@ -136,7 +136,7 @@ if (!$client) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
 </head>
 <body>
   <div class="app-container">
@@ -234,7 +234,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
   <style>
     /* Client Portal Custom Styles - Minimal Finance (Bankio) */
     .portal-hero {
@@ -549,6 +549,36 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
       gap: 6px;
       opacity: 0.85;
     }
+
+    @media (max-width: 768px) {
+      aside.sidebar,
+      .sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        width: 280px !important;
+        height: 100dvh !important;
+        z-index: 9999 !important;
+        background: #FFFFFF !important;
+        transform: translate3d(-105%, 0, 0) !important;
+        transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        padding: 20px 16px !important;
+        box-shadow: 16px 0 40px rgba(0,0,0,0.15) !important;
+      }
+      aside.sidebar.open,
+      aside.sidebar.sidebar-open,
+      .sidebar.open,
+      .sidebar.sidebar-open {
+        transform: translate3d(0, 0, 0) !important;
+      }
+      .sidebar-overlay {
+        z-index: 9998 !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -719,7 +749,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
           </div>
 
           <!-- Riwayat & Bukti Transaksi Saldo Iklan (Ads Top-Up & Spend) -->
-          <div class="glass-panel" style="margin-top: 28px;">
+          <div class="glass-panel" style="margin-top: 28px; overflow: visible; min-width: 0; max-width: 100%;">
             <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
               <div>
                 <h3 class="panel-title" style="display: flex; align-items: center; gap: 8px;">
@@ -735,16 +765,16 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
               </button>
             </div>
 
-            <div class="table-responsive">
-              <table class="table-custom">
+            <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
+              <table class="table-custom" style="min-width: 740px; width: 100%;">
                 <thead>
                   <tr>
-                    <th>TANGGAL &amp; PETUGAS ADS</th>
-                    <th>PROYEK &amp; PLATFORM</th>
-                    <th>NOMINAL TOP-UP</th>
-                    <th>ANGGARAN TERPASANG</th>
-                    <th>CATATAN TIM ADS</th>
-                    <th style="text-align: right;">BUKTI TRANSAKSI</th>
+                    <th style="min-width: 210px; white-space: nowrap;">TANGGAL &amp; PETUGAS ADS</th>
+                    <th style="white-space: nowrap;">PROYEK &amp; PLATFORM</th>
+                    <th style="white-space: nowrap;">NOMINAL TOP-UP</th>
+                    <th style="white-space: nowrap;">ANGGARAN TERPASANG</th>
+                    <th style="white-space: nowrap;">CATATAN TIM ADS</th>
+                    <th style="text-align: right; white-space: nowrap;">BUKTI TRANSAKSI</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -759,7 +789,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
                   <?php else: ?>
                     <?php foreach ($clientAdsTopups as $topup): ?>
                       <tr>
-                        <td>
+                        <td style="min-width: 210px; white-space: nowrap;">
                           <div style="font-weight: 700; color: #101828;">
                             <?= date('d M Y', strtotime($topup['transaction_date'])) ?>
                           </div>
@@ -767,7 +797,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
                             Petugas: <b><?= htmlspecialchars($topup['uploader_name'] ?? 'Tim Ads Kalamedia') ?></b>
                           </div>
                         </td>
-                        <td>
+                        <td style="white-space: nowrap;">
                           <div style="font-weight: 700; color: #101828;">
                             <?= htmlspecialchars($topup['project_name'] ?? 'Kampanye Iklan') ?>
                           </div>
@@ -780,16 +810,16 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
                             <?= htmlspecialchars($topup['platform']) ?>
                           </span>
                         </td>
-                        <td style="font-weight: 800; color: #027A48;">
+                        <td style="font-weight: 800; color: #027A48; white-space: nowrap;">
                           + Rp <?= number_format($topup['topup_amount'], 0, ',', '.') ?>
                         </td>
-                        <td style="font-weight: 700; color: #101828;">
+                        <td style="font-weight: 700; color: #101828; white-space: nowrap;">
                           Rp <?= number_format($topup['spend_installed'], 0, ',', '.') ?>
                         </td>
                         <td style="font-size: 12.5px; color: var(--text-secondary); max-width: 260px;">
                           <?= htmlspecialchars($topup['notes'] ?: 'Pengisian saldo iklan kampanye berjalan lancar.') ?>
                         </td>
-                        <td style="text-align: right;">
+                        <td style="text-align: right; white-space: nowrap;">
                           <?php if (!empty($topup['receipt_file'])): ?>
                             <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($topup['receipt_file'])) ?>', 'Bukti Transaksi Top-Up Saldo <?= htmlspecialchars(addslashes($topup['platform'])) ?>')" style="font-size: 11.5px; font-weight: 700; gap: 4px; display: inline-flex; align-items: center;">
                               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -872,37 +902,37 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
 
         <!-- TAB 3: Client Invoices (Client Privacy Assured) -->
         <div id="tab-pane-invoices" style="display: none;">
-          <div class="glass-panel">
+          <div class="glass-panel" style="overflow: visible; min-width: 0; max-width: 100%;">
             <div class="panel-header">
               <div>
-                <h3 class="panel-title">Riwayat Tagihan & Invoice Klien</h3>
+                <h3 class="panel-title">Riwayat Tagihan &amp; Invoice Klien</h3>
                 <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Daftar tagihan resmi untuk layanan agensi Kalamedia Creative.</p>
               </div>
             </div>
 
-            <div class="table-responsive">
-              <table class="table-custom">
+            <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 8px;">
+              <table class="table-custom" style="min-width: 820px !important; width: 100%;">
                 <thead>
                   <tr>
-                    <th>NO. INVOICE</th>
-                    <th>TANGGAL TERBIT</th>
-                    <th>JATUH TEMPO</th>
-                    <th>TOTAL TAGIHAN</th>
-                    <th>STATUS</th>
-                    <th style="text-align: right;">AKSI</th>
+                    <th style="white-space: nowrap !important;">NO. INVOICE</th>
+                    <th style="white-space: nowrap !important;">TANGGAL TERBIT</th>
+                    <th style="white-space: nowrap !important;">JATUH TEMPO</th>
+                    <th style="white-space: nowrap !important;">TOTAL TAGIHAN</th>
+                    <th style="white-space: nowrap !important;">STATUS</th>
+                    <th style="text-align: right; white-space: nowrap !important;">AKSI</th>
                   </tr>
                 </thead>
                 <tbody>
                   <?php if (empty($invoices)): ?>
-                    <tr><td colspan="6" style="text-align: center; padding: 32px; color: var(--text-muted);">Belum ada riwayat tagihan invoice.</td></tr>
+                    <tr><td colspan="6" style="text-align: center; padding: 32px; color: var(--text-muted); white-space: nowrap !important;">Belum ada riwayat tagihan invoice.</td></tr>
                   <?php else: ?>
                     <?php foreach ($invoices as $inv): ?>
                       <tr>
-                        <td style="font-weight: 800; color: #101828;"><?= htmlspecialchars($inv['invoice_number']) ?></td>
-                        <td><?= date('d M Y', strtotime($inv['issue_date'])) ?></td>
-                        <td><?= date('d M Y', strtotime($inv['due_date'])) ?></td>
-                        <td style="font-weight: 800; color: #101828;">Rp <?= number_format($inv['total_amount'], 0, ',', '.') ?></td>
-                        <td>
+                        <td style="font-weight: 800; color: #101828; white-space: nowrap !important;"><?= htmlspecialchars($inv['invoice_number']) ?></td>
+                        <td style="white-space: nowrap !important;"><?= date('d M Y', strtotime($inv['issue_date'])) ?></td>
+                        <td style="white-space: nowrap !important;"><?= date('d M Y', strtotime($inv['due_date'])) ?></td>
+                        <td style="font-weight: 800; color: #101828; white-space: nowrap !important;">Rp <?= number_format($inv['total_amount'], 0, ',', '.') ?></td>
+                        <td style="white-space: nowrap !important;">
                           <?php
                             $status = $inv['status'];
                             $bg = ($status === 'Paid') ? '#ECFDF5' : (($status === 'Overdue') ? '#FEF2F2' : '#F2F4F7');
@@ -912,7 +942,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
                             <?= htmlspecialchars($status) ?>
                           </span>
                         </td>
-                        <td style="text-align: right;">
+                        <td style="text-align: right; white-space: nowrap !important;">
                           <a href="<?= url('invoice-view') ?>?id=<?= $inv['id'] ?>&portal=client&_slot=client" class="btn btn-secondary btn-sm" style="font-size: 11.5px; font-weight: 700;">
                             Lihat / Cetak PDF
                           </a>
@@ -1415,16 +1445,16 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
                 </span>
               </div>
 
-              <div class="table-responsive">
-                <table class="table-custom">
+              <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
+                <table class="table-custom" style="min-width: 740px; width: 100%;">
                   <thead>
                     <tr>
-                      <th>TANGGAL &amp; PETUGAS ADS</th>
-                      <th>PLATFORM</th>
-                      <th>SALDO DIISI (TOP-UP)</th>
-                      <th>ANGGARAN TERPASANG</th>
-                      <th>CATATAN KETERANGAN</th>
-                      <th style="text-align: right;">BUKTI STRUK</th>
+                      <th style="min-width: 210px; white-space: nowrap;">TANGGAL &amp; PETUGAS ADS</th>
+                      <th style="white-space: nowrap;">PLATFORM</th>
+                      <th style="white-space: nowrap;">SALDO DIISI (TOP-UP)</th>
+                      <th style="white-space: nowrap;">ANGGARAN TERPASANG</th>
+                      <th style="white-space: nowrap;">CATATAN KETERANGAN</th>
+                      <th style="text-align: right; white-space: nowrap;">BUKTI STRUK</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1436,23 +1466,23 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
 
             html += `
               <tr>
-                <td>
+                <td style="min-width: 210px; white-space: nowrap;">
                   <div style="font-weight: 700; color: #101828;">${formatDate(t.transaction_date)}</div>
                   <div style="font-size: 11px; color: var(--text-secondary);">Oleh: ${escapeHtml(t.uploader_name || 'Tim Ads Kalamedia')}</div>
                 </td>
-                <td>
+                <td style="white-space: nowrap;">
                   <span class="badge" style="${platformBadge} font-weight: 700; font-size: 11px;">${escapeHtml(t.platform)}</span>
                 </td>
-                <td style="font-weight: 800; color: #027A48;">
+                <td style="font-weight: 800; color: #027A48; white-space: nowrap;">
                   + Rp ${Number(t.topup_amount || 0).toLocaleString('id-ID')}
                 </td>
-                <td style="font-weight: 700; color: #101828;">
+                <td style="font-weight: 700; color: #101828; white-space: nowrap;">
                   Rp ${Number(t.spend_installed || 0).toLocaleString('id-ID')}
                 </td>
                 <td style="font-size: 12px; color: var(--text-secondary); max-width: 250px;">
                   ${escapeHtml(t.notes || 'Pengisian saldo Ads.')}
                 </td>
-                <td style="text-align: right;">
+                <td style="text-align: right; white-space: nowrap;">
                   ${t.receipt_file ? `
                     <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('${escapeHtml(t.receipt_file)}', 'Bukti Transaksi Saldo Iklan')" style="font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>

@@ -179,7 +179,7 @@ $initialChartData = [
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
 </head>
 <body>
   <div class="app-container">
@@ -267,22 +267,22 @@ $initialChartData = [
         </div>
 
         <!-- Two Column Layout: Project Profitability Leaderboard & Outstanding Receivables -->
-        <div class="owner-dashboard-grid">
+        <div class="owner-dashboard-grid kala-dashboard-bottom-grid">
           
           <!-- Project Profitability Leaderboard -->
-          <div class="glass-panel" style="margin-bottom: 0;">
-            <div class="panel-header">
+          <div class="glass-panel" style="margin-bottom: 0; overflow: visible;">
+            <div class="panel-header kala-leaderboard-header">
               <div>
                 <h3 class="panel-title">
                   Project Profitability Leaderboard
                 </h3>
                 <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Peringkat proyek berdasarkan profit margin & efisiensi biaya produksi</p>
               </div>
-              <button class="btn btn-secondary btn-sm" onclick="openModal('modal-create-project')">+ Proyek Baru</button>
+              <button class="btn btn-secondary btn-sm kala-btn-new-project" onclick="openModal('modal-create-project')">+ Proyek Baru</button>
             </div>
 
-            <div class="table-responsive">
-              <table class="table-custom">
+            <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;">
+              <table class="table-custom" style="min-width: 640px; width: 100%;">
                 <thead>
                   <tr>
                     <th>Rank & Nama Proyek</th>
@@ -444,7 +444,7 @@ $initialChartData = [
           <div class="glass-panel owner-full-width-panel" style="margin-top: 24px;">
             <div class="panel-header" style="margin-bottom: 16px; flex-wrap: wrap; gap: 12px; display: flex; justify-content: space-between; align-items: center;">
               <div>
-                <h3 class="panel-title" style="display: flex; align-items: center; gap: 8px;">
+                <h3 class="panel-title" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
                   <span>Monitoring Saldo Iklan &amp; Riwayat Top-Up Tim Ads</span>
                   <span class="badge" style="background: #EFF8FF; color: #175CD3; font-weight: 700; font-size: 11px;">Transparansi Kampanye</span>
                 </h3>
@@ -461,7 +461,7 @@ $initialChartData = [
 
             <!-- Project Ads Balance Cards -->
             <?php if (!empty($adsProjectsSummary)): ?>
-              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 20px;">
+              <div class="ads-projects-grid">
                 <?php foreach ($adsProjectsSummary as $ap):
                   $alloc = floatval($ap['allocated_ads_budget']);
                   $spend = floatval($ap['total_spend_installed']);
@@ -499,17 +499,17 @@ $initialChartData = [
             <?php endif; ?>
 
             <!-- Table Riwayat Top-up Terbaru -->
-            <div class="table-responsive">
-              <table class="table-custom">
+            <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
+              <table class="table-custom" style="min-width: 820px; width: 100%;">
                 <thead>
                   <tr>
-                    <th>TANGGAL &amp; PETUGAS ADS</th>
-                    <th>KLIEN &amp; PROYEK</th>
-                    <th>PLATFORM</th>
-                    <th>NOMINAL TOP-UP</th>
-                    <th>ANGGARAN TERPASANG</th>
-                    <th>STATUS / CATATAN</th>
-                    <th style="text-align: right;">BUKTI STRUK</th>
+                    <th style="min-width: 210px; white-space: nowrap;">TANGGAL &amp; PETUGAS ADS</th>
+                    <th style="white-space: nowrap;">KLIEN &amp; PROYEK</th>
+                    <th style="white-space: nowrap;">PLATFORM</th>
+                    <th style="white-space: nowrap;">NOMINAL TOP-UP</th>
+                    <th style="white-space: nowrap;">ANGGARAN TERPASANG</th>
+                    <th style="white-space: nowrap;">STATUS / CATATAN</th>
+                    <th style="text-align: right; white-space: nowrap;">BUKTI STRUK</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -522,7 +522,7 @@ $initialChartData = [
                   <?php else: ?>
                     <?php foreach ($recentAdsTopups as $rt): ?>
                       <tr>
-                        <td>
+                        <td style="min-width: 210px; white-space: nowrap;">
                           <div style="font-weight: 700; color: #101828;"><?= date('d M Y', strtotime($rt['transaction_date'])) ?></div>
                           <div style="font-size: 11px; color: var(--text-secondary);">Oleh: <?= htmlspecialchars($rt['uploader_name'] ?? 'Staff Ads') ?></div>
                         </td>

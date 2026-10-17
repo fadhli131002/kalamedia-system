@@ -16,7 +16,7 @@ $users = $db->query("SELECT id, name, email, role, created_at FROM users ORDER B
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
 </head>
 <body>
   <div class="app-container">
@@ -27,10 +27,30 @@ $users = $db->query("SELECT id, name, email, role, created_at FROM users ORDER B
 
       <div class="content-body">
 
+  <style>
+    @media (max-width: 768px) {
+      .settings-grid,
+      .kala-grid-2col {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+      .kala-settings-card-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+      }
+      .kala-settings-card-header .kala-btn-add-account {
+        width: 100% !important;
+        text-align: center;
+        justify-content: center;
+      }
+    }
+  </style>
+
         <div class="settings-grid kala-grid-2col">
           
           <!-- Agency Profile & Invoice Bank Info -->
-          <div class="glass-panel">
+          <div class="glass-panel" style="overflow: visible; min-width: 0; max-width: 100%;">
             <div class="panel-header">
               <div>
                 <h3 class="panel-title">
@@ -72,41 +92,41 @@ $users = $db->query("SELECT id, name, email, role, created_at FROM users ORDER B
           </div>
 
           <!-- User Management (RBAC) -->
-          <div class="glass-panel">
-            <div class="panel-header">
+          <div class="glass-panel" style="overflow: visible; min-width: 0; max-width: 100%;">
+            <div class="panel-header kala-settings-card-header">
               <div>
                 <h3 class="panel-title">
                   Manajemen Akun Pengguna (RBAC)
                 </h3>
                 <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Daftar akun dan hak akses pengguna sistem</p>
               </div>
-              <button type="button" class="btn btn-primary btn-sm" onclick="openCreateUserModal()">
+              <button type="button" class="btn btn-primary btn-sm kala-btn-add-account" onclick="openCreateUserModal()">
                 + Tambah Akun
               </button>
             </div>
 
-            <div class="table-responsive">
-              <table class="table-custom">
+            <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
+              <table class="table-custom" style="min-width: 580px; width: 100%;">
                 <thead>
                   <tr>
-                    <th>Nama & Email</th>
-                    <th>Peran</th>
-                    <th>Hak Akses</th>
+                    <th style="white-space: nowrap;">Nama & Email</th>
+                    <th style="white-space: nowrap;">Peran</th>
+                    <th style="white-space: nowrap;">Hak Akses</th>
                   </tr>
                 </thead>
                 <tbody>
                   <?php foreach ($users as $u): ?>
                     <tr>
-                      <td>
+                      <td style="white-space: nowrap;">
                         <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($u['name']) ?></div>
                         <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($u['email']) ?></div>
                       </td>
-                      <td>
+                      <td style="white-space: nowrap;">
                         <span class="role-badge" style="font-weight: 700; font-size: 11px; text-transform: uppercase;">
                           <?= htmlspecialchars($u['role']) ?>
                         </span>
                       </td>
-                      <td style="font-size: 11px; color: var(--text-secondary);">
+                      <td style="font-size: 11px; color: var(--text-secondary); white-space: nowrap;">
                         <?php
                           $roleDesc = [
                             'owner' => 'Akses Penuh Eksekutif (Profit, User Management & Sistem)',

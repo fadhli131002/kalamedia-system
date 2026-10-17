@@ -58,8 +58,59 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
   <script src="assets/js/html2pdf.bundle.min.js"></script>
+  <style>
+    @media (max-width: 768px) {
+      .kpi-grid.payroll-kpi-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+      }
+      .payroll-header-panel {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+      }
+      .payroll-header-actions {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        gap: 10px !important;
+      }
+      .payroll-header-actions .date-filter-group {
+        display: flex !important;
+        width: 100% !important;
+      }
+      .payroll-header-actions .date-filter-group .filter-btn {
+        flex: 1 !important;
+        text-align: center !important;
+      }
+      .payroll-header-actions .btn {
+        width: 100% !important;
+        justify-content: center !important;
+      }
+      .payroll-filter-bar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        padding: 12px !important;
+      }
+      .payroll-filter-bar .payroll-filter-controls {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        width: 100% !important;
+      }
+      .payroll-filter-bar select,
+      .payroll-filter-bar input {
+        width: 100% !important;
+      }
+      .payroll-search-wrapper {
+        width: 100% !important;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="app-container">
@@ -71,7 +122,7 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
       <div class="content-body">
 
         <!-- 1. KPI Breakdown Cards -->
-        <div class="kpi-grid">
+        <div class="kpi-grid payroll-kpi-grid">
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Gaji Terbayar (Bulan Ini)</span>
@@ -106,17 +157,17 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
         </div>
 
         <!-- 2. Main Payroll Container -->
-        <div class="glass-panel">
-          <div class="panel-header" style="flex-wrap: wrap; gap: 14px;">
+        <div class="glass-panel" style="overflow: visible; min-width: 0; max-width: 100%;">
+          <div class="panel-header payroll-header-panel" style="flex-wrap: wrap; gap: 14px;">
             <div>
               <h3 class="panel-title">
-                Manajemen Penggajian Karyawan & Slip Gaji
+                Manajemen Penggajian Karyawan &amp; Slip Gaji
               </h3>
               <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Kelola pembayaran take-home pay, cetak slip gaji resmi, dan bukti transfer</p>
             </div>
 
             <!-- Tab Switchers & Action Buttons -->
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div class="payroll-header-actions" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
               <div class="date-filter-group">
                 <a href="<?= url('salaries?tab=payroll') ?>" class="filter-btn <?= $tab === 'payroll' ? 'active' : '' ?>">Daftar Payroll Gaji</a>
                 <a href="<?= url('salaries?tab=employees') ?>" class="filter-btn <?= $tab === 'employees' ? 'active' : '' ?>">Master Karyawan</a>
@@ -136,8 +187,8 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
 
           <?php if ($tab === 'payroll'): ?>
             <!-- Filter & Search Bar for Payroll -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; background: #F9FAFB; padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div class="payroll-filter-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; background: #F9FAFB; padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+              <div class="payroll-filter-controls" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                 <label style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">Filter Periode:</label>
                 <select class="form-select" style="width: 150px; padding: 5px 8px; font-size: 12px;" onchange="location.href='<?= url('salaries?tab=payroll&status=' . urlencode($filterStatus)) ?>&period=' + this.value">
                   <option value="">Semua Periode</option>
@@ -154,22 +205,22 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
                 </select>
               </div>
 
-              <div>
+              <div class="payroll-search-wrapper">
                 <input type="text" id="salary-search-input" class="form-control" style="width: 240px; padding: 6px 12px; font-size: 12px;" placeholder="Cari nama atau jabatan...">
               </div>
             </div>
 
             <!-- Payroll Table -->
-            <div class="table-responsive">
-              <table class="table-custom" id="salaries-table">
+            <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
+              <table class="table-custom" id="salaries-table" style="min-width: 800px !important; width: 100%;">
                 <thead>
                   <tr>
-                    <th>Periode & Tanggal</th>
-                    <th>Nama Karyawan & Rekening</th>
-                    <th>Komponen Gaji</th>
-                    <th>Take-Home Pay</th>
-                    <th>Status</th>
-                    <th style="text-align: right;">Slip Gaji & Aksi</th>
+                    <th style="white-space: nowrap !important;">Periode &amp; Tanggal</th>
+                    <th style="white-space: nowrap !important;">Nama Karyawan &amp; Rekening</th>
+                    <th style="white-space: nowrap !important;">Komponen Gaji</th>
+                    <th style="white-space: nowrap !important;">Take-Home Pay</th>
+                    <th style="white-space: nowrap !important;">Status</th>
+                    <th style="text-align: right; white-space: nowrap !important;">Slip Gaji &amp; Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -178,17 +229,17 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
                   <?php else: ?>
                     <?php foreach ($salariesList as $s): ?>
                       <tr>
-                        <td>
+                        <td style="white-space: nowrap;">
                           <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($s['month_period']) ?></div>
                           <div style="font-size: 11px; color: var(--text-secondary);">Bayar: <?= format_date($s['payment_date']) ?></div>
                         </td>
-                        <td>
+                        <td style="white-space: nowrap;">
                           <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($s['employee_name']) ?></div>
                           <div style="font-size: 11px; color: var(--text-secondary);">
                             <?= htmlspecialchars($s['employee_position'] ?: 'Staff') ?> &bull; <?= htmlspecialchars($s['bank_name'] ?: 'BCA') ?> (<?= htmlspecialchars($s['bank_account'] ?: '-') ?>)
                           </div>
                         </td>
-                        <td>
+                        <td style="white-space: nowrap;">
                           <div style="font-size: 12px; color: #101828;">
                             Pokok: <span style="font-weight: 600;"><?= format_rupiah($s['base_salary']) ?></span>
                           </div>
@@ -197,7 +248,7 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
                             <span style="color: var(--danger-text); font-weight: 600;">- <?= format_rupiah($s['deduction']) ?></span>
                           </div>
                         </td>
-                        <td>
+                        <td style="white-space: nowrap;">
                           <div style="font-size: 15px; font-weight: 800; color: #101828;">
                             <?= format_rupiah($s['net_salary']) ?>
                           </div>
@@ -207,12 +258,12 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
                             </div>
                           <?php endif; ?>
                         </td>
-                        <td>
+                        <td style="white-space: nowrap;">
                           <span class="badge-status badge-<?= strtolower($s['status']) ?>">
                             <?= $s['status'] ?>
                           </span>
                         </td>
-                        <td style="text-align: right;">
+                        <td style="text-align: right; white-space: nowrap;">
                           <div style="display: inline-flex; gap: 6px; align-items: center;">
                             <!-- Slip Gaji Modal Trigger -->
                             <button type="button" class="btn btn-secondary btn-sm" onclick="openSlipGajiModal(<?= $s['id'] ?>)" title="Lihat & Cetak Slip Gaji">
@@ -250,19 +301,18 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
               </table>
             </div>
 
-          <?php else: ?>
             <!-- Master Karyawan Table -->
-            <div class="table-responsive">
-              <table class="table-custom" id="employees-table">
+            <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
+              <table class="table-custom" id="employees-table" style="min-width: 800px !important; width: 100%;">
                 <thead>
                   <tr>
-                    <th>Nama Karyawan</th>
-                    <th>Jabatan & Departemen</th>
-                    <th>Status Kerja</th>
-                    <th>Kontak</th>
-                    <th>Rekening Pembayaran</th>
-                    <th>Gaji Pokok Default</th>
-                    <th style="text-align: right;">Aksi</th>
+                    <th style="white-space: nowrap !important;">Nama Karyawan</th>
+                    <th style="white-space: nowrap !important;">Jabatan &amp; Departemen</th>
+                    <th style="white-space: nowrap !important;">Status Kerja</th>
+                    <th style="white-space: nowrap !important;">Kontak</th>
+                    <th style="white-space: nowrap !important;">Rekening Pembayaran</th>
+                    <th style="white-space: nowrap !important;">Gaji Pokok Default</th>
+                    <th style="text-align: right; white-space: nowrap !important;">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -271,33 +321,33 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
                   <?php else: ?>
                     <?php foreach ($employeesList as $emp): ?>
                       <tr>
-                        <td>
+                        <td style="white-space: nowrap;">
                           <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($emp['name']) ?></div>
                           <span class="badge-status badge-<?= $emp['status'] === 'Active' ? 'paid' : 'draft' ?>" style="font-size: 10px; padding: 2px 6px; margin-top: 2px;">
                             <?= $emp['status'] ?>
                           </span>
                         </td>
-                        <td>
+                        <td style="white-space: nowrap;">
                           <div style="font-weight: 600; color: #101828;"><?= htmlspecialchars($emp['position']) ?></div>
                           <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($emp['department'] ?: '-') ?></div>
                         </td>
-                        <td>
+                        <td style="white-space: nowrap;">
                           <span style="font-size: 12px; color: var(--text-secondary); background: #F2F4F7; padding: 3px 8px; border-radius: 4px; font-weight: 500;">
                             <?= htmlspecialchars($emp['employment_type'] ?: 'Full-time') ?>
                           </span>
                         </td>
-                        <td>
+                        <td style="white-space: nowrap;">
                           <div style="font-size: 12px; color: #101828;"><?= htmlspecialchars($emp['email'] ?: '-') ?></div>
                           <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($emp['phone'] ?: '-') ?></div>
                         </td>
-                        <td>
+                        <td style="white-space: nowrap;">
                           <div style="font-weight: 600; color: #101828;"><?= htmlspecialchars($emp['bank_name'] ?: 'BCA') ?></div>
                           <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($emp['bank_account'] ?: '-') ?></div>
                         </td>
-                        <td style="font-weight: 700; color: #101828;">
+                        <td style="font-weight: 700; color: #101828; white-space: nowrap;">
                           <?= format_rupiah($emp['base_salary']) ?>
                         </td>
-                        <td style="text-align: right;">
+                        <td style="text-align: right; white-space: nowrap;">
                           <div style="display: inline-flex; gap: 6px; align-items: center;">
                             <!-- Edit Employee Button -->
                             <button type="button" class="btn btn-secondary btn-sm" onclick='openEditEmployeeModal(<?= json_encode($emp, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Edit Data Karyawan" style="padding: 5px 12px; font-size: 12px; border-radius: 6px; font-weight: 600;">

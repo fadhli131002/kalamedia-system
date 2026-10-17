@@ -44,7 +44,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
   <style>
     /* Bankio Minimal Finance Design System Extensions */
     .expenses-header-row {
@@ -143,7 +143,46 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
       border: 1px solid #ECEEF5;
       border-radius: 22px;
       box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
-      overflow: hidden;
+      overflow: visible;
+    }
+    @media (max-width: 768px) {
+      .kpi-grid.expenses-kpi-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+      }
+      .expenses-header-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+      }
+      .expenses-header-row .btn-solid-dark {
+        width: 100% !important;
+        justify-content: center !important;
+      }
+      .table-toolbar-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        padding: 14px !important;
+      }
+      .toolbar-filters-group {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        width: 100% !important;
+      }
+      .search-input-wrapper {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+      .select-filter-control {
+        width: 100% !important;
+      }
+      .btn-ghost-outlined {
+        width: 100% !important;
+        justify-content: center !important;
+      }
     }
     .table-toolbar-row {
       padding: 16px 20px;
@@ -447,7 +486,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
         </div>
 
         <!-- KPI Breakdown Cards -->
-        <div class="kpi-grid" style="margin-bottom: 24px;">
+        <div class="kpi-grid expenses-kpi-grid" style="margin-bottom: 24px;">
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Fee Freelancer (Paid)</span>
@@ -486,7 +525,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
         </div>
 
         <!-- 3. Integrated Table Toolbar & Table Container (Untitled UI Card) -->
-        <div class="untitled-card">
+        <div class="untitled-card" style="overflow: visible; min-width: 0; max-width: 100%;">
           
           <!-- Toolbar Row (Level 2 Multi-Filter Bar) -->
           <div class="table-toolbar-row">
@@ -542,16 +581,16 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
 
           <?php if ($tab === 'freelancers'): ?>
             <!-- 4. Freelancer Payouts Table -->
-            <div class="table-responsive" style="margin: 0;">
-              <table class="untitled-table" id="payout-table">
+            <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; margin: 0; padding-bottom: 6px;">
+              <table class="untitled-table" id="payout-table" style="min-width: 780px !important; width: 100%;">
                 <thead>
                   <tr>
-                    <th>NAMA FREELANCER &amp; REKENING</th>
-                    <th>PROYEK &amp; KLIEN</th>
-                    <th>URAIAN PEKERJAAN</th>
-                    <th>NOMINAL FEE</th>
-                    <th>STATUS</th>
-                    <th style="text-align: right;">BUKTI &amp; AKSI</th>
+                    <th style="white-space: nowrap !important;">NAMA FREELANCER &amp; REKENING</th>
+                    <th style="white-space: nowrap !important;">PROYEK &amp; KLIEN</th>
+                    <th style="white-space: nowrap !important;">URAIAN PEKERJAAN</th>
+                    <th style="white-space: nowrap !important;">NOMINAL FEE</th>
+                    <th style="white-space: nowrap !important;">STATUS</th>
+                    <th style="text-align: right; white-space: nowrap !important;">BUKTI &amp; AKSI</th>
                   </tr>
                 </thead>
                 <tbody id="payout-tbody">
@@ -573,7 +612,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                         data-project="<?= htmlspecialchars($p['project_name']) ?>"
                         data-client="<?= htmlspecialchars($p['client_company']) ?>"
                       >
-                        <td>
+                        <td style="white-space: nowrap;">
                           <div style="font-weight: 700; color: #101828; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
                             <span><?= htmlspecialchars($p['freelancer_name']) ?></span>
                             <?php if (!empty($p['freelancer_phone'])): ?>
@@ -584,17 +623,17 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                             <?= htmlspecialchars($p['freelancer_bank'] ?: 'Bank') ?> &bull; <?= htmlspecialchars($p['freelancer_account'] ?: 'No Rekening -') ?>
                           </div>
                         </td>
-                        <td>
+                        <td style="white-space: nowrap;">
                           <div style="font-weight: 600; color: #101828;"><?= htmlspecialchars($p['project_name']) ?></div>
                           <div style="font-size: 11.5px; color: #667085; margin-top: 2px;"><?= htmlspecialchars($p['client_company']) ?></div>
                         </td>
-                        <td style="color: #475467; max-width: 240px; line-height: 1.4;">
+                        <td style="color: #475467; max-width: 240px; line-height: 1.4; white-space: normal;">
                           <?= htmlspecialchars($p['task_description']) ?>
                         </td>
                         <td style="font-weight: 700; color: #D92D20; font-size: 13.5px; white-space: nowrap;">
                           <?= format_rupiah($p['amount']) ?>
                         </td>
-                        <td>
+                        <td style="white-space: nowrap;">
                           <?php if ($p['status'] === 'Paid'): ?>
                             <span class="pill-badge pill-paid">
                               <span class="dot-indicator dot-paid"></span>
@@ -649,16 +688,16 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
 
           <?php else: ?>
             <!-- 4b. Ads Top-Up Table -->
-            <div class="table-responsive" style="margin: 0;">
-              <table class="untitled-table" id="ads-table">
+            <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; margin: 0; padding-bottom: 6px;">
+              <table class="untitled-table" id="ads-table" style="min-width: 780px !important; width: 100%;">
                 <thead>
                   <tr>
-                    <th>PLATFORM &amp; ID AKUN</th>
-                    <th>KLIEN &amp; PROYEK</th>
-                    <th>TANGGAL TOP-UP</th>
-                    <th>KETERANGAN CAMPAIGN</th>
-                    <th>NOMINAL TOP-UP</th>
-                    <th style="text-align: right;">BUKTI &amp; AKSI</th>
+                    <th style="white-space: nowrap !important;">PLATFORM &amp; ID AKUN</th>
+                    <th style="white-space: nowrap !important;">KLIEN &amp; PROYEK</th>
+                    <th style="white-space: nowrap !important;">TANGGAL TOP-UP</th>
+                    <th style="white-space: nowrap !important;">KETERANGAN CAMPAIGN</th>
+                    <th style="white-space: nowrap !important;">NOMINAL TOP-UP</th>
+                    <th style="text-align: right; white-space: nowrap !important;">BUKTI &amp; AKSI</th>
                   </tr>
                 </thead>
                 <tbody id="ads-tbody">
@@ -679,16 +718,16 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                         data-client="<?= htmlspecialchars($ad['client_company']) ?>"
                         data-project="<?= htmlspecialchars($ad['project_name'] ?: '-') ?>"
                       >
-                        <td>
+                        <td style="white-space: nowrap;">
                           <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($ad['platform']) ?></div>
                           <div style="font-size: 11.5px; color: #667085; margin-top: 2px;">ID: <?= htmlspecialchars($ad['account_id'] ?: '-') ?></div>
                         </td>
-                        <td>
+                        <td style="white-space: nowrap;">
                           <div style="font-weight: 600; color: #101828;"><?= htmlspecialchars($ad['client_company']) ?></div>
                           <div style="font-size: 11.5px; color: #667085; margin-top: 2px;"><?= htmlspecialchars($ad['project_name'] ?: '-') ?></div>
                         </td>
-                        <td style="color: #475467;"><?= format_date($ad['spent_date']) ?></td>
-                        <td style="color: #475467; max-width: 240px; line-height: 1.4;"><?= htmlspecialchars($ad['notes'] ?: '-') ?></td>
+                        <td style="color: #475467; white-space: nowrap;"><?= format_date($ad['spent_date']) ?></td>
+                        <td style="color: #475467; max-width: 240px; line-height: 1.4; white-space: normal;"><?= htmlspecialchars($ad['notes'] ?: '-') ?></td>
                         <td style="font-weight: 700; color: #D92D20; font-size: 13.5px; white-space: nowrap;">
                           <?= format_rupiah($ad['amount']) ?>
                         </td>

@@ -42,7 +42,7 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
 </head>
 <body>
   <div class="app-container">
@@ -81,7 +81,7 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
         </div>
 
         <!-- Invoices List Panel -->
-        <div class="glass-panel">
+        <div class="glass-panel" style="overflow: visible; min-width: 0; max-width: 100%;">
           <!-- Section Title & Subtitle -->
           <div style="margin-bottom: 18px;">
             <h3 style="font-size: 18px; font-weight: 700; color: #101828; margin: 0 0 4px 0; letter-spacing: -0.2px;">
@@ -108,32 +108,32 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
           </div>
 
           <!-- Invoices Data Table -->
-          <div class="table-responsive">
-            <table class="table-custom" id="invoice-table">
+          <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 8px;">
+            <table class="table-custom" id="invoice-table" style="min-width: 820px !important; width: 100%;">
               <thead>
                 <tr>
-                  <th style="white-space: nowrap;">NO. INVOICE</th>
-                  <th style="white-space: nowrap;">KLIEN & PERUSAHAAN</th>
-                  <th style="white-space: nowrap;">PROYEK TERKAIT</th>
-                  <th style="white-space: nowrap;">TANGGAL TERBIT</th>
-                  <th style="white-space: nowrap;">JATUH TEMPO</th>
-                  <th style="white-space: nowrap;">TOTAL TAGIHAN</th>
-                  <th style="white-space: nowrap;">STATUS</th>
-                  <th style="white-space: nowrap; text-align: right;">AKSI</th>
+                  <th style="white-space: nowrap !important;">NO. INVOICE</th>
+                  <th style="white-space: nowrap !important;">KLIEN &amp; PERUSAHAAN</th>
+                  <th style="white-space: nowrap !important;">PROYEK TERKAIT</th>
+                  <th style="white-space: nowrap !important;">TANGGAL TERBIT</th>
+                  <th style="white-space: nowrap !important;">JATUH TEMPO</th>
+                  <th style="white-space: nowrap !important;">TOTAL TAGIHAN</th>
+                  <th style="white-space: nowrap !important;">STATUS</th>
+                  <th style="white-space: nowrap !important; text-align: right;">AKSI</th>
                 </tr>
               </thead>
               <tbody>
                 <?php if (empty($invoices)): ?>
-                  <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 32px;">Tidak ada invoice ditemukan.</td></tr>
+                  <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 32px; white-space: nowrap !important;">Tidak ada invoice ditemukan.</td></tr>
                 <?php else: ?>
                   <?php foreach ($invoices as $inv): ?>
                     <tr>
-                      <td style="font-weight: 700; white-space: nowrap;">
+                      <td style="font-weight: 700; white-space: nowrap !important;">
                         <a href="<?= url('invoice-view?id=' . $inv['id'] . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" style="color: #101828; text-decoration: none; font-weight: 700; font-family: inherit;">
                           #<?= htmlspecialchars($inv['invoice_number']) ?>
                         </a>
                       </td>
-                      <td>
+                      <td style="white-space: nowrap !important;">
                         <?php if ($isClientUser): ?>
                           <div style="font-weight: 700; color: #101828;">
                             <span><?= htmlspecialchars($inv['client_company']) ?></span>
@@ -145,18 +145,18 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
                         <?php endif; ?>
                         <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 2px;"><?= htmlspecialchars($inv['client_name']) ?></div>
                       </td>
-                      <td style="color: var(--text-secondary); font-size: 13px;">
+                      <td style="color: var(--text-secondary); font-size: 13px; white-space: nowrap !important;">
                         <?= $inv['project_name'] ? htmlspecialchars($inv['project_name']) : '<span style="color:var(--text-muted);">-</span>' ?>
                       </td>
-                      <td style="color: var(--text-secondary); white-space: nowrap;"><?= format_date($inv['issue_date']) ?></td>
-                      <td style="color: var(--text-secondary); white-space: nowrap;"><?= format_date($inv['due_date']) ?></td>
-                      <td style="font-weight: 800; color: #101828; white-space: nowrap; font-size: 13.5px;"><?= format_rupiah($inv['total_amount']) ?></td>
-                      <td>
+                      <td style="color: var(--text-secondary); white-space: nowrap !important;"><?= format_date($inv['issue_date']) ?></td>
+                      <td style="color: var(--text-secondary); white-space: nowrap !important;"><?= format_date($inv['due_date']) ?></td>
+                      <td style="font-weight: 800; color: #101828; white-space: nowrap !important; font-size: 13.5px;"><?= format_rupiah($inv['total_amount']) ?></td>
+                      <td style="white-space: nowrap !important;">
                         <span class="badge-status badge-<?= strtolower($inv['status']) ?>">
                           <?= strtoupper($inv['status']) ?>
                         </span>
                       </td>
-                      <td style="text-align: right; white-space: nowrap;">
+                      <td style="text-align: right; white-space: nowrap !important;">
                         <div style="display: inline-flex; gap: 8px; justify-content: flex-end; align-items: center;">
                           <a href="<?= url('invoice-view?id=' . $inv['id'] . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" class="btn btn-secondary btn-sm" style="padding: 6px 12px; font-size: 12px; font-weight: 600; color: #344054; border: 1px solid #D0D5DD; background: #FFFFFF; border-radius: 8px; text-decoration: none;" title="Lihat & Unduh PDF">
                             <span>Lihat Invoice</span>

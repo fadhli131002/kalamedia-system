@@ -53,7 +53,7 @@ $projects = $db->query("
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
   <style>
     .client-filter-pill {
       background: #FFFFFF;
@@ -103,11 +103,11 @@ $projects = $db->query("
       <div class="content-body">
 
         <!-- 1. Clients Database Panel -->
-        <div class="glass-panel">
+        <div class="glass-panel" style="overflow: visible; min-width: 0; max-width: 100%;">
           <div class="panel-header" style="flex-wrap: wrap; gap: 12px;">
             <div>
               <h3 class="panel-title">
-                Database Klien & Brand Agensi
+                Database Klien &amp; Brand Agensi
               </h3>
               <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Daftar seluruh klien, masa kontrak layanan, dan alokasi tim PIC</p>
             </div>
@@ -124,19 +124,19 @@ $projects = $db->query("
             <button type="button" class="client-filter-pill" onclick="filterClientService('Kelola Sosmed', this)">Kelola Sosmed</button>
             <button type="button" class="client-filter-pill" onclick="filterClientService('Desain Eceran', this)">Desain Eceran / Satuan</button>
             <button type="button" class="client-filter-pill" onclick="filterClientService('Jasa Buat Web', this)">Jasa Buat Web</button>
-            <button type="button" class="client-filter-pill" onclick="filterClientService('Jasa Iklan', this)">Jasa Iklan Meta & Google</button>
+            <button type="button" class="client-filter-pill" onclick="filterClientService('Jasa Iklan', this)">Jasa Iklan Meta &amp; Google</button>
           </div>
 
-          <div class="table-responsive">
-            <table class="table-custom">
+          <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
+            <table class="table-custom" style="min-width: 820px !important; width: 100%;">
               <thead>
                 <tr>
-                  <th>NAMA PERUSAHAAN & PIC</th>
-                  <th>LAYANAN / JASA</th>
-                  <th>TIM PIC (PENANGGUNG JAWAB)</th>
-                  <th>MASA KONTRAK & STATUS</th>
-                  <th>TOTAL PROYEK & BIAYA</th>
-                  <th style="text-align: right; white-space: nowrap;">AKSI</th>
+                  <th style="white-space: nowrap !important;">NAMA PERUSAHAAN &amp; PIC</th>
+                  <th style="white-space: nowrap !important;">LAYANAN / JASA</th>
+                  <th style="white-space: nowrap !important;">TIM PIC (PENANGGUNG JAWAB)</th>
+                  <th style="white-space: nowrap !important;">MASA KONTRAK &amp; STATUS</th>
+                  <th style="white-space: nowrap !important;">TOTAL PROYEK &amp; BIAYA</th>
+                  <th style="text-align: right; white-space: nowrap !important;">AKSI</th>
                 </tr>
               </thead>
               <tbody id="clients-table-body">
@@ -171,7 +171,7 @@ $projects = $db->query("
                     }
                   ?>
                     <tr class="client-data-row" data-services="<?= htmlspecialchars(strtolower($c['service_type'] ?? '')) ?>">
-                      <td>
+                      <td style="white-space: nowrap;">
                         <div class="clickable-client-link" onclick="openProjectFinancialDetailModal(0, <?= $c['id'] ?>)" title="Lihat Rincian Alokasi Keuangan Klien">
                           <span style="font-size: 14px; font-weight: 800; color: #101828;"><?= htmlspecialchars($c['company']) ?></span>
                         </div>
@@ -198,7 +198,7 @@ $projects = $db->query("
                         <?php endif; ?>
                       </td>
 
-                      <td>
+                      <td style="white-space: nowrap;">
                         <?php if (empty($assignedTeam)): ?>
                           <span style="font-size: 11.5px; color: var(--text-tertiary); font-style: italic;">Belum ada PIC teralokasi</span>
                         <?php else: ?>
@@ -214,7 +214,7 @@ $projects = $db->query("
                         <?php endif; ?>
                       </td>
 
-                      <td>
+                      <td style="white-space: nowrap;">
                         <?php if ($startDate && $endDate): ?>
                           <div style="font-size: 11.5px; color: #344054; font-weight: 600; margin-bottom: 4px;">
                             <?= date('d M Y', strtotime($startDate)) ?> &ndash; <?= date('d M Y', strtotime($endDate)) ?>
@@ -244,7 +244,7 @@ $projects = $db->query("
                         <?php endif; ?>
                       </td>
 
-                      <td>
+                      <td style="white-space: nowrap;">
                         <span style="font-weight: 700; color: #101828; background: #F2F4F7; padding: 2px 6px; border-radius: 4px; font-size: 11px;">
                           <?= $c['total_projects'] ?> Proyek
                         </span>
@@ -273,11 +273,11 @@ $projects = $db->query("
         </div>
 
         <!-- 2. Projects Pipeline & Margin Tracker -->
-        <div class="glass-panel">
+        <div class="glass-panel" style="overflow: visible; min-width: 0; max-width: 100%;">
           <div class="panel-header">
             <div>
               <h3 class="panel-title">
-                Daftar Proyek & Kontrol Margin
+                Daftar Proyek &amp; Kontrol Margin
               </h3>
               <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Pantau progres nilai kontrak vs biaya produksi aktual</p>
             </div>
@@ -287,17 +287,17 @@ $projects = $db->query("
             </button>
           </div>
 
-          <div class="table-responsive">
-            <table class="table-custom">
+          <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
+            <table class="table-custom" style="min-width: 820px !important; width: 100%;">
               <thead>
                 <tr>
-                  <th>NAMA PROYEK & KLIEN</th>
-                  <th>NILAI KONTRAK</th>
-                  <th>BIAYA PRODUKSI (OUTFLOW)</th>
-                  <th>ESTIMASI PROFIT</th>
-                  <th>MARGIN AKTUAL</th>
-                  <th>STATUS</th>
-                  <th style="text-align: right; white-space: nowrap;">AKSI</th>
+                  <th style="white-space: nowrap !important;">NAMA PROYEK &amp; KLIEN</th>
+                  <th style="white-space: nowrap !important;">NILAI KONTRAK</th>
+                  <th style="white-space: nowrap !important;">BIAYA PRODUKSI (OUTFLOW)</th>
+                  <th style="white-space: nowrap !important;">ESTIMASI PROFIT</th>
+                  <th style="white-space: nowrap !important;">MARGIN AKTUAL</th>
+                  <th style="white-space: nowrap !important;">STATUS</th>
+                  <th style="text-align: right; white-space: nowrap !important;">AKSI</th>
                 </tr>
               </thead>
               <tbody>
@@ -313,28 +313,28 @@ $projects = $db->query("
                     $isOverBudget = $margin < $targetMargin;
                   ?>
                     <tr>
-                      <td>
+                      <td style="white-space: nowrap;">
                         <div class="clickable-client-link" onclick="openProjectFinancialDetailModal(<?= $p['id'] ?>, <?= $p['client_id'] ?>)" title="Lihat Rincian Alokasi Keuangan Proyek">
                           <span style="font-weight: 700; color: #101828;"><?= htmlspecialchars($p['name']) ?></span>
                         </div>
                         <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($p['client_company']) ?></div>
                       </td>
-                      <td style="font-weight: 700; color: #101828;"><?= format_rupiah($contract) ?></td>
-                      <td>
+                      <td style="font-weight: 700; color: #101828; white-space: nowrap;"><?= format_rupiah($contract) ?></td>
+                      <td style="white-space: nowrap;">
                         <div style="color: var(--danger-text); font-weight: 700;"><?= format_rupiah($prodCost) ?></div>
                         <div style="font-size: 10px; color: var(--text-muted);">Fee Freelancer: <?= format_rupiah($p['total_freelancer_cost']) ?></div>
                         <div style="font-size: 10px; color: var(--text-muted);">Ads Spend: <?= format_rupiah($p['total_ads_cost']) ?></div>
                       </td>
-                      <td style="font-weight: 700; color: <?= $profit >= 0 ? 'var(--success-text)' : 'var(--danger-text)' ?>;">
+                      <td style="font-weight: 700; color: <?= $profit >= 0 ? 'var(--success-text)' : 'var(--danger-text)' ?>; white-space: nowrap;">
                         <?= format_rupiah($profit) ?>
                       </td>
-                      <td>
+                      <td style="white-space: nowrap;">
                         <span class="badge-margin <?= $margin >= $targetMargin ? 'good' : 'bad' ?>">
                           <?= round($margin, 1) ?>%
                         </span>
                         <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Target: <?= $targetMargin ?>%</div>
                       </td>
-                      <td>
+                      <td style="white-space: nowrap;">
                         <span class="badge-status badge-<?= strtolower(str_replace(' ', '', $p['status'])) ?>">
                           <?= $p['status'] ?>
                         </span>

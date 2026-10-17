@@ -215,6 +215,26 @@ $badgeLabel = $sidebarBadge;
   </div>
 
   <script>
+    window.toggleMobileSidebar = function() {
+      var sidebar = document.getElementById('app-sidebar') || document.querySelector('.sidebar');
+      var overlay = document.getElementById('sidebar-overlay');
+      if (sidebar) sidebar.classList.toggle('open');
+      if (overlay) overlay.classList.toggle('active');
+    };
+
+    window.closeMobileSidebar = function() {
+      var sidebar = document.getElementById('app-sidebar') || document.querySelector('.sidebar');
+      var overlay = document.getElementById('sidebar-overlay');
+      if (sidebar) sidebar.classList.remove('open');
+      if (overlay) overlay.classList.remove('active');
+    };
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        window.closeMobileSidebar();
+      }
+    });
+
     (function() {
       try {
         var nav = document.getElementById('app-sidebar-nav') || document.querySelector('.sidebar-nav');

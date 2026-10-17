@@ -40,7 +40,7 @@ if ($isWorkerUser) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
   <style>
     /* Task Management & Workspace Custom Styles - Bankio Minimal Finance */
     .tasks-header-card {
@@ -575,7 +575,7 @@ if ($isWorkerUser) {
           </div>
 
           <!-- Top-Up Transactions & Proof Table Card (Automatic Sync to Client Portal) -->
-          <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+          <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05); min-width: 0; max-width: 100%; overflow: visible;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
               <div>
                 <div style="display: flex; align-items: center; gap: 8px;">
@@ -591,20 +591,20 @@ if ($isWorkerUser) {
               </button>
             </div>
 
-            <div class="table-responsive">
-              <table class="table-custom" id="table-ads-topups">
+            <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
+              <table class="table-custom" id="table-ads-topups" style="min-width: 820px; width: 100%;">
                 <thead>
                   <tr>
-                    <th>TANGGAL & PETUGAS ADS</th>
-                    <th>PROYEK & KLIEN PT</th>
-                    <th>PLATFORM</th>
-                    <th>NOMINAL SALDO DIISI</th>
-                    <th>ANGGARAN TERPASANG</th>
-                    <th>CATATAN TIM ADS</th>
-                    <th>BUKTI TRANSAKSI</th>
-                    <th>STATUS</th>
+                    <th style="min-width: 210px; white-space: nowrap;">TANGGAL & PETUGAS ADS</th>
+                    <th style="white-space: nowrap;">PROYEK & KLIEN PT</th>
+                    <th style="white-space: nowrap;">PLATFORM</th>
+                    <th style="white-space: nowrap;">NOMINAL SALDO DIISI</th>
+                    <th style="white-space: nowrap;">ANGGARAN TERPASANG</th>
+                    <th style="white-space: nowrap;">CATATAN TIM ADS</th>
+                    <th style="white-space: nowrap;">BUKTI TRANSAKSI</th>
+                    <th style="white-space: nowrap;">STATUS</th>
                     <?php if ($isAdminUser): ?>
-                      <th style="text-align: right;">AKSI</th>
+                      <th style="text-align: right; white-space: nowrap;">AKSI</th>
                     <?php endif; ?>
                   </tr>
                 </thead>
@@ -2084,35 +2084,35 @@ if ($isWorkerUser) {
 
         html += `
           <tr>
-            <td>
+            <td style="min-width: 210px; white-space: nowrap;">
               <div style="font-weight: 800; color: #101828;">${formatDate(t.transaction_date)}</div>
               <small style="color: var(--text-secondary); font-size: 11px;">Oleh: <b>${escapeHtml(t.uploader_name || 'Tim Ads')}</b></small>
             </td>
-            <td>
+            <td style="white-space: nowrap;">
               <div style="font-weight: 800; color: #101828;">${escapeHtml(t.client_company || 'Klien PT')}</div>
               <small style="color: var(--text-muted); font-size: 11px;">${escapeHtml(t.project_name || 'Proyek')}</small>
             </td>
-            <td>
+            <td style="white-space: nowrap;">
               <span class="badge" style="background: #F4F3FF; color: #5925DC; font-weight: 800; font-size: 11px;">
                 ${escapeHtml(t.platform)}
               </span>
             </td>
-            <td>
+            <td style="white-space: nowrap;">
               <span style="font-weight: 800; color: #027A48; font-size: 13.5px;">
                 Rp ${Number(t.topup_amount || 0).toLocaleString('id-ID')}
               </span>
             </td>
-            <td>
+            <td style="white-space: nowrap;">
               <span style="font-weight: 700; color: #101828;">
                 Rp ${Number(t.spend_installed || 0).toLocaleString('id-ID')}
               </span>
             </td>
             <td>
-              <div style="max-width: 200px; font-size: 12px; color: #344054; line-height: 1.4;">
+              <div style="max-width: 220px; font-size: 12px; color: #344054; line-height: 1.4; white-space: normal;">
                 ${escapeHtml(t.notes || '-')}
               </div>
             </td>
-            <td>
+            <td style="white-space: nowrap;">
               ${fileUrl ? `
                 <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('${fileUrl}', 'Bukti Isi Saldo ${escapeHtml(t.platform)} - ${escapeHtml(t.client_company || '')}')" style="font-size: 11px; font-weight: 700; padding: 4px 10px; display: inline-flex; align-items: center; gap: 4px;">
                   <span>Lihat Bukti</span>
@@ -2121,7 +2121,7 @@ if ($isWorkerUser) {
                 <span style="font-size: 11px; color: var(--text-muted); font-style: italic;">Tidak ada file</span>
               `}
             </td>
-            <td>
+            <td style="white-space: nowrap;">
               ${isVerified ? `
                 <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 10.5px; border: 1px solid #A6F4C5;">
                   ✓ Terverifikasi
@@ -2468,6 +2468,7 @@ if ($isWorkerUser) {
   </script>
 
   <?php require_once BASE_PATH . '/includes/modals.php'; ?>
+  <script src="assets/js/app.js?v=<?= time() ?>"></script>
   <script src="assets/js/invoice.js?v=<?= time() ?>"></script>
 </body>
 </html>

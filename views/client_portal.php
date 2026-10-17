@@ -234,7 +234,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.4">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.5">
   <style>
     /* Client Portal Custom Styles - Minimal Finance (Bankio) */
     .portal-hero {
@@ -860,53 +860,67 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
       }
 
       .portal-nav-tabs {
-        display: flex !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        scrollbar-width: none !important;
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         gap: 6px !important;
-        padding: 5px !important;
+        padding: 6px !important;
         margin-bottom: 16px !important;
         width: 100% !important;
-        border-radius: 12px !important;
+        border-radius: 14px !important;
+        overflow: visible !important;
+        box-sizing: border-box !important;
+      }
+      .portal-nav-tabs .portal-tab-btn:first-child {
+        grid-column: 1 / -1 !important;
       }
       .portal-tab-btn {
-        flex-shrink: 0 !important;
+        width: 100% !important;
         white-space: nowrap !important;
-        padding: 8px 14px !important;
-        font-size: 12px !important;
+        padding: 9px 10px !important;
+        font-size: 11.5px !important;
         border-radius: 9px !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        flex-shrink: unset !important;
       }
+
       .portal-filter-toolbar {
         flex-direction: column !important;
         align-items: stretch !important;
         gap: 10px !important;
         margin-bottom: 14px !important;
       }
-      .portal-filter-chips-track {
+      .portal-filter-chips-track,
+      #task-filter-chips {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
         width: 100% !important;
-        flex-wrap: nowrap !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        scrollbar-width: none !important;
-        gap: 6px !important;
-        padding-bottom: 4px !important;
+        overflow: visible !important;
+        box-sizing: border-box !important;
+        padding: 0 !important;
       }
       .portal-chip-btn,
       #task-filter-chips .filter-btn {
-        padding: 7px 13px !important;
-        font-size: 12px !important;
+        width: 100% !important;
+        padding: 8px 10px !important;
+        font-size: 11.5px !important;
         border-radius: 9px !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        flex-shrink: unset !important;
       }
       .portal-search-box {
         min-width: 100% !important;
         max-width: 100% !important;
         width: 100% !important;
+        box-sizing: border-box !important;
       }
       .portal-search-input {
         width: 100% !important;
         height: 38px !important;
         font-size: 12.5px !important;
+        box-sizing: border-box !important;
       }
     }
   </style>
@@ -1067,7 +1081,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
         <div id="tab-pane-deliverables">
           <!-- Filter Controls & Search Box (Modern Boxed Controls) -->
           <div class="portal-filter-toolbar">
-            <div class="portal-filter-chips-track touch-swipe-x" id="task-filter-chips">
+            <div class="portal-filter-chips-track" id="task-filter-chips">
               <button type="button" class="portal-chip-btn filter-btn active" onclick="filterClientTasks('all', this)">
                 <span>Semua Pekerjaan</span>
                 <span class="portal-chip-badge" id="filter-count-all">0</span>

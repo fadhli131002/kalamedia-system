@@ -2045,12 +2045,10 @@ button:active,
 
   /* Horizontal Swipeable Filter Bars */
   .date-filter-group,
-  .portal-nav-tabs,
   .workspace-tabs-bar,
   .client-filter-pill-bar,
   .touch-swipe-x,
   .segmented-control-container,
-  #task-filter-chips,
   #status-filter-group {
     display: flex !important;
     overflow-x: auto !important;
@@ -2067,18 +2065,15 @@ button:active,
   }
 
   .date-filter-group::-webkit-scrollbar,
-  .portal-nav-tabs::-webkit-scrollbar,
   .workspace-tabs-bar::-webkit-scrollbar,
   .client-filter-pill-bar::-webkit-scrollbar,
   .touch-swipe-x::-webkit-scrollbar,
   .segmented-control-container::-webkit-scrollbar,
-  #task-filter-chips::-webkit-scrollbar,
   #status-filter-group::-webkit-scrollbar {
     display: none !important;
   }
 
   .filter-btn,
-  .portal-tab-btn,
   .workspace-tab-btn,
   .client-filter-pill,
   .segmented-tab-btn {

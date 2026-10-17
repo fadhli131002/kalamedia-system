@@ -41,8 +41,8 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
   <title>Manajemen Invoice - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-3.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
 </head>
 <body>
   <div class="app-container">
@@ -53,41 +53,50 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
 
       <div class="content-body">
 
-        <!-- Summary Cards -->
+        <!-- Summary Cards (Shopeers SaaS Style) -->
         <div class="kpi-grid">
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title"><?= $isClientUser ? 'Total Tagihan Saya' : 'Total Ditagihkan' ?></span>
+              <span class="kpi-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              </span>
             </div>
             <div class="kpi-value"><?= format_rupiah($totalBilled) ?></div>
-            <div class="kpi-meta"><?= $isClientUser ? 'Akumulasi seluruh tagihan proyek' : 'Akumulasi seluruh invoice aktif' ?></div>
+            <div class="kpi-meta"><?= $isClientUser ? 'Akumulasi seluruh tagihan proyek' : 'Akumulasi invoice aktif' ?></div>
           </div>
 
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title"><?= $isClientUser ? 'Tagihan Lunas' : 'Sudah Dilunasi' ?></span>
+              <span class="kpi-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#059669" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </span>
             </div>
-            <div class="kpi-value" style="color: var(--success-text);"><?= format_rupiah($totalPaid) ?></div>
-            <div class="kpi-meta" style="color: var(--success-text); font-weight: 600;">&bull; <?= $isClientUser ? 'Pembayaran terverifikasi' : 'Dana telah diterima' ?></div>
+            <div class="kpi-value" style="color: #059669;"><?= format_rupiah($totalPaid) ?></div>
+            <div class="kpi-meta" style="color: #059669;"><?= $isClientUser ? 'Pembayaran terverifikasi' : 'Dana telah diterima' ?></div>
           </div>
 
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title"><?= $isClientUser ? 'Belum Dibayar' : 'Menunggu Pelunasan' ?></span>
+              <span class="kpi-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#B45309" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </span>
             </div>
-            <div class="kpi-value" style="color: var(--warning-text);"><?= format_rupiah($totalUnpaid) ?></div>
-            <div class="kpi-meta" style="color: var(--warning-text); font-weight: 600;">&bull; <?= $isClientUser ? 'Menunggu pembayaran' : 'Piutang belum dibayar' ?></div>
+            <div class="kpi-value" style="color: #B45309;"><?= format_rupiah($totalUnpaid) ?></div>
+            <div class="kpi-meta" style="color: #B45309;"><?= $isClientUser ? 'Menunggu pembayaran' : 'Piutang belum dibayar' ?></div>
           </div>
         </div>
 
         <!-- Invoices List Panel -->
         <div class="glass-panel" style="overflow: visible; min-width: 0; max-width: 100%;">
           <!-- Section Title & Subtitle -->
-          <div style="margin-bottom: 18px;">
-            <h3 style="font-size: 18px; font-weight: 700; color: #101828; margin: 0 0 4px 0; letter-spacing: -0.2px;">
-              <?= $isClientUser ? 'Riwayat Tagihan & Invoice Saya' : 'Daftar Tagihan & Penagihan (Invoices)' ?>
-            </h3>
-            <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">
+          <div style="margin-bottom: 16px;">
+            <h2 class="panel-title" style="font-size: 15px; font-weight: 600; color: #111827; margin: 0 0 2px 0; letter-spacing: -0.015em;">
+              <?= $isClientUser ? 'Riwayat Tagihan &amp; Invoice Saya' : 'Daftar Tagihan &amp; Penagihan (Invoices)' ?>
+            </h2>
+            <p style="font-size: 12.5px; color: #6B7280; margin: 0;">
               <?= $isClientUser ? 'Pantau status pembayaran invoice dan unduh dokumen invoice resmi PT Kala Kausa Prima' : 'Kelola invoice klien, status pembayaran & generate PDF' ?>
             </p>
           </div>

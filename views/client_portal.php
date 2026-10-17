@@ -54,10 +54,8 @@ if ($role === 'client' && $client) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Masa Kontrak Berakhir - <?= htmlspecialchars($client['company'] ?? 'Kalamedia') ?></title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
   <style>
     .expired-page {
       min-height: 100vh;
@@ -133,10 +131,8 @@ if (!$client) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Client Portal - Kalamedia</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
 </head>
 <body>
   <div class="app-container">
@@ -231,10 +227,8 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Client Portal - <?= htmlspecialchars($client['company'] ?? 'Kalamedia') ?></title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.5">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
   <style>
     /* Client Portal Custom Styles - Minimal Finance (Bankio) */
     .portal-hero {
@@ -385,77 +379,73 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
       background: #FFFAEB;
     }
 
-    /* Portal Tabs - Modern Segmented Boxed Bar */
+    /* Portal Tabs - SaaS Segmented Control Bar */
     .portal-nav-tabs {
       display: inline-flex;
-      gap: 6px;
-      background: #F1F4F9;
-      border: 1.5px solid #E2E8F0;
-      border-radius: 14px;
-      padding: 6px;
-      margin-bottom: 22px;
+      align-items: center;
+      gap: 2px;
+      background: #F3F4F6;
+      border: none;
+      border-radius: 8px;
+      padding: 3px;
+      margin-bottom: 20px;
       max-width: 100%;
       overflow-x: auto;
+      white-space: nowrap;
       scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
-      box-shadow: inset 0 1px 2px rgba(18, 24, 48, 0.04);
+      box-shadow: none;
     }
     .portal-nav-tabs::-webkit-scrollbar {
       display: none;
     }
     .portal-tab-btn {
-      padding: 9px 18px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #475467;
-      background: #FFFFFF;
-      border: 1.5px solid #E2E8F0;
-      border-radius: 10px;
+      padding: 6px 12px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #6B7280;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       white-space: nowrap;
       flex-shrink: 0;
-      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
-      transition: all 180ms cubic-bezier(0.22, 1, 0.36, 1);
+      box-shadow: none;
+      transition: all 150ms ease;
       font-family: inherit;
-      will-change: transform;
     }
     .portal-tab-btn:hover:not(.active) {
-      color: #101828;
-      background: #F8FAFC;
-      border-color: #CBD5E1;
-      transform: translateY(-1px);
-      box-shadow: 0 3px 6px rgba(16, 24, 40, 0.06);
+      color: #111827;
+      background: rgba(0, 0, 0, 0.04);
     }
     .portal-tab-btn:active {
-      transform: scale(0.97);
-      transition-duration: 90ms;
+      transform: scale(0.98);
     }
     .portal-tab-btn.active {
-      background: #5D76F5 !important;
-      color: #FFFFFF !important;
-      border-color: #5D76F5 !important;
-      box-shadow: 0 4px 14px rgba(93, 118, 245, 0.32) !important;
-      font-weight: 700;
+      background: #FFFFFF !important;
+      color: #111827 !important;
+      border: none !important;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08) !important;
+      font-weight: 600 !important;
     }
     .portal-tab-badge {
       font-size: 11px;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 999px;
-      background: #F2F4F7;
-      color: #475467;
-      line-height: 1.1;
-      transition: background 180ms ease, color 180ms ease;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: #E5E7EB;
+      color: #4B5563;
+      line-height: 1.2;
     }
     .portal-tab-btn.active .portal-tab-badge {
-      background: rgba(255, 255, 255, 0.25);
-      color: #FFFFFF;
+      background: #F3F4F6;
+      color: #111827;
     }
 
-    /* Filter & Search Toolbar (Modern Boxed Controls) */
+    /* Filter & Search Toolbar (SaaS Clean Controls) */
     .portal-filter-toolbar {
       display: flex;
       justify-content: space-between;
@@ -465,13 +455,16 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
       flex-wrap: wrap;
     }
     .portal-filter-chips-track {
-      display: flex;
-      gap: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      background: #F3F4F6;
+      border-radius: 8px;
+      padding: 3px;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       white-space: nowrap;
       scrollbar-width: none;
-      padding: 2px 2px 4px 2px;
       max-width: 100%;
     }
     .portal-filter-chips-track::-webkit-scrollbar {
@@ -479,59 +472,55 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
     }
     .portal-chip-btn,
     #task-filter-chips .filter-btn {
-      background: #FFFFFF !important;
-      border: 1.5px solid #D0D5DD !important;
-      color: #344054 !important;
-      border-radius: 10px !important;
-      padding: 8px 16px !important;
+      background: transparent !important;
+      border: none !important;
+      color: #6B7280 !important;
+      border-radius: 6px !important;
+      padding: 6px 12px !important;
       font-size: 12.5px !important;
-      font-weight: 600 !important;
+      font-weight: 500 !important;
       cursor: pointer !important;
       display: inline-flex !important;
       align-items: center !important;
-      gap: 8px !important;
+      gap: 6px !important;
       white-space: nowrap !important;
       flex-shrink: 0 !important;
-      box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04) !important;
-      transition: all 180ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+      box-shadow: none !important;
+      transition: all 150ms ease !important;
       font-family: inherit !important;
       line-height: 1.2 !important;
       text-decoration: none !important;
     }
     .portal-chip-btn:hover:not(.active),
     #task-filter-chips .filter-btn:hover:not(.active) {
-      background: #F8F9FC !important;
-      border-color: #98A2B3 !important;
-      color: #101828 !important;
-      transform: translateY(-1px) !important;
-      box-shadow: 0 3px 6px rgba(16, 24, 40, 0.06) !important;
+      background: rgba(0, 0, 0, 0.04) !important;
+      color: #111827 !important;
     }
     .portal-chip-btn:active,
     #task-filter-chips .filter-btn:active {
-      transform: scale(0.97) !important;
+      transform: scale(0.98) !important;
     }
     .portal-chip-btn.active,
     #task-filter-chips .filter-btn.active {
-      background: #5D76F5 !important;
-      border-color: #5D76F5 !important;
-      color: #FFFFFF !important;
-      font-weight: 700 !important;
-      box-shadow: 0 4px 12px rgba(93, 118, 245, 0.28) !important;
+      background: #FFFFFF !important;
+      border: none !important;
+      color: #111827 !important;
+      font-weight: 600 !important;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08) !important;
     }
     .portal-chip-badge {
       font-size: 11px;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 999px;
-      background: #F2F4F7;
-      color: #344054;
-      line-height: 1.1;
-      transition: background 180ms ease, color 180ms ease;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: #E5E7EB;
+      color: #4B5563;
+      line-height: 1.2;
     }
     .portal-chip-btn.active .portal-chip-badge,
     #task-filter-chips .filter-btn.active .portal-chip-badge {
-      background: rgba(255, 255, 255, 0.25);
-      color: #FFFFFF;
+      background: #F3F4F6;
+      color: #111827;
     }
 
     /* Search Text Box */
@@ -1017,40 +1006,42 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
           </div>
         </div>
 
-        <!-- 2. Portal Statistics Counters -->
-        <div class="portal-stats-grid">
-          <div class="portal-stat-card">
-            <div>
-              <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">TOTAL DELIVERABLES</span>
-              <div style="font-size: 22px; font-weight: 800; color: #101828; letter-spacing: -0.02em; line-height: 1.2; margin: 4px 0;" id="stat-total-tasks">0</div>
+        <!-- 2. Portal Statistics Counters (Shopeers Format) -->
+        <div class="kpi-grid portal-stats-grid">
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">Total Deliverables</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
             </div>
-            <span style="font-size: 12px; color: #6E7485;">Pekerjaan proyek aktif</span>
+            <div class="kpi-value" id="stat-total-tasks">0</div>
+            <div class="kpi-meta">Pekerjaan proyek aktif</div>
           </div>
 
-          <div class="portal-stat-card highlight">
-            <div>
-              <span style="font-size: 11px; color: #B54708; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; gap: 4px;">
-                BUTUH REVIEW KLIEN
-              </span>
-              <div style="font-size: 22px; font-weight: 800; color: #B54708; letter-spacing: -0.02em; line-height: 1.2; margin: 4px 0;" id="stat-review-tasks">0</div>
+          <div class="kpi-card" style="border-color: #FEDF89; background: #FFFAEB;">
+            <div class="kpi-header">
+              <span class="kpi-title" style="color: #B54708;">Butuh Review Klien</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B54708" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             </div>
-            <span style="font-size: 12px; color: #B54708; font-weight: 600;">Menunggu persetujuan Anda</span>
+            <div class="kpi-value" style="color: #B54708;" id="stat-review-tasks">0</div>
+            <div class="kpi-meta" style="color: #B54708;">Menunggu persetujuan Anda</div>
           </div>
 
-          <div class="portal-stat-card">
-            <div>
-              <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">SEDANG DIKERJAKAN</span>
-              <div style="font-size: 22px; font-weight: 800; color: #101828; letter-spacing: -0.02em; line-height: 1.2; margin: 4px 0;" id="stat-progress-tasks">0</div>
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">Sedang Dikerjakan</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
-            <span style="font-size: 12px; color: #6E7485;">Proses kreatif & revisi tim</span>
+            <div class="kpi-value" id="stat-progress-tasks">0</div>
+            <div class="kpi-meta">Proses kreatif & revisi tim</div>
           </div>
 
-          <div class="portal-stat-card">
-            <div>
-              <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">SELESAI & DISETUJUI</span>
-              <div style="font-size: 22px; font-weight: 800; color: #101828; letter-spacing: -0.02em; line-height: 1.2; margin: 4px 0;" id="stat-approved-tasks">0</div>
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-title">Selesai & Disetujui</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             </div>
-            <span style="font-size: 12px; color: #6E7485;">Deliverables telah final</span>
+            <div class="kpi-value" id="stat-approved-tasks">0</div>
+            <div class="kpi-meta">Deliverables telah final</div>
           </div>
         </div>
 
@@ -1101,7 +1092,9 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <div class="portal-search-box">
-              <span class="portal-search-icon">🔍</span>
+              <span class="portal-search-icon" style="display: flex; align-items: center;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </span>
               <input 
                 type="text" 
                 id="client-task-search-input" 
@@ -1115,7 +1108,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
           </div>
 
           <div style="font-size: 12px; color: #6E7485; margin: -6px 0 16px 2px; display: flex; align-items: center; gap: 6px;">
-            <span>💡</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"/></svg>
             <span>Klik pada deliverable untuk melihat detail, riwayat feedback, dan persetujuan (approve).</span>
           </div>
 
@@ -1159,7 +1152,9 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
                   <?php if (empty($clientAdsTopups)): ?>
                     <tr>
                       <td colspan="6" style="text-align: center; padding: 36px; color: var(--text-muted);">
-                        <div style="font-size: 24px; margin-bottom: 6px;">💳</div>
+                        <div style="display: flex; justify-content: center; margin-bottom: 8px;">
+                          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                        </div>
                         <b>Belum ada riwayat pengisian saldo iklan</b>
                         <p style="font-size: 12px; margin: 4px 0 0;">Bukti transfer saldo iklan yang di-upload tim Ads akan otomatis muncul di sini.</p>
                       </td>
@@ -1226,8 +1221,8 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
               </div>
             </div>
 
-            <div class="table-responsive">
-              <table class="table-custom">
+            <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
+              <table class="table-custom" style="min-width: 720px !important; width: 100%;">
                 <thead>
                   <tr>
                     <th>TANGGAL & WAKTU</th>
@@ -1346,8 +1341,8 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
               </div>
             </div>
 
-            <div class="table-responsive">
-              <table class="table-custom">
+            <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
+              <table class="table-custom" style="min-width: 720px !important; width: 100%;">
                 <thead>
                   <tr>
                     <th>PERIODE LAPORAN</th>
@@ -1643,7 +1638,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
         const isSearch = currentTaskSearchQuery && currentTaskSearchQuery.trim() !== '';
         container.innerHTML = `
           <div style="text-align: center; padding: 48px 24px; background: #FFF; border: 1.5px solid var(--border-color); border-radius: 16px; box-shadow: 0 1px 3px rgba(16,24,40,0.03);">
-            <div style="font-size: 32px; margin-bottom: 8px;">${isSearch ? '🔍' : '📋'}</div>
+            <div style="display: flex; justify-content: center; margin-bottom: 12px;">${isSearch ? '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>' : '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>'}</div>
             <h4 style="font-size: 15px; font-weight: 800; color: #101828; margin-bottom: 4px;">
               ${isSearch ? 'Tidak Ada Deliverable yang Cocok' : 'Tidak Ada Pekerjaan pada Kategori Ini'}
             </h4>
@@ -1789,7 +1784,9 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
         if (!data.success || !data.projects || data.projects.length === 0) {
           container.innerHTML = `
             <div style="text-align: center; padding: 40px; color: var(--text-muted); background: #F9FAFB; border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
-              <div style="font-size: 28px; margin-bottom: 8px;">📊</div>
+              <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              </div>
               <h4 style="font-size: 15px; font-weight: 700; color: #101828; margin-bottom: 4px;">Belum Ada Kampanye Iklan Berbayar</h4>
               <p style="font-size: 13px; margin: 0;">Saat ini belum ada kampanye ads berbayar yang aktif pada paket Anda atau data masih dalam proses setup.</p>
             </div>

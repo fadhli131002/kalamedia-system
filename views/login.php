@@ -68,9 +68,10 @@ if ($requestedContext === 'client') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
   <style>
     .login-page {
       min-height: 100vh;
@@ -78,97 +79,84 @@ if ($requestedContext === 'client') {
       align-items: center;
       justify-content: center;
       padding: 24px;
-      background: #F5F5F7;
-      background-image: 
-        radial-gradient(circle at 15% 20%, rgba(93, 118, 245, 0.08) 0%, transparent 45%), 
-        radial-gradient(circle at 85% 80%, rgba(137, 50, 224, 0.06) 0%, transparent 45%);
+      background: #F8F9FA;
       font-family: var(--font-sans);
     }
     .login-card {
       width: 100%;
-      max-width: 460px;
+      max-width: 440px;
       background: #FFFFFF;
-      border: 1px solid #ECEEF5;
-      border-radius: 24px;
-      padding: 38px 34px;
-      box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
+      border: 1px solid #EAECEF;
+      border-radius: 12px;
+      padding: 36px 32px;
+      box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
     }
     .login-tabs-wrapper {
-      background: #EEF0F6;
-      padding: 5px;
-      border-radius: 999px;
+      background: #F3F4F6;
+      padding: 3px;
+      border-radius: 8px;
       display: flex;
-      gap: 4px;
+      gap: 2px;
       margin-bottom: 24px;
-      border: 1px solid #ECEEF5;
     }
     .login-tab-btn {
       flex: 1;
       border: none;
-      padding: 9px 14px;
-      border-radius: 999px;
-      font-size: 12.5px;
-      font-weight: 600;
+      padding: 7px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
       cursor: pointer;
       background: transparent;
-      color: #6E7485;
-      transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms cubic-bezier(0.22, 1, 0.36, 1), transform 150ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease;
+      color: #6B7280;
+      transition: all 0.15s ease;
       text-align: center;
       font-family: inherit;
-      will-change: transform;
     }
     .login-tab-btn:hover:not(.active) {
-      color: #000000;
-      transform: translate3d(0, -1px, 0);
-    }
-    .login-tab-btn:active {
-      transform: scale(0.96);
-      transition-duration: 90ms;
+      color: #111827;
     }
     .login-tab-btn.active {
-      background: #5D76F5;
-      color: #FFFFFF;
-      box-shadow: 0 4px 12px rgba(93, 118, 245, 0.28);
-      font-weight: 700;
+      background: #FFFFFF;
+      color: #111827;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
+      font-weight: 600;
     }
     .login-card .form-control {
-      border-radius: 14px;
-      border: 1px solid #ECEEF5;
+      border-radius: 8px;
+      border: 1px solid #D1D5DB;
       background: #FFFFFF;
-      padding: 12px 16px;
+      padding: 9px 12px;
       font-size: 13.5px;
-      color: #000000;
-      transition: border-color 200ms ease, box-shadow 200ms ease;
+      color: #111827;
+      transition: border-color 150ms ease, box-shadow 150ms ease;
       font-family: inherit;
+      width: 100%;
+      box-sizing: border-box;
     }
     .login-card .form-control:focus {
-      border-color: #5D76F5;
-      background: #FFFFFF;
-      box-shadow: 0 0 0 4px rgba(93, 118, 245, 0.15);
+      border-color: #2563EB;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
       outline: none;
     }
     .login-card .btn-primary {
-      background: #5D76F5;
+      background: #2563EB;
       color: #FFFFFF;
-      border: 1px solid #5D76F5;
-      border-radius: 14px;
-      padding: 12px 18px;
-      font-size: 14px;
-      font-weight: 600;
-      box-shadow: 0 8px 20px -4px rgba(93, 118, 245, 0.38);
-      transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease;
+      border: none;
+      border-radius: 8px;
+      height: 38px;
+      padding: 0 16px;
+      font-size: 13.5px;
+      font-weight: 500;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+      transition: background-color 150ms ease;
       cursor: pointer;
-      will-change: transform;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
     .login-card .btn-primary:hover {
-      background: #4A63E2;
-      border-color: #4A63E2;
-      box-shadow: 0 10px 24px -4px rgba(93, 118, 245, 0.45);
-      transform: translate3d(0, -1.5px, 0);
-    }
-    .login-card .btn-primary:active {
-      transform: translate3d(0, 0.5px, 0) scale(0.96);
-      transition-duration: 90ms;
+      background: #1D4ED8;
     }
     @media (max-width: 480px) {
       .login-page {
@@ -176,14 +164,11 @@ if ($requestedContext === 'client') {
       }
       .login-card {
         padding: 24px 18px;
-        border-radius: 20px;
-        width: 100%;
-        max-width: 100%;
-        box-sizing: border-box;
+        border-radius: 12px;
       }
       .login-tab-btn {
-        padding: 8px 10px;
-        font-size: 11.5px;
+        padding: 6px 10px;
+        font-size: 12px;
       }
     }
   </style>
@@ -191,11 +176,11 @@ if ($requestedContext === 'client') {
 <body class="login-page">
 
   <div class="login-card">
-    <div class="login-brand" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 22px;">
-      <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" style="height: 56px; width: 56px; object-fit: contain; margin-bottom: 2px;">
-      <div style="font-weight: 800; font-size: 18px; color: #000000; letter-spacing: -0.3px;">PT Kala Kausa Prima</div>
-      <span style="font-size: 11px; color: #5D76F5; text-transform: uppercase; font-weight: 700; letter-spacing: 0.8px; background: rgba(93, 118, 245, 0.12); padding: 3px 12px; border-radius: 999px; border: 1px solid rgba(93, 118, 245, 0.2);">
-        Built for What’s Next
+    <div class="login-brand" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; margin-bottom: 22px;">
+      <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" style="height: 48px; width: 48px; object-fit: contain; margin-bottom: 2px;">
+      <div style="font-weight: 600; font-size: 16px; color: #111827; letter-spacing: -0.015em;">PT Kala Kausa Prima</div>
+      <span style="font-size: 11px; color: #2563EB; font-weight: 500; background: #EFF6FF; padding: 2px 8px; border-radius: 5px;">
+        Agency System
       </span>
     </div>
 
@@ -209,11 +194,11 @@ if ($requestedContext === 'client') {
       </button>
     </div>
 
-    <div style="margin-bottom: 22px; text-align: center;">
-      <h3 style="font-size: 19px; font-weight: 800; color: #000000; margin-bottom: 5px; letter-spacing: -0.3px;" id="login-title">
+    <div style="margin-bottom: 20px; text-align: center;">
+      <h3 style="font-size: 16px; font-weight: 600; color: #111827; margin-bottom: 4px; letter-spacing: -0.015em;" id="login-title">
         <?= $activeContext === 'client' ? 'Portal Klien Kalamedia' : 'Selamat Datang Kembali' ?>
       </h3>
-      <p style="font-size: 13px; color: #6E7485; margin: 0; line-height: 1.5;" id="login-subtitle">
+      <p style="font-size: 12.5px; color: #6B7280; margin: 0; line-height: 1.45;" id="login-subtitle">
         <?= $activeContext === 'client' ? 'Masuk untuk memantau progres proyek, kalender konten & laporan kampanye.' : 'Masuk ke ruang kerja internal & sistem manajemen Kalamedia Agency.' ?>
       </p>
     </div>
@@ -223,29 +208,27 @@ if ($requestedContext === 'client') {
       <input type="hidden" name="_slot" id="auth_slot_input" value="<?= $activeContext ?>">
       <input type="hidden" name="portal" id="auth_portal_input" value="<?= $activeContext ?>">
 
-      <div class="form-group" style="margin-bottom: 16px;">
-        <label class="form-label" id="label-email" style="font-weight: 600; color: #000000; margin-bottom: 6px; font-size: 12.5px; display: block;">Alamat Email</label>
+      <div class="form-group" style="margin-bottom: 14px;">
+        <label class="form-label" id="label-email" style="font-weight: 500; color: #374151; margin-bottom: 5px; font-size: 12.5px; display: block;">Alamat Email</label>
         <input type="email" name="email" id="login-email" class="form-control" placeholder="<?= $activeContext === 'client' ? 'pic@perusahaan.com' : 'nama@kalamedia.id' ?>" required autofocus>
       </div>
 
-      <div class="form-group" style="margin-bottom: 22px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-          <label class="form-label" style="margin-bottom: 0; font-weight: 600; color: #000000; font-size: 12.5px;">Kata Sandi</label>
-          <a href="javascript:void(0)" onclick="showToast('Silakan hubungi Administrator Kalamedia untuk bantuan login.', 'info')" style="font-size: 12px; color: #5D76F5; text-decoration: none; font-weight: 600;">Lupa Password?</a>
+      <div class="form-group" style="margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+          <label class="form-label" style="margin-bottom: 0; font-weight: 500; color: #374151; font-size: 12.5px;">Kata Sandi</label>
+          <a href="javascript:void(0)" onclick="showToast('Silakan hubungi Administrator Kalamedia untuk bantuan login.', 'info')" style="font-size: 12px; color: #2563EB; text-decoration: none; font-weight: 500;">Lupa Password?</a>
         </div>
         <div style="position: relative; display: flex; align-items: center;">
           <input type="password" name="password" id="login-password" class="form-control" placeholder="••••••••" required style="padding-right: 68px;">
-          <button type="button" onclick="togglePasswordVisibility('login-password', this)" style="position: absolute; right: 8px; background: #F8F9FC; border: 1px solid #ECEEF5; border-radius: 10px; padding: 5px 10px; font-size: 11px; font-weight: 700; color: #6E7485; cursor: pointer; transition: background-color 150ms ease, color 150ms ease, transform 150ms ease;">
+          <button type="button" onclick="togglePasswordVisibility('login-password', this)" style="position: absolute; right: 8px; background: #F3F4F6; border: none; border-radius: 6px; padding: 4px 8px; font-size: 11px; font-weight: 500; color: #4B5563; cursor: pointer;">
             Lihat
           </button>
         </div>
       </div>
 
-      <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px 18px; font-size: 14px;">
+      <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; height: 38px; font-size: 13.5px; font-weight: 500;">
         <span id="btn-submit-text"><?= $activeContext === 'client' ? 'Masuk ke Portal Klien' : 'Masuk ke Sistem Internal' ?></span>
       </button>
-    </form>
-  </div>
     </form>
   </div>
 

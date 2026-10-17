@@ -57,8 +57,8 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
   <title>Manajemen Gaji Karyawan (Payroll) - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-3.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
   <script src="assets/js/html2pdf.bundle.min.js"></script>
   <style>
     @media (max-width: 768px) {
@@ -79,16 +79,13 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
         gap: 10px !important;
       }
       .payroll-header-actions .date-filter-group {
-        display: flex !important;
+        display: inline-flex !important;
         width: 100% !important;
-      }
-      .payroll-header-actions .date-filter-group .filter-btn {
-        flex: 1 !important;
-        text-align: center !important;
+        overflow-x: auto !important;
       }
       .payroll-header-actions .btn {
-        width: 100% !important;
-        justify-content: center !important;
+        width: auto !important;
+        align-self: flex-start !important;
       }
       .payroll-filter-bar {
         flex-direction: column !important;
@@ -121,35 +118,47 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
 
       <div class="content-body">
 
-        <!-- 1. KPI Breakdown Cards -->
+        <!-- 1. KPI Breakdown Cards (Shopeers SaaS Style) -->
         <div class="kpi-grid payroll-kpi-grid">
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Gaji Terbayar (Bulan Ini)</span>
+              <span class="kpi-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#059669" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </span>
             </div>
-            <div class="kpi-value" style="color: var(--success-text);"><?= format_rupiah($paidSalaryMonth) ?></div>
-            <div class="kpi-meta" style="color: var(--success-text); font-weight: 600;">&bull; Sudah ditransfer ke rekening tim</div>
+            <div class="kpi-value" style="color: #059669;"><?= format_rupiah($paidSalaryMonth) ?></div>
+            <div class="kpi-meta" style="color: #059669;">Sudah ditransfer ke rekening tim</div>
           </div>
 
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Pending Gaji (Antrean)</span>
+              <span class="kpi-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#B45309" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </span>
             </div>
-            <div class="kpi-value" style="color: var(--warning-text);"><?= format_rupiah($totalPendingSalary) ?></div>
-            <div class="kpi-meta" style="color: var(--warning-text); font-weight: 600;">&bull; <?= $pendingCount ?> karyawan menunggu transfer</div>
+            <div class="kpi-value" style="color: #B45309;"><?= format_rupiah($totalPendingSalary) ?></div>
+            <div class="kpi-meta" style="color: #B45309;"><?= $pendingCount ?> staf menunggu transfer</div>
           </div>
 
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Total Karyawan Aktif</span>
+              <span class="kpi-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </span>
             </div>
-            <div class="kpi-value"><?= $activeEmployeeCount ?> Orang</div>
-            <div class="kpi-meta">Tim internal creative & tech</div>
+            <div class="kpi-value"><?= $activeEmployeeCount ?></div>
+            <div class="kpi-meta">Tim internal creative &amp; tech</div>
           </div>
 
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Total Payroll All-Time</span>
+              <span class="kpi-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><line x1="6" y1="12" x2="6.01" y2="12"/><line x1="18" y1="12" x2="18.01" y2="12"/></svg>
+              </span>
             </div>
             <div class="kpi-value"><?= format_rupiah($totalSalaryAllTime) ?></div>
             <div class="kpi-meta">Akumulasi pengeluaran gaji</div>

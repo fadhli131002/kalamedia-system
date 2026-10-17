@@ -73,59 +73,60 @@ $totalClientsCount = count($allClients);
   <title>Tim & Karyawan - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-3.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
   <style>
     .team-badge-karyawan {
-      background: rgba(93, 118, 245, 0.12);
-      color: #5D76F5;
-      border: 1px solid rgba(93, 118, 245, 0.2);
+      background: #EFF6FF;
+      color: #2563EB;
+      border: none;
       font-size: 11px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 999px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
       display: inline-flex;
       align-items: center;
       gap: 4px;
     }
     .team-badge-freelancer {
-      background: rgba(137, 50, 224, 0.12);
-      color: #8932E0;
-      border: 1px solid rgba(137, 50, 224, 0.2);
+      background: #F5F3FF;
+      color: #7C3AED;
+      border: none;
       font-size: 11px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 999px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
       display: inline-flex;
       align-items: center;
       gap: 4px;
     }
     .client-tag-pill {
-      background: #F8F9FC;
-      color: #6E7485;
+      background: #F3F4F6;
+      color: #4B5563;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 500;
       padding: 3px 8px;
-      border-radius: 8px;
+      border-radius: 6px;
       display: inline-block;
       margin: 2px 2px 2px 0;
-      border: 1px solid #ECEEF5;
+      border: none;
     }
     .service-tag {
       display: inline-flex;
       align-items: center;
       gap: 4px;
       font-size: 11px;
-      font-weight: 700;
-      padding: 2px 8px;
+      font-weight: 500;
+      padding: 3px 8px;
       border-radius: 6px;
       margin-bottom: 4px;
+      border: none;
     }
-    .service-tag-sosmed { background: #EFF8FF; color: #175CD3; border: 1px solid #B2DDFF; }
-    .service-tag-desain { background: #FDF2FA; color: #C11574; border: 1px solid #FCCEEE; }
-    .service-tag-web { background: #F4F3FF; color: #5925DC; border: 1px solid #D9D6FE; }
-    .service-tag-ads { background: #ECFDF3; color: #027A48; border: 1px solid #A6F4C5; }
-    .service-tag-default { background: #F2F4F7; color: #344054; border: 1px solid #EAECF0; }
+    .service-tag-sosmed { background: #EFF6FF; color: #2563EB; }
+    .service-tag-desain { background: #FDF2FA; color: #C11574; }
+    .service-tag-web { background: #F4F3FF; color: #5925DC; }
+    .service-tag-ads { background: #ECFDF3; color: #027A48; }
+    .service-tag-default { background: #F2F4F7; color: #344054; }
     .checkbox-clients-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -254,15 +255,6 @@ $totalClientsCount = count($allClients);
         border-radius: 18px !important;
         margin-bottom: 18px !important;
       }
-      .team-top-header-card {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 12px !important;
-      }
-      .team-top-header-card .btn-primary {
-        width: 100% !important;
-        justify-content: center !important;
-      }
       .bento-toolbar {
         flex-direction: column !important;
         align-items: stretch !important;
@@ -276,8 +268,10 @@ $totalClientsCount = count($allClients);
         -webkit-overflow-scrolling: touch !important;
         white-space: nowrap !important;
         scrollbar-width: none !important;
-        gap: 4px !important;
-        padding: 4px !important;
+        gap: 2px !important;
+        padding: 3px !important;
+        background: #F3F4F6 !important;
+        border-radius: 8px !important;
       }
       .bento-tabs-group::-webkit-scrollbar {
         display: none !important;
@@ -285,9 +279,9 @@ $totalClientsCount = count($allClients);
       .bento-tab-btn {
         flex-shrink: 0 !important;
         white-space: nowrap !important;
-        padding: 7px 14px !important;
-        font-size: 12.5px !important;
-        border-radius: 999px !important;
+        padding: 6px 12px !important;
+        font-size: 12px !important;
+        border-radius: 6px !important;
       }
       .bento-search-box {
         width: 100% !important;
@@ -296,46 +290,41 @@ $totalClientsCount = count($allClients);
       }
       .bento-search-input {
         width: 100% !important;
-        height: 40px !important;
+        height: 36px !important;
         font-size: 13px !important;
       }
     }
 
     .bento-tabs-group {
       display: inline-flex;
-      background: #EEF0F6;
-      padding: 5px;
-      border-radius: 999px;
-      gap: 4px;
-      border: 1px solid #ECEEF5;
+      background: #F3F4F6;
+      padding: 3px;
+      border-radius: 8px;
+      gap: 2px;
+      border: none;
     }
 
     .bento-tab-btn {
       background: transparent;
       border: none;
-      color: #6E7485;
-      font-size: 13px;
-      font-weight: 600;
-      padding: 8px 18px;
-      border-radius: 999px;
+      color: #6B7280;
+      font-size: 12.5px;
+      font-weight: 500;
+      padding: 6px 14px;
+      border-radius: 6px;
       cursor: pointer;
-      transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms cubic-bezier(0.22, 1, 0.36, 1), transform 150ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease;
+      transition: all 0.15s ease;
       font-family: inherit;
-      will-change: transform;
     }
     .bento-tab-btn:hover:not(.active) {
-      color: #000000;
-      transform: translate3d(0, -1px, 0);
-    }
-    .bento-tab-btn:active {
-      transform: scale(0.96);
-      transition-duration: 90ms;
+      color: #111827;
+      background: rgba(0, 0, 0, 0.04);
     }
     .bento-tab-btn.active {
-      background: #5D76F5;
-      color: #FFFFFF;
-      font-weight: 700;
-      box-shadow: 0 4px 12px rgba(93, 118, 245, 0.28);
+      background: #FFFFFF;
+      color: #111827;
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
     }
 
     .bento-search-box {
@@ -385,106 +374,100 @@ $totalClientsCount = count($allClients);
 
       <div class="content-body">
 
-        <!-- Top Header Card -->
-        <div class="team-top-header-card" style="background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 22px; padding: 24px; margin-bottom: 22px; box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <!-- Page Header Bar 1 Baris ala Shopeers SaaS -->
+        <div class="page-header-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
           <div>
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-              <span class="badge" style="background: rgba(93, 118, 245, 0.12); color: #5D76F5; font-weight: 700; font-size: 11px; border-radius: 999px; padding: 3px 10px; border: 1px solid rgba(93, 118, 245, 0.2);">
-                MANAJEMEN SDM & TALENTA
-              </span>
-              <span style="font-size: 12px; color: #949AB1;">&bull;</span>
-              <span style="font-size: 12px; color: #6E7485; font-weight: 600;">
-                Kalamedia Internal
-              </span>
-            </div>
-            <h2 style="font-size: 20px; font-weight: 800; color: #000000; margin: 0; letter-spacing: -0.3px;">
-              Tim & Karyawan Kalamedia
-            </h2>
-            <p style="font-size: 13px; color: #6E7485; margin: 4px 0 0;">
-              Kelola data staf in-house dan freelancer, rincian jobdesk dari Owner, penugasan klien/PT, serta akun akses login ke sistem.
-            </p>
+            <h1 class="page-title" style="font-size: 18px; font-weight: 600; color: #111827; letter-spacing: -0.02em; margin: 0;">Tim &amp; Karyawan</h1>
+            <p style="font-size: 12.5px; color: #6B7280; margin: 2px 0 0;">Kelola data staf in-house, freelancer, jobdesk, dan akun akses sistem</p>
           </div>
-
           <div>
-            <button type="button" class="btn btn-primary" onclick="openModal('modal-create-team-member')">
-              <span>+ Tambah Karyawan / Tim</span>
+            <button type="button" class="btn btn-primary btn-sm" onclick="openModal('modal-create-team-member')">
+              + Tambah Karyawan / Tim
             </button>
           </div>
         </div>
 
-        <!-- Top Metrics Summary (4-Column Bento Grid) -->
-        <div class="bento-metrics-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <!-- Top Metrics Summary (Shopeers 4-Column SaaS KPI Grid) -->
+        <div class="bento-metrics-grid">
           <!-- Card 1: Total Tim Aktif -->
           <div class="bento-metric-card">
-            <div>
-              <div class="metric-label">TOTAL TIM AKTIF</div>
-              <div class="metric-value">
-                <span class="metric-num"><?= $totalMembers ?></span>
-                <span class="metric-unit">Orang</span>
-              </div>
+            <div class="metric-header">
+              <span class="metric-label">Total Tim Aktif</span>
+              <span class="metric-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </span>
+            </div>
+            <div class="metric-value">
+              <span class="metric-num"><?= $totalMembers ?></span>
             </div>
             <div class="metric-subtitle">
-              <span>👥 Tim Internal & Eksternal</span>
+              <span>Tim internal &amp; eksternal</span>
             </div>
           </div>
 
           <!-- Card 2: Staf In-House -->
           <div class="bento-metric-card">
-            <div>
-              <div class="metric-label">STAF IN-HOUSE</div>
-              <div class="metric-value">
-                <span class="metric-num"><?= $karyawanCount ?></span>
-                <span class="metric-unit">Staf</span>
-              </div>
+            <div class="metric-header">
+              <span class="metric-label">Staf In-House</span>
+              <span class="metric-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </span>
+            </div>
+            <div class="metric-value">
+              <span class="metric-num"><?= $karyawanCount ?></span>
             </div>
             <div class="metric-subtitle">
-              <span>💼 Karyawan Akses Portal</span>
+              <span>Karyawan akses portal</span>
             </div>
           </div>
 
           <!-- Card 3: Freelancer -->
           <div class="bento-metric-card">
-            <div>
-              <div class="metric-label">FREELANCER</div>
-              <div class="metric-value">
-                <span class="metric-num"><?= $freelancerCount ?></span>
-                <span class="metric-unit">Talenta</span>
-              </div>
+            <div class="metric-header">
+              <span class="metric-label">Freelancer</span>
+              <span class="metric-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </span>
+            </div>
+            <div class="metric-value">
+              <span class="metric-num"><?= $freelancerCount ?></span>
             </div>
             <div class="metric-subtitle">
-              <span>⚡ Talenta Eksternal</span>
+              <span>Talenta eksternal</span>
             </div>
           </div>
 
           <!-- Card 4: Klien Terdaftar -->
           <div class="bento-metric-card">
-            <div>
-              <div class="metric-label">KLIEN TERDAFTAR</div>
-              <div class="metric-value">
-                <span class="metric-num"><?= $totalClientsCount ?></span>
-                <span class="metric-unit">Perusahaan / PT</span>
-              </div>
+            <div class="metric-header">
+              <span class="metric-label">Klien Terdaftar</span>
+              <span class="metric-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+              </span>
+            </div>
+            <div class="metric-value">
+              <span class="metric-num"><?= $totalClientsCount ?></span>
             </div>
             <div class="metric-subtitle">
-              <span>🏢 Klien Aktif</span>
+              <span>Perusahaan klien aktif</span>
             </div>
           </div>
         </div>
 
         <!-- Unified Table Toolbar & Card Wrapper (Bento Container) -->
         <div class="bento-table-card" style="overflow: visible; min-width: 0; max-width: 100%;">
-          <div style="margin-bottom: 20px;">
-            <h3 style="font-size: 18px; font-weight: 800; color: #000000; margin: 0; letter-spacing: -0.3px;">
-              Daftar Anggota Tim & Alokasi Klien
-            </h3>
-            <p style="font-size: 13px; color: #6E7485; margin: 4px 0 0;">
+          <div style="margin-bottom: 16px;">
+            <h2 class="panel-title" style="font-size: 15px; font-weight: 600; color: #111827; margin: 0; letter-spacing: -0.015em;">
+              Daftar Anggota Tim &amp; Alokasi Klien
+            </h2>
+            <p style="font-size: 12.5px; color: #6B7280; margin: 2px 0 0;">
               Daftar seluruh tim yang memiliki hak akses pengerjaan deliverables dan workspace.
             </p>
           </div>
 
           <!-- Unified Toolbar: Filter Tabs on LEFT, Search Input on RIGHT -->
           <div class="bento-toolbar">
-            <!-- Left: Filter Tabs -->
+            <!-- Left: Filter Tabs (Segmented Control 1 Baris) -->
             <div class="bento-tabs-group">
               <button type="button" class="bento-tab-btn active" onclick="filterTeamRole('all', this)">Semua</button>
               <button type="button" class="bento-tab-btn" onclick="filterTeamRole('karyawan', this)">Karyawan In-House</button>
@@ -493,7 +476,9 @@ $totalClientsCount = count($allClients);
 
             <!-- Right: Search Input -->
             <div class="bento-search-box">
-              <span class="bento-search-icon">🔍</span>
+              <span class="bento-search-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              </span>
               <input 
                 type="text" 
                 id="team-search-input" 
@@ -521,17 +506,17 @@ $totalClientsCount = count($allClients);
               <tbody id="team-table-body">
                 <tr id="search-empty-team-row" style="display: none;">
                   <td colspan="7" style="text-align: center; color: #949AB1; padding: 48px;">
-                    <div style="font-size: 26px; margin-bottom: 6px;">🔍</div>
-                    <div style="font-weight: 700; color: #000000; margin-bottom: 4px; font-size: 14px;">Tidak Ada Anggota Tim yang Cocok</div>
-                    <p style="font-size: 12.5px; color: #6E7485; margin: 0;">Silakan coba kata kunci pencarian atau filter tab lainnya.</p>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 8px; display: block;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <div style="font-weight: 600; color: #111827; margin-bottom: 2px; font-size: 13px;">Tidak Ada Anggota Tim yang Cocok</div>
+                    <p style="font-size: 12px; color: #6B7280; margin: 0;">Silakan coba kata kunci pencarian atau filter tab lainnya.</p>
                   </td>
                 </tr>
                 <?php if (empty($teamMembers)): ?>
                   <tr id="empty-team-row">
                     <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 48px;">
-                      <div style="font-size: 28px; margin-bottom: 8px;">👥</div>
-                      <div style="font-weight: 700; color: #101828; margin-bottom: 4px;">Belum Ada Anggota Tim</div>
-                      <p style="font-size: 13px; color: var(--text-secondary); margin: 0 auto 16px; max-width: 400px;">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 8px; display: block;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                      <div style="font-weight: 600; color: #111827; margin-bottom: 4px; font-size: 14px;">Belum Ada Anggota Tim</div>
+                      <p style="font-size: 12.5px; color: #6B7280; margin: 0 auto 16px; max-width: 400px;">
                         Klik tombol "+ Tambah Karyawan / Tim" di atas untuk mendaftarkan karyawan atau freelancer pertama Anda.
                       </p>
                       <button type="button" class="btn btn-primary btn-sm" onclick="openModal('modal-create-team-member')">
@@ -619,12 +604,12 @@ $totalClientsCount = count($allClients);
                         <?php endif; ?>
 
                         <?php if ($wExpired): ?>
-                          <span style="background: #FEF3F2; color: #B42318; border: 1px solid #FECDCA; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 999px;">
-                            🔴 Kontrak Berakhir
+                          <span style="background: #FEF3F2; color: #B42318; border: none; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 6px; display: inline-flex; align-items: center;">
+                            <span class="status-dot dot-red"></span> Kontrak Berakhir
                           </span>
                         <?php elseif ($wDaysLeft !== null): ?>
-                          <span style="background: #ECFDF3; color: #027A48; border: 1px solid #A6F4C5; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 999px;">
-                            🟢 Aktif • Sisa <?= $wDaysLeft ?> Hari
+                          <span style="background: #ECFDF3; color: #027A48; border: none; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 6px; display: inline-flex; align-items: center;">
+                            <span class="status-dot dot-green"></span> Aktif • Sisa <?= $wDaysLeft ?> Hari
                           </span>
                         <?php endif; ?>
                       </td>

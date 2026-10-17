@@ -178,8 +178,8 @@ $initialChartData = [
   <title>Executive Dashboard - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
 </head>
 <body>
   <div class="app-container">
@@ -190,41 +190,40 @@ $initialChartData = [
 
       <div class="content-body">
         
-        <!-- Key Performance Indicators (KPI) Cards -->
+        <!-- Key Performance Indicators (KPI) Cards - Shopeers Format -->
         <div class="kpi-grid">
           <!-- Total Revenue -->
           <div class="kpi-card">
             <div class="kpi-header">
-              <span class="kpi-title">Total Revenue (Inflow)</span>
+              <span class="kpi-title">Total Revenue</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
             <div class="kpi-value" id="kpi-revenue"><?= format_rupiah($totalRevenue) ?></div>
-            <div class="kpi-meta">
-              <span style="color: var(--success-text); font-weight: 700;">&bull; Terverifikasi</span> dari invoice lunas klien
-            </div>
+            <div class="kpi-meta">Terverifikasi dari invoice lunas</div>
           </div>
 
           <!-- Total Expense -->
           <div class="kpi-card">
             <div class="kpi-header">
-              <span class="kpi-title">Total Expense (Outflow)</span>
+              <span class="kpi-title">Total Expense</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
             <div class="kpi-value" id="kpi-expense"><?= format_rupiah($totalExpense) ?></div>
-            <div class="kpi-meta" style="font-size: 11px;">
-              Freelancer: <?= format_rupiah($totalPayouts) ?> | Ads: <?= format_rupiah($totalAds) ?> | Gaji: <?= format_rupiah($totalSalaries) ?>
-            </div>
+            <div class="kpi-meta">Freelancer, Ads &amp; Gaji</div>
           </div>
 
           <!-- Net Profit -->
           <div class="kpi-card">
             <div class="kpi-header">
-              <span class="kpi-title">Monthly Net Profit & Margin</span>
+              <span class="kpi-title">Monthly Net Profit</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
             </div>
             <div class="kpi-value" id="kpi-profit"><?= format_rupiah($netProfit) ?></div>
             <div class="kpi-meta">
               <span id="kpi-margin" class="badge-margin <?= $profitMargin >= 30 ? 'good' : ($profitMargin >= 15 ? 'warning' : 'bad') ?>">
                 Margin <?= round($profitMargin, 1) ?>%
               </span>
-              <span>Target Agensi &ge; 30%</span>
+              <span>Target &ge; 30%</span>
             </div>
           </div>
 
@@ -232,11 +231,10 @@ $initialChartData = [
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Outstanding Receivables</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
             </div>
             <div class="kpi-value" id="kpi-receivables"><?= format_rupiah($outstandingReceivables) ?></div>
-            <div class="kpi-meta">
-              <span style="color: var(--warning-text); font-weight: 700;">Piutang Klien</span> belum dilunasi
-            </div>
+            <div class="kpi-meta">Piutang klien belum lunas</div>
           </div>
         </div>
 

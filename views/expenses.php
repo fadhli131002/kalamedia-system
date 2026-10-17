@@ -43,98 +43,96 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
   <title>Pengeluaran Operasional (Outflow) - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-3.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
   <style>
     /* Bankio Minimal Finance Design System Extensions */
     .expenses-header-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
-      gap: 16px;
+      margin-bottom: 20px;
+      gap: 12px;
       flex-wrap: wrap;
     }
     .expenses-page-title {
-      font-size: 20px;
-      font-weight: 800;
-      color: #000000;
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
       margin: 0;
       line-height: 1.25;
       letter-spacing: -0.02em;
     }
     .expenses-page-subtitle {
-      font-size: 13px;
-      color: #6E7485;
-      margin-top: 4px;
+      font-size: 12.5px;
+      color: #6B7280;
+      margin-top: 2px;
       margin-bottom: 0;
     }
     .btn-solid-dark {
-      background: #5D76F5;
+      background: #2563EB;
       color: #FFFFFF;
-      border: 1px solid #5D76F5;
-      font-weight: 600;
-      font-size: 13.5px;
-      padding: 10px 18px;
-      border-radius: 14px;
+      border: none;
+      font-weight: 500;
+      font-size: 13px;
+      height: 34px;
+      padding: 0 14px;
+      border-radius: 8px;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(93, 118, 245, 0.25);
-      transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+      transition: all 0.15s ease;
       text-decoration: none;
-      will-change: transform;
     }
     .btn-solid-dark:hover {
-      background: #4A63E2;
-      border-color: #4A63E2;
+      background: #1D4ED8;
       color: #FFFFFF;
-      box-shadow: 0 8px 20px -4px rgba(93, 118, 245, 0.38);
-      transform: translate3d(0, -1.5px, 0);
     }
     .btn-solid-dark:active {
-      transform: translate3d(0, 0.5px, 0) scale(0.96);
-      transition-duration: 90ms;
+      transform: scale(0.98);
     }
     
     /* Level 1 Filter: Segmented Control Tabs */
     .segmented-control-container {
-      background: #EEF0F6;
-      border: 1px solid #ECEEF5;
-      border-radius: 999px;
-      padding: 5px;
+      background: #F3F4F6;
+      border: none;
+      border-radius: 8px;
+      padding: 3px;
       display: inline-flex;
-      gap: 4px;
-      margin-bottom: 24px;
+      gap: 2px;
+      margin-bottom: 20px;
+      max-width: 100%;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: none;
+    }
+    .segmented-control-container::-webkit-scrollbar {
+      display: none;
     }
     .segmented-tab-btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 18px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #6E7485;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #6B7280;
       text-decoration: none;
-      transition: background-color 200ms cubic-bezier(0.22, 1, 0.36, 1), color 200ms cubic-bezier(0.22, 1, 0.36, 1), transform 150ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms ease;
+      transition: all 0.15s ease;
       font-family: inherit;
-      will-change: transform;
     }
     .segmented-tab-btn:hover:not(.active) {
-      color: #000000;
-      transform: translate3d(0, -1px, 0);
-    }
-    .segmented-tab-btn:active {
-      transform: scale(0.96);
-      transition-duration: 90ms;
+      color: #111827;
+      background: rgba(0, 0, 0, 0.04);
     }
     .segmented-tab-btn.active {
-      background: #5D76F5;
-      color: #FFFFFF;
-      font-weight: 700;
-      box-shadow: 0 4px 12px rgba(93, 118, 245, 0.28);
+      background: #FFFFFF;
+      color: #111827;
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
     }
 
     /* Level 2: Integrated Table Toolbar & Container */
@@ -485,27 +483,30 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
           </div>
         </div>
 
-        <!-- KPI Breakdown Cards -->
+        <!-- KPI Breakdown Cards (Shopeers Style) -->
         <div class="kpi-grid expenses-kpi-grid" style="margin-bottom: 24px;">
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Fee Freelancer (Paid)</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
-            <div class="kpi-value" style="color: var(--danger-text);"><?= format_rupiah($totalFreelancer) ?></div>
-            <div class="kpi-meta" style="color: var(--danger-text); font-weight: 600;">&bull; Sudah ditransfer ke talenta</div>
+            <div class="kpi-value"><?= format_rupiah($totalFreelancer) ?></div>
+            <div class="kpi-meta">Sudah ditransfer ke talenta</div>
           </div>
 
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Pending Freelancer Fee</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
-            <div class="kpi-value" style="color: var(--warning-text);"><?= format_rupiah($totalPendingFreelancer) ?></div>
-            <div class="kpi-meta" style="color: var(--warning-text); font-weight: 600;">&bull; Antrean transfer belum dibayar</div>
+            <div class="kpi-value"><?= format_rupiah($totalPendingFreelancer) ?></div>
+            <div class="kpi-meta">Antrean transfer belum dibayar</div>
           </div>
 
           <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Total Ads Spend (Top-Up)</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
             <div class="kpi-value"><?= format_rupiah($totalAds) ?></div>
             <div class="kpi-meta">Meta, Google, TikTok Ads</div>

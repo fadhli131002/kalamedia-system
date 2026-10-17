@@ -856,9 +856,9 @@ window.printFreelancerVoucher = function() {
     <html>
       <head>
         <title>Voucher Pembayaran Freelancer - PT Kala Kausa Prima</title>
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
         <style>
-          body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; background: #fff; padding: 20px; color: #000; }
+          body { font-family: 'Inter', Arial, sans-serif; background: #fff; padding: 20px; color: #000; }
           @page { size: A4; margin: 15mm; }
         </style>
       </head>
@@ -1089,9 +1089,9 @@ window.printAdsVoucher = function() {
     <html>
       <head>
         <title>Voucher Top-Up Ads - PT Kala Kausa Prima</title>
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
         <style>
-          body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; background: #fff; padding: 20px; color: #000; }
+          body { font-family: 'Inter', Arial, sans-serif; background: #fff; padding: 20px; color: #000; }
           @page { size: A4; margin: 15mm; }
         </style>
       </head>

@@ -90,8 +90,8 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <title>Laporan Performance Marketing Klien - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-3.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
 </head>
 <body>
   <div class="app-container">
@@ -102,57 +102,61 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
       <div class="content-body">
 
-        <!-- 1. Top Summary KPI Grid: Full-Funnel Performance -->
+        <!-- 1. Top Summary KPI Grid: Shopeers Architecture -->
         <div class="kpi-grid">
           <!-- Total Managed Spend -->
           <div class="kpi-card">
             <div class="kpi-header">
-              <span class="kpi-title">Total Ad Spend Terkelola</span>
+              <span class="kpi-title">Total Ad Spend</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
-            <div class="kpi-value" style="color: #000000;">
+            <div class="kpi-value">
               Rp <?= number_format($totalSpend, 0, ',', '.') ?>
             </div>
-            <div class="kpi-meta" style="color: var(--text-secondary);">
-              &bull; <?= number_format($stats['total_reports'] ?? 0) ?> Dokumen Deck Terbit
+            <div class="kpi-meta">
+              <?= number_format($stats['total_reports'] ?? 0) ?> Dokumen Deck Terbit
             </div>
           </div>
 
           <!-- Total Gross Revenue / Omset -->
-          <div class="kpi-card" style="border-left: 3px solid #10B981;">
+          <div class="kpi-card">
             <div class="kpi-header">
-              <span class="kpi-title">Total Gross Revenue Dihasilkan</span>
+              <span class="kpi-title">Total Gross Revenue</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
             </div>
-            <div class="kpi-value" style="color: #047857; font-weight: 900;">
+            <div class="kpi-value">
               Rp <?= number_format($totalRevenue, 0, ',', '.') ?>
             </div>
-            <div class="kpi-meta" style="color: var(--success-text); font-weight: 700;">
-              &bull; Closing &amp; E-Commerce Sales
+            <div class="kpi-meta">
+              Closing &amp; E-Commerce Sales
             </div>
           </div>
 
           <!-- Blended ROAS Index -->
-          <div class="kpi-card" style="border-left: 3px solid #4F46E5;">
+          <div class="kpi-card">
             <div class="kpi-header">
               <span class="kpi-title">Blended ROAS Index</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
             </div>
-            <div class="kpi-value" style="color: #4F46E5; font-weight: 900;">
+            <div class="kpi-value">
               <?= number_format($blendedRoas, 2) ?>x
             </div>
-            <div class="kpi-meta" style="color: #4F46E5; font-weight: 600;">
-              &bull; Average Return on Ad Spend
+            <div class="kpi-meta">
+              Average Return on Ad Spend
             </div>
           </div>
 
           <!-- Total Conversions & CPA -->
           <div class="kpi-card">
             <div class="kpi-header">
-              <span class="kpi-title">Total Conversions &amp; CPA</span>
+              <span class="kpi-title">Total Conversions</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
-            <div class="kpi-value" style="color: var(--text-primary);">
-              <?= number_format($totalConversions) ?> <span style="font-size: 13px; font-weight: 600; color: #64748B;">Conv</span>
+            <div class="kpi-value">
+              <?= number_format($totalConversions) ?>
             </div>
-            <div class="kpi-meta" style="color: var(--text-secondary);">
-              &bull; Avg CPA: Rp <?= number_format($avgCplCpa, 0, ',', '.') ?>
+            <div class="kpi-meta">
+              Avg CPA: Rp <?= number_format($avgCplCpa, 0, ',', '.') ?>
             </div>
           </div>
         </div>
@@ -222,13 +226,15 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <?php if (empty($reports)): ?>
                   <tr>
                     <td colspan="6" style="text-align: center; padding: 48px 16px; color: var(--text-secondary);">
-                      <div style="font-size: 32px; margin-bottom: 8px;">📊</div>
-                      <div style="font-weight: 700; font-size: 15px; color: #101828;">Belum Ada Laporan Performance Marketing</div>
-                      <p style="font-size: 12.5px; margin-top: 4px;">
+                      <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                      </div>
+                      <div style="font-weight: 600; font-size: 14px; color: #111827;">Belum Ada Laporan Performance Marketing</div>
+                      <p style="font-size: 12.5px; color: #6B7280; margin-top: 4px;">
                         <?= $isClientUser ? 'Belum ada dokumen laporan performa yang diterbitkan untuk akun Anda.' : 'Mulai dengan menerbitkan laporan deck performa pertama untuk klien Anda.' ?>
                       </p>
                       <?php if (!$isClientUser && (is_owner() || is_admin())): ?>
-                        <a href="<?= url('reports-form') ?>" class="btn btn-primary btn-sm" style="margin-top: 14px; display: inline-flex;">
+                        <a href="<?= url('reports-form') ?>" class="btn btn-primary btn-sm" style="margin-top: 14px; display: inline-flex; height: 34px; padding: 0 14px; border-radius: 8px;">
                           + Buat Laporan Performance Sekarang
                         </a>
                       <?php endif; ?>
@@ -240,14 +246,14 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
                       <!-- Client Brand -->
                       <td>
                         <div style="display: flex; align-items: center; gap: 10px;">
-                          <div style="width: 36px; height: 36px; border-radius: 12px; background: linear-gradient(135deg, #5D76F5 0%, #8932E0 100%); color: #FFFFFF; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                          <div style="width: 34px; height: 34px; border-radius: 8px; background: #EFF6FF; border: 1px solid #DBEAFE; color: #2563EB; font-weight: 600; font-size: 12.5px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                             <?= strtoupper(substr($r['client_company'] ?: $r['client_name'], 0, 2)) ?>
                           </div>
                           <div>
-                            <a href="<?= url("report-deck?id={$r['id']}") ?>" style="font-weight: 700; color: #000000; text-decoration: none; font-size: 13.5px;" class="hover-underline">
+                            <a href="<?= url("report-deck?id={$r['id']}") ?>" style="font-weight: 600; color: #111827; text-decoration: none; font-size: 13px;" class="hover-underline">
                               <?= htmlspecialchars($r['client_company']) ?>
                             </a>
-                            <div style="font-size: 11px; color: var(--text-muted);">
+                            <div style="font-size: 11.5px; color: #6B7280;">
                               PIC: <?= htmlspecialchars($r['client_name']) ?>
                             </div>
                           </div>
@@ -256,20 +262,20 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                       <!-- Objective & Period -->
                       <td>
-                        <div style="font-weight: 700; color: #000000; font-size: 12.5px; margin-bottom: 2px;">
+                        <div style="font-weight: 600; color: #111827; font-size: 12.5px; margin-bottom: 3px;">
                           <?= htmlspecialchars($r['objective'] ?: 'Performance Campaign') ?>
                         </div>
-                        <span class="badge" style="background: rgba(137, 50, 224, 0.12); color: #8932E0; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px;">
+                        <span style="background: #F3F4F6; color: #374151; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 5px;">
                           <?= htmlspecialchars($r['report_period']) ?>
                         </span>
                       </td>
 
                       <!-- Spend vs Revenue -->
                       <td>
-                        <div style="font-weight: 800; color: #047857; font-size: 13px;">
+                        <div style="font-weight: 600; color: #047857; font-size: 13px;">
                           Rp <?= number_format($r['revenue'], 0, ',', '.') ?>
                         </div>
-                        <div style="font-size: 11px; color: var(--text-secondary);">
+                        <div style="font-size: 11.5px; color: #6B7280;">
                           Spend: Rp <?= number_format($r['total_ad_spend'], 0, ',', '.') ?>
                         </div>
                       </td>
@@ -277,24 +283,24 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
                       <!-- ROAS & ROI -->
                       <td>
                         <div style="display: inline-flex; align-items: baseline; gap: 4px;">
-                          <span style="font-weight: 900; color: #5D76F5; font-size: 15px;">
+                          <span style="font-weight: 700; color: #2563EB; font-size: 14px;">
                             <?= number_format($r['roas'], 2) ?>x
                           </span>
-                          <span style="font-size: 11px; font-weight: 700; color: #059669;">
+                          <span style="font-size: 11px; font-weight: 600; color: #059669;">
                             (+<?= number_format($r['roi'], 0) ?>% ROI)
                           </span>
                         </div>
-                        <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 1px;">
+                        <div style="font-size: 11px; color: #9CA3AF; margin-top: 1px;">
                           CTR: <?= number_format($r['ads_ctr'], 2) ?>%
                         </div>
                       </td>
 
                       <!-- Conversions & CPL/CPA -->
                       <td>
-                        <span style="display: inline-flex; align-items: center; background: rgba(93, 118, 245, 0.12); color: #5D76F5; font-weight: 700; font-size: 11.5px; padding: 4px 10px; border-radius: 999px;">
+                        <span style="display: inline-flex; align-items: center; background: #EFF6FF; color: #2563EB; font-weight: 600; font-size: 11.5px; padding: 3px 8px; border-radius: 6px;">
                           <?= number_format($r['total_conversions']) ?> Conv
                         </span>
-                        <div style="font-size: 10.5px; color: var(--text-muted); margin-top: 2px;">
+                        <div style="font-size: 11px; color: #9CA3AF; margin-top: 2px;">
                           Rp <?= number_format($r['cpl_cpa'], 0, ',', '.') ?> / unit
                         </div>
                       </td>

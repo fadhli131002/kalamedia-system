@@ -1,5 +1,5 @@
 // Kalamedia Progressive Web App (PWA) Service Worker
-const CACHE_NAME = 'kalamedia-pwa-v14-mobile-responsive';
+const CACHE_NAME = 'kalamedia-pwa-v16-shopeers-saas';
 const urlsToCache = [
   'assets/css/style.css',
   'assets/js/app.js',

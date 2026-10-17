@@ -146,8 +146,8 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
   <title>Admin & Finance Dashboard - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
 </head>
 <body>
   <div class="app-container">
@@ -161,23 +161,23 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
         <!-- Header Actions: Quick Actions + Excel/CSV/PDF Export -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
           <div>
-            <h2 style="font-size: 18px; font-weight: 800; color: #101828; margin: 0; letter-spacing: -0.2px;">Operational Reports & Antrean Transaksi</h2>
-            <p style="font-size: 12px; color: var(--text-secondary); margin: 3px 0 0 0;">Kelola tagihan piutang, antrean hutang operasional, dan rekonsiliasi kas</p>
+            <h2 style="font-size: 18px; font-weight: 600; color: #111827; margin: 0; letter-spacing: -0.02em;">Operational Reports & Antrean Transaksi</h2>
+            <p style="font-size: 12.5px; color: #6B7280; margin: 3px 0 0 0;">Kelola tagihan piutang, antrean hutang operasional, dan rekonsiliasi kas</p>
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <a href="api/analytics.php?action=export_excel" class="btn btn-secondary btn-sm" style="font-weight: 700;" title="Unduh spreadsheet Excel dengan format tabel & border rapi">
+            <a href="api/analytics.php?action=export_excel" class="btn btn-secondary btn-sm" style="font-weight: 500; height: 34px; padding: 0 12px; border-radius: 8px;" title="Unduh spreadsheet Excel dengan format tabel & border rapi">
               <span>Export Excel (.xls)</span>
             </a>
-            <a href="api/analytics.php?action=export_csv" class="btn btn-secondary btn-sm" style="font-weight: 700;" title="Unduh spreadsheet CSV dengan pemisah kolom otomatis">
+            <a href="api/analytics.php?action=export_csv" class="btn btn-secondary btn-sm" style="font-weight: 500; height: 34px; padding: 0 12px; border-radius: 8px;" title="Unduh spreadsheet CSV dengan pemisah kolom otomatis">
               <span>Export CSV</span>
             </a>
-            <a href="api/analytics.php?action=export_pdf" target="_blank" class="btn btn-primary btn-sm" style="font-weight: 700;" title="Buka & cetak laporan rekonsiliasi bulanan format PDF">
+            <a href="api/analytics.php?action=export_pdf" target="_blank" class="btn btn-primary btn-sm" style="font-weight: 500; height: 34px; padding: 0 14px; border-radius: 8px;" title="Buka & cetak laporan rekonsiliasi bulanan format PDF">
               <span>Cetak Laporan PDF</span>
             </a>
           </div>
         </div>
 
-        <!-- 1. Quick Action Cards (PRD 3.3 + Gaji Karyawan) -->
+        <!-- 1. Quick Action Cards -->
         <div class="quick-actions-bar">
           <div class="quick-action-card" onclick="openModal('modal-create-invoice')">
             <div>
@@ -215,42 +215,46 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
           </div>
         </div>
 
-        <!-- 2. Attention Required (Alert Cards - PRD 3.3) -->
-        <div class="alert-cards-grid">
+        <!-- 2. Operational Metrics Cards (Shopeers Style) -->
+        <div class="kpi-grid">
           <!-- Unpaid Invoices -->
-          <div class="alert-card danger-border" onclick="switchOpTab('tab-ar')" style="cursor: pointer;">
-            <div class="alert-card-info">
-              <h5>Accounts Receivable (A/R)</h5>
-              <div class="count"><?= $unpaidCount ?> Invoice Belum Lunas</div>
-              <div class="subtext">Total: <?= format_rupiah($unpaidSum) ?></div>
+          <div class="kpi-card" onclick="switchOpTab('tab-ar')" style="cursor: pointer;">
+            <div class="kpi-header">
+              <span class="kpi-title">Accounts Receivable (A/R)</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
             </div>
+            <div class="kpi-value"><?= $unpaidCount ?></div>
+            <div class="kpi-meta">Total: <?= format_rupiah($unpaidSum) ?></div>
           </div>
 
           <!-- Pending Freelancer Payouts -->
-          <div class="alert-card warning-border" onclick="switchOpTab('tab-ap')" style="cursor: pointer;">
-            <div class="alert-card-info">
-              <h5>Pending Freelancers (A/P)</h5>
-              <div class="count"><?= $pendingPayoutCount ?> Talenta</div>
-              <div class="subtext">Total: <?= format_rupiah($pendingPayoutSum) ?></div>
+          <div class="kpi-card" onclick="switchOpTab('tab-ap')" style="cursor: pointer;">
+            <div class="kpi-header">
+              <span class="kpi-title">Pending Freelancers (A/P)</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
+            <div class="kpi-value"><?= $pendingPayoutCount ?></div>
+            <div class="kpi-meta">Total: <?= format_rupiah($pendingPayoutSum) ?></div>
           </div>
 
           <!-- Pending Employee Salaries -->
-          <div class="alert-card" onclick="switchOpTab('tab-ap')" style="cursor: pointer; border-left: 4px solid #8932E0;">
-            <div class="alert-card-info">
-              <h5>Pending Gaji Tim (A/P)</h5>
-              <div class="count"><?= $pendingSalaryCount ?> Karyawan</div>
-              <div class="subtext">Total: <?= format_rupiah($pendingSalarySum) ?></div>
+          <div class="kpi-card" onclick="switchOpTab('tab-ap')" style="cursor: pointer;">
+            <div class="kpi-header">
+              <span class="kpi-title">Pending Gaji Tim (A/P)</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
+            <div class="kpi-value"><?= $pendingSalaryCount ?></div>
+            <div class="kpi-meta">Total: <?= format_rupiah($pendingSalarySum) ?></div>
           </div>
 
           <!-- Missing Receipts -->
-          <div class="alert-card info-border" onclick="switchOpTab('tab-missing')" style="cursor: pointer;">
-            <div class="alert-card-info">
-              <h5>Missing Receipt Audit</h5>
-              <div class="count"><?= $totalMissingReceipts ?> Transaksi</div>
-              <div class="subtext">Perlu unggah bukti transfer</div>
+          <div class="kpi-card" onclick="switchOpTab('tab-missing')" style="cursor: pointer;">
+            <div class="kpi-header">
+              <span class="kpi-title">Missing Receipt Audit</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
+            <div class="kpi-value"><?= $totalMissingReceipts ?></div>
+            <div class="kpi-meta">Perlu unggah bukti transfer</div>
           </div>
         </div>
 

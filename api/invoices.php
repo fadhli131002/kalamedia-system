@@ -478,11 +478,11 @@ if ($action === 'download_pdf') {
       <title><?= htmlspecialchars($invoice['invoice_number']) ?> - PT Kala Kausa Prima</title>
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
       <link rel="stylesheet" href="../assets/css/invoice.css">
       <script src="../assets/js/html2pdf.bundle.min.js"></script>
       <style>
-        body { margin: 0; background: #F1F5F9; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { margin: 0; background: #F1F5F9; font-family: 'Inter', sans-serif; }
         .auto-download-notice {
           position: fixed; top: 15px; left: 50%; transform: translateX(-50%);
           background: #0F172A; color: #FFF; padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 999;

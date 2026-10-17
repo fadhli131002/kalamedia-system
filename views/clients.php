@@ -52,46 +52,8 @@ $projects = $db->query("
   <title>Database Klien & Proyek - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-3.0">
-  <style>
-    .client-filter-pill {
-      background: #FFFFFF;
-      border: 1px solid #D0D5DD;
-      color: #344054;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 6px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-    .client-filter-pill:hover {
-      background: #F9FAFB;
-      border-color: #98A2B3;
-    }
-    .client-filter-pill.active {
-      background: linear-gradient(135deg, #5D76F5 0%, #8932E0 100%);
-      color: #FFFFFF;
-      border-color: transparent;
-      box-shadow: 0 2px 6px rgba(93, 118, 245, 0.35);
-    }
-    .service-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 6px;
-      margin: 2px 2px 2px 0;
-    }
-    .service-tag-sosmed { background: #EFF8FF; color: #175CD3; border: 1px solid #B2DDFF; }
-    .service-tag-desain { background: #FDF2FA; color: #C11574; border: 1px solid #FCCEEE; }
-    .service-tag-web { background: #F4F3FF; color: #5925DC; border: 1px solid #D9D6FE; }
-    .service-tag-ads { background: #ECFDF3; color: #027A48; border: 1px solid #A6F4C5; }
-    .service-tag-default { background: #F2F4F7; color: #344054; border: 1px solid #EAECF0; }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
 </head>
 <body>
   <div class="app-container">
@@ -104,27 +66,34 @@ $projects = $db->query("
 
         <!-- 1. Clients Database Panel -->
         <div class="glass-panel" style="overflow: visible; min-width: 0; max-width: 100%;">
-          <div class="panel-header" style="flex-wrap: wrap; gap: 12px;">
-            <div>
-              <h3 class="panel-title">
-                Database Klien &amp; Brand Agensi
-              </h3>
-              <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Daftar seluruh klien, masa kontrak layanan, dan alokasi tim PIC</p>
+          <div class="card-toolbar-saas">
+            <div class="card-toolbar-header-row">
+              <div>
+                <h2 class="panel-title" style="margin: 0; font-size: 15px; font-weight: 600; color: #111827; letter-spacing: -0.015em;">
+                  Database Klien &amp; Brand Agensi
+                </h2>
+                <p class="panel-subtitle" style="font-size: 12.5px; color: #6B7280; margin: 2px 0 0;">Daftar seluruh klien, masa kontrak layanan, dan alokasi tim PIC</p>
+              </div>
+
+              <button type="button" class="btn btn-primary btn-sm mobile-only-btn" onclick="openModal('modal-create-client')">
+                + Tambah Klien Baru
+              </button>
             </div>
 
-            <button class="btn btn-primary btn-sm" onclick="openModal('modal-create-client')">
-              + Tambah Klien Baru
-            </button>
-          </div>
+            <div class="card-toolbar-filter-row">
+              <!-- Filter Pills Berdasarkan 4 Jasa Kalamedia (Clean Segmented Control 1 Baris) -->
+              <div class="client-filter-pill-bar">
+                <button type="button" class="client-filter-pill active" onclick="filterClientService('all', this)">Semua Jasa</button>
+                <button type="button" class="client-filter-pill" onclick="filterClientService('Kelola Sosmed', this)">Kelola Sosmed</button>
+                <button type="button" class="client-filter-pill" onclick="filterClientService('Desain Eceran', this)">Desain Eceran / Satuan</button>
+                <button type="button" class="client-filter-pill" onclick="filterClientService('Jasa Buat Web', this)">Jasa Buat Web</button>
+                <button type="button" class="client-filter-pill" onclick="filterClientService('Jasa Iklan', this)">Jasa Iklan Meta &amp; Google</button>
+              </div>
 
-          <!-- Filter Pills Berdasarkan 4 Jasa Kalamedia -->
-          <div class="client-filter-pill-bar touch-swipe-x" style="display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 16px; align-items: center;">
-            <span style="font-size: 11.5px; font-weight: 700; color: #6E7485; text-transform: uppercase; letter-spacing: 0.5px;">Sortir Jasa:</span>
-            <button type="button" class="client-filter-pill active" onclick="filterClientService('all', this)">Semua Jasa</button>
-            <button type="button" class="client-filter-pill" onclick="filterClientService('Kelola Sosmed', this)">Kelola Sosmed</button>
-            <button type="button" class="client-filter-pill" onclick="filterClientService('Desain Eceran', this)">Desain Eceran / Satuan</button>
-            <button type="button" class="client-filter-pill" onclick="filterClientService('Jasa Buat Web', this)">Jasa Buat Web</button>
-            <button type="button" class="client-filter-pill" onclick="filterClientService('Jasa Iklan', this)">Jasa Iklan Meta &amp; Google</button>
+              <button type="button" class="btn btn-primary btn-sm desktop-only-btn" onclick="openModal('modal-create-client')">
+                + Tambah Klien Baru
+              </button>
+            </div>
           </div>
 
           <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
@@ -142,9 +111,9 @@ $projects = $db->query("
               <tbody id="clients-table-body">
                 <tr id="empty-filtered-clients" style="display: none;">
                   <td colspan="6" style="text-align: center; color: #949AB1; padding: 40px;">
-                    <div style="font-size: 24px; margin-bottom: 6px;">🔍</div>
-                    <div style="font-weight: 700; color: #101828;">Tidak Ada Klien pada Kategori Jasa Ini</div>
-                    <div style="font-size: 12px; color: #6E7485;">Pilih "Semua Jasa" untuk melihat seluruh klien.</div>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 8px auto; display: block;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <div style="font-weight: 600; color: #111827; font-size: 13px;">Tidak Ada Klien pada Kategori Jasa Ini</div>
+                    <div style="font-size: 12px; color: #6B7280; margin-top: 2px;">Pilih "Semua Jasa" untuk melihat seluruh klien.</div>
                   </td>
                 </tr>
                 <?php if (empty($clients)): ?>
@@ -225,17 +194,17 @@ $projects = $db->query("
 
                         <?php if ($isExpired): ?>
                           <div style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                            <span style="background: #FEF3F2; color: #B42318; border: 1px solid #FECDCA; font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 999px;">
-                              🔴 Kontrak Berakhir
+                            <span style="background: #FEF3F2; color: #B42318; border: none; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center;">
+                              <span class="status-dot dot-red"></span> Kontrak Berakhir
                             </span>
-                            <button type="button" class="btn btn-sm" onclick='openRenewClientModal(<?= json_encode($c, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' style="background: #027A48; color: #FFF; border: none; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; cursor: pointer;">
+                            <button type="button" class="btn btn-sm" onclick='openRenewClientModal(<?= json_encode($c, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' style="background: #027A48; color: #FFF; border: none; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; cursor: pointer;">
                               + Perpanjang Kontrak
                             </button>
                           </div>
                         <?php else: ?>
                           <div style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                            <span style="background: #ECFDF3; color: #027A48; border: 1px solid #A6F4C5; font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 999px;">
-                              🟢 Aktif <?= $daysRemaining !== null ? "• Sisa {$daysRemaining} Hari" : '' ?>
+                            <span style="background: #ECFDF3; color: #027A48; border: none; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center;">
+                              <span class="status-dot dot-green"></span> Aktif <?= $daysRemaining !== null ? "• Sisa {$daysRemaining} Hari" : '' ?>
                             </span>
                             <button type="button" class="btn btn-secondary btn-sm" onclick='openRenewClientModal(<?= json_encode($c, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' style="font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px;">
                               Perpanjang

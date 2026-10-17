@@ -39,8 +39,8 @@ if ($isWorkerUser) {
   <title>Manajemen Tugas Tim - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-3.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
   <style>
     /* Task Management & Workspace Custom Styles - Bankio Minimal Finance */
     .mobile-text { display: none; }
@@ -63,50 +63,52 @@ if ($isWorkerUser) {
     /* Workspace Tabs Bar - Modern Segmented Boxed Bar */
     .workspace-tabs-bar {
       display: inline-flex;
-      gap: 6px;
-      margin-bottom: 22px;
-      background: #F1F4F9;
-      border: 1.5px solid #E2E8F0;
-      padding: 6px;
-      border-radius: 14px;
+      gap: 2px;
+      margin-bottom: 20px;
+      background: #F3F4F6;
+      border: none;
+      padding: 3px;
+      border-radius: 8px;
       max-width: 100%;
-      box-shadow: inset 0 1px 2px rgba(18, 24, 48, 0.04);
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: none;
+    }
+    .workspace-tabs-bar::-webkit-scrollbar {
+      display: none;
     }
     .workspace-tab-btn {
-      padding: 9px 18px;
-      font-size: 13px;
-      font-weight: 600;
-      color: #475467;
-      background: #FFFFFF;
-      border: 1.5px solid #E2E8F0;
-      border-radius: 10px;
+      padding: 6px 14px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: #6B7280;
+      background: transparent;
+      border: none;
+      border-radius: 6px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       white-space: nowrap;
-      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
-      transition: all 180ms cubic-bezier(0.22, 1, 0.36, 1);
+      box-shadow: none;
+      transition: all 0.15s ease;
       font-family: inherit;
-      will-change: transform;
     }
     .workspace-tab-btn:hover:not(.active) {
-      color: #101828;
-      background: #F8FAFC;
-      border-color: #CBD5E1;
-      transform: translateY(-1px);
-      box-shadow: 0 3px 6px rgba(16, 24, 40, 0.06);
+      color: #111827;
+      background: rgba(0, 0, 0, 0.04);
+      transform: none;
+      box-shadow: none;
     }
     .workspace-tab-btn:active {
-      transform: scale(0.97);
-      transition-duration: 90ms;
+      transform: scale(0.98);
     }
     .workspace-tab-btn.active {
-      background: #5D76F5 !important;
-      color: #FFFFFF !important;
-      border-color: #5D76F5 !important;
-      font-weight: 700;
-      box-shadow: 0 4px 14px rgba(93, 118, 245, 0.32) !important;
+      background: #FFFFFF !important;
+      color: #111827 !important;
+      border: none !important;
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08) !important;
     }
 
     .kpi-row {
@@ -189,97 +191,97 @@ if ($isWorkerUser) {
       font-weight: 500;
     }
     .task-services-track {
-      display: flex;
-      gap: 8px;
+      display: inline-flex;
+      gap: 2px;
       align-items: center;
       overflow-x: auto;
       flex-wrap: nowrap;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
-      padding-bottom: 2px;
+      background: #F3F4F6;
+      padding: 3px;
+      border-radius: 8px;
       max-width: 100%;
     }
     .task-services-track::-webkit-scrollbar {
       display: none;
     }
     .task-service-pill {
-      background: #FFFFFF;
-      border: 1.5px solid #D0D5DD;
-      color: #344054;
-      border-radius: 10px;
-      padding: 7px 16px;
+      background: transparent;
+      border: none;
+      color: #6B7280;
+      border-radius: 6px;
+      padding: 6px 12px;
       font-size: 12.5px;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       white-space: nowrap;
       flex-shrink: 0;
-      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
-      transition: all 180ms cubic-bezier(0.22, 1, 0.36, 1);
+      box-shadow: none;
+      transition: all 0.15s ease;
       font-family: inherit;
       line-height: 1.2;
     }
     .task-service-pill:hover:not(.active) {
-      background: #F8FAFC;
-      border-color: #98A2B3;
-      color: #101828;
-      transform: translateY(-1px);
-      box-shadow: 0 3px 6px rgba(16, 24, 40, 0.06);
+      background: rgba(0, 0, 0, 0.04);
+      color: #111827;
+      transform: none;
+      box-shadow: none;
     }
     .task-service-pill:active {
-      transform: scale(0.97);
+      transform: scale(0.98);
     }
     .task-service-pill.active {
-      background: #5D76F5 !important;
-      border-color: #5D76F5 !important;
-      color: #FFFFFF !important;
-      font-weight: 700;
-      box-shadow: 0 4px 12px rgba(93, 118, 245, 0.28) !important;
+      background: #FFFFFF !important;
+      border: none !important;
+      color: #111827 !important;
+      font-weight: 600;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08) !important;
     }
 
     .task-status-grid {
-      display: flex;
-      gap: 8px;
+      display: inline-flex;
+      gap: 2px;
       align-items: center;
-      flex-wrap: wrap;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      background: #F3F4F6;
+      padding: 3px;
+      border-radius: 8px;
+      max-width: 100%;
+      scrollbar-width: none;
+    }
+    .task-status-grid::-webkit-scrollbar {
+      display: none;
     }
     .task-status-grid .filter-btn {
-      background: #FFFFFF !important;
-      border: 1.5px solid #D0D5DD !important;
-      color: #344054 !important;
-      border-radius: 10px !important;
-      padding: 7px 16px !important;
+      background: transparent !important;
+      border: none !important;
+      color: #6B7280 !important;
+      border-radius: 6px !important;
+      padding: 6px 12px !important;
       font-size: 12.5px !important;
-      font-weight: 600 !important;
+      font-weight: 500 !important;
       cursor: pointer !important;
       display: inline-flex !important;
       align-items: center !important;
       gap: 6px !important;
       white-space: nowrap !important;
-      flex-shrink: 0 !important;
-      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04) !important;
-      transition: all 180ms cubic-bezier(0.22, 1, 0.36, 1) !important;
-      font-family: inherit !important;
-      line-height: 1.2 !important;
+      transition: all 0.15s ease !important;
     }
     .task-status-grid .filter-btn:hover:not(.active) {
-      background: #F8FAFC !important;
-      border-color: #98A2B3 !important;
-      color: #101828 !important;
-      transform: translateY(-1px) !important;
-      box-shadow: 0 3px 6px rgba(16, 24, 40, 0.06) !important;
-    }
-    .task-status-grid .filter-btn:active {
-      transform: scale(0.97) !important;
+      background: rgba(0, 0, 0, 0.04) !important;
+      color: #111827 !important;
     }
     .task-status-grid .filter-btn.active {
-      background: #5D76F5 !important;
-      border-color: #5D76F5 !important;
-      color: #FFFFFF !important;
-      font-weight: 700 !important;
-      box-shadow: 0 4px 12px rgba(93, 118, 245, 0.28) !important;
+      background: #FFFFFF !important;
+      border: none !important;
+      color: #111827 !important;
+      font-weight: 600 !important;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08) !important;
     }
 
     .task-bottom-toolbar {
@@ -838,42 +840,87 @@ if ($isWorkerUser) {
             </div>
           <?php endif; ?>
 
-          <!-- KPI Metrics Row -->
+          <!-- KPI Metrics Row (Shopeers SaaS Style) -->
           <div class="kpi-row">
             <div class="kpi-tile">
-              <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">TOTAL DELIVERABLES</span>
-              <div style="font-size: 24px; font-weight: 800; color: #101828; letter-spacing: -0.02em; line-height: 1.2;" id="kpi-total">0</div>
-              <span style="font-size: 12px; color: #6E7485;">Pekerjaan aktif</span>
+              <div class="metric-header">
+                <span class="metric-label">Total Deliverables</span>
+                <span class="metric-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                </span>
+              </div>
+              <div class="metric-value">
+                <span class="metric-num" id="kpi-total">0</span>
+              </div>
+              <div class="metric-subtitle">
+                <span>Pekerjaan aktif</span>
+              </div>
             </div>
 
             <div class="kpi-tile urgent">
-              <span style="font-size: 11px; color: #B42318; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">BUTUH REVISI</span>
-              <div style="font-size: 24px; font-weight: 800; color: #B42318; letter-spacing: -0.02em; line-height: 1.2;" id="kpi-revision">0</div>
-              <span style="font-size: 12px; color: #B42318; font-weight: 600;">Permintaan klien</span>
+              <div class="metric-header">
+                <span class="metric-label" style="color: #B42318;">Butuh Revisi</span>
+                <span class="metric-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="#B42318" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </span>
+              </div>
+              <div class="metric-value">
+                <span class="metric-num" id="kpi-revision" style="color: #B42318;">0</span>
+              </div>
+              <div class="metric-subtitle">
+                <span style="color: #B42318;">Permintaan klien</span>
+              </div>
             </div>
 
             <div class="kpi-tile review">
-              <span style="font-size: 11px; color: #B54708; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">REVIEW KLIEN</span>
-              <div style="font-size: 24px; font-weight: 800; color: #B54708; letter-spacing: -0.02em; line-height: 1.2;" id="kpi-review">0</div>
-              <span style="font-size: 12px; color: #B54708; font-weight: 600;">Menunggu approval</span>
+              <div class="metric-header">
+                <span class="metric-label" style="color: #B54708;">Review Klien</span>
+                <span class="metric-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="#B54708" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                </span>
+              </div>
+              <div class="metric-value">
+                <span class="metric-num" id="kpi-review" style="color: #B54708;">0</span>
+              </div>
+              <div class="metric-subtitle">
+                <span style="color: #B54708;">Menunggu approval</span>
+              </div>
             </div>
 
             <div class="kpi-tile">
-              <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">SEDANG DIKERJAKAN</span>
-              <div style="font-size: 24px; font-weight: 800; color: #101828; letter-spacing: -0.02em; line-height: 1.2;" id="kpi-progress">0</div>
-              <span style="font-size: 12px; color: #6E7485;">Tahap produksi</span>
+              <div class="metric-header">
+                <span class="metric-label">Sedang Dikerjakan</span>
+                <span class="metric-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </span>
+              </div>
+              <div class="metric-value">
+                <span class="metric-num" id="kpi-progress">0</span>
+              </div>
+              <div class="metric-subtitle">
+                <span>Tahap produksi</span>
+              </div>
             </div>
 
             <div class="kpi-tile">
-              <span style="font-size: 11px; color: #949AB1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;">SELESAI & DISETUJUI</span>
-              <div style="font-size: 24px; font-weight: 800; color: #101828; letter-spacing: -0.02em; line-height: 1.2;" id="kpi-approved">0</div>
-              <span style="font-size: 12px; color: #6E7485;">Hasil final</span>
+              <div class="metric-header">
+                <span class="metric-label">Selesai &amp; Disetujui</span>
+                <span class="metric-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="#059669" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </span>
+              </div>
+              <div class="metric-value">
+                <span class="metric-num" id="kpi-approved">0</span>
+              </div>
+              <div class="metric-subtitle">
+                <span>Hasil final rampung</span>
+              </div>
             </div>
           </div>
 
           <!-- Filter Panel -->
           <div class="filter-panel">
-            <!-- Row 1: Kategori Jasa (Smooth Touch Track) -->
+            <!-- Row 1: Kategori Jasa (Clean Segmented Control 1 Baris) -->
             <div class="task-services-section">
               <div class="task-filter-header-bar">
                 <span class="task-filter-title">Kategori Layanan</span>
@@ -898,7 +945,7 @@ if ($isWorkerUser) {
               </div>
             </div>
 
-            <!-- Row 2: Status Pekerjaan (2-Column Grid on Mobile) -->
+            <!-- Row 2: Status Pekerjaan (Clean Segmented Control 1 Baris) -->
             <div class="task-status-section">
               <div class="task-filter-header-bar">
                 <span class="task-filter-title">Status Pekerjaan</span>
@@ -926,7 +973,9 @@ if ($isWorkerUser) {
                 <?php endif; ?>
 
                 <div class="task-search-wrap">
-                  <span class="task-search-icon">🔍</span>
+                  <span class="task-search-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  </span>
                   <input type="text" id="task-search-input" class="form-control task-search-input" placeholder="Cari deliverables, klien, PIC..." oninput="handleTaskSearch()">
                   <button type="button" class="task-search-clear" id="task-search-clear-btn" style="display: none;" onclick="clearTaskSearch()">&times;</button>
                 </div>
@@ -948,41 +997,32 @@ if ($isWorkerUser) {
 
         <!-- SECTION 2: Ads Budget & Spend Tracker -->
         <div id="section-ads-content" style="display: none;">
-          <!-- Ads Tracker Header & Controls -->
-          <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 22px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+          <!-- Ads Tracker Header & Controls (Clean SaaS Header) -->
+          <div class="page-header-bar" style="background: #FFFFFF; border: 1px solid #EAECEF; border-radius: 12px; padding: 18px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: 0 1px 2px rgba(16,24,40,0.04);">
             <div>
-              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                <span class="badge" style="background: #F4F3FF; color: #5925DC; border: 1px solid #D9D6FE; font-weight: 800; font-size: 11px;">
-                  ADS BUDGET & SPEND TRACKER
-                </span>
-                <span style="font-size: 12px; color: var(--text-muted);">&bull;</span>
-                <span style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">
-                  Meta Ads &bull; Google Ads &bull; TikTok Ads
-                </span>
-              </div>
-              <h3 style="font-size: 18px; font-weight: 800; color: #101828; margin: 0;">
-                Pelacakan Dana & Koordinasi Anggaran Iklan
-              </h3>
-              <p style="font-size: 13px; color: var(--text-secondary); margin: 3px 0 0;">
+              <h2 class="panel-title" style="font-size: 16px; font-weight: 600; color: #111827; margin: 0; letter-spacing: -0.015em;">
+                Pelacakan Dana &amp; Anggaran Iklan (Ads Tracker)
+              </h2>
+              <p style="font-size: 12.5px; color: #6B7280; margin: 3px 0 0;">
                 <?= $isAdminUser 
                   ? 'Kelola pagu saldo ads proyek, pantau realisasi belanja iklan oleh tim Ads, dan kawal margin agensi secara presisi.' 
                   : 'Lihat pagu saldo ads yang dialokasikan Owner untuk setiap proyek dan laporkan nominal anggaran yang sudah terpasang di dashboard.' ?>
               </p>
             </div>
 
-            <div class="ads-tracker-header-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
-              <button class="btn btn-primary btn-sm" onclick="openUploadAdsTopupModal()" style="font-weight: 700; background: #027A48; border-color: #027A48;">
-                <span>+ Upload Bukti Isi Saldo / Transaksi Ads</span>
+            <div class="ads-tracker-header-actions" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+              <button type="button" class="btn btn-primary btn-sm" onclick="openUploadAdsTopupModal()" style="font-weight: 500; background: #059669; border-color: #059669;">
+                <span>+ Upload Bukti Topup Ads</span>
               </button>
               <?php if ($isAdminUser): ?>
-                <button class="btn btn-secondary btn-sm" onclick="openAllocateAdsModal()" style="font-weight: 700;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openAllocateAdsModal()">
                   <span>+ Atur Pagu Saldo Ads</span>
                 </button>
               <?php endif; ?>
-              <button class="btn btn-secondary btn-sm" onclick="openLogAdsSpendModal()" style="font-weight: 700;">
-                <span>+ Update Anggaran Terpasang & Bukti</span>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openLogAdsSpendModal()">
+                <span>+ Update Anggaran</span>
               </button>
-              <button class="btn btn-secondary btn-sm" onclick="loadAdsTrackerData()">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="loadAdsTrackerData()">
                 <span>Segarkan</span>
               </button>
             </div>
@@ -1668,9 +1708,9 @@ if ($isWorkerUser) {
       if (!tasks || tasks.length === 0) {
         container.innerHTML = `
           <div style="text-align: center; padding: 48px; background: #FFF; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-            <div style="font-size: 32px; margin-bottom: 6px;">📋</div>
-            <h4 style="font-size: 15px; font-weight: 800; color: #101828;">Tidak Ada Tugas Sesuai Filter</h4>
-            <p style="font-size: 12.5px; color: var(--text-muted); margin: 0;">Silakan ubah filter atau tambahkan tugas baru.</p>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 8px; display: block;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <h4 style="font-size: 15px; font-weight: 600; color: #111827; margin: 0 0 2px;">Tidak Ada Tugas Sesuai Filter</h4>
+            <p style="font-size: 12.5px; color: #6B7280; margin: 0;">Silakan ubah filter atau tambahkan tugas baru.</p>
           </div>
         `;
         return;
@@ -2250,33 +2290,78 @@ if ($isWorkerUser) {
         const s = data.summary;
         container.innerHTML = `
           <div class="kpi-tile">
-            <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Total Kontrak Klien (Rahasia)</span>
-            <div style="font-size: 20px; font-weight: 800; color: #101828;">Rp ${Number(s.total_contract_value || 0).toLocaleString('id-ID')}</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Hanya tampak di internal Owner</span>
+            <div class="metric-header">
+              <span class="metric-label">Total Kontrak Klien</span>
+              <span class="metric-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </span>
+            </div>
+            <div class="metric-value">
+              <span class="metric-num">Rp ${Number(s.total_contract_value || 0).toLocaleString('id-ID')}</span>
+            </div>
+            <div class="metric-subtitle">
+              <span>Hanya internal Owner</span>
+            </div>
           </div>
 
           <div class="kpi-tile">
-            <span style="font-size: 11.5px; color: #5925DC; font-weight: 700; text-transform: uppercase;">Pagu Saldo Ads Dialokasikan</span>
-            <div style="font-size: 20px; font-weight: 800; color: #5925DC;">Rp ${Number(s.total_allocated_ads || 0).toLocaleString('id-ID')}</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Pagu belanja platform ads</span>
+            <div class="metric-header">
+              <span class="metric-label">Pagu Saldo Ads</span>
+              <span class="metric-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </span>
+            </div>
+            <div class="metric-value">
+              <span class="metric-num">Rp ${Number(s.total_allocated_ads || 0).toLocaleString('id-ID')}</span>
+            </div>
+            <div class="metric-subtitle">
+              <span>Pagu belanja iklan</span>
+            </div>
           </div>
 
           <div class="kpi-tile">
-            <span style="font-size: 11.5px; color: #175CD3; font-weight: 700; text-transform: uppercase;">Anggaran Terpasang (Spend)</span>
-            <div style="font-size: 20px; font-weight: 800; color: #175CD3;">Rp ${Number(s.total_spend_installed || 0).toLocaleString('id-ID')}</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Laporan realisasi Tim Ads</span>
+            <div class="metric-header">
+              <span class="metric-label">Anggaran Terpasang</span>
+              <span class="metric-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              </span>
+            </div>
+            <div class="metric-value">
+              <span class="metric-num">Rp ${Number(s.total_spend_installed || 0).toLocaleString('id-ID')}</span>
+            </div>
+            <div class="metric-subtitle">
+              <span>Realisasi Tim Ads</span>
+            </div>
           </div>
 
           <div class="kpi-tile ${s.total_remaining_ads <= 0 ? 'urgent' : ''}">
-            <span style="font-size: 11.5px; color: ${s.total_remaining_ads <= 0 ? '#B42318' : '#027A48'}; font-weight: 700; text-transform: uppercase;">Sisa Saldo Ads</span>
-            <div style="font-size: 20px; font-weight: 800; color: ${s.total_remaining_ads <= 0 ? '#B42318' : '#027A48'};">Rp ${Number(s.total_remaining_ads || 0).toLocaleString('id-ID')}</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Saldo pagu yang tersisa</span>
+            <div class="metric-header">
+              <span class="metric-label" style="color: ${s.total_remaining_ads <= 0 ? '#B42318' : '#059669'};">Sisa Saldo Ads</span>
+              <span class="metric-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="${s.total_remaining_ads <= 0 ? '#B42318' : '#059669'}" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </span>
+            </div>
+            <div class="metric-value">
+              <span class="metric-num" style="color: ${s.total_remaining_ads <= 0 ? '#B42318' : '#059669'};">Rp ${Number(s.total_remaining_ads || 0).toLocaleString('id-ID')}</span>
+            </div>
+            <div class="metric-subtitle">
+              <span>Saldo pagu tersisa</span>
+            </div>
           </div>
 
           <div class="kpi-tile">
-            <span style="font-size: 11.5px; color: #027A48; font-weight: 700; text-transform: uppercase;">Margin Bersih Agensi</span>
-            <div style="font-size: 20px; font-weight: 800; color: #027A48;">Rp ${Number(s.total_agency_retained || 0).toLocaleString('id-ID')}</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Kontrak - Pagu Saldo Ads</span>
+            <div class="metric-header">
+              <span class="metric-label">Margin Agensi</span>
+              <span class="metric-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#059669" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+              </span>
+            </div>
+            <div class="metric-value">
+              <span class="metric-num">Rp ${Number(s.total_agency_retained || 0).toLocaleString('id-ID')}</span>
+            </div>
+            <div class="metric-subtitle">
+              <span>Kontrak dikurangi ads</span>
+            </div>
           </div>
         `;
       } else {
@@ -2294,27 +2379,63 @@ if ($isWorkerUser) {
 
         container.innerHTML = `
           <div class="kpi-tile">
-            <span style="font-size: 11.5px; color: #5925DC; font-weight: 700; text-transform: uppercase;">Pagu Saldo Ads Ditugaskan Owner</span>
-            <div style="font-size: 20px; font-weight: 800; color: #5925DC;">Rp ${totalAlloc.toLocaleString('id-ID')}</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Alokasi dana belanja iklan</span>
+            <div class="metric-header">
+              <span class="metric-label">Pagu Saldo Ads</span>
+              <span class="metric-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </span>
+            </div>
+            <div class="metric-value">
+              <span class="metric-num">Rp ${totalAlloc.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="metric-subtitle">
+              <span>Alokasi dana iklan</span>
+            </div>
           </div>
 
           <div class="kpi-tile">
-            <span style="font-size: 11.5px; color: #175CD3; font-weight: 700; text-transform: uppercase;">Anggaran Terpasang di Dashboard</span>
-            <div style="font-size: 20px; font-weight: 800; color: #175CD3;">Rp ${totalInstalled.toLocaleString('id-ID')}</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Total spend yang Anda pasang</span>
+            <div class="metric-header">
+              <span class="metric-label">Anggaran Terpasang</span>
+              <span class="metric-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              </span>
+            </div>
+            <div class="metric-value">
+              <span class="metric-num">Rp ${totalInstalled.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="metric-subtitle">
+              <span>Total spend terpasang</span>
+            </div>
           </div>
 
           <div class="kpi-tile ${totalRemaining <= 0 ? 'urgent' : ''}">
-            <span style="font-size: 11.5px; color: ${totalRemaining <= 0 ? '#B42318' : '#027A48'}; font-weight: 700; text-transform: uppercase;">Sisa Saldo Iklan</span>
-            <div style="font-size: 20px; font-weight: 800; color: ${totalRemaining <= 0 ? '#B42318' : '#027A48'};">Rp ${totalRemaining.toLocaleString('id-ID')}</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Batas penyerapan tersisa</span>
+            <div class="metric-header">
+              <span class="metric-label" style="color: ${totalRemaining <= 0 ? '#B42318' : '#059669'};">Sisa Saldo Iklan</span>
+              <span class="metric-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="${totalRemaining <= 0 ? '#B42318' : '#059669'}" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </span>
+            </div>
+            <div class="metric-value">
+              <span class="metric-num" style="color: ${totalRemaining <= 0 ? '#B42318' : '#059669'};">Rp ${totalRemaining.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="metric-subtitle">
+              <span>Batas sisa penyerapan</span>
+            </div>
           </div>
 
           <div class="kpi-tile">
-            <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Proyek Kampanye</span>
-            <div style="font-size: 20px; font-weight: 800; color: #101828;">${projects.length} Proyek</div>
-            <span style="font-size: 11px; color: var(--text-muted);">Klien aktif Kalamedia</span>
+            <div class="metric-header">
+              <span class="metric-label">Proyek Kampanye</span>
+              <span class="metric-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+              </span>
+            </div>
+            <div class="metric-value">
+              <span class="metric-num">${projects.length}</span>
+            </div>
+            <div class="metric-subtitle">
+              <span>Klien aktif Kalamedia</span>
+            </div>
           </div>
         `;
       }
@@ -2420,9 +2541,9 @@ if ($isWorkerUser) {
       if (allLogs.length === 0) {
         container.innerHTML = `
           <div style="text-align: center; padding: 36px; background: #F9FAFB; border-radius: var(--radius-md); border: 1px dashed var(--border-color); color: var(--text-muted);">
-            <div style="font-size: 28px; margin-bottom: 6px;">📈</div>
-            <h4 style="font-size: 14px; font-weight: 700; color: #101828; margin-bottom: 2px;">Belum Ada Riwayat Update Anggaran Terpasang</h4>
-            <p style="font-size: 12.5px; margin: 0;">Tim Ads dapat menekan tombol <b>+ Update Anggaran Terpasang & Bukti</b> untuk mencatat nominal belanja platform iklan.</p>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 8px; display: block;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            <h4 style="font-size: 14px; font-weight: 600; color: #111827; margin: 0 0 2px;">Belum Ada Riwayat Update Anggaran Terpasang</h4>
+            <p style="font-size: 12.5px; color: #6B7280; margin: 0;">Tim Ads dapat menekan tombol <b>+ Update Anggaran</b> untuk mencatat nominal belanja platform iklan.</p>
           </div>
         `;
         return;
@@ -2521,10 +2642,10 @@ if ($isWorkerUser) {
         tbody.innerHTML = `
           <tr>
             <td colspan="${isPrivileged ? 9 : 8}" style="text-align: center; padding: 36px 20px; color: var(--text-muted); background: #FCFCFD;">
-              <div style="font-size: 26px; margin-bottom: 6px;">💳</div>
-              <div style="font-weight: 700; color: #101828; margin-bottom: 2px;">Belum Ada Bukti Transaksi Isi Saldo Ads</div>
-              <div style="font-size: 12px; margin-bottom: 12px;">Tim Ads dapat menekan tombol <b>+ Upload Bukti Isi Saldo / Transaksi Ads</b> saat selesai top-up iklan klien.</div>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="openUploadAdsTopupModal()" style="font-size: 11.5px; font-weight: 700; color: #027A48;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 8px; display: block;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              <div style="font-weight: 600; color: #111827; margin-bottom: 2px; font-size: 14px;">Belum Ada Bukti Transaksi Isi Saldo Ads</div>
+              <div style="font-size: 12px; color: #6B7280; margin-bottom: 12px;">Tim Ads dapat menekan tombol <b>+ Upload Bukti Topup Ads</b> saat selesai top-up iklan klien.</div>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openUploadAdsTopupModal()" style="font-size: 12px; font-weight: 500; color: #059669;">
                 + Upload Bukti Sekarang
               </button>
             </td>

@@ -74,7 +74,7 @@ $totalClientsCount = count($allClients);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.1">
   <style>
     .team-badge-karyawan {
       background: rgba(93, 118, 245, 0.12);
@@ -249,6 +249,11 @@ $totalClientsCount = count($allClients);
     }
 
     @media (max-width: 768px) {
+      .bento-table-card {
+        padding: 16px 14px !important;
+        border-radius: 18px !important;
+        margin-bottom: 18px !important;
+      }
       .team-top-header-card {
         flex-direction: column !important;
         align-items: stretch !important;
@@ -262,22 +267,37 @@ $totalClientsCount = count($allClients);
         flex-direction: column !important;
         align-items: stretch !important;
         gap: 10px !important;
+        margin-bottom: 16px !important;
       }
       .bento-tabs-group {
         width: 100% !important;
         display: flex !important;
-        justify-content: space-between !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        white-space: nowrap !important;
+        scrollbar-width: none !important;
+        gap: 4px !important;
+        padding: 4px !important;
+      }
+      .bento-tabs-group::-webkit-scrollbar {
+        display: none !important;
       }
       .bento-tab-btn {
-        flex: 1 !important;
-        text-align: center !important;
-        padding: 8px 6px !important;
-        font-size: 12px !important;
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        padding: 7px 14px !important;
+        font-size: 12.5px !important;
+        border-radius: 999px !important;
       }
       .bento-search-box {
         width: 100% !important;
         max-width: 100% !important;
         min-width: 100% !important;
+      }
+      .bento-search-input {
+        width: 100% !important;
+        height: 40px !important;
+        font-size: 13px !important;
       }
     }
 

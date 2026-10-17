@@ -57,7 +57,7 @@ if ($role === 'client' && $client) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.1">
   <style>
     .expired-page {
       min-height: 100vh;
@@ -136,7 +136,7 @@ if (!$client) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.1">
 </head>
 <body>
   <div class="app-container">
@@ -234,7 +234,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.1">
   <style>
     /* Client Portal Custom Styles - Minimal Finance (Bankio) */
     .portal-hero {
@@ -578,6 +578,144 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
       .sidebar-overlay {
         z-index: 9998 !important;
       }
+
+      /* Mobile Portal Preview Notice */
+      .portal-preview-notice {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        padding: 12px 14px !important;
+      }
+      .preview-notice-left {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        width: 100% !important;
+      }
+      .preview-notice-header-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        flex-wrap: wrap !important;
+      }
+      .preview-client-select {
+        width: 100% !important;
+        height: 38px !important;
+      }
+      .preview-notice-right {
+        width: 100% !important;
+      }
+      .preview-back-btn {
+        width: 100% !important;
+        justify-content: center !important;
+        text-align: center !important;
+        display: flex !important;
+      }
+
+      /* Mobile Portal Hero Card */
+      .portal-hero {
+        padding: 16px 14px !important;
+        border-radius: 18px !important;
+        margin-bottom: 16px !important;
+      }
+      .portal-hero-top {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        margin-bottom: 12px !important;
+      }
+      .portal-brand-badge {
+        font-size: 10px !important;
+        padding: 4px 10px !important;
+        max-width: 100% !important;
+        white-space: normal !important;
+        line-height: 1.35 !important;
+        display: inline-flex !important;
+        flex-wrap: wrap !important;
+      }
+      .portal-hero-title {
+        font-size: 17px !important;
+        margin: 8px 0 4px !important;
+        line-height: 1.3 !important;
+      }
+      .portal-hero-desc {
+        font-size: 12px !important;
+        line-height: 1.45 !important;
+      }
+      .portal-hero-pic-block {
+        text-align: left !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        padding: 10px 14px !important;
+        border-radius: 14px !important;
+        border: 1px solid rgba(255, 255, 255, 0.22) !important;
+        margin-top: 4px !important;
+        gap: 10px !important;
+      }
+      .portal-hero-pic-block .btn-whatsapp-pic {
+        margin-top: 0 !important;
+        padding: 6px 12px !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+      }
+      .portal-progress-wrapper {
+        padding: 12px 14px !important;
+        border-radius: 14px !important;
+        margin-top: 10px !important;
+      }
+      .portal-progress-wrapper span {
+        font-size: 10.5px !important;
+      }
+      #portal-progress-text {
+        font-size: 11.5px !important;
+      }
+      #portal-progress-percent {
+        font-size: 18px !important;
+      }
+      .portal-progress-bar-bg {
+        height: 8px !important;
+        margin: 8px 0 4px !important;
+      }
+
+      .portal-stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+        margin-bottom: 14px !important;
+      }
+      .portal-stat-card {
+        padding: 12px !important;
+        border-radius: 14px !important;
+        min-height: auto !important;
+      }
+      .portal-stat-card div > span {
+        font-size: 9.5px !important;
+      }
+      .portal-stat-card div > div {
+        font-size: 18px !important;
+        margin: 2px 0 !important;
+      }
+      .portal-stat-card > span {
+        font-size: 10.5px !important;
+      }
+
+      .portal-nav-tabs {
+        display: flex !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        gap: 6px !important;
+        padding-bottom: 4px !important;
+        margin-bottom: 14px !important;
+      }
+      .portal-tab-btn {
+        flex-shrink: 0 !important;
+        white-space: nowrap !important;
+        padding: 7px 14px !important;
+        font-size: 12px !important;
+        border-radius: 999px !important;
+      }
     }
   </style>
 </head>
@@ -593,16 +731,18 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
 
         <!-- Preview Notice if Admin/Owner is looking at portal -->
         <?php if ($role !== 'client'): ?>
-          <div style="background: #F0F4FF; border: 1px solid #D0DDFE; border-radius: 14px; padding: 12px 18px; margin-bottom: 20px; font-size: 13px; color: #1D2939; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 2px 6px -1px rgba(93, 118, 245, 0.08);">
-            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-              <span style="background: #5D76F5; color: #FFFFFF; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.3px;">
-                MODE PREVIEW <?= strtoupper($role) ?>
-              </span>
-              <span style="color: #344054; font-weight: 600;">
-                Pratinjau Portal Klien:
-              </span>
+          <div class="portal-preview-notice" style="background: #F0F4FF; border: 1px solid #D0DDFE; border-radius: 14px; padding: 12px 18px; margin-bottom: 20px; font-size: 13px; color: #1D2939; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 2px 6px -1px rgba(93, 118, 245, 0.08);">
+            <div class="preview-notice-left" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <div class="preview-notice-header-row">
+                <span class="preview-mode-badge" style="background: #5D76F5; color: #FFFFFF; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.3px;">
+                  MODE PREVIEW <?= strtoupper($role) ?>
+                </span>
+                <span class="preview-mode-label" style="color: #344054; font-weight: 600;">
+                  Pratinjau Portal Klien:
+                </span>
+              </div>
               <?php if (!empty($allActiveClients)): ?>
-                <select onchange="window.location.href='client-portal?preview=1&portal=internal&_slot=internal&client_id=' + this.value" style="font-size: 12.5px; font-weight: 700; color: #101828; padding: 5px 12px; border-radius: 8px; border: 1.5px solid #5D76F5; background: #FFFFFF; cursor: pointer;">
+                <select class="preview-client-select" onchange="window.location.href='client-portal?preview=1&portal=internal&_slot=internal&client_id=' + this.value" style="font-size: 12.5px; font-weight: 700; color: #101828; padding: 5px 12px; border-radius: 8px; border: 1.5px solid #5D76F5; background: #FFFFFF; cursor: pointer;">
                   <?php foreach ($allActiveClients as $ac): ?>
                     <option value="<?= $ac['id'] ?>" <?= $clientId == $ac['id'] ? 'selected' : '' ?>>
                       <?= htmlspecialchars($ac['company']) ?> (PIC: <?= htmlspecialchars($ac['name']) ?>)
@@ -613,8 +753,8 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
                 <strong><?= htmlspecialchars($client['company'] ?? 'Klien') ?></strong>
               <?php endif; ?>
             </div>
-            <div>
-              <a href="<?= home_url_for_role($role) ?>" class="btn btn-secondary btn-sm" style="font-size: 12px; font-weight: 700; background: #FFFFFF; border: 1px solid #D0D5DD; color: #344054;">
+            <div class="preview-notice-right">
+              <a href="<?= home_url_for_role($role) ?>" class="btn btn-secondary btn-sm preview-back-btn" style="font-size: 12px; font-weight: 700; background: #FFFFFF; border: 1px solid #D0D5DD; color: #344054;">
                 &larr; Kembali ke Dashboard
               </a>
             </div>
@@ -624,7 +764,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
         <!-- 1. Client Project Hero Card -->
         <div class="portal-hero">
           <div class="portal-hero-top">
-            <div>
+            <div class="portal-hero-main-info">
               <div class="portal-brand-badge">
                 <span style="color: #FFFFFF !important;"><?= htmlspecialchars($client['company']) ?></span>
                 <span style="color: rgba(255, 255, 255, 0.6) !important;">&bull;</span>
@@ -638,10 +778,12 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
               </p>
             </div>
 
-            <div style="text-align: right;">
-              <span style="font-size: 11px; color: rgba(255, 255, 255, 0.8) !important; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">PIC Kalamedia Agensi</span>
-              <div style="font-size: 14px; font-weight: 800; margin-top: 2px; color: #FFFFFF !important;">Tim Kalamedia</div>
-              <a href="https://wa.me/628881124215" target="_blank" class="btn btn-sm" style="margin-top: 8px; background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.3); font-size: 11.5px; font-weight: 700;">
+            <div class="portal-hero-pic-block" style="text-align: right;">
+              <div class="portal-pic-text">
+                <span class="portal-pic-label" style="font-size: 11px; color: rgba(255, 255, 255, 0.8) !important; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">PIC Kalamedia Agensi</span>
+                <div class="portal-pic-name" style="font-size: 14px; font-weight: 800; margin-top: 2px; color: #FFFFFF !important;">Tim Kalamedia</div>
+              </div>
+              <a href="https://wa.me/628881124215" target="_blank" class="btn btn-sm btn-whatsapp-pic" style="margin-top: 8px; background: rgba(255,255,255,0.18); color: #fff; border: 1px solid rgba(255,255,255,0.3); font-size: 11.5px; font-weight: 700;">
                 Hubungi via WhatsApp
               </a>
             </div>

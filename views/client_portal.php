@@ -234,7 +234,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.3">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.4">
   <style>
     /* Client Portal Custom Styles - Minimal Finance (Bankio) */
     .portal-hero {
@@ -1739,6 +1739,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
       });
 
       container.innerHTML = html;
+    }
 
     function switchPortalTab(tabName, btn) {
       document.querySelectorAll('.portal-tab-btn').forEach(b => b.classList.remove('active'));

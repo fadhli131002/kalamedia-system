@@ -1626,30 +1626,124 @@ button:active,
   border-color: #BE123C;
 }
 
-/* Ghost Delete Button */
+/* ==========================================================================
+   UNIFIED TABLE ACTION BUTTONS SYSTEM (BANKIO DESIGN)
+   ========================================================================== */
+.table-actions,
+.action-btn-group,
+.table-actions-cell {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  justify-content: flex-end !important;
+  white-space: nowrap !important;
+}
+
+.table-custom th.th-actions,
+.table-custom td.td-actions,
+.untitled-table th.th-actions,
+.untitled-table td.td-actions {
+  text-align: right !important;
+  white-space: nowrap !important;
+  min-width: 170px;
+}
+
+.btn-action-view,
+.btn-action-edit,
+.btn-action-delete,
+.btn-action-pay,
+.btn-action-success,
+.btn-action-outline,
 .btn-delete-ghost {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
-  background: #FFF1F2;
-  border: 1px solid #FFE4E6;
-  color: #E11D48;
-  cursor: pointer;
-  transition: var(--transition);
-  padding: 0;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 32px !important;
+  width: auto !important;
+  height: 32px !important;
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  white-space: nowrap !important;
+  line-height: 1.2 !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04) !important;
+  transition: all 160ms cubic-bezier(0.22, 1, 0.36, 1) !important;
+  box-sizing: border-box !important;
+  font-family: inherit !important;
+  will-change: transform !important;
 }
 
+.btn-action-view,
+.btn-action-outline {
+  background: #FFFFFF !important;
+  border: 1px solid #D0D5DD !important;
+  color: #344054 !important;
+}
+.btn-action-view:hover,
+.btn-action-outline:hover {
+  background: #F8FAFC !important;
+  border-color: #98A2B3 !important;
+  color: #101828 !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-action-edit {
+  background: #EFF8FF !important;
+  border: 1px solid #B2DDFF !important;
+  color: #175CD3 !important;
+}
+.btn-action-edit:hover {
+  background: #D1E9FF !important;
+  border-color: #84CAFF !important;
+  color: #155EEF !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-action-delete,
+.btn-delete-ghost {
+  background: #FEF3F2 !important;
+  border: 1px solid #FECDCA !important;
+  color: #B42318 !important;
+}
+.btn-action-delete:hover,
 .btn-delete-ghost:hover {
-  background: #FFE4E6;
-  border-color: #FECDD3;
-  color: #BE123C;
-  transform: translateY(-1px);
+  background: #FEE4E2 !important;
+  border-color: #FDA29B !important;
+  color: #912018 !important;
+  transform: translateY(-1px) !important;
 }
 
-.btn-delete-ghost svg {
+.btn-action-pay {
+  background: #5D76F5 !important;
+  border: 1px solid #5D76F5 !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+.btn-action-pay:hover {
+  background: #4B63DE !important;
+  border-color: #4B63DE !important;
+  color: #FFFFFF !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-action-success {
+  background: #ECFDF3 !important;
+  border: 1px solid #A6F4C5 !important;
+  color: #027A48 !important;
+  font-weight: 700 !important;
+}
+.btn-action-success:hover {
+  background: #D1FADF !important;
+  border-color: #6CE9A6 !important;
+  color: #05603A !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-delete-ghost svg,
+.btn-action-delete svg {
   pointer-events: none;
 }
 

@@ -58,7 +58,7 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-3.0">
   <script src="assets/js/html2pdf.bundle.min.js"></script>
   <style>
     @media (max-width: 768px) {
@@ -212,7 +212,7 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
 
             <!-- Payroll Table -->
             <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
-              <table class="table-custom" id="salaries-table" style="min-width: 800px !important; width: 100%;">
+              <table class="table-custom" id="salaries-table" style="min-width: 950px !important; width: 100%;">
                 <thead>
                   <tr>
                     <th style="white-space: nowrap !important;">Periode &amp; Tanggal</th>
@@ -220,7 +220,7 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
                     <th style="white-space: nowrap !important;">Komponen Gaji</th>
                     <th style="white-space: nowrap !important;">Take-Home Pay</th>
                     <th style="white-space: nowrap !important;">Status</th>
-                    <th style="text-align: right; white-space: nowrap !important;">Slip Gaji &amp; Aksi</th>
+                    <th class="th-actions" style="text-align: right; white-space: nowrap !important; min-width: 250px;">Slip Gaji &amp; Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -263,33 +263,33 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
                             <?= $s['status'] ?>
                           </span>
                         </td>
-                        <td style="text-align: right; white-space: nowrap;">
-                          <div style="display: inline-flex; gap: 6px; align-items: center;">
+                        <td class="td-actions" style="text-align: right; white-space: nowrap;">
+                          <div class="table-actions">
                             <!-- Slip Gaji Modal Trigger -->
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="openSlipGajiModal(<?= $s['id'] ?>)" title="Lihat & Cetak Slip Gaji">
-                              <span>Slip Gaji</span>
+                            <button type="button" class="btn-action-view" onclick="openSlipGajiModal(<?= $s['id'] ?>)" title="Lihat & Cetak Slip Gaji">
+                              Slip Gaji
                             </button>
 
                             <!-- Receipt Actions -->
                             <?php if (!empty($s['receipt_file'])): ?>
-                              <button type="button" class="btn btn-secondary btn-sm" onclick="viewReceiptImage('<?= UPLOAD_URL . '/' . htmlspecialchars($s['receipt_file']) ?>', 'Bukti Transfer Gaji <?= htmlspecialchars($s['employee_name']) ?>')" title="Lihat Bukti Transfer">
-                                <span>Struk</span>
+                              <button type="button" class="btn-action-outline" onclick="viewReceiptImage('<?= UPLOAD_URL . '/' . htmlspecialchars($s['receipt_file']) ?>', 'Bukti Transfer Gaji <?= htmlspecialchars($s['employee_name']) ?>')" title="Lihat Bukti Transfer">
+                                Struk
                               </button>
                             <?php else: ?>
-                              <button type="button" class="btn btn-primary btn-sm" onclick="triggerUploadModal('salary', <?= $s['id'] ?>, 'Upload Bukti Transfer Gaji <?= htmlspecialchars($s['employee_name']) ?>')" title="Upload Bukti Transfer">
-                                <span>+ Bukti</span>
+                              <button type="button" class="btn-action-pay" onclick="triggerUploadModal('salary', <?= $s['id'] ?>, 'Upload Bukti Transfer Gaji <?= htmlspecialchars($s['employee_name']) ?>')" title="Upload Bukti Transfer">
+                                + Bukti
                               </button>
                             <?php endif; ?>
 
                             <!-- Mark Paid Shortcut -->
                             <?php if ($s['status'] === 'Pending'): ?>
-                              <button type="button" class="btn btn-success btn-sm" onclick="markSalaryPaid(<?= $s['id'] ?>)" title="Tandai Sudah Ditransfer">
+                              <button type="button" class="btn-action-success" onclick="markSalaryPaid(<?= $s['id'] ?>)" title="Tandai Sudah Ditransfer">
                                 &#10003; Lunas
                               </button>
                             <?php endif; ?>
 
                             <!-- Delete Option -->
-                            <button type="button" class="btn-delete-ghost" onclick="confirmDeleteSalary(<?= $s['id'] ?>, 'Gaji <?= htmlspecialchars($s['employee_name']) ?> (<?= htmlspecialchars($s['month_period']) ?>)')" title="Hapus Data Gaji" style="padding: 4px 8px; font-size: 12px; font-weight: 600;">
+                            <button type="button" class="btn-action-delete btn-delete-ghost" onclick="confirmDeleteSalary(<?= $s['id'] ?>, 'Gaji <?= htmlspecialchars($s['employee_name']) ?> (<?= htmlspecialchars($s['month_period']) ?>)')" title="Hapus Data Gaji">
                               Hapus
                             </button>
                           </div>
@@ -303,7 +303,7 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
 
             <!-- Master Karyawan Table -->
             <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
-              <table class="table-custom" id="employees-table" style="min-width: 800px !important; width: 100%;">
+              <table class="table-custom" id="employees-table" style="min-width: 950px !important; width: 100%;">
                 <thead>
                   <tr>
                     <th style="white-space: nowrap !important;">Nama Karyawan</th>
@@ -312,7 +312,7 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
                     <th style="white-space: nowrap !important;">Kontak</th>
                     <th style="white-space: nowrap !important;">Rekening Pembayaran</th>
                     <th style="white-space: nowrap !important;">Gaji Pokok Default</th>
-                    <th style="text-align: right; white-space: nowrap !important;">Aksi</th>
+                    <th class="th-actions" style="text-align: right; white-space: nowrap !important; min-width: 220px;">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -347,20 +347,20 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
                         <td style="font-weight: 700; color: #101828; white-space: nowrap;">
                           <?= format_rupiah($emp['base_salary']) ?>
                         </td>
-                        <td style="text-align: right; white-space: nowrap;">
-                          <div style="display: inline-flex; gap: 6px; align-items: center;">
+                        <td class="td-actions" style="text-align: right; white-space: nowrap;">
+                          <div class="table-actions">
                             <!-- Edit Employee Button -->
-                            <button type="button" class="btn btn-secondary btn-sm" onclick='openEditEmployeeModal(<?= json_encode($emp, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Edit Data Karyawan" style="padding: 5px 12px; font-size: 12px; border-radius: 6px; font-weight: 600;">
-                              <span>Edit</span>
+                            <button type="button" class="btn-action-edit" onclick='openEditEmployeeModal(<?= json_encode($emp, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Edit Data Karyawan">
+                              Edit
                             </button>
 
                             <!-- Quick Create Salary -->
-                            <button type="button" class="btn btn-primary btn-sm" onclick="quickCreateSalaryForEmp(<?= $emp['id'] ?>, '<?= htmlspecialchars($emp['name'], ENT_QUOTES) ?>', '<?= htmlspecialchars($emp['position'], ENT_QUOTES) ?>', '<?= htmlspecialchars($emp['bank_name'], ENT_QUOTES) ?>', '<?= htmlspecialchars($emp['bank_account'], ENT_QUOTES) ?>', <?= $emp['base_salary'] ?>)">
+                            <button type="button" class="btn-action-pay" onclick="quickCreateSalaryForEmp(<?= $emp['id'] ?>, '<?= htmlspecialchars($emp['name'], ENT_QUOTES) ?>', '<?= htmlspecialchars($emp['position'], ENT_QUOTES) ?>', '<?= htmlspecialchars($emp['bank_name'], ENT_QUOTES) ?>', '<?= htmlspecialchars($emp['bank_account'], ENT_QUOTES) ?>', <?= $emp['base_salary'] ?>)" title="Buat Gaji">
                               + Buat Gaji
                             </button>
 
                             <!-- Delete Employee -->
-                            <button type="button" class="btn-delete-ghost" onclick="confirmDeleteEmployee(<?= $emp['id'] ?>, '<?= htmlspecialchars($emp['name'], ENT_QUOTES) ?>')" title="Hapus Karyawan" style="padding: 4px 8px; font-size: 12px; font-weight: 600;">
+                            <button type="button" class="btn-action-delete btn-delete-ghost" onclick="confirmDeleteEmployee(<?= $emp['id'] ?>, '<?= htmlspecialchars($emp['name'], ENT_QUOTES) ?>')" title="Hapus Karyawan">
                               Hapus
                             </button>
                           </div>

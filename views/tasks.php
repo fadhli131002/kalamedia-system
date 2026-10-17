@@ -40,7 +40,7 @@ if ($isWorkerUser) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.6">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-3.0">
   <style>
     /* Task Management & Workspace Custom Styles - Bankio Minimal Finance */
     .mobile-text { display: none; }
@@ -1013,7 +1013,7 @@ if ($isWorkerUser) {
             </div>
 
             <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
-              <table class="table-custom" id="table-ads-topups" style="min-width: 820px; width: 100%;">
+              <table class="table-custom" id="table-ads-topups" style="min-width: 950px; width: 100%;">
                 <thead>
                   <tr>
                     <th style="min-width: 210px; white-space: nowrap;">TANGGAL & PETUGAS ADS</th>
@@ -1025,7 +1025,7 @@ if ($isWorkerUser) {
                     <th style="white-space: nowrap;">BUKTI TRANSAKSI</th>
                     <th style="white-space: nowrap;">STATUS</th>
                     <?php if ($isAdminUser): ?>
-                      <th style="text-align: right; white-space: nowrap;">AKSI</th>
+                      <th class="th-actions" style="text-align: right; white-space: nowrap; min-width: 180px;">AKSI</th>
                     <?php endif; ?>
                   </tr>
                 </thead>
@@ -1047,8 +1047,8 @@ if ($isWorkerUser) {
               </div>
             </div>
 
-            <div class="table-responsive">
-              <table class="table-custom" id="table-ads-projects">
+            <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
+              <table class="table-custom" id="table-ads-projects" style="min-width: 920px; width: 100%;">
                 <thead>
                   <tr>
                     <th>PROYEK & KLIEN</th>
@@ -1062,7 +1062,7 @@ if ($isWorkerUser) {
                       <th>MARGIN BERSIH AGENSI</th>
                     <?php endif; ?>
                     <th>STATUS KAMPANYE</th>
-                    <th style="text-align: right;">AKSI</th>
+                    <th class="th-actions" style="text-align: right; white-space: nowrap; min-width: 180px;">AKSI</th>
                   </tr>
                 </thead>
                 <tbody id="tbody-ads-projects">
@@ -2379,15 +2379,17 @@ if ($isWorkerUser) {
             <td>
               ${statusBadge}
             </td>
-            <td style="text-align: right; white-space: nowrap;">
-              <button type="button" class="btn btn-primary btn-sm" onclick="openLogAdsSpendModal(${p.project_id})" style="font-size: 11px; padding: 4px 10px;">
-                + Input Spend
-              </button>
-              ${isPrivileged ? `
-                <button type="button" class="btn btn-secondary btn-sm" onclick="openAllocateAdsModal(${p.project_id}, ${alloc})" style="font-size: 11px; padding: 4px 8px; margin-left: 4px;">
-                  Atur Pagu
+            <td class="td-actions" style="text-align: right; white-space: nowrap;">
+              <div class="table-actions">
+                <button type="button" class="btn-action-pay" onclick="openLogAdsSpendModal(${p.project_id})" title="Input Spend">
+                  + Input Spend
                 </button>
-              ` : ''}
+                ${isPrivileged ? `
+                  <button type="button" class="btn-action-edit" onclick="openAllocateAdsModal(${p.project_id}, ${alloc})" title="Atur Pagu">
+                    Atur Pagu
+                  </button>
+                ` : ''}
+              </div>
             </td>
           </tr>
         `;
@@ -2495,7 +2497,7 @@ if ($isWorkerUser) {
               ` : ''}
 
               ${isPrivileged ? `
-                <button type="button" class="btn btn-secondary btn-sm" onclick="deleteAdsLog(${l.id})" style="font-size: 10.5px; color: #B42318; border-color: #FECDCA; padding: 2px 8px;" title="Hapus Riwayat">
+                <button type="button" class="btn-action-delete btn-delete-ghost" onclick="deleteAdsLog(${l.id})" title="Hapus Riwayat">
                   Hapus
                 </button>
               ` : ''}
@@ -2587,15 +2589,17 @@ if ($isWorkerUser) {
               `}
             </td>
             ${isPrivileged ? `
-              <td style="text-align: right; white-space: nowrap;">
-                ${!isVerified && isOwner ? `
-                  <button type="button" class="btn btn-secondary btn-sm" onclick="verifyTopupTransaction(${t.id})" style="font-size: 10.5px; color: #027A48; border-color: #A6F4C5; background: #ECFDF3; font-weight: 700; margin-right: 4px;">
-                    ✓ Verifikasi
+              <td class="td-actions" style="text-align: right; white-space: nowrap;">
+                <div class="table-actions">
+                  ${!isVerified && isOwner ? `
+                    <button type="button" class="btn-action-success" onclick="verifyTopupTransaction(${t.id})" title="Verifikasi Transaksi">
+                      ✓ Verifikasi
+                    </button>
+                  ` : ''}
+                  <button type="button" class="btn-action-delete btn-delete-ghost" onclick="deleteTopupTransaction(${t.id})" title="Hapus Transaksi">
+                    Hapus
                   </button>
-                ` : ''}
-                <button type="button" class="btn btn-secondary btn-sm" onclick="deleteTopupTransaction(${t.id})" style="font-size: 10.5px; color: #B42318; border-color: #FECDCA; padding: 2px 8px;" title="Hapus Transaksi">
-                  Hapus
-                </button>
+                </div>
               </td>
             ` : ''}
           </tr>

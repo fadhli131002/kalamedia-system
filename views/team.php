@@ -74,7 +74,7 @@ $totalClientsCount = count($allClients);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.1">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-3.0">
   <style>
     .team-badge-karyawan {
       background: rgba(93, 118, 245, 0.12);
@@ -506,7 +506,7 @@ $totalClientsCount = count($allClients);
           </div>
 
           <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
-            <table class="table-custom" style="min-width: 860px; width: 100%;">
+            <table class="table-custom" style="min-width: 960px; width: 100%;">
               <thead>
                 <tr>
                   <th style="min-width: 220px; white-space: nowrap;">NAMA &amp; KONTAK</th>
@@ -515,7 +515,7 @@ $totalClientsCount = count($allClients);
                   <th style="min-width: 150px; white-space: nowrap;">MASA KONTRAK KERJA</th>
                   <th style="min-width: 180px; white-space: nowrap;">KLIEN / PT YANG DIPEGANG</th>
                   <th style="min-width: 160px; white-space: nowrap;">EMAIL LOGIN PORTAL</th>
-                  <th style="min-width: 120px; text-align: right; white-space: nowrap;">AKSI</th>
+                  <th class="th-actions" style="min-width: 160px; text-align: right; white-space: nowrap;">AKSI</th>
                 </tr>
               </thead>
               <tbody id="team-table-body">
@@ -650,12 +650,12 @@ $totalClientsCount = count($allClients);
                         </span>
                       </td>
 
-                      <td style="min-width: 120px; text-align: right; white-space: nowrap;">
-                        <div style="display: inline-flex; gap: 6px; justify-content: flex-end; align-items: center;">
-                          <button type="button" class="btn btn-secondary btn-sm" onclick='openEditTeamModal(<?= json_encode($m, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' style="padding: 5px 12px; font-size: 12px; font-weight: 600;">
+                      <td class="td-actions" style="min-width: 160px; text-align: right; white-space: nowrap;">
+                        <div class="table-actions">
+                          <button type="button" class="btn-action-edit" onclick='openEditTeamModal(<?= json_encode($m, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Edit Anggota Tim">
                             Edit
                           </button>
-                          <button type="button" class="btn-delete-ghost" onclick="confirmDeleteTeamMember(<?= $m['id'] ?>, '<?= htmlspecialchars($m['name'], ENT_QUOTES) ?>')" style="padding: 5px 10px; font-size: 12px; font-weight: 600;">
+                          <button type="button" class="btn-action-delete btn-delete-ghost" onclick="confirmDeleteTeamMember(<?= $m['id'] ?>, '<?= htmlspecialchars($m['name'], ENT_QUOTES) ?>')" title="Hapus Anggota Tim">
                             Hapus
                           </button>
                         </div>

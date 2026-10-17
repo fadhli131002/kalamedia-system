@@ -42,7 +42,7 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-3.0">
 </head>
 <body>
   <div class="app-container">
@@ -109,7 +109,7 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
 
           <!-- Invoices Data Table -->
           <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 8px;">
-            <table class="table-custom" id="invoice-table" style="min-width: 820px !important; width: 100%;">
+            <table class="table-custom" id="invoice-table" style="min-width: 980px !important; width: 100%;">
               <thead>
                 <tr>
                   <th style="white-space: nowrap !important;">NO. INVOICE</th>
@@ -119,7 +119,7 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
                   <th style="white-space: nowrap !important;">JATUH TEMPO</th>
                   <th style="white-space: nowrap !important;">TOTAL TAGIHAN</th>
                   <th style="white-space: nowrap !important;">STATUS</th>
-                  <th style="white-space: nowrap !important; text-align: right;">AKSI</th>
+                  <th class="th-actions" style="white-space: nowrap !important; text-align: right; min-width: 200px;">AKSI</th>
                 </tr>
               </thead>
               <tbody>
@@ -156,28 +156,28 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
                           <?= strtoupper($inv['status']) ?>
                         </span>
                       </td>
-                      <td style="text-align: right; white-space: nowrap !important;">
-                        <div style="display: inline-flex; gap: 8px; justify-content: flex-end; align-items: center;">
-                          <a href="<?= url('invoice-view?id=' . $inv['id'] . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" class="btn btn-secondary btn-sm" style="padding: 6px 12px; font-size: 12px; font-weight: 600; color: #344054; border: 1px solid #D0D5DD; background: #FFFFFF; border-radius: 8px; text-decoration: none;" title="Lihat & Unduh PDF">
+                      <td class="td-actions" style="text-align: right; white-space: nowrap !important;">
+                        <div class="table-actions">
+                          <a href="<?= url('invoice-view?id=' . $inv['id'] . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" class="btn-action-view" title="Lihat & Unduh PDF">
                             <span>Lihat Invoice</span>
                           </a>
 
                           <?php if (!$isClientUser): ?>
                             <?php if ($inv['status'] === 'Draft'): ?>
-                              <button type="button" class="btn btn-secondary btn-sm" onclick="openEditInvoiceModal(<?= $inv['id'] ?>)" style="padding: 6px 12px; font-size: 12px; font-weight: 600; color: #1570EF; border: 1px solid #B2DDFF; background: #EFF8FF; border-radius: 8px;" title="Edit Draft Invoice">
+                              <button type="button" class="btn-action-edit" onclick="openEditInvoiceModal(<?= $inv['id'] ?>)" title="Edit Draft Invoice">
                                 <span>Edit</span>
                               </button>
                             <?php endif; ?>
 
                             <?php if ($inv['status'] !== 'Paid'): ?>
-                              <button type="button" class="btn btn-primary btn-sm" style="padding: 6px 12px; font-size: 12px;" onclick="triggerUploadModal('invoice', <?= $inv['id'] ?>, 'Upload Bukti Pelunasan Invoice #<?= $inv['invoice_number'] ?>')" title="Upload Bukti Pembayaran">
+                              <button type="button" class="btn-action-pay" onclick="triggerUploadModal('invoice', <?= $inv['id'] ?>, 'Upload Bukti Pelunasan Invoice #<?= $inv['invoice_number'] ?>')" title="Upload Bukti Pembayaran">
                                 <span>+ Bayar</span>
                               </button>
                             <?php endif; ?>
 
                             <?php if (is_owner()): ?>
-                              <button type="button" class="btn-delete-ghost" onclick="confirmDeleteInvoice(<?= $inv['id'] ?>, '<?= htmlspecialchars($inv['invoice_number'], ENT_QUOTES) ?>')" data-invoice-id="<?= $inv['id'] ?>" data-invoice-number="<?= htmlspecialchars($inv['invoice_number'], ENT_QUOTES) ?>" title="Hapus Invoice" style="padding: 4px 8px; font-size: 12px; font-weight: 600;">
-                                Hapus
+                              <button type="button" class="btn-action-delete btn-delete-ghost" onclick="confirmDeleteInvoice(<?= $inv['id'] ?>, '<?= htmlspecialchars($inv['invoice_number'], ENT_QUOTES) ?>')" data-invoice-id="<?= $inv['id'] ?>" data-invoice-number="<?= htmlspecialchars($inv['invoice_number'], ENT_QUOTES) ?>" title="Hapus Invoice">
+                                <span>Hapus</span>
                               </button>
                             <?php endif; ?>
                           <?php endif; ?>

@@ -44,7 +44,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-2.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-3.0">
   <style>
     /* Bankio Minimal Finance Design System Extensions */
     .expenses-header-row {
@@ -582,7 +582,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
           <?php if ($tab === 'freelancers'): ?>
             <!-- 4. Freelancer Payouts Table -->
             <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; margin: 0; padding-bottom: 6px;">
-              <table class="untitled-table" id="payout-table" style="min-width: 780px !important; width: 100%;">
+              <table class="untitled-table" id="payout-table" style="min-width: 950px !important; width: 100%;">
                 <thead>
                   <tr>
                     <th style="white-space: nowrap !important;">NAMA FREELANCER &amp; REKENING</th>
@@ -590,7 +590,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                     <th style="white-space: nowrap !important;">URAIAN PEKERJAAN</th>
                     <th style="white-space: nowrap !important;">NOMINAL FEE</th>
                     <th style="white-space: nowrap !important;">STATUS</th>
-                    <th style="text-align: right; white-space: nowrap !important;">BUKTI &amp; AKSI</th>
+                    <th class="th-actions" style="text-align: right; white-space: nowrap !important; min-width: 250px;">BUKTI &amp; AKSI</th>
                   </tr>
                 </thead>
                 <tbody id="payout-tbody">
@@ -646,37 +646,35 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                             </span>
                           <?php endif; ?>
                         </td>
-                        <td style="text-align: right; white-space: nowrap;">
-                          <div class="action-btn-group">
-                            
+                        <td class="td-actions" style="text-align: right; white-space: nowrap;">
+                          <div class="table-actions">
                             <!-- Invoice Button -->
-                            <button type="button" class="btn-action-outline" onclick="openFreelancerVoucherModal(<?= $p['id'] ?>)" title="Lihat &amp; Cetak Invoice / Voucher Fee Freelancer">
-                              <span>Invoice Fee</span>
+                            <button type="button" class="btn-action-view" onclick="openFreelancerVoucherModal(<?= $p['id'] ?>)" title="Lihat &amp; Cetak Invoice / Voucher Fee Freelancer">
+                              Invoice Fee
                             </button>
 
                             <!-- Struk / Upload Button -->
                             <?php if (!empty($p['receipt_file'])): ?>
                               <button type="button" class="btn-action-outline" onclick="viewReceiptImage('<?= UPLOAD_URL . '/' . htmlspecialchars($p['receipt_file']) ?>', 'Bukti Transfer <?= htmlspecialchars($p['freelancer_name']) ?>')" title="Lihat Bukti Transfer">
-                                <span>Lihat Struk</span>
+                                Lihat Struk
                               </button>
                             <?php else: ?>
-                              <button type="button" class="btn-action-upload" onclick="triggerUploadModal('payout', <?= $p['id'] ?>, 'Upload Bukti Fee <?= htmlspecialchars($p['freelancer_name']) ?>')" title="Upload Struk Transfer">
-                                <span>+ Struk</span>
+                              <button type="button" class="btn-action-pay" onclick="triggerUploadModal('payout', <?= $p['id'] ?>, 'Upload Bukti Fee <?= htmlspecialchars($p['freelancer_name']) ?>')" title="Upload Struk Transfer">
+                                + Struk
                               </button>
                             <?php endif; ?>
 
                             <!-- Edit Button -->
-                            <button type="button" class="btn-action-outline" onclick="openEditPayoutModal(<?= $p['id'] ?>)" title="Edit Pembayaran Freelancer" style="font-weight: 600; padding: 4px 8px; font-size: 11.5px;">
-                              <span>Edit</span>
+                            <button type="button" class="btn-action-edit" onclick="openEditPayoutModal(<?= $p['id'] ?>)" title="Edit Pembayaran Freelancer">
+                              Edit
                             </button>
 
                             <!-- Delete Button (Owner Only) -->
                             <?php if (is_owner()): ?>
-                              <button type="button" class="btn-icon-delete" onclick="confirmDeleteExpense('payout', <?= $p['id'] ?>, '<?= htmlspecialchars($p['freelancer_name']) ?>')" title="Hapus Fee Freelancer" style="font-size: 11.5px; font-weight: 600; padding: 4px 8px; width: auto; height: auto;">
-                                <span>Hapus</span>
+                              <button type="button" class="btn-action-delete btn-delete-ghost" onclick="confirmDeleteExpense('payout', <?= $p['id'] ?>, '<?= htmlspecialchars($p['freelancer_name']) ?>')" title="Hapus Fee Freelancer">
+                                Hapus
                               </button>
                             <?php endif; ?>
-
                           </div>
                         </td>
                       </tr>
@@ -689,7 +687,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
           <?php else: ?>
             <!-- 4b. Ads Top-Up Table -->
             <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; margin: 0; padding-bottom: 6px;">
-              <table class="untitled-table" id="ads-table" style="min-width: 780px !important; width: 100%;">
+              <table class="untitled-table" id="ads-table" style="min-width: 950px !important; width: 100%;">
                 <thead>
                   <tr>
                     <th style="white-space: nowrap !important;">PLATFORM &amp; ID AKUN</th>
@@ -697,7 +695,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                     <th style="white-space: nowrap !important;">TANGGAL TOP-UP</th>
                     <th style="white-space: nowrap !important;">KETERANGAN CAMPAIGN</th>
                     <th style="white-space: nowrap !important;">NOMINAL TOP-UP</th>
-                    <th style="text-align: right; white-space: nowrap !important;">BUKTI &amp; AKSI</th>
+                    <th class="th-actions" style="text-align: right; white-space: nowrap !important; min-width: 250px;">BUKTI &amp; AKSI</th>
                   </tr>
                 </thead>
                 <tbody id="ads-tbody">
@@ -731,37 +729,35 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                         <td style="font-weight: 700; color: #D92D20; font-size: 13.5px; white-space: nowrap;">
                           <?= format_rupiah($ad['amount']) ?>
                         </td>
-                        <td style="text-align: right; white-space: nowrap;">
-                          <div class="action-btn-group">
-                            
+                        <td class="td-actions" style="text-align: right; white-space: nowrap;">
+                          <div class="table-actions">
                             <!-- Invoice Ads Button -->
-                            <button type="button" class="btn-action-outline" onclick="openAdsVoucherModal(<?= $ad['id'] ?>)" title="Lihat &amp; Cetak Invoice / Voucher Top-Up Ads">
-                              <span>Invoice Ads</span>
+                            <button type="button" class="btn-action-view" onclick="openAdsVoucherModal(<?= $ad['id'] ?>)" title="Lihat &amp; Cetak Invoice / Voucher Top-Up Ads">
+                              Invoice Ads
                             </button>
 
                             <!-- Struk Button -->
                             <?php if (!empty($ad['receipt_file'])): ?>
                               <button type="button" class="btn-action-outline" onclick="viewReceiptImage('<?= UPLOAD_URL . '/' . htmlspecialchars($ad['receipt_file']) ?>', 'Struk Top-Up <?= htmlspecialchars($ad['platform']) ?>')" title="Lihat Struk Top-Up">
-                                <span>Lihat Struk</span>
+                                Lihat Struk
                               </button>
                             <?php else: ?>
-                              <button type="button" class="btn-action-upload" onclick="triggerUploadModal('ads', <?= $ad['id'] ?>, 'Upload Struk <?= htmlspecialchars($ad['platform']) ?>')" title="Upload Struk Top-Up">
-                                <span>+ Struk</span>
+                              <button type="button" class="btn-action-pay" onclick="triggerUploadModal('ads', <?= $ad['id'] ?>, 'Upload Struk <?= htmlspecialchars($ad['platform']) ?>')" title="Upload Struk Top-Up">
+                                + Struk
                               </button>
                             <?php endif; ?>
 
                             <!-- Edit Button -->
-                            <button type="button" class="btn-action-outline" onclick="openEditAdsModal(<?= $ad['id'] ?>)" title="Edit Top-Up Ads" style="font-weight: 600; padding: 4px 8px; font-size: 11.5px;">
-                              <span>Edit</span>
+                            <button type="button" class="btn-action-edit" onclick="openEditAdsModal(<?= $ad['id'] ?>)" title="Edit Top-Up Ads">
+                              Edit
                             </button>
 
                             <!-- Delete Button (Owner Only) -->
                             <?php if (is_owner()): ?>
-                              <button type="button" class="btn-icon-delete" onclick="confirmDeleteExpense('ads', <?= $ad['id'] ?>, 'Top-Up <?= htmlspecialchars($ad['platform']) ?>')" title="Hapus Top-Up Ads" style="font-size: 11.5px; font-weight: 600; padding: 4px 8px; width: auto; height: auto;">
-                                <span>Hapus</span>
+                              <button type="button" class="btn-action-delete btn-delete-ghost" onclick="confirmDeleteExpense('ads', <?= $ad['id'] ?>, 'Top-Up <?= htmlspecialchars($ad['platform']) ?>')" title="Hapus Top-Up Ads">
+                                Hapus
                               </button>
                             <?php endif; ?>
-
                           </div>
                         </td>
                       </tr>

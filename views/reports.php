@@ -91,7 +91,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=responsive-mobile-3.0">
 </head>
 <body>
   <div class="app-container">
@@ -206,16 +206,16 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
           </form>
 
           <!-- Performance Reports Table -->
-          <div class="table-responsive">
-            <table class="table-custom">
+          <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
+            <table class="table-custom" style="min-width: 880px !important; width: 100%;">
               <thead>
                 <tr>
-                  <th>Klien &amp; Brand</th>
-                  <th>Objektif &amp; Periode</th>
-                  <th>Spend &amp; Revenue</th>
-                  <th>ROAS &amp; Net ROI</th>
-                  <th>Conversions &amp; CPL/CPA</th>
-                  <th style="text-align: right;">Aksi</th>
+                  <th style="white-space: nowrap !important;">Klien &amp; Brand</th>
+                  <th style="white-space: nowrap !important;">Objektif &amp; Periode</th>
+                  <th style="white-space: nowrap !important;">Spend &amp; Revenue</th>
+                  <th style="white-space: nowrap !important;">ROAS &amp; Net ROI</th>
+                  <th style="white-space: nowrap !important;">Conversions &amp; CPL/CPA</th>
+                  <th class="th-actions" style="text-align: right; min-width: 180px; white-space: nowrap !important;">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -300,19 +300,19 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
                       </td>
 
                       <!-- Actions -->
-                      <td style="text-align: right;">
-                        <div style="display: inline-flex; align-items: center; gap: 6px;">
-                          <a href="<?= url("report-deck?id={$r['id']}&portal=client&_slot=client") ?>" class="btn btn-primary btn-sm" style="padding: 5px 10px;" title="Buka Pitch Deck">
-                            <span>Deck</span>
+                      <td class="td-actions" style="text-align: right; white-space: nowrap;">
+                        <div class="table-actions">
+                          <a href="<?= url("report-deck?id={$r['id']}&portal=client&_slot=client") ?>" class="btn-action-view" title="Buka Pitch Deck">
+                            Deck
                           </a>
 
                           <?php if (!$isClientUser && (is_owner() || is_admin())): ?>
-                            <a href="<?= url("reports-form?id={$r['id']}") ?>" class="btn btn-secondary btn-sm" style="padding: 5px 10px; font-weight: 600;" title="Edit Data Laporan">
-                              <span>Edit</span>
+                            <a href="<?= url("reports-form?id={$r['id']}") ?>" class="btn-action-edit" title="Edit Data Laporan">
+                              Edit
                             </a>
 
-                            <button type="button" class="btn btn-secondary btn-sm" style="padding: 5px 10px; color: var(--danger-text); font-weight: 600;" onclick="deleteReport(<?= $r['id'] ?>, '<?= htmlspecialchars(addslashes($r['client_company'])) ?>', '<?= htmlspecialchars($r['report_period']) ?>')" title="Hapus Laporan">
-                              <span>Hapus</span>
+                            <button type="button" class="btn-action-delete btn-delete-ghost" onclick="deleteReport(<?= $r['id'] ?>, '<?= htmlspecialchars(addslashes($r['client_company'])) ?>', '<?= htmlspecialchars($r['report_period']) ?>')" title="Hapus Laporan">
+                              Hapus
                             </button>
                           <?php endif; ?>
                         </div>

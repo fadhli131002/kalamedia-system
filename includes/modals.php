@@ -946,58 +946,196 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- 8. Modal Tambah Proyek Baru -->
 <div id="modal-create-project" class="modal-backdrop">
-  <div class="modal-dialog">
+  <div class="modal-dialog" style="max-width: 620px;">
     <div class="modal-header">
-      <h3 class="modal-title">+ Buat Proyek Baru</h3>
+      <div>
+        <h3 class="modal-title">+ Buat Proyek Baru</h3>
+        <span style="font-size: 12px; color: var(--text-secondary);">Pemisahan Otomatis Nominal Jasa Agensi vs Saldo Iklan Klien</span>
+      </div>
       <button type="button" class="modal-close" onclick="closeModal('modal-create-project')">&times;</button>
     </div>
     <form id="form-create-project" action="api/clients.php?action=create_project" method="POST">
       <div class="modal-body">
         <div class="form-group">
-          <label class="form-label">Klien Terkait *</label>
-          <select name="client_id" class="form-select" required>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label class="form-label" style="margin-bottom: 0;">Pilih Klien Terkait *</label>
+            <a href="javascript:void(0)" onclick="toggleInlineNewClient()" id="toggle-new-client-link" style="font-size: 11.5px; font-weight: 700; color: #175CD3; text-decoration: none;">
+              + Klien Baru
+            </a>
+          </div>
+          <select name="client_id" id="create-project-client-select" class="form-select" onchange="onProjectClientSelectChange(this.value)" required>
             <option value="">-- Pilih Klien --</option>
             <?php foreach ($allClients as $c): ?>
-              <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['company']) ?></option>
+              <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['company']) ?> (<?= htmlspecialchars($c['name']) ?>)</option>
             <?php endforeach; ?>
+            <option value="__new__">+ Klien Baru (Input Cepat Langsung)</option>
           </select>
         </div>
-        <div class="form-group">
-          <label class="form-label">Nama Proyek *</label>
-          <input type="text" name="name" class="form-control" placeholder="Contoh: Digital Campaign & Branding Q4" required>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Nilai Kontrak (Rp) *</label>
-            <div class="input-group-currency">
-              <span class="currency-addon">Rp</span>
-              <input type="text" name="contract_value" class="form-control rupiah-input" placeholder="0" required>
+
+        <!-- Inline New Client Box (Solves 0 clients empty dropdown issue) -->
+        <div id="inline-client-fields" style="<?= empty($allClients) ? 'display:block;' : 'display:none;' ?> background: #F8FAFC; border: 1.5px dashed #CBD5E1; border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+          <div style="font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+            <span>🏢 Data Klien Baru (Otomatis dibuat & terhubung ke Proyek):</span>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom: 8px;">
+              <label class="form-label" style="font-size: 11.5px;">Nama Perusahaan / Brand *</label>
+              <input type="text" name="inline_company" id="inline-company-input" class="form-control" placeholder="PT Sukses Mandiri / Brand X">
+            </div>
+            <div class="form-group" style="margin-bottom: 8px;">
+              <label class="form-label" style="font-size: 11.5px;">Nama PIC *</label>
+              <input type="text" name="inline_pic_name" id="inline-pic-input" class="form-control" placeholder="Bpk. Budi Santoso">
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Target Margin Profit (%)</label>
-            <input type="number" name="target_margin_percent" class="form-control" value="30.00" min="0" max="100" step="0.5">
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 11.5px;">Nomor WhatsApp</label>
+              <input type="text" name="inline_phone" class="form-control" placeholder="081234567890">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 11.5px;">Layanan Utama</label>
+              <select name="inline_service_type" class="form-select">
+                <option value="Jasa Iklan Meta & Google">Jasa Iklan Meta & Google</option>
+                <option value="Kelola Sosmed">Kelola Sosmed</option>
+                <option value="Desain Eceran / Satuan">Desain Eceran / Satuan</option>
+                <option value="Jasa Buat Web">Jasa Buat Web</option>
+              </select>
+            </div>
           </div>
         </div>
+
+        <div class="form-group">
+          <label class="form-label">Nama Proyek *</label>
+          <input type="text" name="name" class="form-control" placeholder="Contoh: Meta & Google Ads Campaign Q4" required>
+        </div>
+
+        <!-- Section: Pemisahan Nominal Jasa vs Saldo Ads -->
+        <div style="background: #F8F9FC; border: 1px solid #EAECF0; border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+          <div style="font-size: 12px; font-weight: 700; color: #344054; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+            <span>💰 Rincian Komponen Nilai Proyek (Financial Separation):</span>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label class="form-label" style="font-size: 11.5px; font-weight: 700; color: #175CD3;">
+                Nominal Jasa Agensi / Fee Manajemen (Rp) *
+              </label>
+              <div class="input-group-currency">
+                <span class="currency-addon" style="background: #EFF8FF; color: #175CD3; font-weight: 700;">Rp</span>
+                <input type="text" name="service_fee_amount" id="create-service-fee" class="form-control rupiah-input" placeholder="0" oninput="recalcProjectSummary('create')" required>
+              </div>
+              <span style="font-size: 10.5px; color: var(--text-muted); display: block; margin-top: 3px;">
+                Pendapatan murni Kalamedia (dihitung sebagai laba kotor)
+              </span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label class="form-label" style="font-size: 11.5px; font-weight: 700; color: #027A48;">
+                Saldo Ads Awal Klien (Rp)
+              </label>
+              <div class="input-group-currency">
+                <span class="currency-addon" style="background: #ECFDF3; color: #027A48; font-weight: 700;">Rp</span>
+                <input type="text" name="ads_budget_pool" id="create-ads-budget" class="form-control rupiah-input" placeholder="0" oninput="recalcProjectSummary('create')">
+              </div>
+              <span style="font-size: 10.5px; color: var(--text-muted); display: block; margin-top: 3px;">
+                Titipan belanja iklan klien (bukan laba agensi)
+              </span>
+            </div>
+          </div>
+
+          <!-- Live Financial Summary Card -->
+          <div id="create-project-summary-box" style="background: #FFFFFF; border: 1px solid #D0D5DD; border-radius: 8px; padding: 12px; margin-top: 6px;">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center;">
+              <div>
+                <span style="font-size: 10.5px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; display: block;">Total Tagihan Klien</span>
+                <span id="create-summary-total" style="font-size: 14px; font-weight: 800; color: #101828;">Rp 0</span>
+              </div>
+              <div style="border-left: 1px solid #EAECF0; border-right: 1px solid #EAECF0;">
+                <span style="font-size: 10.5px; color: #175CD3; font-weight: 600; text-transform: uppercase; display: block;">Porsi Jasa Agensi</span>
+                <span id="create-summary-service" style="font-size: 14px; font-weight: 800; color: #175CD3;">Rp 0 (0%)</span>
+              </div>
+              <div>
+                <span style="font-size: 10.5px; color: #027A48; font-weight: 600; text-transform: uppercase; display: block;">Porsi Saldo Ads</span>
+                <span id="create-summary-ads" style="font-size: 14px; font-weight: 800; color: #027A48;">Rp 0 (0%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Tanggal Mulai</label>
+            <label class="form-label">Target Margin Profit Jasa (%)</label>
+            <input type="number" name="target_margin_percent" class="form-control" value="30.00" min="0" max="100" step="0.5">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tanggal Mulai Kontrak</label>
             <input type="date" name="start_date" class="form-control" value="<?= date('Y-m-d') ?>">
           </div>
           <div class="form-group">
-            <label class="form-label">Target Selesai</label>
+            <label class="form-label">Target Selesai / Akhir Kontrak</label>
             <input type="date" name="end_date" class="form-control" value="<?= date('Y-m-d', strtotime('+3 months')) ?>">
           </div>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal('modal-create-project')">Batal</button>
-        <button type="submit" class="btn btn-primary">Simpan Proyek</button>
+        <button type="submit" class="btn btn-primary" id="btn-submit-create-project">Simpan Proyek Baru</button>
       </div>
     </form>
   </div>
 </div>
 <script>
+function onProjectClientSelectChange(val) {
+  const inlineBox = document.getElementById('inline-client-fields');
+  const compInput = document.getElementById('inline-company-input');
+  const picInput = document.getElementById('inline-pic-input');
+  if (val === '__new__') {
+    if (inlineBox) inlineBox.style.display = 'block';
+    if (compInput) compInput.setAttribute('required', 'required');
+    if (picInput) picInput.setAttribute('required', 'required');
+  } else {
+    if (inlineBox) inlineBox.style.display = 'none';
+    if (compInput) compInput.removeAttribute('required');
+    if (picInput) picInput.removeAttribute('required');
+  }
+}
+
+function toggleInlineNewClient() {
+  const sel = document.getElementById('create-project-client-select');
+  if (sel) {
+    sel.value = '__new__';
+    onProjectClientSelectChange('__new__');
+  }
+}
+
+function parseCurrencyVal(str) {
+  if (!str) return 0;
+  const cleaned = String(str).replace(/[^0-9]/g, '');
+  return parseFloat(cleaned) || 0;
+}
+
+function formatRupiahJs(num) {
+  return 'Rp ' + Math.round(num).toLocaleString('id-ID');
+}
+
+function recalcProjectSummary(prefix) {
+  const feeInput = document.getElementById(`${prefix}-service-fee`);
+  const adsInput = document.getElementById(`${prefix}-ads-budget`);
+  const feeVal = feeInput ? parseCurrencyVal(feeInput.value) : 0;
+  const adsVal = adsInput ? parseCurrencyVal(adsInput.value) : 0;
+  const total = feeVal + adsVal;
+
+  const totalEl = document.getElementById(`${prefix}-summary-total`);
+  const serviceEl = document.getElementById(`${prefix}-summary-service`);
+  const adsEl = document.getElementById(`${prefix}-summary-ads`);
+
+  const feePct = total > 0 ? Math.round((feeVal / total) * 100) : 0;
+  const adsPct = total > 0 ? Math.round((adsVal / total) * 100) : 0;
+
+  if (totalEl) totalEl.innerText = formatRupiahJs(total);
+  if (serviceEl) serviceEl.innerText = `${formatRupiahJs(feeVal)} (${feePct}%)`;
+  if (adsEl) adsEl.innerText = `${formatRupiahJs(adsVal)} (${adsPct}%)`;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   handleAjaxForm('form-create-project', () => {
     closeModal('modal-create-project');
@@ -1153,9 +1291,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <!-- 8c. Modal Edit Data Proyek -->
 <div id="modal-edit-project" class="modal-backdrop">
-  <div class="modal-dialog">
+  <div class="modal-dialog" style="max-width: 620px;">
     <div class="modal-header">
-      <h3 class="modal-title">Edit Data Proyek</h3>
+      <div>
+        <h3 class="modal-title">Edit Data Proyek</h3>
+        <span style="font-size: 12px; color: var(--text-secondary);">Perbarui Komponen Nominal Jasa Agensi vs Saldo Ads</span>
+      </div>
       <button type="button" class="modal-close" onclick="closeModal('modal-edit-project')">&times;</button>
     </div>
     <form id="form-edit-project" action="api/clients.php?action=update_project" method="POST">
@@ -1166,7 +1307,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <select name="client_id" id="edit-project-client-id" class="form-select" required>
             <option value="">-- Pilih Klien --</option>
             <?php foreach ($allClients as $c): ?>
-              <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['company']) ?></option>
+              <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['company']) ?> (<?= htmlspecialchars($c['name']) ?>)</option>
             <?php endforeach; ?>
           </select>
         </div>
@@ -1174,35 +1315,82 @@ document.addEventListener('DOMContentLoaded', () => {
           <label class="form-label">Nama Proyek *</label>
           <input type="text" name="name" id="edit-project-name" class="form-control" placeholder="Contoh: Digital Campaign & Branding Q4" required>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Nilai Kontrak (Rp) *</label>
-            <div class="input-group-currency">
-              <span class="currency-addon">Rp</span>
-              <input type="text" name="contract_value" id="edit-project-contract-value" class="form-control rupiah-input" placeholder="0" required>
+
+        <!-- Section: Pemisahan Nominal Jasa vs Saldo Ads -->
+        <div style="background: #F8F9FC; border: 1px solid #EAECF0; border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+          <div style="font-size: 12px; font-weight: 700; color: #344054; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+            <span>💰 Komponen Nilai Proyek (Financial Separation):</span>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label class="form-label" style="font-size: 11.5px; font-weight: 700; color: #175CD3;">
+                Nominal Jasa Agensi / Fee Manajemen (Rp) *
+              </label>
+              <div class="input-group-currency">
+                <span class="currency-addon" style="background: #EFF8FF; color: #175CD3; font-weight: 700;">Rp</span>
+                <input type="text" name="service_fee_amount" id="edit-service-fee" class="form-control rupiah-input" placeholder="0" oninput="recalcProjectSummary('edit')" required>
+              </div>
+              <span style="font-size: 10.5px; color: var(--text-muted); display: block; margin-top: 3px;">
+                Pendapatan murni Kalamedia (dihitung sebagai laba kotor)
+              </span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 10px;">
+              <label class="form-label" style="font-size: 11.5px; font-weight: 700; color: #027A48;">
+                Saldo Ads Awal Klien (Rp)
+              </label>
+              <div class="input-group-currency">
+                <span class="currency-addon" style="background: #ECFDF3; color: #027A48; font-weight: 700;">Rp</span>
+                <input type="text" name="ads_budget_pool" id="edit-ads-budget" class="form-control rupiah-input" placeholder="0" oninput="recalcProjectSummary('edit')">
+              </div>
+              <span style="font-size: 10.5px; color: var(--text-muted); display: block; margin-top: 3px;">
+                Titipan belanja iklan klien (bukan laba agensi)
+              </span>
             </div>
           </div>
+
+          <!-- Live Financial Summary Card -->
+          <div id="edit-project-summary-box" style="background: #FFFFFF; border: 1px solid #D0D5DD; border-radius: 8px; padding: 12px; margin-top: 6px;">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center;">
+              <div>
+                <span style="font-size: 10.5px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; display: block;">Total Tagihan Klien</span>
+                <span id="edit-summary-total" style="font-size: 14px; font-weight: 800; color: #101828;">Rp 0</span>
+              </div>
+              <div style="border-left: 1px solid #EAECF0; border-right: 1px solid #EAECF0;">
+                <span style="font-size: 10.5px; color: #175CD3; font-weight: 600; text-transform: uppercase; display: block;">Porsi Jasa Agensi</span>
+                <span id="edit-summary-service" style="font-size: 14px; font-weight: 800; color: #175CD3;">Rp 0 (0%)</span>
+              </div>
+              <div>
+                <span style="font-size: 10.5px; color: #027A48; font-weight: 600; text-transform: uppercase; display: block;">Porsi Saldo Ads</span>
+                <span id="edit-summary-ads" style="font-size: 14px; font-weight: 800; color: #027A48;">Rp 0 (0%)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
           <div class="form-group">
             <label class="form-label">Target Margin Profit (%)</label>
             <input type="number" name="target_margin_percent" id="edit-project-target-margin" class="form-control" value="30.00" min="0" max="100" step="0.5">
           </div>
+          <div class="form-group">
+            <label class="form-label">Status Proyek</label>
+            <select name="status" id="edit-project-status" class="form-select">
+              <option value="Planning">Planning</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+              <option value="On Hold">On Hold</option>
+            </select>
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Status Proyek</label>
-          <select name="status" id="edit-project-status" class="form-select">
-            <option value="Planning">Planning</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
-            <option value="On Hold">On Hold</option>
-          </select>
-        </div>
+
         <div class="form-row">
           <div class="form-group">
             <label class="form-label">Tanggal Mulai</label>
             <input type="date" name="start_date" id="edit-project-start-date" class="form-control">
           </div>
           <div class="form-group">
-            <label class="form-label">Target Selesai</label>
+            <label class="form-label">Target Selesai / Akhir Kontrak</label>
             <input type="date" name="end_date" id="edit-project-end-date" class="form-control">
           </div>
         </div>
@@ -1221,6 +1409,150 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => window.location.reload(), 800);
   });
 });
+</script>
+
+<!-- 8d. Modal Tambah / Top-Up Saldo Ads Proyek Sewaktu-Waktu -->
+<div id="modal-topup-project-ads" class="modal-backdrop">
+  <div class="modal-dialog" style="max-width: 540px;">
+    <div class="modal-header">
+      <div>
+        <h3 class="modal-title">+ Tambah Saldo Ads Klien</h3>
+        <span style="font-size: 12px; color: var(--text-secondary);">Top-Up Saldo Iklan Klien di Tengah Masa Kontrak Aktif</span>
+      </div>
+      <button type="button" class="modal-close" onclick="closeModal('modal-topup-project-ads')">&times;</button>
+    </div>
+    <form id="form-topup-project-ads" action="api/clients.php?action=topup_project_ads" method="POST" enctype="multipart/form-data">
+      <input type="hidden" name="project_id" id="topup-ads-project-id">
+      <div class="modal-body">
+        <!-- Project & Contract Info Banner -->
+        <div style="background: #F8F9FC; border: 1px solid #EAECF0; border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+            <div>
+              <span style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: #6E7485;">Proyek &amp; Klien</span>
+              <div style="font-size: 15px; font-weight: 800; color: #101828; margin: 2px 0 2px;" id="topup-ads-project-name">-</div>
+              <div style="font-size: 12px; color: #475467;" id="topup-ads-client-company">-</div>
+            </div>
+            <div style="text-align: right;">
+              <span id="topup-ads-contract-badge" class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 11px;">Kontrak Aktif</span>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;" id="topup-ads-contract-dates">-</div>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed #CBD5E1; margin-top: 10px; padding-top: 8px; font-size: 12px;">
+            <span style="color: var(--text-secondary);">Saldo Ads Proyek Saat Ini:</span>
+            <span id="topup-ads-current-pool" style="font-weight: 800; color: #027A48;">Rp 0</span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Nominal Tambah Saldo (Rp) <span style="color:red;">*</span></label>
+            <div class="input-group-currency">
+              <span class="currency-addon" style="background: #ECFDF3; color: #027A48; font-weight: 700;">Rp</span>
+              <input type="text" name="topup_amount" id="topup-ads-amount" class="form-control rupiah-input" placeholder="0" required>
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted); margin-top: 3px; display: block;">
+              Saldo ini otomatis menambah alokasi iklan tanpa mempengaruhi laba jasa agensi.
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Platform Iklan</label>
+            <select name="platform" class="form-select">
+              <option value="Meta Ads">Meta Ads (Facebook &amp; Instagram)</option>
+              <option value="Google Ads">Google Ads</option>
+              <option value="TikTok Ads">TikTok Ads</option>
+              <option value="Semua Platform">Semua Platform (Pool Bersama)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Upload Bukti Transfer Dana Ads Klien (JPG/PNG/PDF)</label>
+          <input type="file" name="receipt_file" class="form-control" accept="image/*,.pdf">
+          <span style="font-size: 11px; color: var(--text-muted); margin-top: 3px; display: block;">
+            Bukti transfer ini akan dapat dilihat transparan oleh Klien &amp; Tim Ads.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Catatan / Referensi Transfer</label>
+          <input type="text" name="notes" class="form-control" placeholder="Contoh: Top-up tambahan kampanye Flash Sale 11.11 via BCA">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-topup-project-ads')">Batal</button>
+        <button type="submit" class="btn btn-primary" id="btn-submit-topup-ads" style="background: #027A48; border-color: #027A48;">
+          Simpan &amp; Tambah Saldo Ads
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  handleAjaxForm('form-topup-project-ads', () => {
+    closeModal('modal-topup-project-ads');
+    setTimeout(() => window.location.reload(), 800);
+  });
+});
+</script>
+
+<!-- 8e. Modal Preview Bukti Transfer Saldo Ads (Universal Lightbox) -->
+<div id="modal-view-transfer-proof" class="modal-backdrop">
+  <div class="modal-dialog" style="max-width: 600px;">
+    <div class="modal-header">
+      <div>
+        <h4 class="modal-title" id="transfer-proof-modal-title">Bukti Transfer Saldo Ads</h4>
+        <span style="font-size: 12px; color: var(--text-secondary);" id="transfer-proof-modal-subtitle">Lampiran Transaksi Resmi</span>
+      </div>
+      <button type="button" class="modal-close" onclick="closeModal('modal-view-transfer-proof')">&times;</button>
+    </div>
+    <div class="modal-body" style="text-align: center; padding: 20px;">
+      <div id="transfer-proof-media-container" style="min-height: 220px; display: flex; align-items: center; justify-content: center; background: #F8F9FC; border: 1px solid #EAECF0; border-radius: 12px; overflow: hidden;">
+        <span style="color: var(--text-muted); font-size: 13px;">Memuat lampiran...</span>
+      </div>
+    </div>
+    <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+      <a id="transfer-proof-download-link" href="#" target="_blank" download class="btn btn-secondary btn-sm" style="font-weight: 700; gap: 6px; display: inline-flex; align-items: center;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Buka / Unduh Dokumen Asli</span>
+      </a>
+      <button type="button" class="btn btn-secondary" onclick="closeModal('modal-view-transfer-proof')">Tutup</button>
+    </div>
+  </div>
+</div>
+<script>
+function openUniversalTransferProofModal(fileUrl, title, subtitle) {
+  if (!fileUrl) {
+    alert('Lampiran bukti transfer tidak ditemukan.');
+    return;
+  }
+  const titleEl = document.getElementById('transfer-proof-modal-title');
+  const subEl = document.getElementById('transfer-proof-modal-subtitle');
+  const container = document.getElementById('transfer-proof-media-container');
+  const dlLink = document.getElementById('transfer-proof-download-link');
+
+  if (titleEl) titleEl.innerText = title || 'Bukti Transfer Saldo Ads';
+  if (subEl) subEl.innerText = subtitle || 'Lampiran Transaksi Resmi';
+  if (dlLink) dlLink.href = fileUrl;
+
+  const isPdf = fileUrl.toLowerCase().endsWith('.pdf');
+  if (isPdf) {
+    container.innerHTML = `
+      <div style="padding: 30px; text-align: center;">
+        <div style="font-size: 40px; margin-bottom: 12px;">📄</div>
+        <div style="font-size: 14px; font-weight: 700; color: #101828; margin-bottom: 6px;">Dokumen Bukti Transfer Berformat PDF</div>
+        <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 16px;">Klik tombol di bawah untuk membuka atau mengunduh file PDF.</p>
+        <a href="${fileUrl}" target="_blank" class="btn btn-primary btn-sm" style="font-weight: 700;">Buka Dokumen PDF di Tab Baru</a>
+      </div>
+    `;
+  } else {
+    container.innerHTML = `
+      <img src="${fileUrl}" alt="Bukti Transfer" style="max-width: 100%; max-height: 520px; object-fit: contain; border-radius: 8px; display: block; margin: 0 auto;">
+    `;
+  }
+  openModal('modal-view-transfer-proof');
+}
 </script>
 
 <!-- 9. Modal Input Gaji Karyawan (Payroll Outflow) -->

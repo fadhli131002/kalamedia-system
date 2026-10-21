@@ -3,6 +3,92 @@
  * Core Frontend Interactions & Modal Manager
  */
 
+// =========================================================================
+// ANTI-TERTUKAR TAB MULTI-ACCOUNT ISOLATION (Per-Tab sessionStorage Token)
+// =========================================================================
+(function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlUid = urlParams.get('_u');
+
+  if (urlUid) {
+    sessionStorage.setItem('kala_tab_uid', urlUid);
+  } else {
+    const tabUid = sessionStorage.getItem('kala_tab_uid');
+    // If _u not in URL but exists in this tab's sessionStorage, add to current browser history URL
+    if (tabUid && !window.location.pathname.endsWith('/login') && !window.location.pathname.endsWith('/logout')) {
+      const sep = window.location.search ? '&' : '?';
+      const cleanUrl = window.location.pathname + window.location.search + sep + '_u=' + encodeURIComponent(tabUid) + window.location.hash;
+      window.history.replaceState(null, '', cleanUrl);
+    }
+  }
+
+  // Intercept window.fetch to always pass X-Kala-Uid header and append _u to URL
+  const originalFetch = window.fetch;
+  window.fetch = function(input, init) {
+    const tabUid = sessionStorage.getItem('kala_tab_uid');
+    let url = (typeof input === 'string') ? input : (input && input.url ? input.url : '');
+    init = init || {};
+
+    if (tabUid) {
+      if (typeof url === 'string' && url.length > 0 && !url.includes('_u=')) {
+        const sep = url.includes('?') ? '&' : '?';
+        url = url + sep + '_u=' + encodeURIComponent(tabUid);
+        if (typeof input === 'string') {
+          input = url;
+        }
+      }
+      init.headers = init.headers || {};
+      if (init.headers instanceof Headers) {
+        if (!init.headers.has('X-Kala-Uid')) {
+          init.headers.set('X-Kala-Uid', tabUid);
+        }
+      } else if (Array.isArray(init.headers)) {
+        init.headers.push(['X-Kala-Uid', tabUid]);
+      } else {
+        init.headers['X-Kala-Uid'] = tabUid;
+      }
+    }
+    return originalFetch(input, init);
+  };
+
+  // Intercept all <a> clicks to preserve ?_u= on internal navigation
+  document.addEventListener('click', function(e) {
+    const link = e.target.closest('a');
+    if (!link) return;
+    const href = link.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+    if (href.startsWith('http://') || href.startsWith('https://')) {
+      if (!href.includes(window.location.hostname)) return;
+    }
+
+    const tabUid = sessionStorage.getItem('kala_tab_uid');
+    if (tabUid && !href.includes('_u=')) {
+      const sep = href.includes('?') ? '&' : '?';
+      link.setAttribute('href', href + sep + '_u=' + encodeURIComponent(tabUid));
+    }
+  }, true);
+
+  // Intercept all <form> submissions to attach hidden _u input
+  document.addEventListener('submit', function(e) {
+    const form = e.target;
+    if (!(form instanceof HTMLFormElement)) return;
+    const tabUid = sessionStorage.getItem('kala_tab_uid');
+    if (tabUid && !form.querySelector('input[name="_u"]')) {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = '_u';
+      input.value = tabUid;
+      form.appendChild(input);
+    }
+  }, true);
+
+  // Global helper to clean tab uid on logout
+  window.handleKalaLogout = function(logoutUrl) {
+    sessionStorage.removeItem('kala_tab_uid');
+    window.location.href = logoutUrl;
+  };
+})();
+
 // Mobile Sidebar Drawer Navigation Helper
 function toggleMobileSidebar() {
   const sidebar = document.querySelector('.sidebar') || document.getElementById('app-sidebar');

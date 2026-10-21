@@ -83,8 +83,8 @@ if (session_status() === PHP_SESSION_NONE) {
     // 2-hour session lifetime (7200 seconds)
     ini_set('session.gc_maxlifetime', 7200);
     ini_set('session.cookie_lifetime', 7200);
-    $activeCtx = detect_session_context();
-    session_name($activeCtx === 'client' ? 'KALASESS_CLIENT' : 'KALASESS_INTERNAL');
+    // Single unified session cookie for all tabs to enable Google-style multi-account isolation
+    session_name('KALASESS');
     session_start();
 }
 
@@ -138,10 +138,44 @@ function get_base_url() {
     return rtrim($script_dir, '/');
 }
 
-function url($path = '') {
+function url($path = '', $preserveUid = true) {
     $base = get_base_url();
     $path = ltrim($path, '/');
-    return $base ? $base . '/' . $path : '/' . $path;
+    $fullUrl = $base ? $base . '/' . $path : '/' . $path;
+
+    if (!$preserveUid || empty($path)) {
+        return $fullUrl;
+    }
+
+    // Ignore assets, protocol links, anchors, or javascript:
+    if (
+        strpos($path, 'assets/') === 0 ||
+        strpos($path, 'http://') === 0 ||
+        strpos($path, 'https://') === 0 ||
+        strpos($path, '#') === 0 ||
+        strpos($path, 'javascript:') === 0
+    ) {
+        return $fullUrl;
+    }
+
+    // If _u already present in path, don't append again
+    if (strpos($path, '_u=') !== false) {
+        return $fullUrl;
+    }
+
+    $tabUid = '';
+    if (function_exists('current_tab_uid')) {
+        $tabUid = current_tab_uid();
+    } elseif (!empty($_GET['_u'])) {
+        $tabUid = trim($_GET['_u']);
+    }
+
+    if (!empty($tabUid)) {
+        $sep = (strpos($fullUrl, '?') !== false) ? '&' : '?';
+        return $fullUrl . $sep . '_u=' . urlencode($tabUid);
+    }
+
+    return $fullUrl;
 }
 
 function format_rupiah($number, $with_prefix = true) {

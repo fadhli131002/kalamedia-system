@@ -329,34 +329,124 @@ if ($action === 'delete_client') {
     }
 }
 
-// 5. CREATE PROJECT
+// 5. CREATE PROJECT (With Service Fee vs Ads Budget Separation & Inline Client Creation)
 if ($action === 'create_project') {
-    $clientId = intval($_POST['client_id'] ?? 0);
+    if (!is_admin()) {
+        echo json_encode(['success' => false, 'message' => 'Akses ditolak: Hanya Owner dan Admin yang dapat menambahkan proyek.']);
+        exit;
+    }
+
+    $rawClientId = $_POST['client_id'] ?? '';
+    $clientId = ($rawClientId === '__new__') ? 0 : intval($rawClientId);
+
+    // Support Inline Client Creation if client doesn't exist yet or user chose '+ Buat Klien Baru Langsung'
+    if ($clientId <= 0) {
+        $newCompany = trim($_POST['new_client_company'] ?? ($_POST['company'] ?? ''));
+        $newName = trim($_POST['new_client_name'] ?? ($_POST['pic_name'] ?? ''));
+        $newEmail = trim($_POST['new_client_email'] ?? ($_POST['email'] ?? ''));
+        $newPhone = trim($_POST['new_client_phone'] ?? ($_POST['phone'] ?? ''));
+        $newPassword = trim($_POST['new_client_password'] ?? 'kalamedia123');
+
+        if (!empty($newCompany)) {
+            if (empty($newName)) $newName = $newCompany;
+            if (empty($newEmail)) {
+                $cleanSlug = preg_replace('/[^a-z0-9]/', '', strtolower($newCompany));
+                $newEmail = $cleanSlug . '@klien.kalamedia.id';
+            }
+
+            try {
+                // Check if already exists
+                $stmtChkC = $db->prepare("SELECT id FROM clients WHERE company = ? AND COALESCE(is_deleted, 0) = 0 LIMIT 1");
+                $stmtChkC->execute([$newCompany]);
+                $existingCId = $stmtChkC->fetchColumn();
+
+                if ($existingCId) {
+                    $clientId = (int)$existingCId;
+                } else {
+                    $insC = $db->prepare("
+                        INSERT INTO clients (name, company, company_name, pic_name, email, phone, contract_start_date, contract_end_date, contract_status, status, is_deleted)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'active', 'Active', 0)
+                    ");
+                    $startDateVal = !empty($_POST['start_date']) ? $_POST['start_date'] : date('Y-m-d');
+                    $endDateVal = !empty($_POST['end_date']) ? $_POST['end_date'] : date('Y-m-d', strtotime('+3 months'));
+                    $insC->execute([$newName, $newCompany, $newCompany, $newName, $newEmail, $newPhone, $startDateVal, $endDateVal]);
+                    $clientId = (int)$db->lastInsertId();
+
+                    // Create user login for this client
+                    $hashedPw = password_hash($newPassword ?: 'kalamedia123', PASSWORD_BCRYPT);
+                    $db->prepare("
+                        INSERT INTO users (name, email, password, role, employment_type, client_id, phone_wa, is_active, is_deleted)
+                        VALUES (?, ?, ?, 'client', 'client', ?, ?, 1, 0)
+                    ")->execute([$newName, $newEmail, $hashedPw, $clientId, $newPhone]);
+                }
+            } catch (Exception $e) {
+                echo json_encode(['success' => false, 'message' => 'Gagal membuat profil klien baru: ' . $e->getMessage()]);
+                exit;
+            }
+        }
+    }
+
     $name = trim($_POST['name'] ?? '');
-    $contractValue = parse_client_amount($_POST['contract_value'] ?? 0);
+    $serviceFee = parse_client_amount($_POST['service_fee_amount'] ?? 0);
+    $adsBudget = parse_client_amount($_POST['ads_budget_pool'] ?? 0);
+    $passedTotal = parse_client_amount($_POST['total_contract_value'] ?? ($_POST['contract_value'] ?? 0));
+
+    // Calculate total contract value
+    $totalContract = $serviceFee + $adsBudget;
+    if ($totalContract <= 0 && $passedTotal > 0) {
+        $totalContract = $passedTotal;
+        $serviceFee = $passedTotal;
+    }
+
     $targetMargin = floatval($_POST['target_margin_percent'] ?? 30.00);
     $status = $_POST['status'] ?? 'In Progress';
-    $startDate = $_POST['start_date'] ?? date('Y-m-d');
-    $endDate = !empty($_POST['end_date']) ? $_POST['end_date'] : null;
+    $startDate = !empty($_POST['start_date']) ? $_POST['start_date'] : date('Y-m-d');
+    $endDate = !empty($_POST['end_date']) ? $_POST['end_date'] : date('Y-m-d', strtotime('+3 months'));
 
-    if ($clientId <= 0 || empty($name) || $contractValue <= 0) {
-        echo json_encode(['success' => false, 'message' => 'Klien, nama project, dan nilai kontrak wajib diisi.']);
+    // Service Breakdown JSON
+    $services = $_POST['service_breakdown'] ?? [];
+    $serviceBreakdownJson = is_array($services) ? json_encode(array_values($services)) : null;
+
+    if ($clientId <= 0 || empty($name) || $totalContract <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Klien, nama project, dan nominal nilai jasa / tagihan wajib diisi.']);
         exit;
     }
 
     try {
         $stmt = $db->prepare("
-            INSERT INTO projects (client_id, name, contract_value, target_margin_percent, status, start_date, end_date, is_deleted)
-            VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+            INSERT INTO projects (
+                client_id, name, project_name, service_fee_amount, ads_budget_pool,
+                total_contract_value, contract_value, service_breakdown_json,
+                target_margin_percent, status, start_date, end_date, contract_start_date, contract_end_date, is_deleted
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
         ");
-        $stmt->execute([$clientId, $name, $contractValue, $targetMargin, $status, $startDate, $endDate]);
-        $projectId = $db->lastInsertId();
+        $stmt->execute([
+            $clientId, $name, $name, $serviceFee, $adsBudget,
+            $totalContract, $totalContract, $serviceBreakdownJson,
+            $targetMargin, $status, $startDate, $endDate, $startDate, $endDate
+        ]);
+        $projectId = (int)$db->lastInsertId();
 
-        log_activity('project', "Proyek Baru Dimulai: $name", "Nilai Kontrak: " . format_rupiah($contractValue), $contractValue);
+        // If ads budget allocated, log initial pool in ads_budget_logs
+        if ($adsBudget > 0) {
+            $db->prepare("
+                INSERT INTO ads_budget_logs (
+                    project_id, client_id, platform, allocated_budget, spend_installed, remaining_budget,
+                    status, notes, updated_by_user_id, updated_by_name, is_deleted
+                ) VALUES (?, ?, 'Meta Ads', ?, 0, ?, 'sedang_berjalan', 'Alokasi Saldo Ads Awal Kontrak Proyek', ?, ?, 0)
+            ")->execute([$projectId, $clientId, $adsBudget, $adsBudget, current_user_id(), current_user()['name'] ?? 'Admin']);
+        }
+
+        log_activity(
+            'project',
+            "Proyek Baru Dibuat: $name",
+            "Jasa Kalamedia: " . format_rupiah($serviceFee) . " | Saldo Ads: " . format_rupiah($adsBudget) . " | Total Tagihan: " . format_rupiah($totalContract),
+            $totalContract
+        );
 
         echo json_encode([
             'success' => true,
-            'message' => 'Data project berhasil dibuat!',
+            'message' => 'Data project dan alokasi saldo ads berhasil dibuat!',
             'project_id' => $projectId
         ]);
         exit;
@@ -378,10 +468,15 @@ if ($action === 'get_project') {
         exit;
     }
 
-    // STRICT WORKER FINANCIAL PRIVACY: Karyawan / Freelancer dilarang melihat nominal klien
+    // STRICT WORKER FINANCIAL PRIVACY: Karyawan / Freelancer dilarang keras melihat fee jasa agensi & margin profit!
     if (is_karyawan() || is_freelancer()) {
-        unset($project['contract_value']);
-        unset($project['target_margin_percent']);
+        unset(
+            $project['contract_value'],
+            $project['total_contract_value'],
+            $project['service_fee_amount'],
+            $project['target_margin_percent'],
+            $project['service_breakdown_json']
+        );
     }
 
     echo json_encode(['success' => true, 'project' => $project]);
@@ -398,13 +493,26 @@ if ($action === 'update_project') {
     $id = intval($_POST['id'] ?? 0);
     $clientId = intval($_POST['client_id'] ?? 0);
     $name = trim($_POST['name'] ?? '');
-    $contractValue = parse_client_amount($_POST['contract_value'] ?? 0);
+
+    $serviceFee = parse_client_amount($_POST['service_fee_amount'] ?? 0);
+    $adsBudget = parse_client_amount($_POST['ads_budget_pool'] ?? 0);
+    $passedTotal = parse_client_amount($_POST['total_contract_value'] ?? ($_POST['contract_value'] ?? 0));
+
+    $totalContract = $serviceFee + $adsBudget;
+    if ($totalContract <= 0 && $passedTotal > 0) {
+        $totalContract = $passedTotal;
+        $serviceFee = $passedTotal;
+    }
+
     $targetMargin = floatval($_POST['target_margin_percent'] ?? 30.00);
     $status = $_POST['status'] ?? 'In Progress';
     $startDate = !empty($_POST['start_date']) ? $_POST['start_date'] : null;
     $endDate = !empty($_POST['end_date']) ? $_POST['end_date'] : null;
 
-    if ($id <= 0 || $clientId <= 0 || empty($name) || $contractValue <= 0) {
+    $services = $_POST['service_breakdown'] ?? [];
+    $serviceBreakdownJson = is_array($services) && !empty($services) ? json_encode(array_values($services)) : null;
+
+    if ($id <= 0 || $clientId <= 0 || empty($name) || $totalContract <= 0) {
         echo json_encode(['success' => false, 'message' => 'Klien, nama project, dan nilai kontrak wajib diisi.']);
         exit;
     }
@@ -412,17 +520,175 @@ if ($action === 'update_project') {
     try {
         $stmt = $db->prepare("
             UPDATE projects 
-            SET client_id = ?, name = ?, contract_value = ?, target_margin_percent = ?, status = ?, start_date = ?, end_date = ?
+            SET client_id = ?, name = ?, project_name = ?,
+                service_fee_amount = ?, ads_budget_pool = ?,
+                total_contract_value = ?, contract_value = ?,
+                service_breakdown_json = COALESCE(?, service_breakdown_json),
+                target_margin_percent = ?, status = ?, start_date = ?, end_date = ?
             WHERE id = ?
         ");
-        $stmt->execute([$clientId, $name, $contractValue, $targetMargin, $status, $startDate, $endDate, $id]);
+        $stmt->execute([
+            $clientId, $name, $name,
+            $serviceFee, $adsBudget,
+            $totalContract, $totalContract,
+            $serviceBreakdownJson,
+            $targetMargin, $status, $startDate, $endDate, $id
+        ]);
 
-        log_activity('project', "Data Proyek Diperbarui: $name", "Nilai Kontrak: " . format_rupiah($contractValue), $contractValue);
+        log_activity(
+            'project',
+            "Data Proyek Diperbarui: $name",
+            "Jasa Agensi: " . format_rupiah($serviceFee) . " | Saldo Ads: " . format_rupiah($adsBudget) . " | Total: " . format_rupiah($totalContract),
+            $totalContract
+        );
 
         echo json_encode(['success' => true, 'message' => 'Data project berhasil diperbarui!']);
         exit;
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        exit;
+    }
+}
+
+// 7b. TOP-UP / TAMBAH SALDO ADS KLIEN SEWAKTU-WAKTU (Hanya jika kontrak aktif)
+if ($action === 'topup_project_ads') {
+    if (!is_admin()) {
+        echo json_encode(['success' => false, 'message' => 'Akses ditolak: Hanya Owner dan Admin yang dapat menambah saldo Ads.']);
+        exit;
+    }
+
+    $projectId = intval($_POST['project_id'] ?? 0);
+    $topupAmount = parse_client_amount($_POST['topup_amount'] ?? 0);
+    $platform = trim($_POST['platform'] ?? 'Meta Ads');
+    $notes = trim($_POST['notes'] ?? '');
+    $transactionDate = !empty($_POST['transaction_date']) ? trim($_POST['transaction_date']) : date('Y-m-d');
+
+    if ($projectId <= 0 || $topupAmount <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Pilih proyek dan masukkan nominal penambahan saldo Ads yang valid (> Rp 0).']);
+        exit;
+    }
+
+    try {
+        // Fetch project and client contract
+        $stmtP = $db->prepare("
+            SELECT p.*, c.company as client_company, c.contract_end_date as client_contract_end, c.contract_status as client_contract_status
+            FROM projects p
+            JOIN clients c ON p.client_id = c.id
+            WHERE p.id = ? AND COALESCE(p.is_deleted, 0) = 0
+            LIMIT 1
+        ");
+        $stmtP->execute([$projectId]);
+        $project = $stmtP->fetch();
+
+        if (!$project) {
+            echo json_encode(['success' => false, 'message' => 'Data proyek tidak ditemukan.']);
+            exit;
+        }
+
+        // VALIDASI MASA KONTRAK KLIEN
+        $today = date('Y-m-d');
+        $contractEndDate = !empty($project['end_date']) ? $project['end_date'] : $project['client_contract_end'];
+        $contractStatus = $project['contract_status'] ?: $project['client_contract_status'];
+
+        if (($contractEndDate && $today > $contractEndDate) || $contractStatus === 'expired') {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Masa kontrak habis — perpanjang kontrak terlebih dahulu sebelum menambah saldo Ads!'
+            ]);
+            exit;
+        }
+
+        // Upload Bukti Transfer Top-Up Saldo Ads (jika ada)
+        $receiptPath = null;
+        if (!empty($_FILES['receipt_file']['name'])) {
+            $file = $_FILES['receipt_file'];
+            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            $allowed = ['jpg', 'jpeg', 'png', 'webp', 'pdf'];
+
+            if (!in_array($ext, $allowed)) {
+                echo json_encode(['success' => false, 'message' => 'Format file bukti transfer harus JPG, PNG, WEBP, atau PDF.']);
+                exit;
+            }
+
+            if (!is_dir(UPLOAD_DIR)) {
+                @mkdir(UPLOAD_DIR, 0777, true);
+            }
+
+            $fileName = 'topup_ads_' . $projectId . '_' . time() . '.' . $ext;
+            $dest = UPLOAD_DIR . '/' . $fileName;
+
+            if (move_uploaded_file($file['tmp_name'], $dest)) {
+                $receiptPath = UPLOAD_URL . '/' . $fileName;
+            }
+        }
+
+        // UPDATE projects: Tambah ads_budget_pool dan total_contract_value TANPA MENGUBAH service_fee_amount!
+        $db->beginTransaction();
+
+        $db->prepare("
+            UPDATE projects 
+            SET ads_budget_pool = COALESCE(ads_budget_pool, 0) + ?,
+                total_contract_value = COALESCE(total_contract_value, contract_value, 0) + ?,
+                contract_value = COALESCE(contract_value, 0) + ?
+            WHERE id = ?
+        ")->execute([$topupAmount, $topupAmount, $topupAmount, $projectId]);
+
+        // Insert log in ads_budget_logs
+        $db->prepare("
+            INSERT INTO ads_budget_logs (
+                project_id, client_id, platform, allocated_budget, spend_installed, remaining_budget,
+                status, notes, attachment_proof, updated_by_user_id, updated_by_name, is_deleted
+            ) VALUES (?, ?, ?, ?, 0, ?, 'sedang_berjalan', ?, ?, ?, ?, 0)
+        ")->execute([
+            $projectId,
+            (int)$project['client_id'],
+            $platform,
+            $topupAmount,
+            $topupAmount,
+            $notes ?: 'Top-up saldo iklan klien masa kontrak aktif',
+            $receiptPath,
+            current_user_id(),
+            current_user()['name'] ?? 'Admin'
+        ]);
+
+        // Insert into ads_topup_transactions if receipt exists
+        if ($receiptPath) {
+            $db->prepare("
+                INSERT INTO ads_topup_transactions (
+                    client_id, project_id, uploaded_by_user_id, platform, topup_amount,
+                    spend_installed, transaction_date, receipt_file, notes, status, is_deleted
+                ) VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?, 'recorded', 0)
+            ")->execute([
+                (int)$project['client_id'],
+                $projectId,
+                current_user_id(),
+                $platform,
+                $topupAmount,
+                $transactionDate,
+                $receiptPath,
+                $notes
+            ]);
+        }
+
+        $db->commit();
+
+        log_activity(
+            'ads',
+            "Top-Up Saldo Ads Proyek: {$project['name']}",
+            "Nominal: " . format_rupiah($topupAmount) . " ({$platform}) untuk {$project['client_company']}",
+            $topupAmount
+        );
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Top-up saldo Ads sebesar ' . format_rupiah($topupAmount) . ' berhasil ditambahkan ke proyek!',
+            'topup_amount' => $topupAmount,
+            'receipt_path' => $receiptPath ? url($receiptPath) : null
+        ]);
+        exit;
+    } catch (Exception $e) {
+        if ($db->inTransaction()) $db->rollBack();
+        echo json_encode(['success' => false, 'message' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         exit;
     }
 }

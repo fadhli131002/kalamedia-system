@@ -111,7 +111,7 @@ if ($role === 'client' && $client) {
       <a href="https://wa.me/62895361622252?text=Halo%20Tim%20Kalamedia,%20saya%20ingin%20memperpanjang%20kontrak%20layanan%20<?= urlencode($client['company']) ?>" target="_blank" class="btn btn-primary" style="font-weight: 700; background: #027A48; border-color: #027A48;">
         Hubungi WhatsApp Tim Kalamedia
       </a>
-      <a href="api/auth.php?action=logout&_slot=client" class="btn btn-secondary" style="font-weight: 600;">
+      <a href="<?= url('logout') ?>?context=client" onclick="if(window.handleKalaLogout){handleKalaLogout(this.href);return false;}else{sessionStorage.removeItem('kala_tab_uid');}" class="btn btn-secondary" style="font-weight: 600;">
         Keluar (Logout)
       </a>
     </div>
@@ -209,9 +209,19 @@ $stmtReports = $db->prepare("
 $stmtReports->execute([$clientId]);
 $clientReports = $stmtReports->fetchAll(PDO::FETCH_ASSOC);
 
-// Fetch Ads Top-Up Transactions & Proof Receipts for this client
+// Fetch Ads Top-Up Transactions & Proof Receipts for this client (2-Stage Verification)
 $stmtAdsTopup = $db->prepare("
-    SELECT t.*, u.name as uploader_name, p.name as project_name
+    SELECT t.*, 
+           COALESCE(NULLIF(t.transfer_amount_owner, 0), t.topup_amount, 0) as transfer_amount_owner,
+           COALESCE(t.transfer_proof_owner, t.receipt_file) as transfer_proof_owner,
+           COALESCE(NULLIF(t.platform_topup_amount, 0), t.topup_amount, 0) as platform_topup_amount,
+           COALESCE(t.platform_topup_proof, t.receipt_file) as platform_topup_proof,
+           COALESCE(t.platform_topup_status, 'completed') as platform_topup_status,
+           COALESCE(NULLIF(t.ad_spend_amount, 0), t.spend_installed, 0) as ad_spend_amount,
+           COALESCE(t.campaign_status, 'running') as campaign_status,
+           COALESCE(t.stage_label, t.notes, 'Tahap 1') as stage_label,
+           COALESCE(t.assigned_user_name, u.name, 'Tim Ads Kalamedia') as assigned_user_name,
+           u.name as uploader_name, p.name as project_name
     FROM ads_topup_transactions t
     LEFT JOIN users u ON t.uploaded_by_user_id = u.id
     LEFT JOIN projects p ON t.project_id = p.id
@@ -220,6 +230,54 @@ $stmtAdsTopup = $db->prepare("
 ");
 $stmtAdsTopup->execute([$clientId]);
 $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
+
+// Dynamic Aggregation for Client Ad Funds (100% Dynamic from DB)
+$stmtClientAdFunds = $db->prepare("
+    SELECT 
+        COALESCE(SUM(COALESCE(NULLIF(p.ads_budget_pool, 0), p.allocated_ads_budget, 0)), 0) as total_pagu_ads_klien,
+        COALESCE((
+            SELECT SUM(COALESCE(NULLIF(t.transfer_amount_owner, 0), t.topup_amount, 0))
+            FROM ads_topup_transactions t
+            WHERE t.client_id = ? AND COALESCE(t.is_deleted, 0) = 0
+        ), 0) as total_ditransfer_ke_tim_ads,
+        COALESCE((
+            SELECT SUM(COALESCE(NULLIF(t.platform_topup_amount, 0), t.topup_amount, 0))
+            FROM ads_topup_transactions t
+            WHERE t.client_id = ? AND COALESCE(t.is_deleted, 0) = 0 AND (t.platform_topup_status IS NULL OR t.platform_topup_status = 'completed')
+        ), 0) as total_topup_ke_platform,
+        COALESCE((
+            SELECT SUM(COALESCE(NULLIF(t.ad_spend_amount, 0), t.spend_installed, 0))
+            FROM ads_topup_transactions t
+            WHERE t.client_id = ? AND COALESCE(t.is_deleted, 0) = 0
+        ), 0) as total_spend_terpakai
+    FROM projects p
+    WHERE p.client_id = ? AND COALESCE(p.is_deleted, 0) = 0
+");
+$stmtClientAdFunds->execute([$clientId, $clientId, $clientId, $clientId]);
+$clientAdMetrics = $stmtClientAdFunds->fetch(PDO::FETCH_ASSOC) ?: [
+    'total_pagu_ads_klien' => 0,
+    'total_ditransfer_ke_tim_ads' => 0,
+    'total_topup_ke_platform' => 0,
+    'total_spend_terpakai' => 0
+];
+
+$clientPaguTotal = floatval($clientAdMetrics['total_pagu_ads_klien']);
+$clientTransferredTotal = floatval($clientAdMetrics['total_ditransfer_ke_tim_ads']);
+$clientTopupPlatformTotal = floatval($clientAdMetrics['total_topup_ke_platform']);
+$clientSpendTotal = floatval($clientAdMetrics['total_spend_terpakai']);
+$clientSisaPaguDiOwner = $clientPaguTotal - $clientTransferredTotal;
+$clientSisaDiTimAds = $clientTransferredTotal - $clientSpendTotal;
+
+// Check pending limit request from Owner to Client
+$stmtPendingLimitReq = $db->prepare("
+    SELECT r.*, p.name as project_name 
+    FROM ads_balance_requests r
+    LEFT JOIN projects p ON r.project_id = p.id
+    WHERE r.client_id = ? AND r.request_type = 'owner_to_client' AND r.status = 'pending'
+    ORDER BY r.id DESC LIMIT 1
+");
+$stmtPendingLimitReq->execute([$clientId]);
+$pendingLimitRequest = $stmtPendingLimitReq->fetch(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -229,6 +287,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
   <title>Client Portal - <?= htmlspecialchars($client['company'] ?? 'Kalamedia') ?></title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
+  <?php render_tab_uid_script(); ?>
   <style>
     /* Client Portal Custom Styles - Minimal Finance (Bankio) */
     .portal-hero {
@@ -1157,15 +1216,15 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
-              <table class="table-custom" style="min-width: 740px; width: 100%;">
+              <table class="table-custom" style="min-width: 950px; width: 100%;">
                 <thead>
                   <tr>
-                    <th style="min-width: 210px; white-space: nowrap;">TANGGAL &amp; PETUGAS ADS</th>
+                    <th style="min-width: 190px; white-space: nowrap;">TANGGAL &amp; PETUGAS ADS</th>
                     <th style="white-space: nowrap;">PROYEK &amp; PLATFORM</th>
-                    <th style="white-space: nowrap;">NOMINAL TOP-UP</th>
-                    <th style="white-space: nowrap;">ANGGARAN TERPASANG</th>
-                    <th style="white-space: nowrap;">CATATAN TIM ADS</th>
-                    <th style="text-align: right; white-space: nowrap;">BUKTI TRANSAKSI</th>
+                    <th style="white-space: nowrap;">TAHAP 1: OWNER &rarr; TIM ADS</th>
+                    <th style="white-space: nowrap;">TAHAP 2: TIM ADS &rarr; META/GOOGLE</th>
+                    <th style="white-space: nowrap;">REALISASI SPEND &amp; SISA</th>
+                    <th style="white-space: nowrap;">STATUS KAMPANYE</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1180,14 +1239,23 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
                       </td>
                     </tr>
                   <?php else: ?>
-                    <?php foreach ($clientAdsTopups as $topup): ?>
+                    <?php foreach ($clientAdsTopups as $topup): 
+                      $tfOwnerAmount = floatval($topup['transfer_amount_owner']);
+                      $tfOwnerProof = $topup['transfer_proof_owner'];
+                      $topupPlatformAmount = floatval($topup['platform_topup_amount']);
+                      $topupPlatformProof = $topup['platform_topup_proof'];
+                      $topupPlatformStatus = $topup['platform_topup_status'];
+                      $spendAktual = floatval($topup['ad_spend_amount']);
+                      $sisaDiTim = max(0, $tfOwnerAmount - $spendAktual);
+                      $campStatus = $topup['campaign_status'];
+                    ?>
                       <tr>
-                        <td style="min-width: 210px; white-space: nowrap;">
+                        <td style="min-width: 190px; white-space: nowrap;">
                           <div style="font-weight: 700; color: #101828;">
                             <?= date('d M Y', strtotime($topup['transaction_date'])) ?>
                           </div>
                           <div style="font-size: 11px; color: var(--text-secondary);">
-                            Petugas: <b><?= htmlspecialchars($topup['uploader_name'] ?? 'Tim Ads Kalamedia') ?></b>
+                            Petugas: <b><?= htmlspecialchars($topup['assigned_user_name'] ?? $topup['uploader_name'] ?? 'Tim Ads') ?></b>
                           </div>
                         </td>
                         <td style="white-space: nowrap;">
@@ -1199,27 +1267,65 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
                             if (stripos($topup['platform'], 'Google') !== false) { $pBg = '#EFF8FF'; $pCol = '#175CD3'; }
                             elseif (stripos($topup['platform'], 'TikTok') !== false) { $pBg = '#F8F9FC'; $pCol = '#0C111D'; }
                           ?>
-                          <span class="badge" style="background: <?= $pBg ?>; color: <?= $pCol ?>; font-weight: 700; font-size: 10.5px;">
-                            <?= htmlspecialchars($topup['platform']) ?>
-                          </span>
+                          <div style="display: flex; gap: 4px; align-items: center; margin-top: 2px;">
+                            <span class="badge" style="background: <?= $pBg ?>; color: <?= $pCol ?>; font-weight: 700; font-size: 10px;">
+                              <?= htmlspecialchars($topup['platform']) ?>
+                            </span>
+                            <span style="font-size: 11px; color: var(--text-muted);">&bull; <?= htmlspecialchars($topup['stage_label'] ?? 'Tahap 1') ?></span>
+                          </div>
                         </td>
-                        <td style="font-weight: 800; color: #027A48; white-space: nowrap;">
-                          + Rp <?= number_format($topup['topup_amount'], 0, ',', '.') ?>
-                        </td>
-                        <td style="font-weight: 700; color: #101828; white-space: nowrap;">
-                          Rp <?= number_format($topup['spend_installed'], 0, ',', '.') ?>
-                        </td>
-                        <td style="font-size: 12.5px; color: var(--text-secondary); max-width: 260px;">
-                          <?= htmlspecialchars($topup['notes'] ?: 'Pengisian saldo iklan kampanye berjalan lancar.') ?>
-                        </td>
-                        <td style="text-align: right; white-space: nowrap;">
-                          <?php if (!empty($topup['receipt_file'])): ?>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($topup['receipt_file'])) ?>', 'Bukti Transaksi Top-Up Saldo <?= htmlspecialchars(addslashes($topup['platform'])) ?>')" style="font-size: 11.5px; font-weight: 700; gap: 4px; display: inline-flex; align-items: center;">
-                              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                              Lihat Bukti Transaksi
+                        <td style="white-space: nowrap;">
+                          <div style="font-weight: 800; color: #175CD3; font-size: 13.5px;">
+                            Rp <?= number_format($tfOwnerAmount, 0, ',', '.') ?>
+                          </div>
+                          <?php if (!empty($tfOwnerProof)): ?>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($tfOwnerProof)) ?>', 'Bukti Transfer Owner ke Tim Ads - <?= htmlspecialchars(addslashes($topup['project_name'] ?? '')) ?>')" style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; color: #175CD3; border-color: #B2CCFF; background: #EFF8FF;">
+                              📄 Bukti TF Owner
                             </button>
                           <?php else: ?>
-                            <span style="font-size: 11.5px; color: var(--text-muted); font-style: italic;">Tidak ada lampiran</span>
+                            <span style="font-size: 10.5px; color: var(--text-muted); font-style: italic; display: block; margin-top: 2px;">Belum ada lampiran</span>
+                          <?php endif; ?>
+                        </td>
+                        <td style="white-space: nowrap;">
+                          <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="font-weight: 800; color: #027A48; font-size: 13.5px;">
+                              Rp <?= number_format($topupPlatformAmount, 0, ',', '.') ?>
+                            </span>
+                            <?php if ($topupPlatformStatus === 'completed'): ?>
+                              <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 9.5px;">✓ Top-Up Selesai</span>
+                            <?php else: ?>
+                              <span class="badge" style="background: #EFF8FF; color: #175CD3; font-weight: 700; font-size: 9.5px;">Menunggu Top-Up</span>
+                            <?php endif; ?>
+                          </div>
+                          <?php if (!empty($topupPlatformProof)): ?>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($topupPlatformProof)) ?>', 'Bukti Top-Up Platform <?= htmlspecialchars(addslashes($topup['platform'])) ?> - <?= htmlspecialchars(addslashes($topup['project_name'] ?? '')) ?>')" style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; color: #027A48; border-color: #A6F4C5; background: #ECFDF3;">
+                              📈 Bukti Top-Up Ads
+                            </button>
+                          <?php else: ?>
+                            <span style="font-size: 10.5px; color: var(--text-muted); font-style: italic; display: block; margin-top: 2px;">Menunggu tim Ads</span>
+                          <?php endif; ?>
+                        </td>
+                        <td style="white-space: nowrap;">
+                          <div style="font-size: 11.5px; color: #475467;">
+                            Spend: <b style="color: #101828;">Rp <?= number_format($spendAktual, 0, ',', '.') ?></b>
+                          </div>
+                          <div style="font-size: 11.5px; color: <?= $sisaDiTim <= 0 ? '#B42318' : '#027A48' ?>; font-weight: 700; margin-top: 2px;">
+                            Sisa Saldo: Rp <?= number_format($sisaDiTim, 0, ',', '.') ?>
+                          </div>
+                        </td>
+                        <td style="white-space: nowrap;">
+                          <?php if ($campStatus === 'running' || $sisaDiTim > 0): ?>
+                            <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 11px;">
+                              ● Iklan Jalan
+                            </span>
+                          <?php elseif ($campStatus === 'paused'): ?>
+                            <span class="badge" style="background: #FEF0C7; color: #B54708; font-weight: 700; font-size: 11px;">
+                              ❚❚ Dijeda
+                            </span>
+                          <?php else: ?>
+                            <span class="badge" style="background: #FEF3F2; color: #B42318; font-weight: 700; font-size: 11px;">
+                              ✕ Saldo Habis
+                            </span>
                           <?php endif; ?>
                         </td>
                       </tr>
@@ -1416,14 +1522,92 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
           </div>
         </div>
 
-        <!-- TAB 5: Client Live Ads Transparency -->
+        <!-- TAB 5: Client Live Ads Transparency (100% Dynamic Aggregation) -->
         <div id="tab-pane-ads" style="display: none;">
+          <?php if (!empty($pendingLimitRequest)): ?>
+            <!-- Prominent Banner Notifikasi Pengajuan Tambah Limit dari Owner -->
+            <div id="client-banner-limit-request" style="background: linear-gradient(135deg, #FEF0C7 0%, #FEDF89 100%); border: 1.5px solid #FDB022; border-radius: 14px; padding: 18px 20px; margin-bottom: 22px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.18); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+              <div style="display: flex; align-items: flex-start; gap: 14px; max-width: 760px;">
+                <span style="font-size: 26px; line-height: 1;">🔔</span>
+                <div>
+                  <div style="font-size: 14.5px; font-weight: 800; color: #7A2E0E;">
+                    Pengajuan Penambahan Limit Saldo Iklan dari Owner Kalamedia
+                  </div>
+                  <p style="font-size: 13px; color: #93370D; margin: 4px 0 0; line-height: 1.5;">
+                    Owner mengajukan penambahan limit saldo iklan sebesar <b>Rp <?= number_format($pendingLimitRequest['amount_requested'], 0, ',', '.') ?></b> untuk proyek <b><?= htmlspecialchars($pendingLimitRequest['project_name'] ?? 'Kampanye Iklan') ?></b> agar penayangan iklan di platform tidak terhenti.
+                    <?php if (!empty($pendingLimitRequest['notes'])): ?>
+                      <br><i>Catatan Owner: "<?= htmlspecialchars($pendingLimitRequest['notes']) ?>"</i>
+                    <?php endif; ?>
+                  </p>
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="openClientApproveLimitModal(<?= (int)$pendingLimitRequest['project_id'] ?>, <?= (int)$pendingLimitRequest['id'] ?>, <?= (float)$pendingLimitRequest['amount_requested'] ?>, '<?= htmlspecialchars(addslashes($pendingLimitRequest['notes'] ?? '')) ?>')" style="background: #027A48; border-color: #027A48; font-weight: 800; font-size: 12.5px; padding: 10px 18px; border-radius: 10px; box-shadow: 0 2px 6px rgba(2,122,72,0.3); display: inline-flex; align-items: center; gap: 6px;">
+                <span>✅ Setuju Tambah Limit &amp; Upload Bukti Transfer</span>
+              </button>
+            </div>
+          <?php endif; ?>
+
+          <!-- 4 Kartu KPI Dana Iklan di Portal Klien -->
+          <div class="kpi-grid portal-stats-grid" id="client-ads-kpi-row" style="grid-template-columns: repeat(4, 1fr) !important; gap: 14px; margin-bottom: 24px;">
+            <!-- Kartu 1: Total Pagu Saldo Ads Anda -->
+            <div class="kpi-card" style="border-top: 3px solid #5925DC;">
+              <div class="kpi-header">
+                <span class="kpi-title" style="color: #5925DC; font-weight: 700;">Total Pagu Saldo Ads Anda</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5925DC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              </div>
+              <div class="kpi-value" id="kpi-client-pagu" style="color: #101828; font-size: 22px;">
+                Rp <?= number_format($clientPaguTotal, 0, ',', '.') ?>
+              </div>
+              <div class="kpi-meta">Pagu limit saldo iklan yang Anda alokasikan</div>
+            </div>
+
+            <!-- Kartu 2: Dicairkan ke Tim Ads -->
+            <div class="kpi-card" style="border-top: 3px solid #175CD3;">
+              <div class="kpi-header">
+                <span class="kpi-title" style="color: #175CD3; font-weight: 700;">Dicairkan ke Tim Ads</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#175CD3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 9V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><rect x="9" y="9" width="12" height="10" rx="2"/></svg>
+              </div>
+              <div class="kpi-value" id="kpi-client-transferred" style="color: #175CD3; font-size: 22px;">
+                Rp <?= number_format($clientTransferredTotal, 0, ',', '.') ?>
+              </div>
+              <div class="kpi-meta">Dana dicairkan Owner ke Tim Ads pelaksana</div>
+            </div>
+
+            <!-- Kartu 3: Sudah Top-Up & Jalan di Meta/Google -->
+            <div class="kpi-card" style="border-top: 3px solid #027A48;">
+              <div class="kpi-header">
+                <span class="kpi-title" style="color: #027A48; font-weight: 700;">Top-Up &amp; Jalan di Platform</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#027A48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+              </div>
+              <div class="kpi-value" id="kpi-client-topup-platform" style="color: #027A48; font-size: 22px;">
+                Rp <?= number_format($clientTopupPlatformTotal, 0, ',', '.') ?>
+              </div>
+              <div class="kpi-meta" id="kpi-client-spend-meta">
+                Spend: <b>Rp <?= number_format($clientSpendTotal, 0, ',', '.') ?></b> &bull; <?= ($clientSisaDiTimAds > 0 || $clientTopupPlatformTotal > 0) ? 'Iklan Jalan' : 'Dijeda' ?>
+              </div>
+            </div>
+
+            <!-- Kartu 4: Sisa Pagu Saldo Ads Anda -->
+            <div class="kpi-card <?= $clientSisaPaguDiOwner <= 0 ? 'urgent' : '' ?>" style="border-top: 3px solid <?= $clientSisaPaguDiOwner <= 0 ? '#B42318' : '#059669' ?>;">
+              <div class="kpi-header">
+                <span class="kpi-title" style="color: <?= $clientSisaPaguDiOwner <= 0 ? '#B42318' : '#059669' ?>; font-weight: 700;">Sisa Pagu Saldo Ads Anda</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="<?= $clientSisaPaguDiOwner <= 0 ? '#B42318' : '#059669' ?>" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <div class="kpi-value" id="kpi-client-remaining" style="color: <?= $clientSisaPaguDiOwner <= 0 ? '#B42318' : '#059669' ?>; font-size: 22px;">
+                Rp <?= number_format($clientSisaPaguDiOwner, 0, ',', '.') ?>
+              </div>
+              <div class="kpi-meta" id="kpi-client-remaining-meta">
+                Di Owner: Rp <?= number_format($clientSisaPaguDiOwner, 0, ',', '.') ?> | Di Iklan: Rp <?= number_format($clientSisaDiTimAds, 0, ',', '.') ?>
+              </div>
+            </div>
+          </div>
+
           <div class="glass-panel">
             <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
               <div>
-                <h3 class="panel-title">Transparansi Kampanye & Anggaran Iklan (Live Ads Tracker)</h3>
+                <h3 class="panel-title">Transparansi Kampanye &amp; Anggaran Iklan (Live Ads Tracker)</h3>
                 <p style="font-size: 12.5px; color: var(--text-secondary); margin-top: 2px;">
-                  Informasi real-time penayangan iklan berbayar (Meta, Google, TikTok Ads) yang dijalankan dan diverifikasi agensi Kalamedia.
+                  Informasi real-time penayangan iklan berbayar (Meta, Google, TikTok Ads) beserta transparansi 2 tahap verifikasi bukti transaksi.
                 </p>
               </div>
               <button type="button" class="btn btn-secondary btn-sm" onclick="loadClientAdsData()">
@@ -1432,8 +1616,9 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <div id="client-ads-container" style="padding: 24px;">
+              <!-- Container for Live Projects & 2-Stage Verification Table -->
               <div style="text-align: center; padding: 32px; color: var(--text-muted);">
-                Memuat data kampanye ads...
+                Memuat transparansi iklan...
               </div>
             </div>
           </div>
@@ -1698,6 +1883,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
       let html = '';
       tasks.forEach(t => {
         const sInfo = statusMap[t.status] || { label: t.status, class: 'backlog' };
+        const isFreelance = (t.worker_type === 'freelancer');
         const workerPos = t.worker_position ? ` (${escapeHtml(t.worker_position)})` : '';
         const workerBadge = isFreelance 
           ? `<span class="badge-worker freelancer">Freelancer: ${escapeHtml(t.worker_name || 'Talent')}${workerPos}</span>`
@@ -1731,6 +1917,106 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
             <p style="font-size: 13px; color: var(--text-secondary); margin: 0 0 14px; line-height: 1.5;">
               ${escapeHtml(t.description || 'Tidak ada deskripsi singkat.')}
             </p>
+
+            ${(t.is_ads_task || parseFloat(t.assigned_ads_budget) > 0) ? `
+              <!-- Real-Time Ads Monitoring Panel (Client View) -->
+              <div style="background: #F8F9FC; border: 1.5px solid #EAECF0; border-radius: 12px; padding: 14px; margin: 12px 0;">
+                ${t.is_depleted ? `
+                  <div style="background: #FFEFEF; border: 1.5px solid #FECDCA; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; color: #B42318; font-weight: 700; font-size: 12.5px; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 18px;">⚠️</span>
+                    <span><b>PEMBERITAHUAN: SALDO IKLAN TELAH HABIS (Rp 0)!</b> Kampanye dijeda otomatis. Harap hubungi Tim Kalamedia untuk perpanjangan / top-up saldo iklan Anda.</span>
+                  </div>
+                ` : (t.is_warning ? `
+                  <div style="background: #FEF6E7; border: 1.5px solid #FEDF89; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; color: #B54708; font-weight: 700; font-size: 12.5px; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 18px;">⚠️</span>
+                    <span><b>SALDO IKLAN HAMPIR HABIS (&le; 20%)!</b> Saldo iklan kampanye Anda menipis. Anda dapat meminta penambahan saldo ads ke tim Kalamedia.</span>
+                  </div>
+                ` : '')}
+
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
+                  <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span class="badge" style="background: #F4F3FF; color: #5925DC; font-weight: 800; font-size: 11px;">
+                      ${escapeHtml(t.ads_platform || 'Meta Ads')}
+                    </span>
+
+                    <!-- Indikator 4: Status Tayang Iklan Jalan / Tidak -->
+                    ${t.campaign_run_status === 'running' ? `
+                      <span style="background: #E8F7F0; color: #30A46C; border: 1px solid #A6F4C5; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px;">
+                        <span style="width: 7px; height: 7px; border-radius: 50%; background: #30A46C; box-shadow: 0 0 6px #30A46C; display: inline-block;"></span>
+                        Iklan Jalan (Running)
+                      </span>
+                    ` : (t.campaign_run_status === 'paused' ? `
+                      <span style="background: #FEF6E7; color: #F5A524; border: 1px solid #FEDF89; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px;">
+                        <span style="width: 7px; height: 7px; border-radius: 50%; background: #F5A524; display: inline-block;"></span>
+                        Iklan Dijeda (Paused)
+                      </span>
+                    ` : `
+                      <span style="background: #FFEFEF; color: #E5484D; border: 1px solid #FECDCA; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px;">
+                        <span style="width: 7px; height: 7px; border-radius: 50%; background: #E5484D; display: inline-block;"></span>
+                        Iklan Berhenti (Stopped)
+                      </span>
+                    `)}
+
+                    <!-- Indikator 5: Status Saldo Masih Ada / Habis -->
+                    ${t.balance_health_status === 'safe' ? `
+                      <span class="badge" style="background: #E8F7F0; color: #30A46C; font-weight: 800; font-size: 11px; padding: 3px 8px; border-radius: 6px;">
+                        Saldo Masih Tersedia (Aman)
+                      </span>
+                    ` : (t.balance_health_status === 'warning' ? `
+                      <span class="badge" style="background: #FEF6E7; color: #F5A524; font-weight: 800; font-size: 11px; padding: 3px 8px; border-radius: 6px;">
+                        Saldo Hampir Habis
+                      </span>
+                    ` : `
+                      <span class="badge" style="background: #FFEFEF; color: #E5484D; font-weight: 800; font-size: 11px; padding: 3px 8px; border-radius: 6px;">
+                        SALDO HABIS (Rp 0)
+                      </span>
+                    `)}
+                  </div>
+
+                  <div style="display: flex; gap: 6px; align-items: center;">
+                    ${t.transfer_proof_url ? `
+                      <button type="button" class="btn btn-secondary btn-sm" onclick="openUniversalTransferProofModal('${escapeHtml(t.transfer_proof_url)}', 'Bukti Transfer Saldo Iklan Klien', '${escapeHtml(t.title)}')" style="font-size: 11.5px; font-weight: 700; gap: 4px; display: inline-flex; align-items: center;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        Lihat Bukti Transfer
+                      </button>
+                    ` : ''}
+
+                    ${t.ads_spent_proof_url ? `
+                      <a href="${escapeHtml(t.ads_spent_proof_url)}" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 11.5px; font-weight: 700;">
+                        Lihat Dashboard Ads
+                      </a>
+                    ` : ''}
+                  </div>
+                </div>
+
+                <!-- 3 Key Metric Columns: Budget, Spent, Remaining -->
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #FFFFFF; border: 1px solid #EAECF0; border-radius: 8px; padding: 12px; margin-bottom: 10px; text-align: center;">
+                  <div>
+                    <span style="font-size: 10.5px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; display: block;">1. Total Budget Saldo Ads</span>
+                    <span style="font-size: 14px; font-weight: 800; color: #101828;">${t.assigned_ads_budget_formatted}</span>
+                  </div>
+                  <div style="border-left: 1px solid #EAECF0; border-right: 1px solid #EAECF0;">
+                    <span style="font-size: 10.5px; color: #B42318; font-weight: 600; text-transform: uppercase; display: block;">2. Sudah Dibelanjakan</span>
+                    <span style="font-size: 14px; font-weight: 800; color: #B42318;">${t.ads_spent_amount_formatted} (${t.spent_percent}%)</span>
+                  </div>
+                  <div>
+                    <span style="font-size: 10.5px; color: #027A48; font-weight: 600; text-transform: uppercase; display: block;">3. Sisa Saldo Ads</span>
+                    <span style="font-size: 14px; font-weight: 800; color: #027A48;">${t.remaining_ads_balance_formatted}</span>
+                  </div>
+                </div>
+
+                <!-- Real-time Progress Bar -->
+                <div style="height: 8px; background: #E5E7EB; border-radius: 999px; overflow: hidden; margin-bottom: 6px;">
+                  <div style="height: 100%; width: ${Math.min(100, t.spent_percent)}%; background: ${t.spent_percent >= 100 ? '#E5484D' : (t.spent_percent >= 80 ? '#F5A524' : '#30A46C')}; border-radius: 999px; transition: width 0.4s ease;"></div>
+                </div>
+
+                ${t.ads_spent_notes ? `
+                  <div style="font-size: 12px; color: #475467; font-style: italic; margin-top: 6px;">
+                    Catatan Tim Ads: "${escapeHtml(t.ads_spent_notes)}"
+                  </div>
+                ` : ''}
+              </div>
+            ` : ''}
 
             <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; flex-wrap: wrap; gap: 10px;">
               <div style="display: flex; align-items: center; gap: 12px;">
@@ -1801,104 +2087,95 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
         const res = await fetch(`api/ads_tracker.php?action=list&_slot=${slot}&portal=${slot}&client_id=${clientId}`);
         const data = await res.json();
 
-        if (!data.success || !data.projects || data.projects.length === 0) {
+        if (!data.success) {
           container.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: var(--text-muted); background: #F9FAFB; border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
-              <div style="display: flex; justify-content: center; margin-bottom: 12px;">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-              </div>
-              <h4 style="font-size: 15px; font-weight: 700; color: #101828; margin-bottom: 4px;">Belum Ada Kampanye Iklan Berbayar</h4>
-              <p style="font-size: 13px; margin: 0;">Saat ini belum ada kampanye ads berbayar yang aktif pada paket Anda atau data masih dalam proses setup.</p>
+            <div style="text-align: center; padding: 32px; color: #B42318;">
+              ${escapeHtml(data.message || 'Gagal memuat transparansi iklan.')}
             </div>
           `;
           return;
         }
 
-        let html = '';
-        data.projects.forEach(p => {
-          const logs = p.logs || [];
-          const totalSpend = Number(p.total_spend_installed || 0);
+        // 1. Update 4 KPI Cards Dynamically
+        if (data.summary) {
+          const s = data.summary;
+          const elPagu = document.getElementById('kpi-client-pagu');
+          if (elPagu) elPagu.innerText = 'Rp ' + Number(s.total_pagu_ads_klien || 0).toLocaleString('id-ID');
 
-          html += `
-            <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
-              <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 14px;">
-                <div>
-                  <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 11px; margin-bottom: 4px;">KAMPANYE IKLAN AKTIF</span>
-                  <h4 style="font-size: 16px; font-weight: 800; color: #101828; margin: 2px 0;">${escapeHtml(p.project_name)}</h4>
-                  <span style="font-size: 12.5px; color: var(--text-secondary);">${escapeHtml(p.client_company)} &bull; ${escapeHtml(p.package_name || 'Performance Marketing')}</span>
-                </div>
-                <div style="text-align: right;">
-                  <span style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Anggaran Iklan Terpasang</span>
-                  <div style="font-size: 20px; font-weight: 800; color: #101828;">Rp ${totalSpend.toLocaleString('id-ID')}</div>
-                </div>
-              </div>
+          const elTrans = document.getElementById('kpi-client-transferred');
+          if (elTrans) elTrans.innerText = 'Rp ' + Number(s.total_ditransfer_ke_tim_ads || 0).toLocaleString('id-ID');
 
-              <h5 style="font-size: 13px; font-weight: 700; color: #344054; margin: 0 0 10px;">Aktivitas & Riwayat Penayangan Iklan:</h5>
-          `;
+          const elTopup = document.getElementById('kpi-client-topup-platform');
+          if (elTopup) elTopup.innerText = 'Rp ' + Number(s.total_topup_ke_platform || 0).toLocaleString('id-ID');
 
-          if (logs.length === 0) {
-            html += `
-              <div style="padding: 16px; background: #F9FAFB; border-radius: 8px; font-size: 12.5px; color: var(--text-muted); font-style: italic;">
-                Tim Ads Kalamedia sedang menyiapkan setup materi iklan dan penargetan audiens. Laporan penayangan berkala akan tampil di sini.
-              </div>
-            `;
-          } else {
-            html += `
-              <div style="display: flex; flex-direction: column; gap: 10px;">
-            `;
-            logs.forEach(l => {
-              const statusMap = {
-                'sedang_berjalan': { label: 'Sedang Berjalan', bg: '#ECFDF3', color: '#027A48' },
-                'menunggu_saldo': { label: 'Menunggu Saldo', bg: '#EFF8FF', color: '#175CD3' },
-                'saldo_hampir_habis': { label: 'Saldo Menipis', bg: '#FEF3F2', color: '#B42318' },
-                'selesai': { label: 'Selesai', bg: '#F2F4F7', color: '#344054' }
-              };
-              const st = statusMap[l.status] || { label: l.status, bg: '#F2F4F7', color: '#344054' };
-
-              html += `
-                <div style="background: #F9FAFB; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                  <div>
-                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                      <span class="badge" style="background: #F4F3FF; color: #5925DC; font-weight: 800; font-size: 11px;">${escapeHtml(l.platform)}</span>
-                      <span class="badge" style="background: ${st.bg}; color: ${st.color}; font-weight: 700; font-size: 11px;">${st.label}</span>
-                      <span style="font-size: 11px; color: var(--text-muted);">${formatDate(l.created_at || l.updated_at)}</span>
-                    </div>
-                    <div style="font-size: 13px; color: #101828; margin-top: 4px;">
-                      ${escapeHtml(l.notes || 'Kampanye performa berjalan optimal sesuai target KPI.')}
-                    </div>
-                  </div>
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="text-align: right;">
-                      <span style="font-size: 10.5px; color: var(--text-muted); display: block;">Realisasi Belanja</span>
-                      <span style="font-size: 14px; font-weight: 800; color: #101828;">Rp ${Number(l.spend_installed || 0).toLocaleString('id-ID')}</span>
-                    </div>
-                    ${l.attachment_proof ? `
-                      <a href="${escapeHtml(l.attachment_proof)}" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 5px 10px;">
-                        Bukti Dashboard
-                      </a>
-                    ` : ''}
-                  </div>
-                </div>
-              `;
-            });
-            html += `</div>`;
+          const elSpendMeta = document.getElementById('kpi-client-spend-meta');
+          if (elSpendMeta) {
+            const isRun = (s.campaign_status === 'running' || s.sisa_saldo_di_tim_ads > 0);
+            elSpendMeta.innerHTML = `Spend: <b>Rp ${Number(s.total_spend_terpakai || 0).toLocaleString('id-ID')}</b> &bull; ${isRun ? 'Iklan Jalan' : 'Dijeda'}`;
           }
 
-          html += `</div>`;
-        });
+          const elRem = document.getElementById('kpi-client-remaining');
+          if (elRem) {
+            const remVal = Number(s.sisa_pagu_di_owner || 0);
+            elRem.innerText = 'Rp ' + remVal.toLocaleString('id-ID');
+            elRem.style.color = remVal <= 0 ? '#B42318' : '#059669';
+          }
 
-        // Render Top-Up Transactions in Tab Ads
+          const elRemMeta = document.getElementById('kpi-client-remaining-meta');
+          if (elRemMeta) {
+            elRemMeta.innerText = `Di Owner: Rp ${Number(s.sisa_pagu_di_owner || 0).toLocaleString('id-ID')} | Di Iklan: Rp ${Number(s.sisa_saldo_di_tim_ads || 0).toLocaleString('id-ID')}`;
+          }
+        }
+
+        // 2. Render Pending Limit Request Banner if exists
+        let bannerHtml = '';
+        if (data.pending_limit_request) {
+          const req = data.pending_limit_request;
+          bannerHtml = `
+            <div id="client-banner-limit-request" style="background: linear-gradient(135deg, #FEF0C7 0%, #FEDF89 100%); border: 1.5px solid #FDB022; border-radius: 14px; padding: 18px 20px; margin-bottom: 22px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.18); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+              <div style="display: flex; align-items: flex-start; gap: 14px; max-width: 760px;">
+                <span style="font-size: 26px; line-height: 1;">🔔</span>
+                <div>
+                  <div style="font-size: 14.5px; font-weight: 800; color: #7A2E0E;">
+                    Pengajuan Penambahan Limit Saldo Iklan dari Owner Kalamedia
+                  </div>
+                  <p style="font-size: 13px; color: #93370D; margin: 4px 0 0; line-height: 1.5;">
+                    Owner mengajukan penambahan limit saldo iklan sebesar <b>Rp ${Number(req.amount_requested || 0).toLocaleString('id-ID')}</b> untuk proyek <b>${escapeHtml(req.project_name || 'Kampanye Iklan')}</b> agar penayangan iklan di platform tidak terhenti.
+                    ${req.notes ? `<br><i>Catatan Owner: "${escapeHtml(req.notes)}"</i>` : ''}
+                  </p>
+                </div>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="openClientApproveLimitModal(${req.project_id}, ${req.id}, ${req.amount_requested || 0}, '${escapeHtml(req.notes || '')}')" style="background: #027A48; border-color: #027A48; font-weight: 800; font-size: 12.5px; padding: 10px 18px; border-radius: 10px; box-shadow: 0 2px 6px rgba(2,122,72,0.3); display: inline-flex; align-items: center; gap: 6px;">
+                <span>✅ Setuju Tambah Limit &amp; Upload Bukti Transfer</span>
+              </button>
+            </div>
+          `;
+        }
+
+        // 3. Render 2-Stage Verification Table & Projects Summary
         const topups = data.topup_transactions || [];
-        if (topups.length > 0) {
-          html += `
-            <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; margin-top: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+        let tableHtml = '';
+
+        if (topups.length === 0) {
+          tableHtml = `
+            <div style="text-align: center; padding: 40px; color: var(--text-muted); background: #F9FAFB; border-radius: var(--radius-md); border: 1px dashed var(--border-color);">
+              <div style="display: flex; justify-content: center; margin-bottom: 12px;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+              </div>
+              <h4 style="font-size: 15px; font-weight: 700; color: #101828; margin-bottom: 4px;">Belum Ada Transaksi Saldo Iklan</h4>
+              <p style="font-size: 13px; margin: 0;">Bukti transfer saldo dan pengisian ke Meta/Google Ads dari agensi akan otomatis tampil transparan di sini.</p>
+            </div>
+          `;
+        } else {
+          tableHtml = `
+            <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
                 <div>
                   <h4 style="font-size: 16px; font-weight: 800; color: #101828; margin: 0 0 2px;">
-                    Riwayat &amp; Bukti Transaksi Saldo Iklan (Top-Up Real-Time)
+                    Alur Perjalanan &amp; Bukti Transaksi Dana Iklan (2 Tahap Verifikasi)
                   </h4>
-                  <span style="font-size: 12px; color: var(--text-secondary);">
-                    Catatan pengisian saldo iklan resmi dari Tim Ads Kalamedia beserta verifikasi struk transfer.
+                  <span style="font-size: 12.5px; color: var(--text-secondary);">
+                    Transparansi penuh mulai dari pencairan Owner ke Tim Ads hingga penyetoran ke akun platform iklan.
                   </span>
                 </div>
                 <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700;">
@@ -1907,54 +2184,99 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
               </div>
 
               <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
-                <table class="table-custom" style="min-width: 740px; width: 100%;">
+                <table class="table-custom" style="min-width: 950px; width: 100%;">
                   <thead>
                     <tr>
-                      <th style="min-width: 210px; white-space: nowrap;">TANGGAL &amp; PETUGAS ADS</th>
-                      <th style="white-space: nowrap;">PLATFORM</th>
-                      <th style="white-space: nowrap;">SALDO DIISI (TOP-UP)</th>
-                      <th style="white-space: nowrap;">ANGGARAN TERPASANG</th>
-                      <th style="white-space: nowrap;">CATATAN KETERANGAN</th>
-                      <th style="text-align: right; white-space: nowrap;">BUKTI STRUK</th>
+                      <th style="min-width: 190px; white-space: nowrap;">TANGGAL &amp; PETUGAS ADS</th>
+                      <th style="white-space: nowrap;">PROYEK &amp; PLATFORM</th>
+                      <th style="white-space: nowrap;">TAHAP 1: OWNER &rarr; TIM ADS</th>
+                      <th style="white-space: nowrap;">TAHAP 2: TIM ADS &rarr; META/GOOGLE</th>
+                      <th style="white-space: nowrap;">REALISASI SPEND &amp; SISA</th>
+                      <th style="white-space: nowrap;">STATUS KAMPANYE</th>
                     </tr>
                   </thead>
                   <tbody>
           `;
-          topups.forEach(t => {
-            const platformBadge = (t.platform || '').toLowerCase().includes('google')
-              ? 'background: #EFF8FF; color: #175CD3;'
-              : ((t.platform || '').toLowerCase().includes('tiktok') ? 'background: #F8F9FC; color: #0C111D;' : 'background: #F4F3FF; color: #5925DC;');
 
-            html += `
+          topups.forEach(t => {
+            const pBg = (t.platform || '').toLowerCase().includes('google')
+              ? '#EFF8FF'
+              : ((t.platform || '').toLowerCase().includes('tiktok') ? '#F8F9FC' : '#F4F3FF');
+            const pCol = (t.platform || '').toLowerCase().includes('google')
+              ? '#175CD3'
+              : ((t.platform || '').toLowerCase().includes('tiktok') ? '#0C111D' : '#5925DC');
+
+            const tfOwnerAmount = Number(t.transfer_amount_owner || t.topup_amount || 0);
+            const tfOwnerProof = t.transfer_proof_owner || t.receipt_file || '';
+            const topupPlatformAmount = Number(t.platform_topup_amount || t.topup_amount || 0);
+            const topupPlatformProof = t.platform_topup_proof || t.receipt_file || '';
+            const topupPlatformStatus = t.platform_topup_status || 'completed';
+            const spendAktual = Number(t.ad_spend_amount || t.spend_installed || 0);
+            const sisaDiTim = Math.max(0, tfOwnerAmount - spendAktual);
+            const campStatus = t.campaign_status || 'running';
+
+            tableHtml += `
               <tr>
-                <td style="min-width: 210px; white-space: nowrap;">
+                <td style="min-width: 190px; white-space: nowrap;">
                   <div style="font-weight: 700; color: #101828;">${formatDate(t.transaction_date)}</div>
-                  <div style="font-size: 11px; color: var(--text-secondary);">Oleh: ${escapeHtml(t.uploader_name || 'Tim Ads Kalamedia')}</div>
+                  <div style="font-size: 11px; color: var(--text-secondary);">Petugas: <b>${escapeHtml(t.assigned_user_name || t.uploader_name || 'Tim Ads')}</b></div>
                 </td>
                 <td style="white-space: nowrap;">
-                  <span class="badge" style="${platformBadge} font-weight: 700; font-size: 11px;">${escapeHtml(t.platform)}</span>
+                  <div style="font-weight: 700; color: #101828;">${escapeHtml(t.project_name || 'Kampanye Iklan')}</div>
+                  <div style="display: flex; gap: 4px; align-items: center; margin-top: 2px;">
+                    <span class="badge" style="background: ${pBg}; color: ${pCol}; font-weight: 700; font-size: 10px;">${escapeHtml(t.platform)}</span>
+                    <span style="font-size: 11px; color: var(--text-muted);">&bull; ${escapeHtml(t.stage_label || 'Tahap 1')}</span>
+                  </div>
                 </td>
-                <td style="font-weight: 800; color: #027A48; white-space: nowrap;">
-                  + Rp ${Number(t.topup_amount || 0).toLocaleString('id-ID')}
-                </td>
-                <td style="font-weight: 700; color: #101828; white-space: nowrap;">
-                  Rp ${Number(t.spend_installed || 0).toLocaleString('id-ID')}
-                </td>
-                <td style="font-size: 12px; color: var(--text-secondary); max-width: 250px;">
-                  ${escapeHtml(t.notes || 'Pengisian saldo Ads.')}
-                </td>
-                <td style="text-align: right; white-space: nowrap;">
-                  ${t.receipt_file ? `
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('${escapeHtml(t.receipt_file)}', 'Bukti Transaksi Saldo Iklan')" style="font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                      Lihat Bukti
+                <td style="white-space: nowrap;">
+                  <div style="font-weight: 800; color: #175CD3; font-size: 13.5px;">
+                    Rp ${tfOwnerAmount.toLocaleString('id-ID')}
+                  </div>
+                  ${tfOwnerProof ? `
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('${escapeHtml(tfOwnerProof)}', 'Bukti Transfer Owner ke Tim Ads - ${escapeHtml(t.project_name || '')}')" style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; color: #175CD3; border-color: #B2CCFF; background: #EFF8FF;">
+                      📄 Bukti TF Owner
                     </button>
-                  ` : '<span style="font-size: 11px; color: var(--text-muted);">-</span>'}
+                  ` : '<span style="font-size: 10.5px; color: var(--text-muted); font-style: italic; display: block; margin-top: 2px;">Belum ada lampiran</span>'}
+                </td>
+                <td style="white-space: nowrap;">
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-weight: 800; color: #027A48; font-size: 13.5px;">
+                      Rp ${topupPlatformAmount.toLocaleString('id-ID')}
+                    </span>
+                    ${topupPlatformStatus === 'completed' ? `
+                      <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 9.5px;">✓ Top-Up Selesai</span>
+                    ` : `
+                      <span class="badge" style="background: #EFF8FF; color: #175CD3; font-weight: 700; font-size: 9.5px;">Menunggu Top-Up</span>
+                    `}
+                  </div>
+                  ${topupPlatformProof ? `
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('${escapeHtml(topupPlatformProof)}', 'Bukti Top-Up Platform ${escapeHtml(t.platform)} - ${escapeHtml(t.project_name || '')}')" style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; color: #027A48; border-color: #A6F4C5; background: #ECFDF3;">
+                      📈 Bukti Top-Up Ads
+                    </button>
+                  ` : '<span style="font-size: 10.5px; color: var(--text-muted); font-style: italic; display: block; margin-top: 2px;">Menunggu tim Ads</span>'}
+                </td>
+                <td style="white-space: nowrap;">
+                  <div style="font-size: 11.5px; color: #475467;">
+                    Spend: <b style="color: #101828;">Rp ${spendAktual.toLocaleString('id-ID')}</b>
+                  </div>
+                  <div style="font-size: 11.5px; color: ${sisaDiTim <= 0 ? '#B42318' : '#027A48'}; font-weight: 700; margin-top: 2px;">
+                    Sisa Saldo: Rp ${sisaDiTim.toLocaleString('id-ID')}
+                  </div>
+                </td>
+                <td style="white-space: nowrap;">
+                  ${(campStatus === 'running' || sisaDiTim > 0) ? `
+                    <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 11px;">● Iklan Jalan</span>
+                  ` : (campStatus === 'paused' ? `
+                    <span class="badge" style="background: #FEF0C7; color: #B54708; font-weight: 700; font-size: 11px;">❚❚ Dijeda</span>
+                  ` : `
+                    <span class="badge" style="background: #FEF3F2; color: #B42318; font-weight: 700; font-size: 11px;">✕ Saldo Habis</span>
+                  `)}
                 </td>
               </tr>
             `;
           });
-          html += `
+
+          tableHtml += `
                   </tbody>
                 </table>
               </div>
@@ -1962,7 +2284,7 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
           `;
         }
 
-        container.innerHTML = html;
+        container.innerHTML = bannerHtml + tableHtml;
       } catch (err) {
         console.error(err);
         container.innerHTML = `
@@ -1972,6 +2294,102 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
         `;
       }
     }
+
+    function openClientApproveLimitModal(projectId, requestId = 0, amountRequested = 0, notes = '') {
+      document.getElementById('client-limit-project-id').value = projectId || '';
+      document.getElementById('client-limit-request-id').value = requestId || 0;
+      
+      const reqEl = document.getElementById('client-limit-requested-amount');
+      if (reqEl) reqEl.innerText = 'Rp ' + Number(amountRequested || 0).toLocaleString('id-ID');
+
+      const notesEl = document.getElementById('client-limit-notes-text');
+      if (notesEl) {
+        notesEl.innerText = notes ? `Alasan Owner: "${notes}"` : 'Pengajuan saldo untuk kelancaran kampanye.';
+      }
+
+      const amountInput = document.getElementById('client-limit-amount-input');
+      if (amountInput && amountRequested > 0) {
+        amountInput.value = Number(amountRequested).toLocaleString('id-ID');
+      }
+
+      openModal('modal-client-approve-limit');
+    }
+
+    async function handleClientApproveLimit(e) {
+      e.preventDefault();
+      const form = document.getElementById('form-client-approve-limit');
+      const submitBtn = document.getElementById('btn-submit-client-limit');
+      const origText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = 'Memproses Persetujuan...';
+
+      const formData = new FormData(form);
+
+      try {
+        const res = await fetch('api/ads_tracker.php?action=approve_client_limit', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message, 'success');
+          closeModal('modal-client-approve-limit');
+          form.reset();
+          loadClientAdsData();
+          // Hide top banner if exists
+          const banner = document.getElementById('client-banner-limit-request');
+          if (banner) banner.style.display = 'none';
+        } else {
+          showToast(data.message || 'Gagal memproses persetujuan', 'danger');
+        }
+      } catch (err) {
+        showToast('Koneksi server gagal', 'danger');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = origText;
+      }
+    }
+
+    function formatRupiahInput(input) {
+      let val = input.value.replace(/[^0-9]/g, '');
+      if (val) {
+        input.value = Number(val).toLocaleString('id-ID');
+      } else {
+        input.value = '';
+      }
+    }
+
+    function previewTransactionReceipt(url, title = 'Bukti Transaksi Saldo Iklan') {
+      const modal = document.getElementById('modal-view-receipt');
+      if (!modal) return;
+
+      const img = document.getElementById('view-receipt-img');
+      const iframe = document.getElementById('view-receipt-iframe');
+      const titleEl = document.getElementById('view-receipt-title');
+      const downloadLink = document.getElementById('view-receipt-download');
+
+      if (titleEl) titleEl.innerText = title;
+      if (downloadLink) downloadLink.href = url;
+
+      if (url.toLowerCase().endsWith('.pdf')) {
+        if (img) img.style.display = 'none';
+        if (iframe) {
+          iframe.src = url;
+          iframe.style.display = 'block';
+        }
+      } else {
+        if (iframe) {
+          iframe.style.display = 'none';
+          iframe.src = '';
+        }
+        if (img) {
+          img.src = url;
+          img.style.display = 'inline-block';
+        }
+      }
+      openModal('modal-view-receipt');
+    }
+    window.previewTransactionReceipt = previewTransactionReceipt;
 
     async function openFeedbackModal(taskId) {
       try {
@@ -2140,7 +2558,60 @@ $clientAdsTopups = $stmtAdsTopup->fetchAll(PDO::FETCH_ASSOC);
     }
   </script>
 
+  <!-- MODAL: Klien Setujui Tambah Limit Pagu Saldo Ads -->
+  <div class="modal" id="modal-client-approve-limit">
+    <div class="modal-dialog" style="max-width: 540px;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div>
+            <h4 class="modal-title">Persetujuan Tambah Limit Saldo Iklan</h4>
+            <span style="font-size: 12px; color: var(--text-secondary);">Tambahkan limit pagu saldo ads &amp; upload bukti transfer pembayaran ke agensi</span>
+          </div>
+          <button type="button" class="close-btn" onclick="closeModal('modal-client-approve-limit')">&times;</button>
+        </div>
+        <form id="form-client-approve-limit" onsubmit="handleClientApproveLimit(event)" enctype="multipart/form-data">
+          <input type="hidden" name="project_id" id="client-limit-project-id" value="<?= $project['id'] ?? 0 ?>">
+          <input type="hidden" name="request_id" id="client-limit-request-id" value="0">
+          
+          <div class="modal-body">
+            <div id="client-limit-info-box" style="background: #F4F3FF; border: 1px solid #D9D6FE; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px;">
+              <div style="font-size: 11.5px; color: #5925DC; font-weight: 700; text-transform: uppercase;">Pengajuan dari Owner</div>
+              <div style="font-size: 18px; font-weight: 800; color: #101828; margin-top: 2px;" id="client-limit-requested-amount">Rp 0</div>
+              <div style="font-size: 12px; color: #475467; margin-top: 4px;" id="client-limit-notes-text"></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Nominal Tambah Saldo (Rp) <span style="color:red;">*</span></label>
+              <input type="text" name="amount_added" id="client-limit-amount-input" class="form-control" placeholder="Contoh: 1.000.000" required oninput="formatRupiahInput(this)">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Upload Bukti Transfer Bank (JPG / PNG / PDF) <span style="color:red;">*</span></label>
+              <input type="file" name="client_proof_file" class="form-control" accept="image/*,.pdf" required>
+              <small style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 3px;">
+                Lampirkan struk transfer dana penambahan saldo iklan ke rekening Kalamedia.
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Catatan Tambahan (Opsional)</label>
+              <textarea name="notes" class="form-control" rows="2" placeholder="Contoh: Dana penambahan saldo ads untuk kampanye promo bulan ini"></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('modal-client-approve-limit')">Batal</button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-client-limit" style="background: #027A48; border-color: #027A48; font-weight: 700;">
+              Konfirmasi &amp; Tambah Pagu Saldo
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <?php require_once BASE_PATH . '/includes/modals.php'; ?>
+  <script src="assets/js/app.js?v=<?= time() ?>"></script>
   <script src="assets/js/invoice.js?v=<?= time() ?>"></script>
 </body>
 </html>

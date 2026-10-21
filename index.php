@@ -22,26 +22,10 @@ if (empty($route)) {
 
 // Default route resolution
 if (empty($route)) {
-    $context = resolveActiveSessionContext();
-    if (is_logged_in($context)) {
-        $role = current_user_role($context);
-        if ($role === 'client') {
-            $route = 'client-portal';
-        } elseif ($role === 'karyawan' || $role === 'freelancer') {
-            $route = 'tasks';
-        } elseif ($role === 'owner') {
-            $route = 'owner-dashboard';
-        } else {
-            $route = 'admin-dashboard';
-        }
+    if (is_logged_in()) {
+        header('Location: ' . home_url_for_role());
+        exit;
     } else {
-        if (is_logged_in('internal')) {
-            header('Location: ' . home_url_for_role(current_user_role('internal')));
-            exit;
-        } elseif (is_logged_in('client')) {
-            header('Location: ' . url('client-portal'));
-            exit;
-        }
         $route = 'login';
     }
 }
@@ -57,50 +41,36 @@ switch ($route) {
         break;
 
     case 'logout':
-        $context = $_GET['context'] ?? ($_GET['portal'] ?? ($_GET['_slot'] ?? resolveActiveSessionContext()));
-        if ($context === 'client' || session_name() === 'KALASESS_CLIENT') {
-            if (function_exists('switch_session_context')) {
-                switch_session_context('client');
-            }
-            $_SESSION = [];
-            if (ini_get("session.use_cookies")) {
-                $params = session_get_cookie_params();
-                setcookie('KALASESS_CLIENT', '', time() - 42000,
-                    $params["path"], $params["domain"],
-                    $params["secure"], $params["httponly"]
-                );
-            }
-            session_destroy();
-            header('Location: ' . url('login?context=client'));
-            exit;
-        } elseif ($context === 'internal' || session_name() === 'KALASESS_INTERNAL') {
-            if (function_exists('switch_session_context')) {
-                switch_session_context('internal');
-            }
-            $_SESSION = [];
-            if (ini_get("session.use_cookies")) {
-                $params = session_get_cookie_params();
-                setcookie('KALASESS_INTERNAL', '', time() - 42000,
-                    $params["path"], $params["domain"],
-                    $params["secure"], $params["httponly"]
-                );
-            }
-            session_destroy();
-            header('Location: ' . url('login?context=internal'));
-            exit;
-        } else {
-            $_SESSION = [];
-            if (ini_get("session.use_cookies")) {
-                $params = session_get_cookie_params();
-                setcookie(session_name(), '', time() - 42000,
-                    $params["path"], $params["domain"],
-                    $params["secure"], $params["httponly"]
-                );
-            }
-            session_destroy();
-            header('Location: ' . url('login'));
-            exit;
+        // Isolated Logout: Only removes this specific tab's account from $_SESSION['kala_accounts']
+        $uidKey = $_GET['_u'] ?? $_POST['_u'] ?? ($_SERVER['HTTP_X_KALA_UID'] ?? '');
+        if (!empty($uidKey) && is_numeric($uidKey)) {
+            $uidKey = 'u_' . $uidKey;
         }
+
+        $loggedOutRole = '';
+        if (!empty($uidKey) && isset($_SESSION['kala_accounts'][$uidKey])) {
+            $loggedOutRole = $_SESSION['kala_accounts'][$uidKey]['role'] ?? '';
+            unset($_SESSION['kala_accounts'][$uidKey]);
+        } else {
+            $curr = current_user();
+            if ($curr && !empty($curr['id'])) {
+                $currKey = 'u_' . $curr['id'];
+                $loggedOutRole = $curr['role'] ?? '';
+                unset($_SESSION['kala_accounts'][$currKey]);
+            }
+        }
+
+        if (empty($_SESSION['kala_accounts'])) {
+            $_SESSION['kala_accounts'] = [];
+            unset($_SESSION['user'], $_SESSION['user_id'], $_SESSION['role'], $_SESSION['client_id']);
+        }
+
+        $redirectUrl = url('login', false);
+        if ($loggedOutRole === 'client' || (!empty($_GET['context']) && $_GET['context'] === 'client')) {
+            $redirectUrl = url('login?context=client', false);
+        }
+        header('Location: ' . $redirectUrl);
+        exit;
 
     case 'client-portal':
         require_client();

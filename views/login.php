@@ -9,57 +9,16 @@ if (function_exists('check_and_expire_client_contracts')) {
 }
 
 $requestedContext = $_GET['context'] ?? '';
-$isSwitch = isset($_GET['switch']);
+$requestedUid = $_GET['_u'] ?? '';
+$isSwitch = isset($_GET['switch']) || isset($_GET['new_tab']);
 
-// Check if logged-in client is expired
-if (is_logged_in('client')) {
-    $cUser = current_user('client');
-    if ($cUser) {
-        $cDb = Database::getConnection();
-        $stmtCChk = $cDb->prepare("
-            SELECT c.id, c.contract_status, c.contract_end_date, u.is_active 
-            FROM users u
-            LEFT JOIN clients c ON u.client_id = c.id OR u.email = c.email
-            WHERE u.id = ? LIMIT 1
-        ");
-        $stmtCChk->execute([$cUser['id']]);
-        $cRowChk = $stmtCChk->fetch(PDO::FETCH_ASSOC);
-        if ($cRowChk && ($cRowChk['contract_status'] === 'expired' || ($cRowChk['is_active'] ?? 1) == 0)) {
-            unset($_SESSION['kala_auth']['client']);
-            unset($_SESSION['kala_client_portal']);
-            if (isset($_SESSION['user']) && ($_SESSION['user']['role'] ?? '') === 'client') {
-                unset($_SESSION['user']);
-            }
-        }
-    }
+// Only auto-redirect away from login if a specific active _u token was passed and not switching
+if (!empty($requestedUid) && is_logged_in() && !$isSwitch) {
+    header('Location: ' . home_url_for_role());
+    exit;
 }
 
-// Check session based on requested context
-if ($requestedContext === 'client') {
-    if (is_logged_in('client') && !$isSwitch) {
-        header('Location: ' . url('client-portal?tab=deliverables&portal=client&_slot=client'));
-        exit;
-    }
-    $activeContext = 'client';
-} elseif ($requestedContext === 'internal') {
-    if (is_logged_in('internal') && !$isSwitch) {
-        header('Location: ' . home_url_for_role(current_user_role('internal')));
-        exit;
-    }
-    $activeContext = 'internal';
-} else {
-    // Default flow:
-    if (!$isSwitch) {
-        if (is_logged_in('internal') && !is_logged_in('client')) {
-            header('Location: ' . home_url_for_role(current_user_role('internal')));
-            exit;
-        } elseif (is_logged_in('client') && !is_logged_in('internal')) {
-            header('Location: ' . url('client-portal?tab=deliverables&portal=client&_slot=client'));
-            exit;
-        }
-    }
-    $activeContext = 'internal';
-}
+$activeContext = ($requestedContext === 'client') ? 'client' : 'internal';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -278,10 +237,13 @@ if ($requestedContext === 'client') {
         });
         const data = await res.json();
         if (data.success) {
+          if (data.uid_key) {
+            sessionStorage.setItem('kala_tab_uid', data.uid_key);
+          }
           showToast(data.message, 'success');
           setTimeout(() => {
             window.location.href = data.redirect || 'index.php';
-          }, 500);
+          }, 400);
         } else {
           showToast(data.message || 'Login gagal', 'danger');
         }

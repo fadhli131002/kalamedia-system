@@ -80,10 +80,20 @@ class Database {
             }
 
             // High Performance: Only run migrations if lock file does not exist (0ms overhead on requests)
-            $lockFile = BASE_PATH . '/database/.schema_v6.lock';
+            $lockFile = BASE_PATH . '/database/.schema_v8.lock';
             if (!file_exists($lockFile)) {
                 self::runMigrations(self::$instance, self::$driver);
-                @file_put_contents($lockFile, "Schema v6 initialized at " . date('Y-m-d H:i:s'));
+                @file_put_contents($lockFile, "Schema v8 initialized at " . date('Y-m-d H:i:s'));
+            }
+
+            // Ensure core system accounts (Owner & Admin) always exist
+            try {
+                $hasOwner = self::$instance->query("SELECT id FROM users WHERE role = 'owner' LIMIT 1")->fetchColumn();
+                if (!$hasOwner) {
+                    self::seedDefaultSystemAccounts(self::$instance);
+                }
+            } catch (Throwable $e) {
+                // Table might not exist yet before migration
             }
         }
         return self::$instance;
@@ -509,6 +519,23 @@ class Database {
             if (!in_array('allocated_ads_budget', $projCols)) {
                 $db->exec("ALTER TABLE projects ADD COLUMN allocated_ads_budget DECIMAL(15,2) DEFAULT 0");
             }
+            if (!in_array('service_fee_amount', $projCols)) {
+                $db->exec("ALTER TABLE projects ADD COLUMN service_fee_amount DECIMAL(15,2) DEFAULT 0");
+            }
+            if (!in_array('ads_budget_pool', $projCols)) {
+                $db->exec("ALTER TABLE projects ADD COLUMN ads_budget_pool DECIMAL(15,2) DEFAULT 0");
+            }
+            if (!in_array('service_breakdown_json', $projCols)) {
+                $db->exec("ALTER TABLE projects ADD COLUMN service_breakdown_json TEXT DEFAULT NULL");
+            }
+            if (!in_array('total_contract_value', $projCols)) {
+                $db->exec("ALTER TABLE projects ADD COLUMN total_contract_value DECIMAL(15,2) DEFAULT 0");
+            }
+            // Auto-sync legacy contract_value to total_contract_value & service_fee_amount if zero
+            try {
+                $db->exec("UPDATE projects SET total_contract_value = contract_value WHERE (total_contract_value IS NULL OR total_contract_value = 0) AND contract_value > 0");
+                $db->exec("UPDATE projects SET service_fee_amount = contract_value WHERE (service_fee_amount IS NULL OR service_fee_amount = 0) AND contract_value > 0");
+            } catch (Exception $e) {}
             if (!in_array('is_deleted', $projCols)) {
                 $db->exec("ALTER TABLE projects ADD COLUMN is_deleted INT DEFAULT 0");
             }
@@ -534,6 +561,100 @@ class Database {
             if (!in_array('start_date', $taskCols)) {
                 $db->exec("ALTER TABLE tasks ADD COLUMN start_date DATE DEFAULT NULL");
             }
+            if (!in_array('assigned_ads_budget', $taskCols)) {
+                $db->exec("ALTER TABLE tasks ADD COLUMN assigned_ads_budget DECIMAL(15,2) DEFAULT 0");
+            }
+            if (!in_array('ads_spent_amount', $taskCols)) {
+                $db->exec("ALTER TABLE tasks ADD COLUMN ads_spent_amount DECIMAL(15,2) DEFAULT 0");
+            }
+            if (!in_array('remaining_ads_balance', $taskCols)) {
+                $db->exec("ALTER TABLE tasks ADD COLUMN remaining_ads_balance DECIMAL(15,2) DEFAULT 0");
+            }
+            if (!in_array('campaign_run_status', $taskCols)) {
+                $db->exec("ALTER TABLE tasks ADD COLUMN campaign_run_status VARCHAR(50) DEFAULT 'Iklan Jalan (Running)'");
+            }
+            if (!in_array('transfer_proof_file', $taskCols)) {
+                $db->exec("ALTER TABLE tasks ADD COLUMN transfer_proof_file VARCHAR(255) DEFAULT NULL");
+            }
+            if (!in_array('ads_platform', $taskCols)) {
+                $db->exec("ALTER TABLE tasks ADD COLUMN ads_platform VARCHAR(50) DEFAULT 'Meta Ads'");
+            }
+            if (!in_array('ads_spent_notes', $taskCols)) {
+                $db->exec("ALTER TABLE tasks ADD COLUMN ads_spent_notes TEXT DEFAULT NULL");
+            }
+            if (!in_array('ads_spent_proof', $taskCols)) {
+                $db->exec("ALTER TABLE tasks ADD COLUMN ads_spent_proof VARCHAR(255) DEFAULT NULL");
+            }
+            try {
+                $db->exec("UPDATE tasks SET remaining_ads_balance = (COALESCE(assigned_ads_budget,0) - COALESCE(ads_spent_amount,0)) WHERE assigned_ads_budget > 0");
+            } catch (Exception $e) {}
+        }
+
+        // 3d. Migrate `ads_budget_logs` columns
+        $adsLogCols = $getTableCols('ads_budget_logs');
+        if (!empty($adsLogCols)) {
+            if (!in_array('task_id', $adsLogCols)) {
+                try {
+                    $db->exec("ALTER TABLE ads_budget_logs ADD COLUMN task_id INT DEFAULT NULL");
+                } catch (Exception $e) {}
+            }
+        }
+
+        // 3e. Migrate `ads_topup_transactions` & `ads_balance_requests`
+        try {
+            $db->exec("
+                CREATE TABLE IF NOT EXISTS ads_balance_requests (
+                    id {$pkDef},
+                    project_id INT NOT NULL,
+                    client_id INT NOT NULL,
+                    request_type VARCHAR(30) NOT NULL,
+                    requester_user_id INT NOT NULL,
+                    requester_name VARCHAR(150) NOT NULL,
+                    amount_requested DECIMAL(15,2) NOT NULL DEFAULT 0,
+                    notes TEXT DEFAULT NULL,
+                    proof_file VARCHAR(255) DEFAULT NULL,
+                    status VARCHAR(30) NOT NULL DEFAULT 'pending',
+                    resolved_at DATETIME DEFAULT NULL,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                );
+            ");
+        } catch (Throwable $e) {}
+
+        $adsTopupCols = $getTableCols('ads_topup_transactions');
+        if (!empty($adsTopupCols)) {
+            $neededTopupCols = [
+                'transfer_amount_owner' => 'DECIMAL(15,2) DEFAULT 0',
+                'transfer_proof_owner'  => 'VARCHAR(255) DEFAULT NULL',
+                'platform_topup_amount' => 'DECIMAL(15,2) DEFAULT 0',
+                'platform_topup_proof'  => 'VARCHAR(255) DEFAULT NULL',
+                'platform_topup_status' => "VARCHAR(30) DEFAULT 'completed'",
+                'ad_spend_amount'       => 'DECIMAL(15,2) DEFAULT 0',
+                'campaign_status'       => "VARCHAR(50) DEFAULT 'running'",
+                'stage_label'           => 'VARCHAR(100) DEFAULT NULL',
+                'assigned_user_id'      => 'INT DEFAULT NULL',
+                'assigned_user_name'    => 'VARCHAR(150) DEFAULT NULL'
+            ];
+            foreach ($neededTopupCols as $cName => $cDef) {
+                if (!in_array($cName, $adsTopupCols)) {
+                    try {
+                        $db->exec("ALTER TABLE ads_topup_transactions ADD COLUMN {$cName} {$cDef}");
+                    } catch (Throwable $e) {}
+                }
+            }
+            try {
+                // Backfill existing rows
+                $db->exec("
+                    UPDATE ads_topup_transactions 
+                    SET transfer_amount_owner = CASE WHEN transfer_amount_owner IS NULL OR transfer_amount_owner = 0 THEN COALESCE(topup_amount, 0) ELSE transfer_amount_owner END,
+                        transfer_proof_owner = CASE WHEN transfer_proof_owner IS NULL THEN receipt_file ELSE transfer_proof_owner END,
+                        platform_topup_amount = CASE WHEN platform_topup_amount IS NULL OR platform_topup_amount = 0 THEN COALESCE(topup_amount, 0) ELSE platform_topup_amount END,
+                        platform_topup_proof = CASE WHEN platform_topup_proof IS NULL THEN receipt_file ELSE platform_topup_proof END,
+                        ad_spend_amount = CASE WHEN ad_spend_amount IS NULL OR ad_spend_amount = 0 THEN COALESCE(spend_installed, 0) ELSE ad_spend_amount END,
+                        campaign_status = CASE WHEN campaign_status IS NULL OR campaign_status = '' THEN 'running' ELSE campaign_status END,
+                        stage_label = CASE WHEN stage_label IS NULL OR stage_label = '' THEN COALESCE(notes, 'Tahap 1') ELSE stage_label END
+                    WHERE is_deleted = 0
+                ");
+            } catch (Throwable $e) {}
         }
 
         // Populate sensible default contract dates for existing active clients, team & tasks

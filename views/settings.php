@@ -16,6 +16,7 @@ $users = $db->query("SELECT id, name, email, role, created_at FROM users ORDER B
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
+  <?php render_tab_uid_script(); ?>
 </head>
 <body>
   <div class="app-container">

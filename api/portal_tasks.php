@@ -13,7 +13,9 @@
  * - POST ?action=mark_feedbacks_read
  */
 
-header('Content-Type: application/json; charset=utf-8');
+if (!headers_sent()) {
+    header('Content-Type: application/json; charset=utf-8');
+}
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../config/auth.php';
 
@@ -30,6 +32,73 @@ $clientId = current_user_client_id();
 
 $db = Database::getConnection();
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
+
+function parse_task_amount($val): float {
+    if (is_numeric($val)) return floatval($val);
+    $clean = preg_replace('/[^0-9,.]/', '', strval($val));
+    if (strpos($clean, '.') !== false && strpos($clean, ',') !== false) {
+        $clean = str_replace('.', '', $clean);
+        $clean = str_replace(',', '.', $clean);
+    } elseif (strpos($clean, '.') !== false && substr_count($clean, '.') > 1) {
+        $clean = str_replace('.', '', $clean);
+    } elseif (strpos($clean, '.') !== false) {
+        $parts = explode('.', $clean);
+        if (strlen(end($parts)) === 3) {
+            $clean = str_replace('.', '', $clean);
+        }
+    } elseif (strpos($clean, ',') !== false) {
+        $clean = str_replace(',', '.', $clean);
+    }
+    return floatval($clean);
+}
+
+function decorate_task_ads_metrics(array $t): array {
+    $budget = floatval($t['assigned_ads_budget'] ?? 0);
+    $spent = floatval($t['ads_spent_amount'] ?? 0);
+    $remaining = max(0, floatval($t['remaining_ads_balance'] ?? ($budget - $spent)));
+    $spentPercent = ($budget > 0) ? min(100, round(($spent / $budget) * 100, 1)) : 0;
+
+    $healthStatus = 'none';
+    $healthLabel = 'Tidak Ada Saldo Ads';
+    $healthBadgeClass = 'health-none';
+
+    if ($budget > 0) {
+        if ($remaining <= 0) {
+            $healthStatus = 'empty';
+            $healthLabel = 'SALDO HABIS (Rp 0)';
+            $healthBadgeClass = 'health-empty';
+        } elseif ($remaining <= 0.20 * $budget) {
+            $healthStatus = 'warning';
+            $healthLabel = 'Saldo Hampir Habis (Segera Top-Up)';
+            $healthBadgeClass = 'health-warning';
+        } else {
+            $healthStatus = 'safe';
+            $healthLabel = 'Saldo Masih Tersedia (Aman)';
+            $healthBadgeClass = 'health-safe';
+        }
+    }
+
+    $t['assigned_ads_budget'] = $budget;
+    $t['ads_spent_amount'] = $spent;
+    $t['remaining_ads_balance'] = $remaining;
+    $t['assigned_ads_budget_formatted'] = format_rupiah($budget);
+    $t['ads_spent_amount_formatted'] = format_rupiah($spent);
+    $t['remaining_ads_balance_formatted'] = format_rupiah($remaining);
+    $t['is_depleted'] = ($healthStatus === 'empty');
+    $t['is_warning'] = ($healthStatus === 'warning');
+    $t['is_safe'] = ($healthStatus === 'safe');
+    $t['is_ads_task'] = ($budget > 0 || ($t['category'] ?? '') === 'ads');
+    $t['spent_percent'] = $spentPercent;
+    $t['balance_health_status'] = $healthStatus;
+    $t['balance_health_label'] = $healthLabel;
+    $t['balance_health_badge_class'] = $healthBadgeClass;
+    $t['campaign_run_status'] = !empty($t['campaign_run_status']) ? $t['campaign_run_status'] : 'Iklan Jalan (Running)';
+    $t['ads_platform'] = !empty($t['ads_platform']) ? $t['ads_platform'] : 'Meta Ads';
+    $t['transfer_proof_url'] = !empty($t['transfer_proof_file']) ? url($t['transfer_proof_file']) : null;
+    $t['ads_spent_proof_url'] = !empty($t['ads_spent_proof']) ? url($t['ads_spent_proof']) : null;
+
+    return $t;
+}
 
 /**
  * Non-blocking PHP cURL Webhook to notify worker/freelancer via Make.com / WhatsApp Gateway
@@ -105,6 +174,8 @@ if ($action === 'list_tasks') {
             $stmt = $db->prepare("
                 SELECT t.id, t.project_id, t.client_id, t.title, t.description, t.category,
                        t.worker_type, t.priority, t.status, t.deliverable_link, t.start_date, t.due_date,
+                       t.assigned_ads_budget, t.ads_spent_amount, t.remaining_ads_balance,
+                       t.campaign_run_status, t.transfer_proof_file, t.ads_platform, t.ads_spent_notes, t.ads_spent_proof,
                        t.created_at, t.updated_at,
                        p.name as project_name,
                        u.name as worker_name, u.role as worker_role, u.employment_type as worker_emp_type,
@@ -129,7 +200,7 @@ if ($action === 'list_tasks') {
                     t.due_date ASC, t.id DESC
             ");
             $stmt->execute([$clientId]);
-            $tasks = $stmt->fetchAll();
+            $tasks = array_map('decorate_task_ads_metrics', $stmt->fetchAll());
 
             // Calculate Project Statistics
             $totalTasks = count($tasks);
@@ -170,7 +241,9 @@ if ($action === 'list_tasks') {
             // WORKER WORKSPACE: Tasks assigned to logged in staff/freelancer
             $stmt = $db->prepare("
                 SELECT t.id, t.project_id, t.client_id, t.title, t.description, t.category,
-                       t.worker_type, t.priority, t.status, t.deliverable_link, t.due_date,
+                       t.worker_type, t.priority, t.status, t.deliverable_link, t.start_date, t.due_date,
+                       t.assigned_ads_budget, t.ads_spent_amount, t.remaining_ads_balance,
+                       t.campaign_run_status, t.transfer_proof_file, t.ads_platform, t.ads_spent_notes, t.ads_spent_proof,
                        t.created_at, t.updated_at,
                        p.name as project_name,
                        c.company as client_company, c.name as client_pic,
@@ -196,7 +269,7 @@ if ($action === 'list_tasks') {
                     t.due_date ASC, t.id DESC
             ");
             $stmt->execute([$userId, $userId]);
-            $tasks = $stmt->fetchAll();
+            $tasks = array_map('decorate_task_ads_metrics', $stmt->fetchAll());
 
             $total = count($tasks);
             $inProgress = 0;
@@ -268,6 +341,8 @@ if ($action === 'list_tasks') {
             $stmt = $db->prepare("
                 SELECT t.id, t.project_id, t.client_id, t.title, t.description, t.category,
                        t.worker_type, t.priority, t.status, t.deliverable_link, t.start_date, t.due_date,
+                       t.assigned_ads_budget, t.ads_spent_amount, t.remaining_ads_balance,
+                       t.campaign_run_status, t.transfer_proof_file, t.ads_platform, t.ads_spent_notes, t.ads_spent_proof,
                        t.created_at, t.updated_at,
                        p.name as project_name,
                        c.company as client_company, c.name as client_pic, c.service_type as client_service_type,
@@ -297,7 +372,7 @@ if ($action === 'list_tasks') {
                     t.due_date ASC, t.id DESC
             ");
             $stmt->execute($params);
-            $tasks = $stmt->fetchAll();
+            $tasks = array_map('decorate_task_ads_metrics', $stmt->fetchAll());
 
             // Overall Stats across all tasks (scoped to client_id if passed)
             $clientStatsFilter = !empty($_GET['client_id']) ? " AND client_id = " . intval($_GET['client_id']) : "";
@@ -394,7 +469,7 @@ if ($action === 'get_task_details') {
 
         echo json_encode([
             'success' => true,
-            'task' => $task,
+            'task' => decorate_task_ads_metrics($task),
             'feedbacks' => $feedbacks
         ]);
         exit;
@@ -422,6 +497,9 @@ if ($action === 'assign_task') {
     $startDate = trim($_POST['start_date'] ?? '');
     $dueDate = trim($_POST['due_date'] ?? '');
     $deliverableLink = trim($_POST['deliverable_link'] ?? '');
+    $assignedAdsBudget = parse_task_amount($_POST['assigned_ads_budget'] ?? 0);
+    $adsPlatform = trim($_POST['ads_platform'] ?? '');
+    $campaignRunStatus = trim($_POST['campaign_run_status'] ?? 'running');
 
     if (empty($title) || !$projectId || !$assignedTo) {
         echo json_encode(['success' => false, 'message' => 'Judul tugas, proyek, dan PIC wajib diisi']);
@@ -439,8 +517,12 @@ if ($action === 'assign_task') {
     }
 
     try {
-        // Find client_id from project
-        $stmtP = $db->prepare("SELECT client_id, name as project_name FROM projects WHERE id = ?");
+        // Find project & client
+        $stmtP = $db->prepare("
+            SELECT p.id, p.client_id, p.name as project_name, p.ads_budget_pool,
+                   COALESCE((SELECT SUM(t2.assigned_ads_budget) FROM tasks t2 WHERE t2.project_id = p.id AND t2.is_deleted = 0), 0) as used_ads_budget
+            FROM projects p WHERE p.id = ?
+        ");
         $stmtP->execute([$projectId]);
         $proj = $stmtP->fetch();
 
@@ -450,6 +532,18 @@ if ($action === 'assign_task') {
         }
 
         $clientIdOfProject = (int)$proj['client_id'];
+        $pool = (float)($proj['ads_budget_pool'] ?? 0);
+        $usedPool = (float)($proj['used_ads_budget'] ?? 0);
+        $availableAdsPool = max(0, $pool - $usedPool);
+
+        // Validation if assigned ads budget exceeds available pool
+        if ($assignedAdsBudget > 0 && $pool > 0 && $assignedAdsBudget > $availableAdsPool) {
+            echo json_encode([
+                'success' => false,
+                'message' => "Budget iklan yang dialokasikan (Rp " . number_format($assignedAdsBudget, 0, ',', '.') . ") melebihi sisa saldo ads proyek yang tersedia (Rp " . number_format($availableAdsPool, 0, ',', '.') . "). Silakan top-up saldo ads proyek terlebih dahulu."
+            ]);
+            exit;
+        }
 
         // Determine worker_type (karyawan vs freelancer) & validate contracts
         $stmtU = $db->prepare("
@@ -489,14 +583,34 @@ if ($action === 'assign_task') {
             }
         }
 
+        // Handle proof of transfer file upload
+        $transferProofFile = null;
+        if (!empty($_FILES['transfer_proof_file']['name']) && $_FILES['transfer_proof_file']['error'] === UPLOAD_ERR_OK) {
+            $allowedExts = ['jpg', 'jpeg', 'png', 'pdf', 'webp'];
+            $fileInfo = pathinfo($_FILES['transfer_proof_file']['name']);
+            $ext = strtolower($fileInfo['extension'] ?? '');
+            if (in_array($ext, $allowedExts)) {
+                $uploadDir = BASE_PATH . '/assets/uploads/receipts/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                $filename = 'proof_ads_' . time() . '_' . uniqid() . '.' . $ext;
+                if (move_uploaded_file($_FILES['transfer_proof_file']['tmp_name'], $uploadDir . $filename)) {
+                    $transferProofFile = 'assets/uploads/receipts/' . $filename;
+                }
+            }
+        }
+
         $workerType = ($assignee['role'] === 'freelancer' || $assignee['employment_type'] === 'freelance') ? 'freelancer' : 'karyawan';
 
         $insert = $db->prepare("
             INSERT INTO tasks (
                 project_id, client_id, assigned_to_user_id, assigned_by_user_id,
                 title, description, category, worker_type, priority, status,
-                deliverable_link, start_date, due_date
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'backlog', ?, ?, ?)
+                deliverable_link, start_date, due_date,
+                assigned_ads_budget, ads_spent_amount, remaining_ads_balance,
+                campaign_run_status, transfer_proof_file, ads_platform
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'backlog', ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         $insert->execute([
             $projectId,
@@ -510,11 +624,34 @@ if ($action === 'assign_task') {
             $priority,
             $deliverableLink ?: null,
             $startDate,
-            $dueDate
+            $dueDate,
+            $assignedAdsBudget,
+            0,
+            $assignedAdsBudget,
+            $assignedAdsBudget > 0 ? $campaignRunStatus : null,
+            $transferProofFile,
+            $adsPlatform ?: null
         ]);
         $newTaskId = (int)$db->lastInsertId();
 
-        log_activity('task', "Tugas Baru Dibagikan: {$title}", "Ditugaskan ke {$assignee['name']} ({$workerType}) untuk proyek {$proj['project_name']} ({$startDate} s/d {$dueDate})");
+        // Audit log for ads budget allocation
+        if ($assignedAdsBudget > 0) {
+            try {
+                $db->prepare("
+                    INSERT INTO ads_budget_logs (project_id, client_id, task_id, amount, type, notes, created_by)
+                    VALUES (?, ?, ?, ?, 'task_allocation', ?, ?)
+                ")->execute([
+                    $projectId,
+                    $clientIdOfProject,
+                    $newTaskId,
+                    $assignedAdsBudget,
+                    "Alokasi budget iklan tugas: {$title} ({$adsPlatform}) ke {$assignee['name']}",
+                    $userId
+                ]);
+            } catch (Exception $e) {}
+        }
+
+        log_activity('task', "Tugas Baru Dibagikan: {$title}", "Ditugaskan ke {$assignee['name']} ({$workerType}) untuk proyek {$proj['project_name']} ({$startDate} s/d {$dueDate})" . ($assignedAdsBudget > 0 ? " | Budget Ads: Rp " . number_format($assignedAdsBudget, 0, ',', '.') : ""));
 
         // Trigger webhook to notify worker
         triggerWorkerWebhook([
@@ -526,6 +663,8 @@ if ($action === 'assign_task') {
             'priority' => $priority,
             'start_date' => $startDate,
             'due_date' => $dueDate,
+            'assigned_ads_budget' => $assignedAdsBudget,
+            'ads_platform' => $adsPlatform,
             'worker_id' => $assignedTo,
             'worker_name' => $assignee['name'],
             'worker_phone' => $assignee['phone_wa'] ?? '',
@@ -536,12 +675,121 @@ if ($action === 'assign_task') {
 
         echo json_encode([
             'success' => true,
-            'message' => "Tugas berhasil dibagikan ke {$assignee['name']}!",
+            'message' => "Tugas berhasil dibagikan ke {$assignee['name']}!" . ($assignedAdsBudget > 0 ? " Budget iklan Rp " . number_format($assignedAdsBudget, 0, ',', '.') . " dialokasikan." : ""),
             'task_id' => $newTaskId
         ]);
         exit;
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => 'Gagal membagi tugas: ' . $e->getMessage()]);
+        exit;
+    }
+}
+
+// -------------------------------------------------------------
+// 3b. POST: Update Ads Campaign Metrics (Worker / Admin / Owner)
+// -------------------------------------------------------------
+if ($action === 'update_ads_campaign_metrics') {
+    $taskId = (int)($_POST['task_id'] ?? 0);
+    $spentAmount = parse_task_amount($_POST['ads_spent_amount'] ?? 0);
+    $campaignRunStatus = trim($_POST['campaign_run_status'] ?? 'running');
+    $notes = trim($_POST['ads_spent_notes'] ?? '');
+
+    if (!$taskId) {
+        echo json_encode(['success' => false, 'message' => 'Task ID tidak valid']);
+        exit;
+    }
+
+    $validStatuses = ['running', 'paused', 'stopped'];
+    if (!in_array($campaignRunStatus, $validStatuses)) {
+        $campaignRunStatus = 'running';
+    }
+
+    try {
+        $stmt = $db->prepare("SELECT * FROM tasks WHERE id = ? AND is_deleted = 0");
+        $stmt->execute([$taskId]);
+        $task = $stmt->fetch();
+
+        if (!$task) {
+            echo json_encode(['success' => false, 'message' => 'Tugas iklan tidak ditemukan']);
+            exit;
+        }
+
+        if (!is_admin() && (int)$task['assigned_to_user_id'] !== $userId) {
+            echo json_encode(['success' => false, 'message' => 'Anda tidak memiliki hak akses memperbarui metrik iklan tugas ini']);
+            exit;
+        }
+
+        $assignedBudget = (float)($task['assigned_ads_budget'] ?? 0);
+        $remainingBalance = max(0, $assignedBudget - $spentAmount);
+
+        // Handle screenshot upload
+        $proofPath = $task['ads_spent_proof'] ?? null;
+        if (!empty($_FILES['ads_spent_proof']['name']) && $_FILES['ads_spent_proof']['error'] === UPLOAD_ERR_OK) {
+            $allowedExts = ['jpg', 'jpeg', 'png', 'pdf', 'webp'];
+            $fileInfo = pathinfo($_FILES['ads_spent_proof']['name']);
+            $ext = strtolower($fileInfo['extension'] ?? '');
+            if (in_array($ext, $allowedExts)) {
+                $uploadDir = BASE_PATH . '/assets/uploads/tasks/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+                $filename = 'spent_proof_' . $taskId . '_' . time() . '_' . uniqid() . '.' . $ext;
+                if (move_uploaded_file($_FILES['ads_spent_proof']['tmp_name'], $uploadDir . $filename)) {
+                    $proofPath = 'assets/uploads/tasks/' . $filename;
+                }
+            }
+        }
+
+        $stmtUpdate = $db->prepare("
+            UPDATE tasks
+            SET ads_spent_amount = ?,
+                remaining_ads_balance = ?,
+                campaign_run_status = ?,
+                ads_spent_notes = ?,
+                ads_spent_proof = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        ");
+        $stmtUpdate->execute([
+            $spentAmount,
+            $remainingBalance,
+            $campaignRunStatus,
+            $notes ?: $task['ads_spent_notes'],
+            $proofPath,
+            $taskId
+        ]);
+
+        // Insert log into ads_budget_logs
+        try {
+            $db->prepare("
+                INSERT INTO ads_budget_logs (project_id, client_id, task_id, amount, type, notes, created_by)
+                VALUES (?, ?, ?, ?, 'spend_update', ?, ?)
+            ")->execute([
+                $task['project_id'],
+                $task['client_id'],
+                $taskId,
+                $spentAmount,
+                "Update pemakaian iklan: Rp " . number_format($spentAmount, 0, ',', '.') . " (Sisa: Rp " . number_format($remainingBalance, 0, ',', '.') . ", Status: {$campaignRunStatus}) oleh {$user['name']}",
+                $userId
+            ]);
+        } catch (Exception $e) {}
+
+        log_activity('task', "Pemakaian Iklan Diperbarui: {$task['title']}", "Terpakai: Rp " . number_format($spentAmount, 0, ',', '.') . " | Sisa: Rp " . number_format($remainingBalance, 0, ',', '.') . " | Status: {$campaignRunStatus}");
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Status dan pemakaian saldo iklan berhasil diperbarui!',
+            'data' => [
+                'task_id' => $taskId,
+                'assigned_ads_budget' => $assignedBudget,
+                'ads_spent_amount' => $spentAmount,
+                'remaining_ads_balance' => $remainingBalance,
+                'campaign_run_status' => $campaignRunStatus
+            ]
+        ]);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Gagal memperbarui pemakaian iklan: ' . $e->getMessage()]);
         exit;
     }
 }
@@ -803,6 +1051,12 @@ if ($action === 'projects_dropdown') {
     try {
         $stmt = $db->query("
             SELECT p.id as project_id, p.name as project_name, p.client_id,
+                   p.service_fee_amount, p.ads_budget_pool, p.total_contract_value,
+                   COALESCE((
+                       SELECT SUM(t2.assigned_ads_budget) 
+                       FROM tasks t2 
+                       WHERE t2.project_id = p.id AND t2.is_deleted = 0
+                   ), 0) as total_allocated_ads_budget,
                    c.company as client_company, c.name as client_pic,
                    c.service_type, c.contract_start_date, c.contract_end_date, c.contract_status
             FROM projects p
@@ -811,6 +1065,12 @@ if ($action === 'projects_dropdown') {
             ORDER BY c.company ASC, p.id DESC
         ");
         $projects = $stmt->fetchAll();
+        foreach ($projects as &$p) {
+            $pool = (float)($p['ads_budget_pool'] ?? 0);
+            $allocated = (float)($p['total_allocated_ads_budget'] ?? 0);
+            $p['available_ads_pool'] = max(0, $pool - $allocated);
+        }
+        unset($p);
 
         echo json_encode(['success' => true, 'projects' => $projects]);
         exit;
@@ -881,4 +1141,6 @@ if ($action === 'delete_all_tasks') {
     }
 }
 
-echo json_encode(['success' => false, 'message' => 'Aksi API tidak valid']);
+if (!empty($action) && $action !== 'none') {
+    echo json_encode(['success' => false, 'message' => 'Aksi API tidak valid']);
+}

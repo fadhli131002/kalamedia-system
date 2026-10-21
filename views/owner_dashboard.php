@@ -42,18 +42,25 @@ $rawProjects = $db->query("
            (SELECT COALESCE(SUM(amount), 0) FROM ads_spend WHERE project_id = p.id AND COALESCE(is_deleted, 0) = 0) as total_ads_cost
     FROM projects p
     JOIN clients c ON p.client_id = c.id
+    WHERE COALESCE(p.is_deleted, 0) = 0 AND COALESCE(c.is_deleted, 0) = 0
 ")->fetchAll();
 
 $leaderboard = [];
 foreach ($rawProjects as $p) {
-    $prodCost = floatval($p['total_freelancer_cost']) + floatval($p['total_ads_cost']);
-    $contract = floatval($p['contract_value']);
-    $profit = $contract - $prodCost;
-    $margin = $contract > 0 ? ($profit / $contract) * 100 : 0;
+    $serviceFee = floatval($p['service_fee_amount'] > 0 ? $p['service_fee_amount'] : $p['contract_value']);
+    $adsBudget = floatval($p['ads_budget_pool']);
+    $totalContract = floatval($p['total_contract_value'] > 0 ? $p['total_contract_value'] : ($serviceFee + $adsBudget));
+    $freelancerCost = floatval($p['total_freelancer_cost']);
+    $prodCost = $freelancerCost + floatval($p['total_ads_cost']);
+    $profit = $serviceFee - $freelancerCost;
+    $margin = $serviceFee > 0 ? ($profit / $serviceFee) * 100 : 0;
     $targetMargin = floatval($p['target_margin_percent']);
     $isOverBudget = $margin < $targetMargin;
 
     $leaderboard[] = array_merge($p, [
+        'service_fee' => $serviceFee,
+        'ads_budget' => $adsBudget,
+        'total_contract' => $totalContract,
         'prod_cost' => $prodCost,
         'profit' => $profit,
         'margin' => $margin,
@@ -105,31 +112,76 @@ foreach ($systemUsers as $su) {
     }
 }
 
-// 9. Ads Top-Up Transactions & Budget Monitoring for Owner
+// 9. Ads Top-Up Transactions & Budget Monitoring for Owner (100% Dynamic Aggregations)
+$adsProjectsSummary = $db->query("
+    SELECT p.id, p.name as project_name, c.company as client_company,
+           COALESCE(NULLIF(p.contract_value, 0), p.total_contract_value, 0) as total_kontrak_klien,
+           COALESCE(NULLIF(p.ads_budget_pool, 0), p.allocated_ads_budget, 0) as total_pagu_ads_klien,
+           COALESCE(NULLIF(p.ads_budget_pool, 0), p.allocated_ads_budget, 0) as allocated_ads_budget,
+           COALESCE((
+               SELECT SUM(COALESCE(NULLIF(transfer_amount_owner, 0), topup_amount, 0))
+               FROM ads_topup_transactions
+               WHERE project_id = p.id AND COALESCE(is_deleted, 0) = 0
+           ), 0) as total_ditransfer_ke_tim_ads,
+           COALESCE((
+               SELECT SUM(COALESCE(NULLIF(platform_topup_amount, 0), topup_amount, 0))
+               FROM ads_topup_transactions
+               WHERE project_id = p.id AND COALESCE(is_deleted, 0) = 0 AND (platform_topup_status IS NULL OR platform_topup_status = 'completed')
+           ), 0) as total_spend_installed,
+           COALESCE((
+               SELECT SUM(COALESCE(NULLIF(ad_spend_amount, 0), spend_installed, 0))
+               FROM ads_topup_transactions
+               WHERE project_id = p.id AND COALESCE(is_deleted, 0) = 0
+           ), 0) as total_spend_terpakai,
+           (
+               COALESCE(NULLIF(p.ads_budget_pool, 0), p.allocated_ads_budget, 0) -
+               COALESCE((
+                   SELECT SUM(COALESCE(NULLIF(transfer_amount_owner, 0), topup_amount, 0))
+                   FROM ads_topup_transactions
+                   WHERE project_id = p.id AND COALESCE(is_deleted, 0) = 0
+               ), 0)
+           ) as remaining_ads_budget,
+           (
+               COALESCE(NULLIF(p.contract_value, 0), p.total_contract_value, 0) -
+               COALESCE(NULLIF(p.ads_budget_pool, 0), p.allocated_ads_budget, 0)
+           ) as margin_bersih_agensi
+    FROM projects p
+    JOIN clients c ON p.client_id = c.id
+    WHERE COALESCE(p.is_deleted, 0) = 0 
+      AND (COALESCE(p.ads_budget_pool, 0) > 0 OR COALESCE(p.allocated_ads_budget, 0) > 0)
+    ORDER BY p.id DESC
+    LIMIT 6
+")->fetchAll(PDO::FETCH_ASSOC);
+
 $recentAdsTopups = $db->query("
-    SELECT t.*, u.name as uploader_name, p.name as project_name, c.company as client_company,
-           COALESCE(p.allocated_ads_budget, 0) as allocated_ads_budget,
-           COALESCE((SELECT SUM(spend_installed) FROM ads_budget_logs WHERE project_id = p.id AND COALESCE(is_deleted,0) = 0), 0) as total_spend_installed
+    SELECT t.*, 
+           COALESCE(NULLIF(t.transfer_amount_owner, 0), t.topup_amount, 0) as transfer_amount_owner,
+           COALESCE(t.transfer_proof_owner, t.receipt_file) as transfer_proof_owner,
+           COALESCE(NULLIF(t.platform_topup_amount, 0), t.topup_amount, 0) as platform_topup_amount,
+           COALESCE(t.platform_topup_proof, t.receipt_file) as platform_topup_proof,
+           COALESCE(NULLIF(t.ad_spend_amount, 0), t.spend_installed, 0) as ad_spend_amount,
+           COALESCE(t.stage_label, t.notes, 'Tahap 1') as stage_label,
+           COALESCE(t.assigned_user_name, u_assigned.name, 'Tim Ads Kalamedia') as assigned_user_name,
+           u_up.name as uploader_name, p.name as project_name, c.company as client_company
     FROM ads_topup_transactions t
-    LEFT JOIN users u ON t.uploaded_by_user_id = u.id
+    LEFT JOIN users u_up ON t.uploaded_by_user_id = u_up.id
+    LEFT JOIN users u_assigned ON t.assigned_user_id = u_assigned.id
     LEFT JOIN projects p ON t.project_id = p.id
     LEFT JOIN clients c ON t.client_id = c.id
     WHERE COALESCE(t.is_deleted, 0) = 0
     ORDER BY t.transaction_date DESC, t.id DESC
     LIMIT 8
-")->fetchAll();
+")->fetchAll(PDO::FETCH_ASSOC);
 
-$adsProjectsSummary = $db->query("
-    SELECT p.id, p.name as project_name, c.company as client_company,
-           COALESCE(p.allocated_ads_budget, 0) as allocated_ads_budget,
-           COALESCE((SELECT SUM(spend_installed) FROM ads_budget_logs WHERE project_id = p.id AND COALESCE(is_deleted,0) = 0), 0) as total_spend_installed,
-           (COALESCE(p.allocated_ads_budget, 0) - COALESCE((SELECT SUM(spend_installed) FROM ads_budget_logs WHERE project_id = p.id AND COALESCE(is_deleted,0) = 0), 0)) as remaining_ads_budget
-    FROM projects p
-    JOIN clients c ON p.client_id = c.id
-    WHERE COALESCE(p.is_deleted, 0) = 0 AND COALESCE(p.allocated_ads_budget, 0) > 0
-    ORDER BY p.id DESC
-    LIMIT 6
-")->fetchAll();
+// Pending balance requests from Tim Ads to Owner
+$pendingWorkerRequests = $db->query("
+    SELECT r.*, p.name as project_name, c.company as client_company
+    FROM ads_balance_requests r
+    JOIN projects p ON r.project_id = p.id
+    JOIN clients c ON r.client_id = c.id
+    WHERE r.request_type = 'worker_to_owner' AND r.status = 'pending'
+    ORDER BY r.id DESC
+")->fetchAll(PDO::FETCH_ASSOC);
 
 // 10. Initial Cashflow Chart Data (6 Months History) for Instant Zero-Lag Rendering
 $isMysql = (Database::getDriver() === 'mysql');
@@ -180,6 +232,7 @@ $initialChartData = [
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
+  <?php render_tab_uid_script(); ?>
 </head>
 <body>
   <div class="app-container">
@@ -438,8 +491,37 @@ $initialChartData = [
             <?php endif; ?>
           </div>
 
+          <!-- Notification Banner if Tim Ads Requests Balance -->
+          <?php if (!empty($pendingWorkerRequests)): ?>
+            <div style="margin-top: 24px;">
+              <?php foreach ($pendingWorkerRequests as $pwr): ?>
+                <div style="background: #FFF9F2; border: 1.5px solid #FDB022; border-radius: 12px; padding: 16px 20px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);">
+                  <div style="display: flex; align-items: flex-start; gap: 14px;">
+                    <span style="font-size: 28px; line-height: 1;">🔔</span>
+                    <div>
+                      <div style="font-weight: 800; font-size: 14px; color: #B54708;">
+                        Permintaan Pencairan Saldo Ads dari Tim Ads (<?= htmlspecialchars($pwr['requester_name']) ?>)
+                      </div>
+                      <div style="font-size: 13px; color: #475467; margin-top: 3px;">
+                        Klien: <b><?= htmlspecialchars($pwr['client_company']) ?></b> &bull; Proyek: <b><?= htmlspecialchars($pwr['project_name']) ?></b> &bull; Kebutuhan: <b style="color: #B42318; font-size: 14px;"><?= format_rupiah($pwr['amount_requested']) ?></b>
+                      </div>
+                      <div style="font-size: 12px; color: #344054; margin-top: 4px; background: #FFFFFF; border: 1px dashed #FDB022; padding: 6px 12px; border-radius: 6px;">
+                        <b>Catatan Tim Ads:</b> "<?= htmlspecialchars($pwr['notes'] ?: 'Saldo iklan telah menipis/habis.') ?>"
+                      </div>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 10px;">
+                    <a href="<?= url('tasks') ?>?tab=ads" class="btn btn-primary btn-sm" style="font-weight: 700; background: #175CD3; border-color: #175CD3; font-size: 12.5px; padding: 8px 16px;">
+                      + Buka Pelacakan &amp; Transfer Saldo
+                    </a>
+                  </div>
+                </div>
+              <?php endforeach; ?>
+            </div>
+          <?php endif; ?>
+
           <!-- Monitoring Saldo Iklan & Riwayat Top-Up Tim Ads -->
-          <div class="glass-panel owner-full-width-panel" style="margin-top: 24px;">
+          <div class="glass-panel owner-full-width-panel" style="margin-top: <?= !empty($pendingWorkerRequests) ? '12px' : '24px' ?>;">
             <div class="panel-header" style="margin-bottom: 16px; flex-wrap: wrap; gap: 12px; display: flex; justify-content: space-between; align-items: center;">
               <div>
                 <h3 class="panel-title" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
@@ -478,9 +560,14 @@ $initialChartData = [
                       </span>
                     </div>
 
+                    <div style="display: flex; justify-content: space-between; font-size: 11.5px; margin-bottom: 4px;">
+                      <span style="color: var(--text-secondary);">Total Pagu Ads:</span>
+                      <span style="font-weight: 700; color: #5925DC;"><?= format_rupiah($alloc) ?></span>
+                    </div>
+
                     <div style="display: flex; justify-content: space-between; font-size: 11.5px; margin-bottom: 6px;">
-                      <span style="color: var(--text-secondary);">Terpasang: <b><?= format_rupiah($spend) ?></b></span>
-                      <span style="color: var(--text-secondary);">Pagu: <b><?= format_rupiah($alloc) ?></b></span>
+                      <span style="color: var(--text-secondary);">Dicairkan ke Tim:</span>
+                      <span style="font-weight: 700; color: #175CD3;"><?= format_rupiah($ap['total_ditransfer_ke_tim_ads']) ?></span>
                     </div>
 
                     <div style="background: #F2F4F7; height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 8px;">
@@ -488,26 +575,26 @@ $initialChartData = [
                     </div>
 
                     <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11.5px; border-top: 1px dashed var(--border-color); padding-top: 6px;">
-                      <span style="color: var(--text-secondary);">Sisa Saldo:</span>
-                      <span style="font-weight: 800; color: <?= $rem <= 0 ? 'var(--danger-text)' : 'var(--success-text)' ?>;"><?= format_rupiah($rem) ?></span>
+                      <span style="color: var(--text-secondary);">Sisa Pagu di Owner:</span>
+                      <span style="font-weight: 800; color: <?= $rem <= 0 ? 'var(--danger-text)' : '#027A48' ?>;"><?= format_rupiah($rem) ?></span>
                     </div>
                   </div>
                 <?php endforeach; ?>
               </div>
             <?php endif; ?>
 
-            <!-- Table Riwayat Top-up Terbaru -->
+            <!-- Table Riwayat Top-up Terbaru dengan 2 Tahap Bukti Transaksi -->
             <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
-              <table class="table-custom" style="min-width: 820px; width: 100%;">
+              <table class="table-custom" style="min-width: 950px; width: 100%;">
                 <thead>
                   <tr>
-                    <th style="min-width: 210px; white-space: nowrap;">TANGGAL &amp; PETUGAS ADS</th>
+                    <th style="min-width: 180px; white-space: nowrap;">TANGGAL &amp; PETUGAS ADS</th>
                     <th style="white-space: nowrap;">KLIEN &amp; PROYEK</th>
-                    <th style="white-space: nowrap;">PLATFORM</th>
-                    <th style="white-space: nowrap;">NOMINAL TOP-UP</th>
-                    <th style="white-space: nowrap;">ANGGARAN TERPASANG</th>
-                    <th style="white-space: nowrap;">STATUS / CATATAN</th>
-                    <th style="text-align: right; white-space: nowrap;">BUKTI STRUK</th>
+                    <th style="white-space: nowrap;">PLATFORM &amp; TAHAP</th>
+                    <th style="white-space: nowrap;">1. TRANSFER OWNER &rarr; TIM ADS</th>
+                    <th style="white-space: nowrap;">2. TOP-UP TIM ADS &rarr; META/GOOGLE</th>
+                    <th style="white-space: nowrap;">SPEND &amp; STATUS KAMPANYE</th>
+                    <th style="white-space: nowrap;">STATUS LAPORAN</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -518,11 +605,17 @@ $initialChartData = [
                       </td>
                     </tr>
                   <?php else: ?>
-                    <?php foreach ($recentAdsTopups as $rt): ?>
+                    <?php foreach ($recentAdsTopups as $rt): 
+                      $tfOwnerProof = !empty($rt['transfer_proof_owner']) ? $rt['transfer_proof_owner'] : (!empty($rt['receipt_file']) ? $rt['receipt_file'] : '');
+                      $topupPlatformProof = !empty($rt['platform_topup_proof']) ? $rt['platform_topup_proof'] : (!empty($rt['receipt_file']) ? $rt['receipt_file'] : '');
+                      $tfAmount = floatval($rt['transfer_amount_owner']);
+                      $platformAmount = floatval($rt['platform_topup_amount']);
+                      $spendAmount = floatval($rt['ad_spend_amount']);
+                    ?>
                       <tr>
-                        <td style="min-width: 210px; white-space: nowrap;">
+                        <td style="min-width: 180px; white-space: nowrap;">
                           <div style="font-weight: 700; color: #101828;"><?= date('d M Y', strtotime($rt['transaction_date'])) ?></div>
-                          <div style="font-size: 11px; color: var(--text-secondary);">Oleh: <?= htmlspecialchars($rt['uploader_name'] ?? 'Staff Ads') ?></div>
+                          <div style="font-size: 11px; color: var(--text-secondary);">Petugas: <b><?= htmlspecialchars($rt['assigned_user_name'] ?? 'Tim Ads') ?></b></div>
                         </td>
                         <td>
                           <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($rt['client_company'] ?? '-') ?></div>
@@ -532,30 +625,44 @@ $initialChartData = [
                           <span class="badge" style="background: #F4F3FF; color: #5925DC; font-weight: 700; font-size: 11px;">
                             <?= htmlspecialchars($rt['platform']) ?>
                           </span>
-                        </td>
-                        <td style="font-weight: 800; color: #027A48;">
-                          + <?= format_rupiah($rt['topup_amount']) ?>
-                        </td>
-                        <td style="font-weight: 700; color: #101828;">
-                          <?= format_rupiah($rt['spend_installed']) ?>
-                        </td>
-                        <td>
-                          <div style="font-size: 12px; color: #101828; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="<?= htmlspecialchars($rt['notes'] ?: '-') ?>">
-                            <?= htmlspecialchars($rt['notes'] ?: '-') ?>
-                          </div>
-                          <span class="badge" style="background: #ECFDF3; color: #027A48; font-size: 10px; font-weight: 700; margin-top: 2px;">
-                            <?= ucfirst($rt['status'] ?? 'recorded') ?>
+                          <span style="font-size: 11px; color: var(--text-secondary); display: block; margin-top: 2px;">
+                            <?= htmlspecialchars($rt['stage_label'] ?? 'Tahap Berjalan') ?>
                           </span>
                         </td>
-                        <td style="text-align: right;">
-                          <?php if (!empty($rt['receipt_file'])): ?>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($rt['receipt_file'])) ?>', 'Bukti Transaksi Saldo <?= htmlspecialchars(addslashes($rt['platform'])) ?> - <?= htmlspecialchars(addslashes($rt['client_company'] ?? '')) ?>')" style="font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                              Lihat Bukti
+                        <td style="white-space: nowrap;">
+                          <div style="font-weight: 800; color: #175CD3; font-size: 13px;">
+                            <?= format_rupiah($tfAmount) ?>
+                          </div>
+                          <?php if (!empty($tfOwnerProof)): ?>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($tfOwnerProof)) ?>', 'Bukti Transfer Owner ke Tim Ads - <?= htmlspecialchars(addslashes($rt['client_company'] ?? '')) ?>')" style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; margin-top: 3px; display: inline-flex; align-items: center; gap: 4px; color: #175CD3; border-color: #B2CCFF; background: #EFF8FF;">
+                              📄 Bukti TF Owner
                             </button>
                           <?php else: ?>
-                            <span style="font-size: 11px; color: var(--text-muted); font-style: italic;">Tidak ada bukti</span>
+                            <span style="font-size: 10.5px; color: var(--text-muted); font-style: italic;">Belum ada lampiran</span>
                           <?php endif; ?>
+                        </td>
+                        <td style="white-space: nowrap;">
+                          <div style="font-weight: 800; color: #027A48; font-size: 13px;">
+                            <?= format_rupiah($platformAmount) ?>
+                          </div>
+                          <?php if (!empty($topupPlatformProof)): ?>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($topupPlatformProof)) ?>', 'Bukti Top-Up Platform <?= htmlspecialchars(addslashes($rt['platform'])) ?>')" style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; margin-top: 3px; display: inline-flex; align-items: center; gap: 4px; color: #027A48; border-color: #A6F4C5; background: #ECFDF3;">
+                              📈 Bukti Top-Up Ads
+                            </button>
+                          <?php else: ?>
+                            <span class="badge" style="background: #FEF3F2; color: #B42318; font-size: 10px; font-weight: 700; margin-top: 3px;">⏳ Menunggu Top-Up</span>
+                          <?php endif; ?>
+                        </td>
+                        <td style="white-space: nowrap;">
+                          <div style="font-size: 12px; color: #101828;">Spend: <b><?= format_rupiah($spendAmount) ?></b></div>
+                          <span class="badge" style="background: <?= ($rt['campaign_status'] === 'running' || empty($rt['campaign_status'])) ? '#ECFDF3' : '#F2F4F7' ?>; color: <?= ($rt['campaign_status'] === 'running' || empty($rt['campaign_status'])) ? '#027A48' : '#344054' ?>; font-size: 10px; font-weight: 700; margin-top: 2px;">
+                            <?= ($rt['campaign_status'] === 'running' || empty($rt['campaign_status'])) ? '🟢 Iklan Jalan' : '⏸️ Dijeda' ?>
+                          </span>
+                        </td>
+                        <td>
+                          <span class="badge" style="background: <?= ($rt['status'] === 'verified') ? '#ECFDF3' : '#EFF8FF' ?>; color: <?= ($rt['status'] === 'verified') ? '#027A48' : '#175CD3' ?>; font-size: 10.5px; font-weight: 700;">
+                            <?= ($rt['status'] === 'verified') ? '✓ Terverifikasi' : 'Terekam' ?>
+                          </span>
                         </td>
                       </tr>
                     <?php endforeach; ?>

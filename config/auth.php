@@ -1,7 +1,8 @@
 <?php
 /**
  * Authentication & Strict Multi-Role Access Control (RBAC)
- * 5 Roles: Owner, Admin, Karyawan (In-House Staff), Freelancer (External Talent), Client (Client Portal)
+ * Anti-Collision Multi-Tab Architecture (?_u=u_<id> + sessionStorage + $_SESSION['kala_accounts'])
+ * 5 Roles: Owner, Admin, Karyawan, Freelancer, Client
  */
 
 require_once __DIR__ . '/app.php';
@@ -14,139 +15,197 @@ function release_session(): void {
 }
 
 /**
- * Dual-Session Architecture Based on Context Route & Slot ('internal' vs 'client'):
- * - $_SESSION['kala_auth']['internal']: For Owner, Admin, Karyawan, Freelancer (Internal Workspace)
- * - $_SESSION['kala_auth']['client']: For Clients (Client Portal)
- * Eliminates multi-tab session overwrites so Owner and Client can remain logged in concurrently across tabs.
+ * Check if the current request is for a Client Portal route
  */
-function resolveActiveSessionContext(): string {
-    // 1. If explicit session_name is KALASESS_CLIENT
-    if (session_name() === 'KALASESS_CLIENT') {
-        $slotParam = $_GET['_slot'] ?? $_POST['_slot'] ?? ($_GET['portal'] ?? ($_POST['portal'] ?? ($_GET['context'] ?? ($_POST['context'] ?? ''))));
-        if ($slotParam === 'internal' || isset($_GET['preview'])) {
-            return 'internal';
-        }
-        return 'client';
-    }
-
-    if (function_exists('detect_session_context')) {
-        return detect_session_context();
-    }
-
+function is_client_portal_route(): bool {
     $uri = $_SERVER['REQUEST_URI'] ?? '';
     $script = basename($_SERVER['SCRIPT_NAME'] ?? '');
-    $slotParam = $_GET['_slot'] ?? $_POST['_slot'] ?? ($_GET['auth_context'] ?? ($_POST['auth_context'] ?? ($_SERVER['HTTP_X_KALA_SLOT'] ?? ($_SERVER['HTTP_X_AUTH_CONTEXT'] ?? ''))));
+    $page = $_GET['page'] ?? ($GLOBALS['currentPage'] ?? '');
+    $slotParam = $_GET['_slot'] ?? $_POST['_slot'] ?? ($_GET['context'] ?? ($_POST['context'] ?? ($_GET['portal'] ?? '')));
 
-    if ($slotParam === 'client' || $slotParam === 'internal') {
-        return $slotParam;
-    }
+    if ($slotParam === 'client') return true;
+    if ($slotParam === 'internal') return false;
 
-    if (
-        $script === 'client_portal.php' ||
-        strpos($uri, '/client-portal') !== false ||
-        (isset($_GET['portal']) && $_GET['portal'] === 'client') ||
-        (isset($_GET['page']) && in_array($_GET['page'], ['client-portal', 'client_portal']))
-    ) {
-        return 'client';
-    }
-
-    $referer = $_SERVER['HTTP_REFERER'] ?? '';
-    if (strpos($referer, '/client-portal') !== false || strpos($referer, 'portal=client') !== false || strpos($referer, 'client_portal.php') !== false) {
-        return 'client';
-    }
-
-    $currentPage = $GLOBALS['currentPage'] ?? ($_GET['page'] ?? '');
-    if ($currentPage === 'client-portal' || $currentPage === 'client') {
-        return 'client';
-    }
-
-    return 'internal';
-}
-
-function get_auth_context(): string {
-    return resolveActiveSessionContext();
-}
-
-function get_session_slot(?string $context = null): string {
-    $ctx = $context ?: resolveActiveSessionContext();
-    return ($ctx === 'client') ? 'kala_client_portal' : 'kala_internal';
-}
-
-function is_logged_in(?string $context = null): bool {
-    $ctx = $context ?: resolveActiveSessionContext();
-
-    // 1. Primary storage: $_SESSION['kala_auth'][$ctx]
-    if (!empty($_SESSION['kala_auth'][$ctx]['user_id'])) {
+    if ($script === 'client_portal.php') return true;
+    if (in_array($page, ['client-portal', 'client_portal', 'client'])) return true;
+    if (strpos($uri, '/client-portal') !== false || strpos($uri, 'portal=client') !== false || strpos($uri, 'context=client') !== false) {
         return true;
     }
 
-    // 2. Fallback to generic user session if role matches context
-    if (!empty($_SESSION['user']['id']) && !empty($_SESSION['user']['role'])) {
-        $uRole = $_SESSION['user']['role'];
-        if ($ctx === 'client' && $uRole === 'client') {
-            return true;
-        }
-        if ($ctx === 'internal' && in_array($uRole, ['owner', 'admin', 'karyawan', 'freelancer'])) {
-            return true;
-        }
-    }
-
-    // 3. Legacy multi-slot: $_SESSION['kala_internal'] or $_SESSION['kala_client_portal']
-    $legacySlot = ($ctx === 'client') ? 'kala_client_portal' : 'kala_internal';
-    if (!empty($_SESSION[$legacySlot]['logged_in']) && !empty($_SESSION[$legacySlot]['user'])) {
+    $referer = $_SERVER['HTTP_REFERER'] ?? '';
+    if (strpos($uri, '/api/') !== false && (strpos($referer, '/client-portal') !== false || strpos($referer, 'portal=client') !== false)) {
         return true;
     }
 
     return false;
 }
 
-function current_user(?string $context = null): ?array {
-    $ctx = $context ?: resolveActiveSessionContext();
+/**
+ * Resolves the active user account for the current request / tab
+ * 1. Checks ?_u= or POST _u or HTTP_X_KALA_UID
+ * 2. Checks $_SESSION['kala_accounts'][$uid_key]
+ * 3. Fallback route:
+ *    - Route /client-portal: STRICTLY searches for a 'client' account in $_SESSION['kala_accounts']
+ *    - Route internal: STRICTLY searches for 'owner'/'admin'/'karyawan'/'freelancer' and FORBIDS taking 'client'
+ */
+function resolve_active_account(): ?array {
+    if (isset($GLOBALS['__ACTIVE_RESOLVED_ACCOUNT__'])) {
+        return $GLOBALS['__ACTIVE_RESOLVED_ACCOUNT__'];
+    }
 
-    // 1. Primary storage: $_SESSION['kala_auth'][$ctx]
-    if (!empty($_SESSION['kala_auth'][$ctx]['user_id'])) {
-        $data = $_SESSION['kala_auth'][$ctx];
-        return [
-            'id' => (int)$data['user_id'],
-            'name' => $data['name'] ?? '',
-            'email' => $data['email'] ?? '',
-            'role' => $data['role'] ?? '',
-            'employment_type' => $data['employment_type'] ?? ($ctx === 'client' ? 'client' : 'internal'),
-            'phone_wa' => $data['phone_wa'] ?? null,
-            'client_id' => !empty($data['client_id']) ? (int)$data['client_id'] : null,
-            'avatar' => $data['avatar'] ?? null,
+    if (!isset($_SESSION['kala_accounts']) || !is_array($_SESSION['kala_accounts'])) {
+        $_SESSION['kala_accounts'] = [];
+    }
+
+    // 1. Read UID token from request (?_u=, POST _u, or Header X-Kala-Uid)
+    $uidKey = $_GET['_u'] ?? $_POST['_u'] ?? ($_SERVER['HTTP_X_KALA_UID'] ?? '');
+    if (!empty($uidKey) && is_numeric($uidKey)) {
+        $uidKey = 'u_' . $uidKey;
+    }
+
+    $selectedAccount = null;
+
+    // Direct token lookup
+    if (!empty($uidKey) && isset($_SESSION['kala_accounts'][$uidKey])) {
+        $selectedAccount = $_SESSION['kala_accounts'][$uidKey];
+    }
+
+    // 2. If token is missing or not found in accounts, determine from route
+    if (!$selectedAccount && !empty($_SESSION['kala_accounts'])) {
+        $isClientRoute = is_client_portal_route();
+        if ($isClientRoute) {
+            // Find client account
+            foreach (array_reverse($_SESSION['kala_accounts']) as $acc) {
+                if (($acc['role'] ?? '') === 'client') {
+                    $selectedAccount = $acc;
+                    break;
+                }
+            }
+        } else {
+            // Internal Route: WAJIB HANYA mencari owner/admin/karyawan/freelancer! DILARANG mengambil client!
+            foreach (array_reverse($_SESSION['kala_accounts']) as $acc) {
+                if (in_array($acc['role'] ?? '', ['owner', 'admin', 'karyawan', 'freelancer'])) {
+                    $selectedAccount = $acc;
+                    break;
+                }
+            }
+        }
+    }
+
+    // 3. Fallback for legacy session structures (if kala_accounts was not yet populated)
+    if (!$selectedAccount) {
+        if (!empty($_SESSION['user']['id']) && !empty($_SESSION['user']['role'])) {
+            $uRole = $_SESSION['user']['role'];
+            $isClientRoute = is_client_portal_route();
+            if (($isClientRoute && $uRole === 'client') || (!$isClientRoute && $uRole !== 'client')) {
+                $uKey = 'u_' . (int)$_SESSION['user']['id'];
+                $selectedAccount = [
+                    'user_id'         => (int)$_SESSION['user']['id'],
+                    'id'              => (int)$_SESSION['user']['id'],
+                    'name'            => $_SESSION['user']['name'] ?? '',
+                    'email'           => $_SESSION['user']['email'] ?? '',
+                    'role'            => $_SESSION['user']['role'] ?? '',
+                    'employment_type' => $_SESSION['user']['employment_type'] ?? ($uRole === 'client' ? 'client' : 'internal'),
+                    'phone_wa'        => $_SESSION['user']['phone_wa'] ?? null,
+                    'client_id'       => !empty($_SESSION['user']['client_id']) ? (int)$_SESSION['user']['client_id'] : null,
+                    'avatar'          => $_SESSION['user']['avatar'] ?? null,
+                ];
+                $_SESSION['kala_accounts'][$uKey] = $selectedAccount;
+            }
+        }
+    }
+
+    // If active account determined, normalize and synchronize for this request
+    if ($selectedAccount) {
+        $normalized = [
+            'id'              => (int)($selectedAccount['id'] ?? $selectedAccount['user_id']),
+            'user_id'         => (int)($selectedAccount['id'] ?? $selectedAccount['user_id']),
+            'name'            => $selectedAccount['name'] ?? '',
+            'email'           => $selectedAccount['email'] ?? '',
+            'role'            => $selectedAccount['role'] ?? '',
+            'employment_type' => $selectedAccount['employment_type'] ?? ($selectedAccount['role'] === 'client' ? 'client' : 'internal'),
+            'phone_wa'        => $selectedAccount['phone_wa'] ?? null,
+            'client_id'       => !empty($selectedAccount['client_id']) ? (int)$selectedAccount['client_id'] : null,
+            'avatar'          => $selectedAccount['avatar'] ?? null,
         ];
+
+        // Sync to legacy session fields so external templates don't break
+        $_SESSION['user_id'] = $normalized['id'];
+        $_SESSION['role'] = $normalized['role'];
+        $_SESSION['client_id'] = $normalized['client_id'];
+        $_SESSION['user'] = $normalized;
+
+        $GLOBALS['__ACTIVE_RESOLVED_ACCOUNT__'] = $normalized;
+        return $normalized;
     }
 
-    // 2. Generic user if role matches
-    if (!empty($_SESSION['user']['id']) && !empty($_SESSION['user']['role'])) {
-        $u = $_SESSION['user'];
-        $uRole = $u['role'] ?? '';
-        if (($ctx === 'client' && $uRole === 'client') || ($ctx === 'internal' && $uRole !== 'client')) {
-            return [
-                'id' => (int)$u['id'],
-                'name' => $u['name'] ?? '',
-                'email' => $u['email'] ?? '',
-                'role' => $u['role'] ?? '',
-                'employment_type' => $u['employment_type'] ?? ($ctx === 'client' ? 'client' : 'internal'),
-                'phone_wa' => $u['phone_wa'] ?? null,
-                'client_id' => !empty($u['client_id']) ? (int)$u['client_id'] : null,
-                'avatar' => $u['avatar'] ?? null,
-            ];
-        }
-    }
-
-    // 3. Legacy multi-slot storage
-    $legacySlot = ($ctx === 'client') ? 'kala_client_portal' : 'kala_internal';
-    if (!empty($_SESSION[$legacySlot]['user'])) {
-        $u = $_SESSION[$legacySlot]['user'];
-        $uRole = $u['role'] ?? '';
-        if (($ctx === 'client' && $uRole === 'client') || ($ctx === 'internal' && $uRole !== 'client')) {
-            return $u;
-        }
-    }
-
+    $GLOBALS['__ACTIVE_RESOLVED_ACCOUNT__'] = null;
     return null;
+}
+
+function current_tab_uid(): string {
+    $u = resolve_active_account();
+    return $u ? ('u_' . $u['id']) : '';
+}
+
+function render_tab_uid_script(): void {
+    $currentUid = current_tab_uid();
+    ?>
+    <script>
+      (function() {
+        var serverUid = '<?= htmlspecialchars($currentUid, ENT_QUOTES, 'UTF-8') ?>';
+        var urlParams = new URLSearchParams(window.location.search);
+        var urlUid = urlParams.get('_u');
+        if (urlUid) {
+          sessionStorage.setItem('kala_tab_uid', urlUid);
+        } else if (serverUid) {
+          sessionStorage.setItem('kala_tab_uid', serverUid);
+          if (!window.location.pathname.endsWith('/login') && !window.location.pathname.endsWith('/logout')) {
+            var sep = window.location.search ? '&' : '?';
+            window.history.replaceState(null, '', window.location.pathname + window.location.search + sep + '_u=' + encodeURIComponent(serverUid) + window.location.hash);
+          }
+        } else {
+          var stored = sessionStorage.getItem('kala_tab_uid');
+          if (stored && !window.location.pathname.endsWith('/login') && !window.location.pathname.endsWith('/logout')) {
+            var sep = window.location.search ? '&' : '?';
+            window.history.replaceState(null, '', window.location.pathname + window.location.search + sep + '_u=' + encodeURIComponent(stored) + window.location.hash);
+          }
+        }
+      })();
+    </script>
+    <?php
+}
+
+function resolveActiveSessionContext(): string {
+    return is_client_portal_route() ? 'client' : 'internal';
+}
+
+function get_auth_context(): string {
+    return resolveActiveSessionContext();
+}
+
+function is_logged_in(?string $context = null): bool {
+    $u = resolve_active_account();
+    if (!$u) return false;
+    if ($context === 'client') {
+        return ($u['role'] === 'client');
+    }
+    if ($context === 'internal') {
+        return in_array($u['role'], ['owner', 'admin', 'karyawan', 'freelancer']);
+    }
+    return true;
+}
+
+function current_user(?string $context = null): ?array {
+    $u = resolve_active_account();
+    if (!$u) return null;
+    if ($context === 'client' && $u['role'] !== 'client') {
+        return null;
+    }
+    if ($context === 'internal' && $u['role'] === 'client') {
+        return null;
+    }
+    return $u;
 }
 
 function current_user_id(?string $context = null): ?int {
@@ -165,35 +224,29 @@ function current_user_client_id(?string $context = null): ?int {
 }
 
 function is_owner(?string $context = null): bool {
-    $ctx = $context ?: resolveActiveSessionContext();
-    return current_user_role($ctx) === 'owner';
+    return current_user_role($context) === 'owner';
 }
 
 function is_admin(?string $context = null): bool {
-    $ctx = $context ?: resolveActiveSessionContext();
-    $role = current_user_role($ctx);
+    $role = current_user_role($context);
     return ($role === 'owner' || $role === 'admin');
 }
 
 function is_karyawan(?string $context = null): bool {
-    $ctx = $context ?: resolveActiveSessionContext();
-    return current_user_role($ctx) === 'karyawan';
+    return current_user_role($context) === 'karyawan';
 }
 
 function is_freelancer(?string $context = null): bool {
-    $ctx = $context ?: resolveActiveSessionContext();
-    return current_user_role($ctx) === 'freelancer';
+    return current_user_role($context) === 'freelancer';
 }
 
 function is_worker(?string $context = null): bool {
-    $ctx = $context ?: resolveActiveSessionContext();
-    $role = current_user_role($ctx);
+    $role = current_user_role($context);
     return in_array($role, ['karyawan', 'freelancer', 'admin', 'owner']);
 }
 
 function is_client(?string $context = null): bool {
-    $ctx = $context ?: resolveActiveSessionContext();
-    return current_user_role($ctx) === 'client';
+    return current_user_role($context) === 'client';
 }
 
 function home_url_for_role(?string $roleOrContext = null): string {
@@ -210,16 +263,15 @@ function home_url_for_role(?string $roleOrContext = null): string {
         case 'freelancer':
             return url('tasks');
         case 'client':
-            return url('client-portal');
+            return url('client-portal?tab=deliverables');
         default:
-            return url('login');
+            return url('login', false);
     }
 }
 
 function current_portal(): string {
-    $ctx = resolveActiveSessionContext();
-    if ($ctx === 'client') return 'client';
-    $role = current_user_role('internal');
+    if (is_client_portal_route() || is_client()) return 'client';
+    $role = current_user_role();
     if ($role === 'owner') return 'owner';
     if ($role === 'admin') return 'admin';
     return 'worker';
@@ -231,7 +283,6 @@ function check_and_expire_client_contracts(?PDO $db = null): void {
             $db = Database::getConnection();
         }
         $today = date('Y-m-d');
-        // Find clients whose contract has expired
         $stmt = $db->prepare("
             SELECT id FROM clients 
             WHERE contract_end_date IS NOT NULL 
@@ -252,12 +303,15 @@ function check_and_expire_client_contracts(?PDO $db = null): void {
 
 function require_auth(?string $context = null) {
     check_and_expire_client_contracts();
-    if (!is_logged_in($context)) {
+    $targetContext = $context ?: (is_client_portal_route() ? 'client' : 'internal');
+    $isLoggedIn = is_logged_in($targetContext);
+
+    if (!$isLoggedIn) {
         $uri = $_SERVER['REQUEST_URI'] ?? '';
         $isApi = (strpos($uri, '/api/') !== false) ||
                  (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') ||
                  (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
-        $loginUrl = url('login') . ($context === 'client' ? '?context=client' : '');
+        $loginUrl = url('login', false) . ($targetContext === 'client' ? '?context=client' : '');
         if ($isApi) {
             header('Content-Type: application/json');
             echo json_encode(['success' => false, 'message' => 'Sesi berakhir atau belum login. Silakan login kembali.', 'redirect' => $loginUrl]);
@@ -266,49 +320,50 @@ function require_auth(?string $context = null) {
         header('Location: ' . $loginUrl);
         exit;
     }
+
+    $u = current_user();
+    // Prevent client role from accessing internal workspace
+    if ($targetContext === 'internal' && ($u['role'] ?? '') === 'client') {
+        header('Location: ' . url('client-portal?tab=deliverables'));
+        exit;
+    }
 }
 
 function require_owner() {
     require_auth('internal');
-    if (!is_owner('internal')) {
-        header('Location: ' . home_url_for_role(current_user_role('internal')));
+    if (!is_owner()) {
+        header('Location: ' . home_url_for_role());
         exit;
     }
 }
 
 function require_admin() {
     require_auth('internal');
-    if (!is_admin('internal')) {
-        header('Location: ' . home_url_for_role(current_user_role('internal')));
+    if (!is_admin()) {
+        header('Location: ' . home_url_for_role());
         exit;
     }
 }
 
 function require_worker() {
     require_auth('internal');
-    if (!is_worker('internal')) {
-        header('Location: ' . home_url_for_role(current_user_role('internal')));
+    if (!is_worker()) {
+        header('Location: ' . home_url_for_role());
         exit;
     }
 }
 
 function require_client() {
-    $ctx = resolveActiveSessionContext();
-    if ($ctx === 'internal') {
-        require_auth('internal');
-        if (!is_admin('internal')) {
-            header('Location: ' . home_url_for_role(current_user_role('internal')));
-            exit;
-        }
-    } else {
-        if (!is_logged_in('client') && is_admin('internal')) {
-            return;
-        }
-        require_auth('client');
-        if (!is_client('client') && !is_admin('internal')) {
-            header('Location: ' . url('login?context=client'));
-            exit;
-        }
+    check_and_expire_client_contracts();
+    $u = resolve_active_account();
+    // Allow admin/owner to preview client portal
+    if ($u && ($u['role'] === 'owner' || $u['role'] === 'admin')) {
+        return;
+    }
+    if (!$u || $u['role'] !== 'client') {
+        $loginUrl = url('login', false) . '?context=client';
+        header('Location: ' . $loginUrl);
+        exit;
     }
 }
 

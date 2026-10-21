@@ -1,7 +1,8 @@
 <?php
 /**
  * Auth API Handler
- * Multi-Role Authentication for 5 Roles: Owner, Admin, Karyawan, Freelancer, Client
+ * Multi-Role Authentication with Isolated Per-Tab Account Token (?_u=u_<id>)
+ * 5 Roles: Owner, Admin, Karyawan, Freelancer, Client
  */
 
 header('Content-Type: application/json');
@@ -34,19 +35,15 @@ if ($action === 'login') {
             }
 
             $userPayload = [
-                'id' => (int)$user['id'],
-                'name' => $displayName,
-                'email' => $user['email'],
-                'role' => $user['role'],
-                'employment_type' => $user['employment_type'] ?? 'internal',
-                'phone_wa' => $user['phone_wa'] ?? null,
-                'client_id' => !empty($user['client_id']) ? (int)$user['client_id'] : null,
-                'avatar' => $user['avatar']
+                'id'              => (int)$user['id'],
+                'name'            => $displayName,
+                'email'           => $user['email'],
+                'role'            => $user['role'],
+                'employment_type' => $user['employment_type'] ?? ($user['role'] === 'client' ? 'client' : 'internal'),
+                'phone_wa'        => $user['phone_wa'] ?? null,
+                'client_id'       => !empty($user['client_id']) ? (int)$user['client_id'] : null,
+                'avatar'          => $user['avatar'] ?? null
             ];
-
-            if (!isset($_SESSION['kala_auth']) || !is_array($_SESSION['kala_auth'])) {
-                $_SESSION['kala_auth'] = [];
-            }
 
             if ($user['role'] === 'client') {
                 // Strict validation: Check client contract expiration
@@ -83,57 +80,48 @@ if ($action === 'login') {
                         exit;
                     }
                 }
+            }
 
-                if (function_exists('switch_session_context')) {
-                    switch_session_context('client');
-                }
-                $_SESSION['kala_auth']['client'] = [
-                    'user_id'         => (int)$user['id'],
-                    'name'            => $displayName,
-                    'email'           => $user['email'],
-                    'role'            => 'client',
-                    'employment_type' => 'client',
-                    'client_id'       => !empty($user['client_id']) ? (int)$user['client_id'] : null,
-                    'avatar'          => $user['avatar'] ?? null
-                ];
-                $_SESSION['kala_client_portal'] = [
-                    'logged_in'     => true,
-                    'user'          => $userPayload,
-                    'last_activity' => time()
-                ];
-                $_SESSION['user'] = $userPayload;
-                $_SESSION['user_id'] = (int)$user['id'];
-                $_SESSION['role'] = 'client';
-                $_SESSION['client_id'] = !empty($user['client_id']) ? (int)$user['client_id'] : null;
-                $redirectUrl = url('client-portal?tab=deliverables&portal=client&_slot=client');
+            // 1. Simpan di $_SESSION['kala_accounts'][$uid_key] (DILARANG KERAS MENGHAPUS AKUN LAIN!)
+            $uidKey = 'u_' . (int)$user['id'];
+            if (!isset($_SESSION['kala_accounts']) || !is_array($_SESSION['kala_accounts'])) {
+                $_SESSION['kala_accounts'] = [];
+            }
+            $_SESSION['kala_accounts'][$uidKey] = [
+                'user_id'         => (int)$user['id'],
+                'id'              => (int)$user['id'],
+                'name'            => $displayName,
+                'email'           => $user['email'],
+                'role'            => $user['role'],
+                'employment_type' => $userPayload['employment_type'],
+                'phone_wa'        => $user['phone_wa'] ?? null,
+                'client_id'       => !empty($user['client_id']) ? (int)$user['client_id'] : null,
+                'avatar'          => $user['avatar'] ?? null,
+                'login_time'      => time()
+            ];
+
+            // 2. Set current active session for backwards compatibility
+            $_SESSION['user'] = $userPayload;
+            $_SESSION['user_id'] = (int)$user['id'];
+            $_SESSION['role'] = $user['role'];
+            $_SESSION['client_id'] = !empty($user['client_id']) ? (int)$user['client_id'] : null;
+
+            // 3. Tentukan Redirect URL dengan identitas tab ?_u=u_<id>
+            if ($user['role'] === 'client') {
+                $redirectUrl = url('client-portal?tab=deliverables&_u=' . $uidKey, false);
+            } elseif ($user['role'] === 'owner') {
+                $redirectUrl = url('owner-dashboard?_u=' . $uidKey, false);
+            } elseif ($user['role'] === 'admin') {
+                $redirectUrl = url('admin-dashboard?_u=' . $uidKey, false);
             } else {
-                if (function_exists('switch_session_context')) {
-                    switch_session_context('internal');
-                }
-                $_SESSION['kala_auth']['internal'] = [
-                    'user_id'         => (int)$user['id'],
-                    'name'            => $displayName,
-                    'email'           => $user['email'],
-                    'role'            => $user['role'],
-                    'employment_type' => $user['employment_type'] ?? 'internal',
-                    'client_id'       => null,
-                    'avatar'          => $user['avatar'] ?? null
-                ];
-                $_SESSION['kala_internal'] = [
-                    'logged_in'     => true,
-                    'user'          => $userPayload,
-                    'last_activity' => time()
-                ];
-                $_SESSION['user'] = $userPayload;
-                $_SESSION['user_id'] = (int)$user['id'];
-                $_SESSION['role'] = $user['role'];
-                $redirectUrl = home_url_for_role($user['role']);
+                $redirectUrl = url('tasks?_u=' . $uidKey, false);
             }
 
             echo json_encode([
                 'success' => true,
                 'message' => 'Login berhasil!',
                 'redirect' => $redirectUrl,
+                'uid_key' => $uidKey,
                 'user' => $userPayload
             ]);
             exit;
@@ -172,71 +160,56 @@ if ($action === 'quick_login') {
             }
 
             $userPayload = [
-                'id' => (int)$user['id'],
-                'name' => $displayName,
-                'email' => $user['email'],
-                'role' => $user['role'],
-                'employment_type' => $user['employment_type'] ?? 'internal',
-                'phone_wa' => $user['phone_wa'] ?? null,
-                'client_id' => !empty($user['client_id']) ? (int)$user['client_id'] : null,
-                'avatar' => $user['avatar']
+                'id'              => (int)$user['id'],
+                'name'            => $displayName,
+                'email'           => $user['email'],
+                'role'            => $user['role'],
+                'employment_type' => $user['employment_type'] ?? ($user['role'] === 'client' ? 'client' : 'internal'),
+                'phone_wa'        => $user['phone_wa'] ?? null,
+                'client_id'       => !empty($user['client_id']) ? (int)$user['client_id'] : null,
+                'avatar'          => $user['avatar'] ?? null
             ];
 
-            if (!isset($_SESSION['kala_auth']) || !is_array($_SESSION['kala_auth'])) {
-                $_SESSION['kala_auth'] = [];
+            // 1. Simpan di $_SESSION['kala_accounts'][$uid_key] (DILARANG KERAS MENGHAPUS AKUN LAIN!)
+            $uidKey = 'u_' . (int)$user['id'];
+            if (!isset($_SESSION['kala_accounts']) || !is_array($_SESSION['kala_accounts'])) {
+                $_SESSION['kala_accounts'] = [];
             }
+            $_SESSION['kala_accounts'][$uidKey] = [
+                'user_id'         => (int)$user['id'],
+                'id'              => (int)$user['id'],
+                'name'            => $displayName,
+                'email'           => $user['email'],
+                'role'            => $user['role'],
+                'employment_type' => $userPayload['employment_type'],
+                'phone_wa'        => $user['phone_wa'] ?? null,
+                'client_id'       => !empty($user['client_id']) ? (int)$user['client_id'] : null,
+                'avatar'          => $user['avatar'] ?? null,
+                'login_time'      => time()
+            ];
 
+            // 2. Set current active session for backwards compatibility
+            $_SESSION['user'] = $userPayload;
+            $_SESSION['user_id'] = (int)$user['id'];
+            $_SESSION['role'] = $user['role'];
+            $_SESSION['client_id'] = !empty($user['client_id']) ? (int)$user['client_id'] : null;
+
+            // 3. Tentukan Redirect URL dengan identitas tab ?_u=u_<id>
             if ($user['role'] === 'client') {
-                if (function_exists('switch_session_context')) {
-                    switch_session_context('client');
-                }
-                $_SESSION['kala_auth']['client'] = [
-                    'user_id'         => (int)$user['id'],
-                    'name'            => $displayName,
-                    'email'           => $user['email'],
-                    'role'            => 'client',
-                    'employment_type' => 'client',
-                    'client_id'       => !empty($user['client_id']) ? (int)$user['client_id'] : null,
-                    'avatar'          => $user['avatar'] ?? null
-                ];
-                $_SESSION['kala_client_portal'] = [
-                    'logged_in'     => true,
-                    'user'          => $userPayload,
-                    'last_activity' => time()
-                ];
-                $_SESSION['user'] = $userPayload;
-                $_SESSION['user_id'] = (int)$user['id'];
-                $_SESSION['role'] = 'client';
-                $_SESSION['client_id'] = !empty($user['client_id']) ? (int)$user['client_id'] : null;
-                $redirectUrl = url('client-portal?tab=deliverables&portal=client&_slot=client');
+                $redirectUrl = url('client-portal?tab=deliverables&_u=' . $uidKey, false);
+            } elseif ($user['role'] === 'owner') {
+                $redirectUrl = url('owner-dashboard?_u=' . $uidKey, false);
+            } elseif ($user['role'] === 'admin') {
+                $redirectUrl = url('admin-dashboard?_u=' . $uidKey, false);
             } else {
-                if (function_exists('switch_session_context')) {
-                    switch_session_context('internal');
-                }
-                $_SESSION['kala_auth']['internal'] = [
-                    'user_id'         => (int)$user['id'],
-                    'name'            => $displayName,
-                    'email'           => $user['email'],
-                    'role'            => $user['role'],
-                    'employment_type' => $user['employment_type'] ?? 'internal',
-                    'client_id'       => null,
-                    'avatar'          => $user['avatar'] ?? null
-                ];
-                $_SESSION['kala_internal'] = [
-                    'logged_in'     => true,
-                    'user'          => $userPayload,
-                    'last_activity' => time()
-                ];
-                $_SESSION['user'] = $userPayload;
-                $_SESSION['user_id'] = (int)$user['id'];
-                $_SESSION['role'] = $user['role'];
-                $redirectUrl = home_url_for_role($user['role']);
+                $redirectUrl = url('tasks?_u=' . $uidKey, false);
             }
 
             echo json_encode([
                 'success' => true,
                 'message' => 'Masuk sebagai ' . ucfirst($role) . ' (' . htmlspecialchars($displayName) . ') berhasil!',
                 'redirect' => $redirectUrl,
+                'uid_key' => $uidKey,
                 'user' => $userPayload
             ]);
             exit;
@@ -251,47 +224,33 @@ if ($action === 'quick_login') {
 }
 
 if ($action === 'logout') {
-    $context = $_GET['context'] ?? $_POST['context'] ?? ($_GET['portal'] ?? ($_POST['portal'] ?? ($_GET['_slot'] ?? ($_POST['_slot'] ?? resolveActiveSessionContext()))));
+    // Isolated Logout: Hanya hapus $_SESSION['kala_accounts'][$uid_key] milik tab itu saja!
+    $uidKey = $_GET['_u'] ?? $_POST['_u'] ?? ($_SERVER['HTTP_X_KALA_UID'] ?? '');
+    if (!empty($uidKey) && is_numeric($uidKey)) {
+        $uidKey = 'u_' . $uidKey;
+    }
 
-    if ($context === 'client' || session_name() === 'KALASESS_CLIENT') {
-        if (function_exists('switch_session_context')) {
-            switch_session_context('client');
-        }
-        $_SESSION = [];
-        if (ini_get("session.use_cookies")) {
-            $params = session_get_cookie_params();
-            setcookie('KALASESS_CLIENT', '', time() - 42000,
-                $params["path"], $params["domain"],
-                $params["secure"], $params["httponly"]
-            );
-        }
-        session_destroy();
-        $redirectUrl = url('login?context=client');
-    } elseif ($context === 'internal' || session_name() === 'KALASESS_INTERNAL') {
-        if (function_exists('switch_session_context')) {
-            switch_session_context('internal');
-        }
-        $_SESSION = [];
-        if (ini_get("session.use_cookies")) {
-            $params = session_get_cookie_params();
-            setcookie('KALASESS_INTERNAL', '', time() - 42000,
-                $params["path"], $params["domain"],
-                $params["secure"], $params["httponly"]
-            );
-        }
-        session_destroy();
-        $redirectUrl = url('login?context=internal');
+    $loggedOutRole = '';
+    if (!empty($uidKey) && isset($_SESSION['kala_accounts'][$uidKey])) {
+        $loggedOutRole = $_SESSION['kala_accounts'][$uidKey]['role'] ?? '';
+        unset($_SESSION['kala_accounts'][$uidKey]);
     } else {
-        $_SESSION = [];
-        if (ini_get("session.use_cookies")) {
-            $params = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000,
-                $params["path"], $params["domain"],
-                $params["secure"], $params["httponly"]
-            );
+        $curr = current_user();
+        if ($curr && !empty($curr['id'])) {
+            $currKey = 'u_' . $curr['id'];
+            $loggedOutRole = $curr['role'] ?? '';
+            unset($_SESSION['kala_accounts'][$currKey]);
         }
-        session_destroy();
-        $redirectUrl = url('login');
+    }
+
+    if (empty($_SESSION['kala_accounts'])) {
+        $_SESSION['kala_accounts'] = [];
+        unset($_SESSION['user'], $_SESSION['user_id'], $_SESSION['role'], $_SESSION['client_id']);
+    }
+
+    $redirectUrl = url('login', false);
+    if ($loggedOutRole === 'client' || (!empty($_GET['context']) && $_GET['context'] === 'client')) {
+        $redirectUrl = url('login?context=client', false);
     }
 
     if (!isset($_SERVER['HTTP_X_REQUESTED_WITH']) && !str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')) {
@@ -299,8 +258,12 @@ if ($action === 'logout') {
         exit;
     }
 
-    echo json_encode(['success' => true, 'redirect' => $redirectUrl]);
+    echo json_encode([
+        'success' => true,
+        'redirect' => $redirectUrl,
+        'logged_out_uid' => $uidKey
+    ]);
     exit;
 }
 
-echo json_encode(['success' => false, 'message' => 'Invalid auth action']);
+echo json_encode(['success' => false, 'message' => 'Aksi auth tidak valid']);

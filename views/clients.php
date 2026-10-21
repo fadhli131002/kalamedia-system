@@ -32,11 +32,13 @@ foreach ($assignedTeamRows as $r) {
     $teamByClient[(int)$r['client_id']][] = $r;
 }
 
-// Fetch all active projects with calculated costs & margins
+// Fetch all active projects with calculated costs & margins and separated fees
 $projects = $db->query("
-    SELECT p.*, c.company as client_company,
+    SELECT p.*, c.company as client_company, c.name as client_pic,
+           c.contract_start_date as client_contract_start, c.contract_end_date as client_contract_end, c.contract_status as client_contract_status,
            (SELECT COALESCE(SUM(amount), 0) FROM freelancer_payouts WHERE project_id = p.id AND COALESCE(is_deleted, 0) = 0) as total_freelancer_cost,
-           (SELECT COALESCE(SUM(amount), 0) FROM ads_spend WHERE project_id = p.id AND COALESCE(is_deleted, 0) = 0) as total_ads_cost
+           (SELECT COALESCE(SUM(amount), 0) FROM ads_spend WHERE project_id = p.id AND COALESCE(is_deleted, 0) = 0) as total_ads_cost,
+           (SELECT COALESCE(SUM(assigned_ads_budget), 0) FROM tasks WHERE project_id = p.id AND COALESCE(is_deleted, 0) = 0) as total_assigned_ads_budget
     FROM projects p
     JOIN clients c ON p.client_id = c.id
     WHERE COALESCE(p.is_deleted, 0) = 0 AND COALESCE(c.is_deleted, 0) = 0
@@ -54,6 +56,7 @@ $projects = $db->query("
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
+  <?php render_tab_uid_script(); ?>
 </head>
 <body>
   <div class="app-container">
@@ -257,16 +260,16 @@ $projects = $db->query("
           </div>
 
           <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
-            <table class="table-custom" style="min-width: 900px !important; width: 100%;">
+            <table class="table-custom" style="min-width: 960px !important; width: 100%;">
               <thead>
                 <tr>
                   <th style="white-space: nowrap !important;">NAMA PROYEK &amp; KLIEN</th>
-                  <th style="white-space: nowrap !important;">NILAI KONTRAK</th>
-                  <th style="white-space: nowrap !important;">BIAYA PRODUKSI (OUTFLOW)</th>
-                  <th style="white-space: nowrap !important;">ESTIMASI PROFIT</th>
-                  <th style="white-space: nowrap !important;">MARGIN AKTUAL</th>
-                  <th style="white-space: nowrap !important;">STATUS</th>
-                  <th class="th-actions" style="text-align: right; white-space: nowrap !important; min-width: 160px;">AKSI</th>
+                  <th style="white-space: nowrap !important;">TOTAL KONTRAK &amp; KOMPONEN</th>
+                  <th style="white-space: nowrap !important;">FEE FREELANCER (PRODUKSI)</th>
+                  <th style="white-space: nowrap !important;">ESTIMASI PROFIT JASA</th>
+                  <th style="white-space: nowrap !important;">MARGIN JASA</th>
+                  <th style="white-space: nowrap !important;">STATUS &amp; SALDO ADS</th>
+                  <th class="th-actions" style="text-align: right; white-space: nowrap !important; min-width: 190px;">AKSI</th>
                 </tr>
               </thead>
               <tbody>
@@ -274,12 +277,21 @@ $projects = $db->query("
                   <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 32px;">Belum ada data proyek terdaftar.</td></tr>
                 <?php else: ?>
                   <?php foreach ($projects as $p):
-                    $prodCost = floatval($p['total_freelancer_cost']) + floatval($p['total_ads_cost']);
-                    $contract = floatval($p['contract_value']);
-                    $profit = $contract - $prodCost;
-                    $margin = $contract > 0 ? ($profit / $contract) * 100 : 0;
+                    $serviceFee = floatval($p['service_fee_amount'] > 0 ? $p['service_fee_amount'] : $p['contract_value']);
+                    $adsBudget = floatval($p['ads_budget_pool']);
+                    $totalContract = floatval($p['total_contract_value'] > 0 ? $p['total_contract_value'] : ($serviceFee + $adsBudget));
+                    $freelancerCost = floatval($p['total_freelancer_cost']);
+                    $profit = $serviceFee - $freelancerCost;
+                    $margin = $serviceFee > 0 ? ($profit / $serviceFee) * 100 : 0;
                     $targetMargin = floatval($p['target_margin_percent']);
-                    $isOverBudget = $margin < $targetMargin;
+
+                    $today = date('Y-m-d');
+                    $contractEnd = !empty($p['end_date']) ? $p['end_date'] : ($p['client_contract_end'] ?? '');
+                    $contractStatus = $p['contract_status'] ?: ($p['client_contract_status'] ?? 'active');
+                    $isContractExpired = ($contractEnd && $today > $contractEnd) || ($contractStatus === 'expired');
+
+                    $totalAssigned = floatval($p['total_assigned_ads_budget']);
+                    $availablePool = max(0, $adsBudget - $totalAssigned);
                   ?>
                     <tr>
                       <td style="white-space: nowrap;">
@@ -288,14 +300,24 @@ $projects = $db->query("
                         </div>
                         <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($p['client_company']) ?></div>
                       </td>
-                      <td style="font-weight: 700; color: #101828; white-space: nowrap;"><?= format_rupiah($contract) ?></td>
                       <td style="white-space: nowrap;">
-                        <div style="color: var(--danger-text); font-weight: 700;"><?= format_rupiah($prodCost) ?></div>
-                        <div style="font-size: 10px; color: var(--text-muted);">Fee Freelancer: <?= format_rupiah($p['total_freelancer_cost']) ?></div>
-                        <div style="font-size: 10px; color: var(--text-muted);">Ads Spend: <?= format_rupiah($p['total_ads_cost']) ?></div>
+                        <div style="font-weight: 800; color: #101828; font-size: 13.5px;"><?= format_rupiah($totalContract) ?></div>
+                        <div style="display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap;">
+                          <span class="badge" style="background: #EFF8FF; color: #175CD3; font-weight: 700; font-size: 10px; padding: 2px 6px;">
+                            Jasa: <?= format_rupiah($serviceFee) ?>
+                          </span>
+                          <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 10px; padding: 2px 6px;">
+                            Ads: <?= format_rupiah($adsBudget) ?>
+                          </span>
+                        </div>
+                      </td>
+                      <td style="white-space: nowrap;">
+                        <div style="color: var(--danger-text); font-weight: 700;"><?= format_rupiah($freelancerCost) ?></div>
+                        <div style="font-size: 10.5px; color: var(--text-muted);">Biaya Talent Freelancer</div>
                       </td>
                       <td style="font-weight: 700; color: <?= $profit >= 0 ? 'var(--success-text)' : 'var(--danger-text)' ?>; white-space: nowrap;">
                         <?= format_rupiah($profit) ?>
+                        <div style="font-size: 10px; color: var(--text-muted);">(Laba Bersih Agensi)</div>
                       </td>
                       <td style="white-space: nowrap;">
                         <span class="badge-margin <?= $margin >= $targetMargin ? 'good' : 'bad' ?>">
@@ -307,9 +329,24 @@ $projects = $db->query("
                         <span class="badge-status badge-<?= strtolower(str_replace(' ', '', $p['status'])) ?>">
                           <?= $p['status'] ?>
                         </span>
+                        <?php if ($adsBudget > 0): ?>
+                          <div style="font-size: 10.5px; color: #027A48; font-weight: 600; margin-top: 3px;">
+                            Sisa Pool Ads: <?= format_rupiah($availablePool) ?>
+                          </div>
+                        <?php endif; ?>
                       </td>
                       <td class="td-actions" style="text-align: right; white-space: nowrap;">
-                        <div class="table-actions">
+                        <div class="table-actions" style="justify-content: flex-end; gap: 4px;">
+                          <?php if (!$isContractExpired): ?>
+                            <button type="button" class="btn btn-sm" onclick='openTopupAdsModal(<?= json_encode($p, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' style="background: #ECFDF3; color: #027A48; border: 1px solid #A6F4C5; font-weight: 700; padding: 4px 8px; font-size: 11px;" title="Tambah / Top-Up Saldo Ads Klien">
+                              + Saldo Ads
+                            </button>
+                          <?php else: ?>
+                            <button type="button" class="btn btn-sm" disabled style="background: #F2F4F7; color: #98A2B3; border: 1px solid #D0D5DD; padding: 4px 8px; font-size: 11px; cursor: not-allowed;" title="Masa kontrak habis — perpanjang kontrak terlebih dahulu">
+                              + Saldo Ads (Terkunci)
+                            </button>
+                          <?php endif; ?>
+
                           <button type="button" class="btn-action-edit" onclick='openEditProjectModal(<?= json_encode($p, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Edit Proyek">
                             Edit
                           </button>
@@ -358,6 +395,49 @@ $projects = $db->query("
       if (emptyEl) {
         emptyEl.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
       }
+    }
+
+    function openEditProjectModal(project) {
+      if (!project) return;
+      document.getElementById('edit-project-id').value = project.id || '';
+      document.getElementById('edit-project-client-id').value = project.client_id || '';
+      document.getElementById('edit-project-name').value = project.name || '';
+
+      const serviceFee = project.service_fee_amount > 0 ? project.service_fee_amount : (project.contract_value || 0);
+      const adsBudget = project.ads_budget_pool || 0;
+
+      const feeInput = document.getElementById('edit-service-fee');
+      const adsInput = document.getElementById('edit-ads-budget');
+
+      if (feeInput) feeInput.value = Math.round(serviceFee).toLocaleString('id-ID');
+      if (adsInput) adsInput.value = Math.round(adsBudget).toLocaleString('id-ID');
+
+      document.getElementById('edit-project-target-margin').value = project.target_margin_percent || '30.00';
+      document.getElementById('edit-project-status').value = project.status || 'Planning';
+      document.getElementById('edit-project-start-date').value = project.start_date || '';
+      document.getElementById('edit-project-end-date').value = project.end_date || '';
+
+      recalcProjectSummary('edit');
+      openModal('modal-edit-project');
+    }
+
+    function openTopupAdsModal(project) {
+      if (!project) return;
+      document.getElementById('topup-ads-project-id').value = project.id;
+      document.getElementById('topup-ads-project-name').innerText = project.name;
+      document.getElementById('topup-ads-client-company').innerText = project.client_company || 'Klien';
+
+      const poolVal = parseFloat(project.ads_budget_pool) || 0;
+      document.getElementById('topup-ads-current-pool').innerText = 'Rp ' + Math.round(poolVal).toLocaleString('id-ID');
+
+      const startDate = project.start_date || project.client_contract_start || '-';
+      const endDate = project.end_date || project.client_contract_end || '-';
+      document.getElementById('topup-ads-contract-dates').innerText = `${startDate} s/d ${endDate}`;
+
+      const amountInput = document.getElementById('topup-ads-amount');
+      if (amountInput) amountInput.value = '';
+
+      openModal('modal-topup-project-ads');
     }
   </script>
 </body>

@@ -737,6 +737,7 @@ unset($c);
     </main>
   </div>
 
+  <?php require_once BASE_PATH . '/includes/bottom_nav.php'; ?>
   <?php require_once BASE_PATH . '/includes/modals.php'; ?>
 
   <!-- Scripts -->

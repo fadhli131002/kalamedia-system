@@ -149,6 +149,9 @@ function current_tab_uid(): string {
 }
 
 function render_tab_uid_script(): void {
+    if (function_exists('render_pwa_meta_tags')) {
+        render_pwa_meta_tags();
+    }
     $currentUid = current_tab_uid();
     ?>
     <script>

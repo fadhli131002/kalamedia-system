@@ -192,6 +192,14 @@ $badgeLabel = $sidebarBadge;
     <?php
       $sbLogoutContext = ($currentPage === 'client-portal' || is_client()) ? 'client' : 'internal';
     ?>
+    <!-- PWA Install Action Button (Only visible on supporting mobile/desktop browsers) -->
+    <div style="padding: 0 12px; margin-top: 10px; margin-bottom: 8px;">
+      <button type="button" id="btn-pwa-install" class="btn btn-secondary btn-sm" style="display: none; width: 100%; align-items: center; justify-content: center; gap: 6px; font-weight: 600; font-size: 11.5px; border-color: #2563EB; color: #2563EB; background: #EFF6FF; padding: 6px 10px; border-radius: 8px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Pasang Portal Kala</span>
+      </button>
+    </div>
+
     <div class="nav-section-title">Sesi Akun</div>
     <a href="<?= url('logout') ?>?context=<?= $sbLogoutContext ?>" onclick="if(window.handleKalaLogout){handleKalaLogout(this.href);return false;}else{sessionStorage.removeItem('kala_tab_uid');}" class="nav-link nav-link-logout">
       <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>

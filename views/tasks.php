@@ -4040,6 +4040,7 @@ if ($isWorkerUser) {
     }
   </script>
 
+  <?php require_once BASE_PATH . '/includes/bottom_nav.php'; ?>
   <?php require_once BASE_PATH . '/includes/modals.php'; ?>
   <script src="assets/js/app.js?v=<?= time() ?>"></script>
   <script src="assets/js/invoice.js?v=<?= time() ?>"></script>

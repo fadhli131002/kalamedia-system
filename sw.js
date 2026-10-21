@@ -1,15 +1,20 @@
-// Kalamedia Progressive Web App (PWA) Service Worker
-const CACHE_NAME = 'kalamedia-pwa-v17-shopeers-saas';
+// Portal Kala Progressive Web App (PWA) Service Worker
+const CACHE_NAME = 'portal-kala-pwa-v1.0';
 const urlsToCache = [
   'assets/css/style.css',
   'assets/js/app.js',
   'assets/js/charts.js',
-  'assets/img/Logo-1.webp'
+  'assets/img/Logo-1.webp',
+  'assets/img/icon-192.png',
+  'assets/img/icon-512.png',
+  'manifest.json'
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)).catch(err => {
+      console.warn('PWA: Failed to cache some initial assets', err);
+    })
   );
   self.skipWaiting();
 });
@@ -32,14 +37,14 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const req = event.request;
 
-  // 1. Never intercept non-GET requests (POST, PUT, DELETE)
+  // 1. Only intercept GET requests
   if (req.method !== 'GET') {
     return;
   }
 
   const url = new URL(req.url);
 
-  // 2. Never intercept API calls or dynamic PHP script execution
+  // 2. Never cache or intercept dynamic API calls, live PHP scripts, or dynamic query URLs
   if (url.pathname.includes('/api/') || url.pathname.endsWith('.php') || url.search) {
     return;
   }
@@ -49,8 +54,8 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 4. Only cache static files (CSS, WebP, PNG, SVG, fonts)
-  const isStaticAsset = url.pathname.match(/\.(css|js|webp|png|jpg|jpeg|svg|woff2?|ttf|ico)$/i);
+  // 4. Only cache static files (CSS, WebP, PNG, SVG, fonts, manifest)
+  const isStaticAsset = url.pathname.match(/\.(css|js|webp|png|jpg|jpeg|svg|woff2?|ttf|ico|json)$/i);
   if (!isStaticAsset) {
     return;
   }

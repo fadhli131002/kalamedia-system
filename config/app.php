@@ -219,3 +219,20 @@ function get_flash() {
     }
     return null;
 }
+
+function render_pwa_meta_tags(): void {
+    ?>
+    <!-- PWA Settings & Portal Kala Mobile Capabilities -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563EB">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Portal Kala">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Portal Kala">
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/img/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/img/icon-512.png">
+    <?php
+}
+

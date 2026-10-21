@@ -7,6 +7,7 @@
     </main> <!-- /.main-wrapper -->
   </div> <!-- /.app-container -->
 
+  <?php require_once __DIR__ . '/bottom_nav.php'; ?>
   <?php require_once __DIR__ . '/modals.php'; ?>
 
   <?php 

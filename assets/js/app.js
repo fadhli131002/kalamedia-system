@@ -1432,12 +1432,55 @@ window.togglePasswordVisibility = function(inputId, btn) {
   }
 };
 
-// Register PWA Service Worker for mobile app capability
+// Register PWA Service Worker for Portal Kala
+let deferredPwaPrompt = null;
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(err => {
-      console.log('PWA ServiceWorker registration failed: ', err);
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      // Optional check for updates
+      reg.onupdatefound = () => {
+        const installingWorker = reg.installing;
+        if (installingWorker) {
+          installingWorker.onstatechange = () => {
+            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('Portal Kala PWA updated. Reloading cache.');
+            }
+          };
+        }
+      };
+    }).catch(err => {
+      console.warn('Portal Kala PWA ServiceWorker registration failed: ', err);
     });
   });
 }
+
+// Capture BeforeInstallPromptEvent for custom Install Banner/Button
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPwaPrompt = e;
+  const installBtn = document.getElementById('btn-pwa-install');
+  if (installBtn) {
+    installBtn.style.display = 'inline-flex';
+    installBtn.onclick = () => {
+      if (deferredPwaPrompt) {
+        deferredPwaPrompt.prompt();
+        deferredPwaPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            installBtn.style.display = 'none';
+          }
+          deferredPwaPrompt = null;
+        });
+      }
+    };
+  }
+});
+
+window.addEventListener('appinstalled', () => {
+  console.log('Portal Kala berhasil di-install ke perangkat.');
+  const installBtn = document.getElementById('btn-pwa-install');
+  if (installBtn) installBtn.style.display = 'none';
+  deferredPwaPrompt = null;
+});
+
 

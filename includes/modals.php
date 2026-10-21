@@ -2545,6 +2545,7 @@ function openUniversalTransferProofModal(fileUrl, title, subtitle) {
   </div>
 </div>
 
+<?php if (in_array(current_user_role(), ['owner', 'admin'])): ?>
 <!-- 14. Modal Detail Alokasi Keuangan & Profitabilitas Proyek/Klien -->
 <div id="modal-project-financial-breakdown" class="modal-backdrop">
   <div class="modal-dialog modal-xl" style="max-width: 980px; max-height: 90vh; display: flex; flex-direction: column;">
@@ -2721,6 +2722,7 @@ function openUniversalTransferProofModal(fileUrl, title, subtitle) {
     </div>
   </div>
 </div>
+<?php endif; ?>
 
 <!-- Modal Tambah Akun Pengguna (Karyawan, Freelance, Client, Admin) -->
 <div id="modal-add-user" class="modal-backdrop">

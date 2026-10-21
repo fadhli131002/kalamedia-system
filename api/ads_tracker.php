@@ -18,12 +18,14 @@ require_once __DIR__ . '/../config/auth.php';
 
 require_auth();
 $user = current_user();
-$role = current_user_role();
+$sessionRole = strtolower($_SESSION['role'] ?? '');
+$userRole = strtolower($user['role'] ?? '');
+$role = $sessionRole ?: ($userRole ?: current_user_role());
 $userId = (int)$user['id'];
-$isOwnerUser = is_owner();
-$isAdminUser = is_admin();
+$isOwnerUser = ($role === 'owner');
+$isAdminUser = ($role === 'admin' || $role === 'owner');
 $isWorkerUser = ($role === 'karyawan' || $role === 'freelancer');
-$isClientUser = is_client();
+$isClientUser = ($role === 'client');
 
 release_session();
 
@@ -290,19 +292,24 @@ if ($action === 'list') {
             $workerTransferredTotal = 0;
             $workerTopupPlatformTotal = 0;
             $workerSpendTotal = 0;
-            $workerSisaTotal = 0;
+
+            foreach ($topupTransactions as $t) {
+                $workerTransferredTotal += floatval($t['transfer_amount_owner'] ?? 0);
+                $workerTopupPlatformTotal += floatval($t['platform_topup_amount'] ?? 0);
+                $workerSpendTotal += floatval($t['ad_spend_amount'] ?? 0);
+            }
+            $workerSisaTotal = $workerTransferredTotal - $workerSpendTotal;
 
             foreach ($projects as &$p) {
                 // STRICT WORKER PROTECTION: Remove contracts, agency margins, and client pagu in Owner's hand
                 unset($p['total_kontrak_klien']);
+                unset($p['contract_value']);
                 unset($p['margin_bersih_agensi']);
                 unset($p['total_pagu_ads_klien']);
+                unset($p['allocated_ads_budget']);
                 unset($p['sisa_pagu_di_owner']);
-
-                $workerTransferredTotal += floatval($p['total_ditransfer_ke_tim_ads']);
-                $workerTopupPlatformTotal += floatval($p['total_topup_ke_platform']);
-                $workerSpendTotal += floatval($p['total_spend_terpakai']);
-                $workerSisaTotal += floatval($p['sisa_saldo_di_tim_ads']);
+                unset($p['remaining_ads_budget']);
+                unset($p['agency_retained_balance']);
 
                 $p['has_pending_request'] = in_array($p['project_id'], $pendingProjIds);
             }
@@ -315,6 +322,10 @@ if ($action === 'list') {
                     'total_topup_ke_platform'      => $workerTopupPlatformTotal,
                     'total_spend_terpakai'         => $workerSpendTotal,
                     'sisa_saldo_di_tim_ads'        => $workerSisaTotal,
+                    'total_ditransfer_owner'       => $workerTransferredTotal,
+                    'total_dibelanjakan_ads'       => $workerSpendTotal,
+                    'sisa_saldo'                   => $workerSisaTotal,
+                    'status_iklan'                 => ($workerSisaTotal > 0 ? 'Iklan Jalan' : ($workerTransferredTotal > 0 ? 'Saldo Habis' : 'Belum Ada Saldo')),
                     'campaign_status'              => ($workerSisaTotal > 0) ? 'running' : 'empty'
                 ],
                 'projects' => $projects,

@@ -23,8 +23,12 @@ require_once __DIR__ . '/../config/auth.php';
 require_auth();
 
 $user = current_user();
-$role = current_user_role();
+$sessionRole = strtolower($_SESSION['role'] ?? '');
+$userRole = strtolower($user['role'] ?? '');
+$role = $sessionRole ?: ($userRole ?: current_user_role());
 $userId = (int)$user['id'];
+$isOwnerOrAdmin = in_array($role, ['owner', 'admin']);
+$isWorkerUser = ($role === 'karyawan' || $role === 'freelancer');
 
 // Release session lock immediately to prevent concurrent request blocking
 release_session();
@@ -286,6 +290,26 @@ if ($action === 'list_tasks') {
                 $totalUnreadFeedbacks += (int)$t['unread_feedbacks_count'];
             }
 
+            // Calculate worker's dynamic ads metrics (Saldo & Sisa Saldo only)
+            $stmtWorkerAds = $db->prepare("
+                SELECT 
+                    COALESCE(SUM(COALESCE(NULLIF(transfer_amount_owner, 0), topup_amount, 0)), 0) as total_transfer,
+                    COALESCE(SUM(COALESCE(NULLIF(ad_spend_amount, 0), spend_installed, 0)), 0) as total_spent
+                FROM ads_topup_transactions
+                WHERE COALESCE(is_deleted, 0) = 0
+                AND (
+                    assigned_user_id = ? OR uploaded_by_user_id = ?
+                    OR project_id IN (SELECT DISTINCT project_id FROM tasks WHERE assigned_to_user_id = ? AND COALESCE(is_deleted,0)=0)
+                    OR client_id IN (SELECT client_id FROM employee_clients WHERE user_id = ?)
+                )
+            ");
+            $stmtWorkerAds->execute([$userId, $userId, $userId, $userId]);
+            $wAds = $stmtWorkerAds->fetch(PDO::FETCH_ASSOC);
+            $totalDitransfer = floatval($wAds['total_transfer'] ?? 0);
+            $totalDibelanjakan = floatval($wAds['total_spent'] ?? 0);
+            $sisaSaldo = $totalDitransfer - $totalDibelanjakan;
+            $statusIklan = ($sisaSaldo > 0) ? 'Iklan Jalan' : ($totalDitransfer > 0 ? 'Saldo Habis' : 'Belum Ada Saldo');
+
             echo json_encode([
                 'success' => true,
                 'role' => $role,
@@ -296,6 +320,12 @@ if ($action === 'list_tasks') {
                     'client_review_count' => $clientReview,
                     'approved_count' => $approved,
                     'unread_feedbacks_count' => $totalUnreadFeedbacks
+                ],
+                'ads_summary' => [
+                    'total_ditransfer_owner' => $totalDitransfer,
+                    'total_dibelanjakan_ads' => $totalDibelanjakan,
+                    'sisa_saldo'             => $sisaSaldo,
+                    'status_iklan'           => $statusIklan
                 ],
                 'tasks' => $tasks
             ]);

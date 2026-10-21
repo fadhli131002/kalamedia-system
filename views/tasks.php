@@ -6,12 +6,40 @@
 require_auth();
 
 $user = current_user();
-$role = current_user_role();
+$role = strtolower($_SESSION['role'] ?? ($user['role'] ?? current_user_role()));
 $userId = (int)$user['id'];
-$isAdminUser = is_admin();
-$isOwnerUser = is_owner();
+$isOwnerOrAdmin = in_array($role, ['owner', 'admin']);
+$isAdminUser = $isOwnerOrAdmin;
+$isOwnerUser = ($role === 'owner');
 $isWorkerUser = ($role === 'karyawan' || $role === 'freelancer');
 $db = Database::getConnection();
+
+// Calculate worker's dynamic ads metrics 100% from database (strictly 2 cards: Saldo & Sisa Saldo)
+$total_ditransfer_owner = 0.0;
+$total_dibelanjakan_ads = 0.0;
+$sisa_saldo = 0.0;
+$status_iklan = 'Belum Ada Saldo';
+
+if ($isWorkerUser) {
+    $stmtWorkerAds = $db->prepare("
+        SELECT 
+            COALESCE(SUM(COALESCE(NULLIF(t.transfer_amount_owner, 0), t.topup_amount, 0)), 0) as total_transfer,
+            COALESCE(SUM(COALESCE(NULLIF(t.ad_spend_amount, 0), t.spend_installed, 0)), 0) as total_spent
+        FROM ads_topup_transactions t
+        WHERE COALESCE(t.is_deleted, 0) = 0
+        AND (
+            t.assigned_user_id = ? OR t.uploaded_by_user_id = ?
+            OR t.project_id IN (SELECT DISTINCT project_id FROM tasks WHERE assigned_to_user_id = ? AND COALESCE(is_deleted,0)=0)
+            OR t.client_id IN (SELECT client_id FROM employee_clients WHERE user_id = ?)
+        )
+    ");
+    $stmtWorkerAds->execute([$userId, $userId, $userId, $userId]);
+    $workerSummaryRow = $stmtWorkerAds->fetch(PDO::FETCH_ASSOC);
+    $total_ditransfer_owner = floatval($workerSummaryRow['total_transfer'] ?? 0);
+    $total_dibelanjakan_ads = floatval($workerSummaryRow['total_spent'] ?? 0);
+    $sisa_saldo = $total_ditransfer_owner - $total_dibelanjakan_ads;
+    $status_iklan = ($sisa_saldo > 0) ? 'Iklan Jalan' : ($total_ditransfer_owner > 0 ? 'Saldo Habis' : 'Belum Ada Saldo');
+}
 
 $allTeamWorkers = [];
 if ($isAdminUser || $isOwnerUser) {
@@ -1045,9 +1073,42 @@ if ($isWorkerUser) {
 
           <!-- Summary KPI Cards -->
           <div class="kpi-row" id="ads-kpi-container">
-            <div class="kpi-tile">
-              <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 600;">Memuat Ringkasan Dinamis...</span>
-            </div>
+            <?php if ($isOwnerOrAdmin): ?>
+              <div class="kpi-tile">
+                <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 600;">Memuat Ringkasan Owner...</span>
+              </div>
+            <?php else: ?>
+              <!-- KARYAWAN / FREELANCER (TIM ADS): HANYA 2 KARTU (Saldo & Sisa Saldo) -->
+              <div class="kpi-tile">
+                <div class="metric-header">
+                  <span class="metric-label">Saldo</span>
+                  <span class="metric-icon">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#175CD3" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  </span>
+                </div>
+                <div class="metric-value">
+                  <span class="metric-num" style="color: #175CD3;">Rp <?= number_format($total_ditransfer_owner, 0, ',', '.') ?></span>
+                </div>
+                <div class="metric-subtitle">
+                  <span>Nominal saldo yang ditransfer oleh Owner</span>
+                </div>
+              </div>
+
+              <div class="kpi-tile <?= $sisa_saldo <= 0 ? 'urgent' : '' ?>">
+                <div class="metric-header">
+                  <span class="metric-label" style="color: <?= $sisa_saldo <= 0 ? '#B42318' : '#027A48' ?>;">Sisa Saldo</span>
+                  <span class="metric-icon">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="<?= $sisa_saldo <= 0 ? '#B42318' : '#027A48' ?>" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  </span>
+                </div>
+                <div class="metric-value">
+                  <span class="metric-num" style="color: <?= $sisa_saldo <= 0 ? '#B42318' : '#027A48' ?>;">Rp <?= number_format($sisa_saldo, 0, ',', '.') ?></span>
+                </div>
+                <div class="metric-subtitle">
+                  <span>Sudah dibelanjakan: Rp <?= number_format($total_dibelanjakan_ads, 0, ',', '.') ?> &bull; Status: <?= $status_iklan ?></span>
+                </div>
+              </div>
+            <?php endif; ?>
           </div>
 
           <!-- Top-Up Transactions & Proof Table Card (Automatic Sync to Client Portal) -->
@@ -1055,14 +1116,18 @@ if ($isWorkerUser) {
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
               <div>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                  <h4 style="font-size: 15px; font-weight: 800; color: #101828; margin: 0;">Riwayat &amp; Bukti Transaksi Saldo Iklan (Alur 2 Tahap)</h4>
+                  <h4 style="font-size: 15px; font-weight: 800; color: #101828; margin: 0;">
+                    <?= $isOwnerOrAdmin ? 'Riwayat &amp; Bukti Transaksi Saldo Iklan (Alur 2 Tahap)' : 'Riwayat Saldo &amp; Bukti Belanja Iklan' ?>
+                  </h4>
                   <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 10.5px;">Tampil di Portal Klien</span>
                 </div>
                 <span style="font-size: 12px; color: var(--text-secondary);">
-                  Catatan pencairan dari Owner ke Tim Ads dan penyetoran saldo ke platform Meta Ads / Google Ads beserta lampiran bukti fisik.
+                  <?= $isOwnerOrAdmin 
+                    ? 'Catatan pencairan dari Owner ke Tim Ads dan penyetoran saldo ke platform Meta Ads / Google Ads beserta lampiran bukti fisik.'
+                    : 'Catatan saldo yang diterima dari Owner dan bukti realisasi belanja iklan ke platform ads.' ?>
                 </span>
               </div>
-              <?php if ($isAdminUser || $isOwnerUser): ?>
+              <?php if ($isOwnerOrAdmin): ?>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="openTransferToWorkerModal()" style="font-size: 12px; font-weight: 700; color: #175CD3; border-color: #B2CCFF; background: #EFF8FF;">
                   + Transfer Saldo Baru
                 </button>
@@ -1072,15 +1137,27 @@ if ($isWorkerUser) {
             <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
               <table class="table-custom" id="table-ads-topups" style="min-width: 980px; width: 100%;">
                 <thead>
-                  <tr>
-                    <th style="min-width: 190px; white-space: nowrap;">TANGGAL &amp; PETUGAS ADS</th>
-                    <th style="white-space: nowrap;">PROYEK &amp; PLATFORM</th>
-                    <th style="white-space: nowrap;">TAHAP 1: OWNER &rarr; TIM ADS</th>
-                    <th style="white-space: nowrap;">TAHAP 2: TIM ADS &rarr; META/GOOGLE</th>
-                    <th style="white-space: nowrap;">REALISASI SPEND &amp; SISA</th>
-                    <th style="white-space: nowrap;">STATUS KAMPANYE</th>
-                    <th class="th-actions" style="text-align: right; white-space: nowrap; min-width: 140px;">AKSI</th>
-                  </tr>
+                  <?php if ($isOwnerOrAdmin): ?>
+                    <tr>
+                      <th style="min-width: 190px; white-space: nowrap;">TANGGAL &amp; PETUGAS ADS</th>
+                      <th style="white-space: nowrap;">PROYEK &amp; PLATFORM</th>
+                      <th style="white-space: nowrap;">TAHAP 1: OWNER &rarr; TIM ADS</th>
+                      <th style="white-space: nowrap;">TAHAP 2: TIM ADS &rarr; META/GOOGLE</th>
+                      <th style="white-space: nowrap;">REALISASI SPEND &amp; SISA</th>
+                      <th style="white-space: nowrap;">STATUS KAMPANYE</th>
+                      <th class="th-actions" style="text-align: right; white-space: nowrap; min-width: 140px;">AKSI</th>
+                    </tr>
+                  <?php else: ?>
+                    <tr>
+                      <th style="white-space: nowrap;">TANGGAL &amp; PROYEK</th>
+                      <th style="white-space: nowrap;">PLATFORM ADS</th>
+                      <th style="white-space: nowrap;">SALDO (TRANSFER DARI OWNER + BUKTI TF OWNER)</th>
+                      <th style="white-space: nowrap;">SUDAH DIBELANJAKAN (BUKTI TOP-UP/SPEND ADS)</th>
+                      <th style="white-space: nowrap;">SISA SALDO</th>
+                      <th style="white-space: nowrap;">STATUS KAMPANYE</th>
+                      <th class="th-actions" style="text-align: right; white-space: nowrap; min-width: 140px;">AKSI</th>
+                    </tr>
+                  <?php endif; ?>
                 </thead>
                 <tbody id="tbody-ads-topups">
                   <tr><td colspan="7" style="text-align: center; padding: 24px; color: var(--text-muted);">Memuat riwayat isi saldo ads...</td></tr>
@@ -1089,13 +1166,14 @@ if ($isWorkerUser) {
             </div>
           </div>
 
-          <!-- Projects Ads Budget Table Card -->
+          <!-- Projects Ads Budget Table Card (HANYA UNTUK OWNER & ADMIN) -->
+          <?php if ($isOwnerOrAdmin): ?>
           <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: gap: 8px;">
               <div>
                 <h4 style="font-size: 15px; font-weight: 800; color: #101828; margin: 0;">Status Alokasi &amp; Anggaran Terpasang per Proyek</h4>
                 <span style="font-size: 12px; color: var(--text-secondary);">
-                  <?= ($isAdminUser || $isOwnerUser) ? 'Sinkronisasi Kontrak, Margin Agensi, Pagu Saldo Ads Klien, Pencairan ke Tim Ads, dan Sisa Pagu di Tangan Owner' : 'Saldo Diterima dari Owner, Realisasi Top-Up Platform, dan Sisa Saldo yang Anda Pegang' ?>
+                  Sinkronisasi Kontrak, Margin Agensi, Pagu Saldo Ads Klien, Pencairan ke Tim Ads, dan Sisa Pagu di Tangan Owner
                 </span>
               </div>
             </div>
@@ -1104,32 +1182,23 @@ if ($isWorkerUser) {
               <table class="table-custom" id="table-ads-projects" style="min-width: 980px; width: 100%;">
                 <thead>
                   <tr id="thead-ads-projects-row">
-                    <?php if ($isAdminUser || $isOwnerUser): ?>
-                      <th>PROYEK &amp; KLIEN</th>
-                      <th>NILAI KONTRAK (RAHASIA)</th>
-                      <th>MARGIN BERSIH AGENSI</th>
-                      <th>TOTAL PAGU ADS KLIEN</th>
-                      <th>DITRANSFER KE TIM ADS</th>
-                      <th>SISA PAGU DI OWNER</th>
-                      <th>STATUS KAMPANYE</th>
-                      <th class="th-actions" style="text-align: right; white-space: nowrap; min-width: 200px;">AKSI</th>
-                    <?php else: ?>
-                      <th>PROYEK &amp; KLIEN</th>
-                      <th>SALDO DITERIMA DARI OWNER</th>
-                      <th>SUDAH TOP-UP PLATFORM</th>
-                      <th>TERPAKAI (SPEND)</th>
-                      <th>SISA SALDO SAYA</th>
-                      <th>STATUS KAMPANYE</th>
-                      <th class="th-actions" style="text-align: right; white-space: nowrap; min-width: 180px;">AKSI</th>
-                    <?php endif; ?>
+                    <th>PROYEK &amp; KLIEN</th>
+                    <th>NILAI KONTRAK (RAHASIA)</th>
+                    <th>MARGIN BERSIH AGENSI</th>
+                    <th>TOTAL PAGU ADS KLIEN</th>
+                    <th>DITRANSFER KE TIM ADS</th>
+                    <th>SISA PAGU DI OWNER</th>
+                    <th>STATUS KAMPANYE</th>
+                    <th class="th-actions" style="text-align: right; white-space: nowrap; min-width: 200px;">AKSI</th>
                   </tr>
                 </thead>
                 <tbody id="tbody-ads-projects">
-                  <tr><td colspan="<?= ($isAdminUser || $isOwnerUser) ? 8 : 7 ?>" style="text-align: center; padding: 28px; color: var(--text-muted);">Memuat data anggaran ads...</td></tr>
+                  <tr><td colspan="8" style="text-align: center; padding: 28px; color: var(--text-muted);">Memuat data anggaran ads...</td></tr>
                 </tbody>
               </table>
             </div>
           </div>
+          <?php endif; ?>
 
           <!-- Coordination Logs & Screenshot Proof Feed -->
           <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
@@ -1724,6 +1793,7 @@ if ($isWorkerUser) {
     </div>
   </div>
 
+  <?php if ($isOwnerOrAdmin): ?>
   <!-- MODAL: Transfer Saldo Ads Owner -> Tim Ads (Owner / Admin Only) -->
   <div class="modal" id="modal-transfer-to-worker">
     <div class="modal-dialog" style="max-width: 580px;">
@@ -1809,6 +1879,7 @@ if ($isWorkerUser) {
       </div>
     </div>
   </div>
+  <?php endif; ?>
 
   <!-- MODAL: Konfirmasi Top-Up Platform & Update Spend (Tim Ads) -->
   <div class="modal" id="modal-confirm-platform-topup">
@@ -1930,6 +2001,7 @@ if ($isWorkerUser) {
     </div>
   </div>
 
+  <?php if ($isOwnerOrAdmin): ?>
   <!-- MODAL: Owner Ajukan Tambah Limit Saldo ke Klien -->
   <div class="modal" id="modal-request-limit-owner">
     <div class="modal-dialog" style="max-width: 540px;">
@@ -1974,6 +2046,7 @@ if ($isWorkerUser) {
       </div>
     </div>
   </div>
+  <?php endif; ?>
 
   <script src="assets/js/app.js?v=bankio-typography-3.0"></script>
   <script>
@@ -2876,7 +2949,8 @@ if ($isWorkerUser) {
 
     async function loadAdsTrackerData() {
       try {
-        const res = await fetch('api/ads_tracker.php?action=list');
+        const uid = '<?= $userId ?>';
+        const res = await fetch(`api/ads_tracker.php?action=list&_u=u_${uid}`);
         const data = await res.json();
         if (!data.success) {
           showToast(data.message || 'Gagal memuat data iklan', 'danger');
@@ -2898,7 +2972,7 @@ if ($isWorkerUser) {
     function renderAdsNotifications(data) {
       const container = document.getElementById('ads-notifications-container');
       if (!container) return;
-      const isPrivileged = (data.role === 'owner' || data.role === 'admin');
+      const isPrivileged = <?= json_encode($isOwnerOrAdmin) ?> && (data.role === 'owner' || data.role === 'admin');
       const pending = data.pending_requests || [];
 
       if (isPrivileged) {
@@ -2976,8 +3050,10 @@ if ($isWorkerUser) {
 
     function renderAdsSummary(data) {
       const container = document.getElementById('ads-kpi-container');
-      const isPrivileged = (data.role === 'owner' || data.role === 'admin');
+      if (!container) return;
 
+      <?php if ($isOwnerOrAdmin): ?>
+      const isPrivileged = (data.role === 'owner' || data.role === 'admin');
       if (isPrivileged && data.summary) {
         const s = data.summary;
         container.innerHTML = `
@@ -3056,207 +3132,132 @@ if ($isWorkerUser) {
             </div>
           </div>
         `;
-      } else {
-        // STRICT WORKER VIEW: Exactly 4 KPI tiles, completely without contract value, agency margin, or Owner pagu!
-        const s = data.summary || {};
-        const transferred = Number(s.total_transferred_from_owner || 0);
-        const topupPlatform = Number(s.total_topup_ke_platform || 0);
-        const spend = Number(s.total_spend_terpakai || 0);
-        const sisa = Number(s.sisa_saldo_di_tim_ads || 0);
-        const isLow = sisa <= 0;
-
-        container.innerHTML = `
-          <div class="kpi-tile">
-            <div class="metric-header">
-              <span class="metric-label">Saldo Diterima dari Owner</span>
-              <span class="metric-icon">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#175CD3" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              </span>
-            </div>
-            <div class="metric-value">
-              <span class="metric-num" style="color: #175CD3;">Rp ${transferred.toLocaleString('id-ID')}</span>
-            </div>
-            <div class="metric-subtitle">
-              <span>Dana yang dicairkan Owner</span>
-            </div>
-          </div>
-
-          <div class="kpi-tile">
-            <div class="metric-header">
-              <span class="metric-label">Sudah Di-Topup ke Meta/Google</span>
-              <span class="metric-icon">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#5925DC" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-              </span>
-            </div>
-            <div class="metric-value">
-              <span class="metric-num" style="color: #5925DC;">Rp ${topupPlatform.toLocaleString('id-ID')}</span>
-            </div>
-            <div class="metric-subtitle">
-              <span>Penyetoran ke akun iklan</span>
-            </div>
-          </div>
-
-          <div class="kpi-tile ${isLow ? 'urgent' : ''}">
-            <div class="metric-header">
-              <span class="metric-label" style="color: ${isLow ? '#B42318' : '#027A48'};">Terpakai &amp; Sisa Saldo Saya</span>
-              <span class="metric-icon">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="${isLow ? '#B42318' : '#027A48'}" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-              </span>
-            </div>
-            <div class="metric-value">
-              <span class="metric-num" style="color: ${isLow ? '#B42318' : '#027A48'};">Rp ${sisa.toLocaleString('id-ID')}</span>
-            </div>
-            <div class="metric-subtitle">
-              <span>Spend: Rp ${spend.toLocaleString('id-ID')}</span>
-            </div>
-          </div>
-
-          <div class="kpi-tile">
-            <div class="metric-header">
-              <span class="metric-label">Status Kampanye &amp; Saldo</span>
-              <span class="metric-icon">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
-              </span>
-            </div>
-            <div class="metric-value">
-              <span class="metric-num" style="font-size: 18px; font-weight: 800; color: ${sisa > 0 ? '#027A48' : '#B42318'};">
-                ${sisa > 0 ? '🟢 Iklan Aktif' : '🔴 Saldo Habis'}
-              </span>
-            </div>
-            <div class="metric-subtitle">
-              <span>${(data.projects || []).length} proyek ditugaskan</span>
-            </div>
-          </div>
-        `;
       }
+      <?php else: ?>
+      // KARYAWAN / FREELANCER (TIM ADS) VIEW: EXACTLY 2 CARDS ONLY!
+      const s = data.summary || {};
+      const transferred = Number(s.total_ditransfer_owner !== undefined ? s.total_ditransfer_owner : (s.total_transferred_from_owner || <?= (float)$total_ditransfer_owner ?>));
+      const spend = Number(s.total_dibelanjakan_ads !== undefined ? s.total_dibelanjakan_ads : (s.total_spend_terpakai || <?= (float)$total_dibelanjakan_ads ?>));
+      const sisa = transferred - spend;
+      const isRunning = (sisa > 0);
+      const statusText = isRunning ? 'Iklan Jalan' : (transferred > 0 ? 'Saldo Habis' : 'Belum Ada Saldo');
+
+      container.innerHTML = `
+        <div class="kpi-tile">
+          <div class="metric-header">
+            <span class="metric-label">Saldo</span>
+            <span class="metric-icon">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="#175CD3" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </span>
+          </div>
+          <div class="metric-value">
+            <span class="metric-num" style="color: #175CD3;">Rp ${transferred.toLocaleString('id-ID')}</span>
+          </div>
+          <div class="metric-subtitle">
+            <span>Nominal saldo yang ditransfer oleh Owner</span>
+          </div>
+        </div>
+
+        <div class="kpi-tile ${sisa <= 0 ? 'urgent' : ''}">
+          <div class="metric-header">
+            <span class="metric-label" style="color: ${sisa <= 0 ? '#B42318' : '#027A48'};">Sisa Saldo</span>
+            <span class="metric-icon">
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sisa <= 0 ? '#B42318' : '#027A48'}" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </span>
+          </div>
+          <div class="metric-value">
+            <span class="metric-num" style="color: ${sisa <= 0 ? '#B42318' : '#027A48'};">Rp ${sisa.toLocaleString('id-ID')}</span>
+          </div>
+          <div class="metric-subtitle">
+            <span>Sudah dibelanjakan: Rp ${spend.toLocaleString('id-ID')} &bull; Status: ${statusText}</span>
+          </div>
+        </div>
+      `;
+      <?php endif; ?>
     }
 
     function renderAdsProjectsTable(data) {
+      <?php if (!$isOwnerOrAdmin): ?>
+      return;
+      <?php else: ?>
       const tbody = document.getElementById('tbody-ads-projects');
       if (!tbody) return;
       const isPrivileged = (data.role === 'owner' || data.role === 'admin');
-      const projects = data.projects || [];
+      if (!isPrivileged) return;
 
+      const projects = data.projects || [];
       if (projects.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="${isPrivileged ? 8 : 7}" style="text-align: center; padding: 32px; color: var(--text-muted);">Belum ada data proyek atau alokasi saldo iklan.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; padding: 32px; color: var(--text-muted);">Belum ada data proyek atau alokasi saldo iklan.</td></tr>`;
         return;
       }
 
       let html = '';
       projects.forEach(p => {
-        if (isPrivileged) {
-          const contract = Number(p.total_kontrak_klien || p.contract_value || 0);
-          const margin = Number(p.margin_bersih_agensi || 0);
-          const pagu = Number(p.total_pagu_ads_klien || p.allocated_ads_budget || 0);
-          const transferred = Number(p.total_ditransfer_ke_tim_ads || 0);
-          const sisaPaguOwner = Number(p.sisa_pagu_di_owner || 0);
-          const sisaSaldoTimAds = Number(p.sisa_saldo_di_tim_ads || 0);
+        const contract = Number(p.total_kontrak_klien || p.contract_value || 0);
+        const margin = Number(p.margin_bersih_agensi || 0);
+        const pagu = Number(p.total_pagu_ads_klien || p.allocated_ads_budget || 0);
+        const transferred = Number(p.total_ditransfer_ke_tim_ads || 0);
+        const sisaPaguOwner = Number(p.sisa_pagu_di_owner || 0);
+        const sisaSaldoTimAds = Number(p.sisa_saldo_di_tim_ads || 0);
 
-          let stBadge = '<span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700;">🟢 Iklan Jalan</span>';
-          if (sisaSaldoTimAds <= 0 && transferred > 0) {
-            stBadge = '<span class="badge" style="background: #FEF3F2; color: #B42318; font-weight: 700;">🔴 Saldo Tim Habis</span>';
-          } else if (transferred <= 0) {
-            stBadge = '<span class="badge" style="background: #EFF8FF; color: #175CD3; font-weight: 700;">Menunggu Transfer</span>';
-          }
-
-          html += `
-            <tr>
-              <td>
-                <div style="font-weight: 800; color: #101828;">${escapeHtml(p.client_company)}</div>
-                <span style="font-size: 11.5px; color: var(--text-secondary);">${escapeHtml(p.project_name)}</span>
-              </td>
-              <td style="font-weight: 800; color: #101828; white-space: nowrap;">
-                Rp ${contract.toLocaleString('id-ID')}
-              </td>
-              <td style="font-weight: 800; color: #027A48; white-space: nowrap;">
-                Rp ${margin.toLocaleString('id-ID')}
-              </td>
-              <td style="font-weight: 800; color: #5925DC; white-space: nowrap;">
-                Rp ${pagu.toLocaleString('id-ID')}
-              </td>
-              <td style="font-weight: 800; color: #175CD3; white-space: nowrap;">
-                Rp ${transferred.toLocaleString('id-ID')}
-              </td>
-              <td style="font-weight: 800; color: ${sisaPaguOwner <= 0 ? '#B42318' : '#027A48'}; white-space: nowrap;">
-                Rp ${sisaPaguOwner.toLocaleString('id-ID')}
-              </td>
-              <td>
-                ${stBadge}
-              </td>
-              <td class="td-actions" style="text-align: right; white-space: nowrap;">
-                <div class="table-actions" style="display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap;">
-                  <button type="button" class="btn btn-primary btn-sm" onclick="openTransferToWorkerModal(${p.project_id}, ${sisaPaguOwner})" style="font-size: 11px; font-weight: 700; background: #175CD3; border-color: #175CD3;">
-                    + Transfer Saldo
-                  </button>
-                  ${sisaPaguOwner <= 0 ? `
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="openRequestLimitOwnerModal(${p.project_id})" style="font-size: 11px; font-weight: 700; color: #B54708; border-color: #FDB022; background: #FFF9F2;">
-                      🔔 Ajukan Limit ke Klien
-                    </button>
-                  ` : ''}
-                  <button type="button" class="btn btn-secondary btn-sm" onclick="openAllocateAdsModal(${p.project_id}, ${pagu})" style="font-size: 11px; font-weight: 600;">
-                    Atur Pagu
-                  </button>
-                </div>
-              </td>
-            </tr>
-          `;
-        } else {
-          // STRICT WORKER ROW: Only worker metrics! No contract, margin, or total pagu
-          const transferred = Number(p.total_ditransfer_ke_tim_ads || 0);
-          const topup = Number(p.total_topup_ke_platform || 0);
-          const spend = Number(p.total_spend_terpakai || 0);
-          const sisa = Number(p.sisa_saldo_di_tim_ads || 0);
-
-          let stBadge = '<span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700;">🟢 Iklan Jalan</span>';
-          if (sisa <= 0 && transferred > 0) {
-            stBadge = '<span class="badge" style="background: #FEF3F2; color: #B42318; font-weight: 700;">🔴 Saldo Habis</span>';
-          } else if (transferred <= 0) {
-            stBadge = '<span class="badge" style="background: #EFF8FF; color: #175CD3; font-weight: 700;">Menunggu Transfer Owner</span>';
-          }
-
-          html += `
-            <tr>
-              <td>
-                <div style="font-weight: 800; color: #101828;">${escapeHtml(p.client_company)}</div>
-                <span style="font-size: 11.5px; color: var(--text-secondary);">${escapeHtml(p.project_name)}</span>
-              </td>
-              <td style="font-weight: 800; color: #175CD3; white-space: nowrap;">
-                Rp ${transferred.toLocaleString('id-ID')}
-              </td>
-              <td style="font-weight: 800; color: #5925DC; white-space: nowrap;">
-                Rp ${topup.toLocaleString('id-ID')}
-              </td>
-              <td style="font-weight: 800; color: #B42318; white-space: nowrap;">
-                Rp ${spend.toLocaleString('id-ID')}
-              </td>
-              <td style="font-weight: 800; color: ${sisa <= 0 ? '#B42318' : '#027A48'}; white-space: nowrap;">
-                Rp ${sisa.toLocaleString('id-ID')}
-              </td>
-              <td>
-                ${stBadge}
-              </td>
-              <td class="td-actions" style="text-align: right; white-space: nowrap;">
-                <div class="table-actions" style="display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap;">
-                  <button type="button" class="btn btn-primary btn-sm" onclick="openConfirmPlatformTopupModalForProject(${p.project_id}, ${transferred})" style="font-size: 11px; font-weight: 700; background: #027A48; border-color: #027A48;">
-                    + Konfirmasi Top-Up &amp; Spend
-                  </button>
-                  <button type="button" class="btn btn-secondary btn-sm" onclick="openRequestBalanceWorkerModal(${p.project_id})" style="font-size: 11px; font-weight: 700; color: #B42318; border-color: #FECDCA; background: #FEF3F2;">
-                    🔔 Minta Saldo
-                  </button>
-                </div>
-              </td>
-            </tr>
-          `;
+        let stBadge = '<span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700;">🟢 Iklan Jalan</span>';
+        if (sisaSaldoTimAds <= 0 && transferred > 0) {
+          stBadge = '<span class="badge" style="background: #FEF3F2; color: #B42318; font-weight: 700;">🔴 Saldo Tim Habis</span>';
+        } else if (transferred <= 0) {
+          stBadge = '<span class="badge" style="background: #EFF8FF; color: #175CD3; font-weight: 700;">Menunggu Transfer</span>';
         }
+
+        html += `
+          <tr>
+            <td>
+              <div style="font-weight: 800; color: #101828;">${escapeHtml(p.client_company)}</div>
+              <span style="font-size: 11.5px; color: var(--text-secondary);">${escapeHtml(p.project_name)}</span>
+            </td>
+            <td style="font-weight: 800; color: #101828; white-space: nowrap;">
+              Rp ${contract.toLocaleString('id-ID')}
+            </td>
+            <td style="font-weight: 800; color: #027A48; white-space: nowrap;">
+              Rp ${margin.toLocaleString('id-ID')}
+            </td>
+            <td style="font-weight: 800; color: #5925DC; white-space: nowrap;">
+              Rp ${pagu.toLocaleString('id-ID')}
+            </td>
+            <td style="font-weight: 800; color: #175CD3; white-space: nowrap;">
+              Rp ${transferred.toLocaleString('id-ID')}
+            </td>
+            <td style="font-weight: 800; color: ${sisaPaguOwner <= 0 ? '#B42318' : '#027A48'}; white-space: nowrap;">
+              Rp ${sisaPaguOwner.toLocaleString('id-ID')}
+            </td>
+            <td>
+              ${stBadge}
+            </td>
+            <td class="td-actions" style="text-align: right; white-space: nowrap;">
+              <div class="table-actions" style="display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap;">
+                <button type="button" class="btn btn-primary btn-sm" onclick="openTransferToWorkerModal(${p.project_id}, ${sisaPaguOwner})" style="font-size: 11px; font-weight: 700; background: #175CD3; border-color: #175CD3;">
+                  + Transfer Saldo
+                </button>
+                ${sisaPaguOwner <= 0 ? `
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="openRequestLimitOwnerModal(${p.project_id})" style="font-size: 11px; font-weight: 700; color: #B54708; border-color: #FDB022; background: #FFF9F2;">
+                    🔔 Ajukan Limit ke Klien
+                  </button>
+                ` : ''}
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openAllocateAdsModal(${p.project_id}, ${pagu})" style="font-size: 11px; font-weight: 600;">
+                  Atur Pagu
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
       });
 
       tbody.innerHTML = html;
+      <?php endif; ?>
     }
 
     function renderAdsTopupTable(data) {
       const tbody = document.getElementById('tbody-ads-topups');
       if (!tbody) return;
-      const isPrivileged = (data.role === 'owner' || data.role === 'admin');
+      const isPrivileged = <?= json_encode($isOwnerOrAdmin) ?> && (data.role === 'owner' || data.role === 'admin');
       const isOwner = (data.role === 'owner');
       const topups = data.topup_transactions || [];
 
@@ -3266,7 +3267,9 @@ if ($isWorkerUser) {
             <td colspan="7" style="text-align: center; padding: 36px 20px; color: var(--text-muted); background: #FCFCFD;">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 8px; display: block;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
               <div style="font-weight: 600; color: #111827; margin-bottom: 2px; font-size: 14px;">Belum Ada Riwayat Alur Transaksi Saldo Iklan</div>
-              <div style="font-size: 12px; color: #6B7280; margin-bottom: 12px;">Owner dapat mencairkan saldo dengan menekan tombol <b>+ Transfer Saldo ke Tim Ads</b>.</div>
+              <div style="font-size: 12px; color: #6B7280; margin-bottom: 12px;">
+                ${isPrivileged ? 'Owner dapat mencairkan saldo dengan menekan tombol <b>+ Transfer Saldo ke Tim Ads</b>.' : 'Owner belum mencairkan saldo iklan untuk tugas/proyek Anda.'}
+              </div>
               ${isPrivileged ? `
                 <button type="button" class="btn btn-primary btn-sm" onclick="openTransferToWorkerModal()" style="font-size: 12px; font-weight: 600; background: #175CD3; border-color: #175CD3;">
                   + Cairkan Saldo Sekarang
@@ -3288,99 +3291,89 @@ if ($isWorkerUser) {
 
         const isPlatformToppedUp = (t.platform_topup_status === 'completed' || topupPlatform > 0);
 
-        html += `
-          <tr>
-            <td style="min-width: 190px; white-space: nowrap;">
-              <div style="font-weight: 800; color: #101828;">${formatDate(t.transaction_date)}</div>
-              <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 1px;">
-                Oleh: <b>${escapeHtml(t.assigned_user_name || t.uploader_name || 'Tim Ads')}</b>
-              </div>
-              <span class="badge" style="background: #F2F4F7; color: #344054; font-size: 10px; font-weight: 700; margin-top: 3px;">
-                ${escapeHtml(t.stage_label || 'Tahap 1')}
-              </span>
-            </td>
-
-            <td style="white-space: nowrap;">
-              <div style="font-weight: 800; color: #101828;">${escapeHtml(t.client_company || 'Klien')}</div>
-              <div style="color: var(--text-muted); font-size: 11px;">${escapeHtml(t.project_name || 'Proyek')}</div>
-              <span class="badge" style="background: #F4F3FF; color: #5925DC; font-weight: 800; font-size: 10.5px; margin-top: 3px;">
-                ${escapeHtml(t.platform || 'Meta Ads')}
-              </span>
-            </td>
-
-            <td style="white-space: nowrap;">
-              <div style="font-weight: 800; color: #175CD3; font-size: 13.5px;">
-                Rp ${transferOwner.toLocaleString('id-ID')}
-              </div>
-              ${t.transfer_proof_owner ? `
-                <button type="button" class="btn btn-secondary btn-sm" onclick="previewAdsProof('${escapeHtml(t.transfer_proof_owner)}')" style="font-size: 10.5px; font-weight: 700; padding: 2px 8px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px;">
-                  📄 Bukti TF Owner
-                </button>
-              ` : `
-                <span style="font-size: 11px; color: var(--text-muted); font-style: italic;">Belum ada bukti</span>
-              `}
-            </td>
-
-            <td style="white-space: nowrap;">
-              ${isPlatformToppedUp ? `
-                <div style="font-weight: 800; color: #027A48; font-size: 13.5px;">
-                  Rp ${topupPlatform.toLocaleString('id-ID')}
+        if (isPrivileged) {
+          // OWNER / ADMIN VIEW: 7 Columns with full internal metrics
+          html += `
+            <tr>
+              <td style="min-width: 190px; white-space: nowrap;">
+                <div style="font-weight: 800; color: #101828;">${formatDate(t.transaction_date)}</div>
+                <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 1px;">
+                  Oleh: <b>${escapeHtml(t.assigned_user_name || t.uploader_name || 'Tim Ads')}</b>
                 </div>
-                ${t.platform_topup_proof ? `
-                  <button type="button" class="btn btn-secondary btn-sm" onclick="previewAdsProof('${escapeHtml(t.platform_topup_proof)}')" style="font-size: 10.5px; font-weight: 700; padding: 2px 8px; margin-top: 4px; color: #027A48; display: inline-flex; align-items: center; gap: 4px;">
-                    📈 Bukti Top-Up Ads
+                <span class="badge" style="background: #F2F4F7; color: #344054; font-size: 10px; font-weight: 700; margin-top: 3px;">
+                  ${escapeHtml(t.stage_label || 'Tahap 1')}
+                </span>
+              </td>
+
+              <td style="white-space: nowrap;">
+                <div style="font-weight: 800; color: #101828;">${escapeHtml(t.client_company || 'Klien')}</div>
+                <div style="color: var(--text-muted); font-size: 11px;">${escapeHtml(t.project_name || 'Proyek')}</div>
+                <span class="badge" style="background: #F4F3FF; color: #5925DC; font-weight: 800; font-size: 10.5px; margin-top: 3px;">
+                  ${escapeHtml(t.platform || 'Meta Ads')}
+                </span>
+              </td>
+
+              <td style="white-space: nowrap;">
+                <div style="font-weight: 800; color: #175CD3; font-size: 13.5px;">
+                  Rp ${transferOwner.toLocaleString('id-ID')}
+                </div>
+                ${t.transfer_proof_owner ? `
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="previewAdsProof('${escapeHtml(t.transfer_proof_owner)}')" style="font-size: 10.5px; font-weight: 700; padding: 2px 8px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px;">
+                    📄 Bukti TF Owner
                   </button>
                 ` : `
-                  <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 10.5px; margin-top: 4px;">
-                    ✓ Sudah Top-Up
+                  <span style="font-size: 11px; color: var(--text-muted); font-style: italic;">Belum ada bukti</span>
+                `}
+              </td>
+
+              <td style="white-space: nowrap;">
+                ${isPlatformToppedUp ? `
+                  <div style="font-weight: 800; color: #027A48; font-size: 13.5px;">
+                    Rp ${topupPlatform.toLocaleString('id-ID')}
+                  </div>
+                  ${t.platform_topup_proof ? `
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="previewAdsProof('${escapeHtml(t.platform_topup_proof)}')" style="font-size: 10.5px; font-weight: 700; padding: 2px 8px; margin-top: 4px; color: #027A48; display: inline-flex; align-items: center; gap: 4px;">
+                      📈 Bukti Top-Up Ads
+                    </button>
+                  ` : `
+                    <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 10.5px; margin-top: 4px;">
+                      ✓ Sudah Top-Up
+                    </span>
+                  `}
+                ` : `
+                  <span class="badge" style="background: #FEF0C7; color: #B54708; font-weight: 700; font-size: 11px;">
+                    Menunggu Top-Up
                   </span>
                 `}
-              ` : `
-                <span class="badge" style="background: #FEF0C7; color: #B54708; font-weight: 700; font-size: 11px;">
-                  Menunggu Top-Up
-                </span>
-                ${!isPrivileged ? `
-                  <div style="margin-top: 4px;">
-                    <button type="button" class="btn btn-primary btn-sm" onclick="openConfirmPlatformTopupModal(${t.id}, ${transferOwner})" style="font-size: 10.5px; font-weight: 700; padding: 2px 8px; background: #027A48; border-color: #027A48;">
-                      + Top-Up Sekarang
-                    </button>
-                  </div>
-                ` : ''}
-              `}
-            </td>
+              </td>
 
-            <td style="white-space: nowrap;">
-              <div style="font-size: 12px; color: #344054;">
-                Spend: <b style="color: #B42318;">Rp ${spend.toLocaleString('id-ID')}</b>
-              </div>
-              <div style="font-size: 12px; color: #344054; margin-top: 2px;">
-                Sisa: <b style="color: ${sisa <= 0 ? '#B42318' : '#027A48'};">Rp ${sisa.toLocaleString('id-ID')}</b>
-              </div>
-            </td>
+              <td style="white-space: nowrap;">
+                <div style="font-size: 12px; color: #344054;">
+                  Spend: <b style="color: #B42318;">Rp ${spend.toLocaleString('id-ID')}</b>
+                </div>
+                <div style="font-size: 12px; color: #344054; margin-top: 2px;">
+                  Sisa: <b style="color: ${sisa <= 0 ? '#B42318' : '#027A48'};">Rp ${sisa.toLocaleString('id-ID')}</b>
+                </div>
+              </td>
 
-            <td style="white-space: nowrap;">
-              ${(t.campaign_status === 'running' || !t.campaign_status) ? `
-                <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 11px;">
-                  🟢 Iklan Jalan
-                </span>
-              ` : (t.campaign_status === 'paused' ? `
-                <span class="badge" style="background: #FEF0C7; color: #B54708; font-weight: 700; font-size: 11px;">
-                  🟡 Dijeda
-                </span>
-              ` : `
-                <span class="badge" style="background: #FEF3F2; color: #B42318; font-weight: 700; font-size: 11px;">
-                  🔴 Saldo Habis
-                </span>
-              `)}
-            </td>
-
-            <td class="td-actions" style="text-align: right; white-space: nowrap;">
-              <div class="table-actions" style="display: flex; gap: 6px; justify-content: flex-end;">
-                ${!isPrivileged ? `
-                  <button type="button" class="btn btn-action-pay" onclick="openConfirmPlatformTopupModal(${t.id}, ${transferOwner})" title="Update Realisasi Top-Up & Spend">
-                    ⚡ Update Spend
-                  </button>
+              <td style="white-space: nowrap;">
+                ${(t.campaign_status === 'running' || !t.campaign_status) ? `
+                  <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 11px;">
+                    🟢 Iklan Jalan
+                  </span>
+                ` : (t.campaign_status === 'paused' ? `
+                  <span class="badge" style="background: #FEF0C7; color: #B54708; font-weight: 700; font-size: 11px;">
+                    🟡 Dijeda
+                  </span>
                 ` : `
+                  <span class="badge" style="background: #FEF3F2; color: #B42318; font-weight: 700; font-size: 11px;">
+                    🔴 Saldo Habis
+                  </span>
+                `)}
+              </td>
+
+              <td class="td-actions" style="text-align: right; white-space: nowrap;">
+                <div class="table-actions" style="display: flex; gap: 6px; justify-content: flex-end;">
                   ${!isVerified && isOwner ? `
                     <button type="button" class="btn-action-success" onclick="verifyTopupTransaction(${t.id})" title="Verifikasi Transaksi">
                       ✓ Verifikasi
@@ -3389,11 +3382,91 @@ if ($isWorkerUser) {
                   <button type="button" class="btn-action-delete btn-delete-ghost" onclick="deleteTopupTransaction(${t.id})" title="Hapus Transaksi">
                     Hapus
                   </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        } else {
+          // KARYAWAN / FREELANCER (TIM ADS) VIEW: EXACTLY AS REQUESTED
+          // Columns: Tanggal & Proyek, Platform Ads, Saldo (Transfer dari Owner + Bukti TF Owner), Sudah Dibelanjakan (Bukti Top-Up/Spend Ads), Sisa Saldo, Status Kampanye, AKSI
+          html += `
+            <tr>
+              <td style="white-space: nowrap;">
+                <div style="font-weight: 800; color: #101828;">${formatDate(t.transaction_date)}</div>
+                <div style="font-size: 12px; color: #344054; margin-top: 2px;">
+                  <b>${escapeHtml(t.client_company || 'Klien')}</b> &bull; ${escapeHtml(t.project_name || 'Proyek')}
+                </div>
+                <span class="badge" style="background: #F2F4F7; color: #344054; font-size: 10px; font-weight: 700; margin-top: 3px;">
+                  ${escapeHtml(t.stage_label || 'Tahap 1')}
+                </span>
+              </td>
+
+              <td style="white-space: nowrap;">
+                <span class="badge" style="background: #F4F3FF; color: #5925DC; font-weight: 800; font-size: 11px;">
+                  ${escapeHtml(t.platform || 'Meta Ads')}
+                </span>
+              </td>
+
+              <td style="white-space: nowrap;">
+                <div style="font-weight: 800; color: #175CD3; font-size: 14px;">
+                  Rp ${transferOwner.toLocaleString('id-ID')}
+                </div>
+                ${t.transfer_proof_owner ? `
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="previewAdsProof('${escapeHtml(t.transfer_proof_owner)}')" style="font-size: 10.5px; font-weight: 700; padding: 2px 8px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; color: #175CD3; border-color: #B2CCFF; background: #EFF8FF;">
+                    📄 Bukti TF Owner
+                  </button>
+                ` : `
+                  <span style="font-size: 11px; color: var(--text-muted); font-style: italic;">Belum ada bukti</span>
                 `}
-              </div>
-            </td>
-          </tr>
-        `;
+              </td>
+
+              <td style="white-space: nowrap;">
+                <div style="font-weight: 800; color: #027A48; font-size: 14px;">
+                  Rp ${spend.toLocaleString('id-ID')}
+                </div>
+                ${t.platform_topup_proof ? `
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="previewAdsProof('${escapeHtml(t.platform_topup_proof)}')" style="font-size: 10.5px; font-weight: 700; padding: 2px 8px; margin-top: 4px; color: #027A48; border-color: #A6F4C5; background: #ECFDF3; display: inline-flex; align-items: center; gap: 4px;">
+                    📈 Bukti Top-Up Ads
+                  </button>
+                ` : `
+                  <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 10.5px; margin-top: 4px;">
+                    ✓ Tercatat
+                  </span>
+                `}
+              </td>
+
+              <td style="white-space: nowrap;">
+                <div style="font-weight: 800; font-size: 14px; color: ${sisa <= 0 ? '#B42318' : '#027A48'};">
+                  Rp ${sisa.toLocaleString('id-ID')}
+                </div>
+              </td>
+
+              <td style="white-space: nowrap;">
+                ${(sisa > 0 && (t.campaign_status === 'running' || !t.campaign_status)) ? `
+                  <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 11px;">
+                    🟢 Iklan Jalan
+                  </span>
+                ` : (t.campaign_status === 'paused' ? `
+                  <span class="badge" style="background: #FEF0C7; color: #B54708; font-weight: 700; font-size: 11px;">
+                    🟡 Dijeda
+                  </span>
+                ` : `
+                  <span class="badge" style="background: #FEF3F2; color: #B42318; font-weight: 700; font-size: 11px;">
+                    🔴 Saldo Habis
+                  </span>
+                `)}
+              </td>
+
+              <td class="td-actions" style="text-align: right; white-space: nowrap;">
+                <div class="table-actions" style="display: flex; gap: 6px; justify-content: flex-end;">
+                  <button type="button" class="btn btn-primary btn-sm" onclick="openConfirmPlatformTopupModal(${t.id}, ${transferOwner})" style="font-size: 11px; font-weight: 700; background: #027A48; border-color: #027A48;" title="Update Realisasi Top-Up & Spend">
+                    ⚡ Update Spend
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }
       });
 
       tbody.innerHTML = html;
@@ -3409,9 +3482,13 @@ if ($isWorkerUser) {
 
       let optionsHtml = '<option value="">-- Pilih Proyek Klien --</option>';
       projects.forEach(p => {
+        <?php if ($isOwnerOrAdmin): ?>
         const sisaPaguOwner = Number(p.sisa_pagu_di_owner || 0);
         const paguTotal = Number(p.total_pagu_ads_klien || p.allocated_ads_budget || 0);
         optionsHtml += `<option value="${p.project_id}" data-allocated="${paguTotal}" data-sisa-pagu="${sisaPaguOwner}">[${escapeHtml(p.client_company)}] ${escapeHtml(p.project_name)}</option>`;
+        <?php else: ?>
+        optionsHtml += `<option value="${p.project_id}">[${escapeHtml(p.client_company)}] ${escapeHtml(p.project_name)}</option>`;
+        <?php endif; ?>
       });
 
       if (selectSpend) selectSpend.innerHTML = optionsHtml;

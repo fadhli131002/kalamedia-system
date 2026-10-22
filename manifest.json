@@ -1,8 +1,9 @@
 {
+  "id": "portal-kala-pwa",
   "name": "Portal Kala",
   "short_name": "Portal Kala",
   "description": "Sistem Operasional & Portal Klien PT Kala Kausa Prima",
-  "start_url": "index.php",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",

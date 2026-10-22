@@ -795,44 +795,43 @@ if ($isWorkerUser) {
       <div class="content-body">
 
         <!-- Header Card -->
+        <!-- Header Card (Admin / PM Only) -->
+        <?php if ($isAdminUser): ?>
         <div class="tasks-header-card">
           <div>
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
               <span class="badge" style="background: #F2F4F7; color: #101828; font-weight: 800; font-size: 11px;">
-                <?= $isAdminUser ? 'ADMIN & PM WORKSPACE' : 'TIM PRODUKSI' ?>
+                ADMIN &amp; PM WORKSPACE
               </span>
               <span style="font-size: 12px; color: var(--text-muted);">&bull;</span>
               <span style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">
-                Login sebagai: <b><?= htmlspecialchars($user['name']) ?></b> (<?= ucfirst($role) ?>)
+                Login sebagai: <b><?= htmlspecialchars($user['name']) ?></b> (Admin)
               </span>
             </div>
             <h2 style="font-size: 20px; font-weight: 800; color: #101828; margin: 0; letter-spacing: -0.3px;">
-              <?= $isAdminUser ? 'Manajemen Tugas & Pembagian Kerja SDM' : 'Workspace Tugas Saya & Pelacakan Progres' ?>
+              Manajemen Tugas &amp; Pembagian Kerja SDM
             </h2>
             <p style="font-size: 13px; color: var(--text-secondary); margin: 4px 0 0;">
-              <?= $isAdminUser 
-                ? 'Distribusikan deliverables proyek ke Karyawan In-House dan Freelancer, serta pantau progres dan revisi klien.' 
-                : 'Daftar deliverables yang ditugaskan kepada Anda. Perbarui link hasil kerja dan tindak lanjuti masukan klien.' ?>
+              Distribusikan deliverables proyek ke Karyawan In-House dan Freelancer, serta pantau progres dan revisi klien.
             </p>
           </div>
 
           <div class="tasks-header-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <?php if ($isAdminUser): ?>
-              <button class="btn btn-primary btn-sm" onclick="openAssignTaskModal()">
-                <span>+ Bagi Tugas Baru (Assign)</span>
-              </button>
-              <button class="btn btn-secondary btn-sm" onclick="deleteAllTasks()" style="color: #B42318; border-color: #FECDCA; background: #FEF3F2; font-weight: 700;" title="Hapus Semua Tugas">
-                <span>Hapus Semua Tugas</span>
-              </button>
-            <?php endif; ?>
+            <button class="btn btn-primary btn-sm" onclick="openAssignTaskModal()">
+              <span>+ Bagi Tugas Baru (Assign)</span>
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="deleteAllTasks()" style="color: #B42318; border-color: #FECDCA; background: #FEF3F2; font-weight: 700;" title="Hapus Semua Tugas">
+              <span>Hapus Semua Tugas</span>
+            </button>
             <button class="btn btn-secondary btn-sm" onclick="loadTasksData()">
               <span>Segarkan</span>
             </button>
           </div>
         </div>
+        <?php endif; ?>
 
-        <!-- Section Switcher Tabs -->
-        <div class="workspace-tabs-bar">
+        <!-- Section Switcher Tabs (Desktop Only on Mobile for Workers) -->
+        <div class="workspace-tabs-bar <?= !$isAdminUser ? 'worker-tabs-bar' : '' ?>">
           <button type="button" class="workspace-tab-btn active" id="tab-btn-tasks" onclick="switchTaskWorkspaceTab('tasks')">
             <span class="desktop-text">Deliverables &amp; Penugasan Tim</span>
             <span class="mobile-text">Deliverables Tim</span>
@@ -853,62 +852,66 @@ if ($isWorkerUser) {
           <div id="revision-alert-container" style="display: none;"></div>
 
           <?php if ($role === 'freelancer'): ?>
-            <!-- Freelancer Saldo & Honorarium Payouts (Real-Time Dynamic Cards) -->
-            <div style="background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 20px; padding: 20px 22px; margin-bottom: 22px; box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05);">
+            <!-- Freelancer Saldo & Honorarium Payouts (Appify Style) -->
+            <div style="background: #FFFFFF; border: 1px solid #F0F1F7; border-radius: 18px; padding: 18px 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04);">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #027A48; background: #ECFDF3; padding: 3px 10px; border-radius: 6px; border: 1px solid #A6F4C5;">
-                    SALDO PENDAPATAN &amp; FEE SAYA
+                  <span style="font-size: 11px; font-weight: 700; color: #10B981; background: #E8F8F2; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                    Saldo Pendapatan &amp; Fee Saya
                   </span>
-                  <span style="font-size: 12.5px; color: var(--text-secondary); font-weight: 600;">Honorarium resmi mitra freelancer</span>
+                  <span style="font-size: 12px; color: #7B7890; font-weight: 500;">Honorarium resmi mitra freelancer</span>
                 </div>
-                <div style="font-size: 12px; color: var(--text-muted);">
-                  Terverifikasi real-time dari sistem keuangan
+                <div style="font-size: 11.5px; color: #7B7890;">
+                  Terverifikasi real-time
                 </div>
               </div>
-              <div class="kpi-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px;">
-                <div class="kpi-tile" style="border-left: 4px solid #059669; background: #F6FEF9; min-height: auto; padding: 16px 18px;">
-                  <div class="metric-header" style="margin-bottom: 6px;">
-                    <span class="metric-label" style="color: #059669; font-weight: 700; font-size: 12px;">Saldo Fee Terbayar (Lunas)</span>
-                    <span class="metric-icon">
-                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="#059669" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    </span>
+
+              <div class="kpi-grid freelancer-fee-grid" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+                <!-- Card 1: Fee Diterima -->
+                <div class="appify-card-mini" style="background: #FFFFFF; border: 1px solid #F0F1F7; border-radius: 16px; padding: 14px 16px; box-shadow: 0 2px 10px rgba(26, 22, 43, 0.02);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="color: #7B7890; font-weight: 600; font-size: 12.5px; white-space: normal; line-height: 1.2;">Fee Diterima</span>
+                    <div style="width: 28px; height: 28px; border-radius: 8px; background: #E8F8F2; display: flex; align-items: center; justify-content: center; color: #10B981; flex-shrink: 0;">
+                      <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </div>
                   </div>
-                  <div class="metric-value">
-                    <span class="metric-num" id="kpi-freelancer-paid" style="color: #059669; font-size: 22px; font-weight: 800;"><?= format_rupiah($freelancerPaid) ?></span>
+                  <div style="font-size: 18px; font-weight: 800; color: #1A162B; line-height: 1.2; letter-spacing: -0.2px;">
+                    <span id="kpi-freelancer-paid"><?= format_rupiah($freelancerPaid) ?></span>
                   </div>
-                  <div class="metric-subtitle" style="margin-top: 4px;">
-                    <span style="color: #059669; font-size: 11.5px;">Sudah ditransfer ke rekening Anda</span>
+                  <div style="margin-top: 4px; font-size: 11.5px; color: #10B981; font-weight: 500; line-height: 1.2;">
+                    Sudah ditransfer ke rekening Anda
                   </div>
                 </div>
 
-                <div class="kpi-tile" style="border-left: 4px solid #D97706; background: #FFFDF5; min-height: auto; padding: 16px 18px;">
-                  <div class="metric-header" style="margin-bottom: 6px;">
-                    <span class="metric-label" style="color: #D97706; font-weight: 700; font-size: 12px;">Fee Menunggu Pembayaran</span>
-                    <span class="metric-icon">
-                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="#D97706" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    </span>
+                <!-- Card 2: Menunggu Transfer -->
+                <div class="appify-card-mini" style="background: #FFFFFF; border: 1px solid #F0F1F7; border-radius: 16px; padding: 14px 16px; box-shadow: 0 2px 10px rgba(26, 22, 43, 0.02);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="color: #7B7890; font-weight: 600; font-size: 12.5px; white-space: normal; line-height: 1.2;">Menunggu Transfer</span>
+                    <div style="width: 28px; height: 28px; border-radius: 8px; background: #FFF4E5; display: flex; align-items: center; justify-content: center; color: #F59E0B; flex-shrink: 0;">
+                      <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </div>
                   </div>
-                  <div class="metric-value">
-                    <span class="metric-num" id="kpi-freelancer-pending" style="color: #D97706; font-size: 22px; font-weight: 800;"><?= format_rupiah($freelancerPending) ?></span>
+                  <div style="font-size: 18px; font-weight: 800; color: #1A162B; line-height: 1.2; letter-spacing: -0.2px;">
+                    <span id="kpi-freelancer-pending"><?= format_rupiah($freelancerPending) ?></span>
                   </div>
-                  <div class="metric-subtitle" style="margin-top: 4px;">
-                    <span style="color: #D97706; font-size: 11.5px;">Dalam antrean transfer Owner</span>
+                  <div style="margin-top: 4px; font-size: 11.5px; color: #F59E0B; font-weight: 500; line-height: 1.2;">
+                    Dalam antrean transfer Owner
                   </div>
                 </div>
 
-                <div class="kpi-tile" style="border-left: 4px solid #2563EB; background: #F8F9FC; min-height: auto; padding: 16px 18px;">
-                  <div class="metric-header" style="margin-bottom: 6px;">
-                    <span class="metric-label" style="color: #2563EB; font-weight: 700; font-size: 12px;">Total Nilai Kontrak Fee</span>
-                    <span class="metric-icon">
-                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                    </span>
+                <!-- Card 3: Total Kontrak Fee -->
+                <div class="appify-card-mini" style="background: #FFFFFF; border: 1px solid #F0F1F7; border-radius: 16px; padding: 14px 16px; box-shadow: 0 2px 10px rgba(26, 22, 43, 0.02);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="color: #7B7890; font-weight: 600; font-size: 12.5px; white-space: normal; line-height: 1.2;">Total Kontrak Fee</span>
+                    <div style="width: 28px; height: 28px; border-radius: 8px; background: #EEF2FF; display: flex; align-items: center; justify-content: center; color: #5B3DF5; flex-shrink: 0;">
+                      <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
                   </div>
-                  <div class="metric-value">
-                    <span class="metric-num" id="kpi-freelancer-total" style="color: #2563EB; font-size: 22px; font-weight: 800;"><?= format_rupiah($freelancerPaid + $freelancerPending) ?></span>
+                  <div style="font-size: 18px; font-weight: 800; color: #1A162B; line-height: 1.2; letter-spacing: -0.2px;">
+                    <span id="kpi-freelancer-total"><?= format_rupiah($freelancerPaid + $freelancerPending) ?></span>
                   </div>
-                  <div class="metric-subtitle" style="margin-top: 4px;">
-                    <span style="color: var(--text-secondary); font-size: 11.5px;">Akumulasi honorarium seluruh proyek</span>
+                  <div style="margin-top: 4px; font-size: 11.5px; color: #7B7890; font-weight: 500; line-height: 1.2;">
+                    Akumulasi seluruh proyek
                   </div>
                 </div>
               </div>
@@ -1122,128 +1125,69 @@ if ($isWorkerUser) {
           <!-- Active Hierarchical Notifications Container (Tim Ads <-> Owner <-> Client) -->
           <div id="ads-notifications-container" style="margin-bottom: 16px;"></div>
 
-          <!-- Ads Tracker Header & Controls (Clean SaaS Header) -->
+          <?php if ($isOwnerOrAdmin): ?>
+          <!-- Ads Tracker Header & Controls (Clean SaaS Header for Owner & Admin) -->
           <div class="page-header-bar" style="background: #FFFFFF; border: 1px solid #EAECEF; border-radius: 12px; padding: 18px 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: 0 1px 2px rgba(16,24,40,0.04);">
             <div>
               <h2 class="panel-title" style="font-size: 16px; font-weight: 600; color: #111827; margin: 0; letter-spacing: -0.015em;">
                 Pelacakan Dana &amp; Anggaran Iklan (Ads Tracker)
               </h2>
               <p style="font-size: 12.5px; color: #6B7280; margin: 3px 0 0;">
-                <?= ($isAdminUser || $isOwnerUser)
-                  ? 'Kawal alur dana iklan 2 tahap (Owner &rarr; Tim Ads &rarr; Meta/Google), pantau sisa pagu, dan verifikasi bukti transaksi secara presisi.' 
-                  : 'Pantau saldo dana iklan yang diterima dari Owner, laporkan bukti top-up ke Meta/Google Ads, dan catat realisasi spend berjalan.' ?>
+                Kawal alur dana iklan 2 tahap (Owner &rarr; Tim Ads &rarr; Meta/Google), pantau sisa pagu, dan verifikasi bukti transaksi secara presisi.
               </p>
             </div>
 
             <div class="ads-tracker-header-actions" style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
-              <?php if ($isAdminUser || $isOwnerUser): ?>
-                <button type="button" class="btn btn-primary btn-sm" onclick="openTransferToWorkerModal()" style="font-weight: 700; background: #175CD3; border-color: #175CD3;">
-                  <span>+ Transfer Saldo ke Tim Ads</span>
-                </button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="openAllocateAdsModal()">
-                  <span>+ Atur Pagu Saldo Ads</span>
-                </button>
-              <?php else: ?>
-                <button type="button" class="btn btn-primary btn-sm" onclick="openConfirmPlatformTopupModal()" style="font-weight: 700; background: #027A48; border-color: #027A48;">
-                  <span>+ Konfirmasi Top-Up &amp; Spend</span>
-                </button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="openRequestBalanceWorkerModal()" style="color: #B42318; border-color: #FDA29B;">
-                  <span>🔔 Minta Saldo ke Owner</span>
-                </button>
-              <?php endif; ?>
+              <button type="button" class="btn btn-primary btn-sm" onclick="openTransferToWorkerModal()" style="font-weight: 700; background: #175CD3; border-color: #175CD3;">
+                <span>+ Transfer Saldo ke Tim Ads</span>
+              </button>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openAllocateAdsModal()">
+                <span>+ Atur Pagu Saldo Ads</span>
+              </button>
               <button type="button" class="btn btn-secondary btn-sm" onclick="loadAdsTrackerData()">
                 <span>Segarkan Data</span>
               </button>
             </div>
           </div>
 
-          <!-- Summary KPI Cards -->
+          <!-- Summary KPI Cards (Owner & Admin) -->
           <div class="kpi-row" id="ads-kpi-container">
-            <?php if ($isOwnerOrAdmin): ?>
-              <div class="kpi-tile">
-                <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 600;">Memuat Ringkasan Owner...</span>
-              </div>
-            <?php else: ?>
-              <!-- KARYAWAN / FREELANCER (TIM ADS): HANYA 2 KARTU (Saldo & Sisa Saldo) -->
-              <div class="kpi-tile">
-                <div class="metric-header">
-                  <span class="metric-label">Saldo</span>
-                  <span class="metric-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="#175CD3" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                  </span>
-                </div>
-                <div class="metric-value">
-                  <span class="metric-num" style="color: #175CD3;">Rp <?= number_format($total_ditransfer_owner, 0, ',', '.') ?></span>
-                </div>
-                <div class="metric-subtitle">
-                  <span>Nominal saldo yang ditransfer oleh Owner</span>
-                </div>
-              </div>
-
-              <div class="kpi-tile <?= $sisa_saldo <= 0 ? 'urgent' : '' ?>">
-                <div class="metric-header">
-                  <span class="metric-label" style="color: <?= $sisa_saldo <= 0 ? '#B42318' : '#027A48' ?>;">Sisa Saldo</span>
-                  <span class="metric-icon">
-                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="<?= $sisa_saldo <= 0 ? '#B42318' : '#027A48' ?>" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  </span>
-                </div>
-                <div class="metric-value">
-                  <span class="metric-num" style="color: <?= $sisa_saldo <= 0 ? '#B42318' : '#027A48' ?>;">Rp <?= number_format($sisa_saldo, 0, ',', '.') ?></span>
-                </div>
-                <div class="metric-subtitle">
-                  <span>Sudah dibelanjakan: Rp <?= number_format($total_dibelanjakan_ads, 0, ',', '.') ?> &bull; Status: <?= $status_iklan ?></span>
-                </div>
-              </div>
-            <?php endif; ?>
+            <div class="kpi-tile">
+              <span style="font-size: 11.5px; color: var(--text-secondary); font-weight: 600;">Memuat Ringkasan Owner...</span>
+            </div>
           </div>
 
-          <!-- Top-Up Transactions & Proof Table Card (Automatic Sync to Client Portal) -->
+          <!-- Top-Up Transactions & Proof Table Card (Owner & Admin) -->
           <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05); min-width: 0; max-width: 100%; overflow: visible;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
               <div>
                 <div style="display: flex; align-items: center; gap: 8px;">
                   <h4 style="font-size: 15px; font-weight: 800; color: #101828; margin: 0;">
-                    <?= $isOwnerOrAdmin ? 'Riwayat &amp; Bukti Transaksi Saldo Iklan (Alur 2 Tahap)' : 'Riwayat Saldo &amp; Bukti Belanja Iklan' ?>
+                    Riwayat &amp; Bukti Transaksi Saldo Iklan (Alur 2 Tahap)
                   </h4>
                   <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 10.5px;">Tampil di Portal Klien</span>
                 </div>
                 <span style="font-size: 12px; color: var(--text-secondary);">
-                  <?= $isOwnerOrAdmin 
-                    ? 'Catatan pencairan dari Owner ke Tim Ads dan penyetoran saldo ke platform Meta Ads / Google Ads beserta lampiran bukti fisik.'
-                    : 'Catatan saldo yang diterima dari Owner dan bukti realisasi belanja iklan ke platform ads.' ?>
+                  Catatan pencairan dari Owner ke Tim Ads dan penyetoran saldo ke platform Meta Ads / Google Ads beserta lampiran bukti fisik.
                 </span>
               </div>
-              <?php if ($isOwnerOrAdmin): ?>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="openTransferToWorkerModal()" style="font-size: 12px; font-weight: 700; color: #175CD3; border-color: #B2CCFF; background: #EFF8FF;">
-                  + Transfer Saldo Baru
-                </button>
-              <?php endif; ?>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="openTransferToWorkerModal()" style="font-size: 12px; font-weight: 700; color: #175CD3; border-color: #B2CCFF; background: #EFF8FF;">
+                + Transfer Saldo Baru
+              </button>
             </div>
 
             <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
               <table class="table-custom" id="table-ads-topups" style="min-width: 980px; width: 100%;">
                 <thead>
-                  <?php if ($isOwnerOrAdmin): ?>
-                    <tr>
-                      <th style="min-width: 190px; white-space: nowrap;">TANGGAL &amp; PETUGAS ADS</th>
-                      <th style="white-space: nowrap;">PROYEK &amp; PLATFORM</th>
-                      <th style="white-space: nowrap;">TAHAP 1: OWNER &rarr; TIM ADS</th>
-                      <th style="white-space: nowrap;">TAHAP 2: TIM ADS &rarr; META/GOOGLE</th>
-                      <th style="white-space: nowrap;">REALISASI SPEND &amp; SISA</th>
-                      <th style="white-space: nowrap;">STATUS KAMPANYE</th>
-                      <th class="th-actions" style="text-align: right; white-space: nowrap; min-width: 140px;">AKSI</th>
-                    </tr>
-                  <?php else: ?>
-                    <tr>
-                      <th style="white-space: nowrap;">TANGGAL &amp; PROYEK</th>
-                      <th style="white-space: nowrap;">PLATFORM ADS</th>
-                      <th style="white-space: nowrap;">SALDO (TRANSFER DARI OWNER + BUKTI TF OWNER)</th>
-                      <th style="white-space: nowrap;">SUDAH DIBELANJAKAN (BUKTI TOP-UP/SPEND ADS)</th>
-                      <th style="white-space: nowrap;">SISA SALDO</th>
-                      <th style="white-space: nowrap;">STATUS KAMPANYE</th>
-                      <th class="th-actions" style="text-align: right; white-space: nowrap; min-width: 140px;">AKSI</th>
-                    </tr>
-                  <?php endif; ?>
+                  <tr>
+                    <th style="min-width: 190px; white-space: nowrap;">TANGGAL &amp; PETUGAS ADS</th>
+                    <th style="white-space: nowrap;">PROYEK &amp; PLATFORM</th>
+                    <th style="white-space: nowrap;">TAHAP 1: OWNER &rarr; TIM ADS</th>
+                    <th style="white-space: nowrap;">TAHAP 2: TIM ADS &rarr; META/GOOGLE</th>
+                    <th style="white-space: nowrap;">REALISASI SPEND &amp; SISA</th>
+                    <th style="white-space: nowrap;">STATUS KAMPANYE</th>
+                    <th class="th-actions" style="text-align: right; white-space: nowrap; min-width: 140px;">AKSI</th>
+                  </tr>
                 </thead>
                 <tbody id="tbody-ads-topups">
                   <tr><td colspan="7" style="text-align: center; padding: 24px; color: var(--text-muted);">Memuat riwayat isi saldo ads...</td></tr>
@@ -1252,8 +1196,7 @@ if ($isWorkerUser) {
             </div>
           </div>
 
-          <!-- Projects Ads Budget Table Card (HANYA UNTUK OWNER & ADMIN) -->
-          <?php if ($isOwnerOrAdmin): ?>
+          <!-- Projects Ads Budget Table Card (Owner & Admin) -->
           <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: gap: 8px;">
               <div>
@@ -1284,13 +1227,12 @@ if ($isWorkerUser) {
               </table>
             </div>
           </div>
-          <?php endif; ?>
 
-          <!-- Coordination Logs & Screenshot Proof Feed -->
+          <!-- Coordination Logs & Screenshot Proof Feed (Owner & Admin) -->
           <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
               <div>
-                <h4 style="font-size: 15px; font-weight: 800; color: #101828; margin: 0;">Riwayat Update & Bukti Screenshot Dashboard Ads</h4>
+                <h4 style="font-size: 15px; font-weight: 800; color: #101828; margin: 0;">Riwayat Update &amp; Bukti Screenshot Dashboard Ads</h4>
                 <span style="font-size: 12px; color: var(--text-secondary);">Catatan koordinasi langsung antara Tim Ads dan Owner beserta screenshot dashboard</span>
               </div>
             </div>
@@ -1299,6 +1241,112 @@ if ($isWorkerUser) {
               <div style="text-align: center; padding: 28px; color: var(--text-muted);">Memuat riwayat koordinasi...</div>
             </div>
           </div>
+
+          <?php else: ?>
+          <!-- WORKER / FREELANCER (TIM ADS): APPIFY "MY WALLET" WORKSPACE -->
+          <div class="appify-wallet-container" style="max-width: 100%; margin: 0 auto 24px;">
+            <!-- 1. Bagian Atas: Label Saldo Diterima + Angka Besar + Pill Status -->
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 13px; font-weight: 600; color: #7B7890; margin-bottom: 6px;">
+                Saldo Diterima dari Owner
+              </div>
+              <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <span id="appify-hero-transferred" style="font-size: 28px; font-weight: 800; color: #1A162B; letter-spacing: -0.5px; line-height: 1.2;">
+                  Rp <?= number_format($total_ditransfer_owner, 0, ',', '.') ?>
+                </span>
+                <span id="appify-hero-status-pill" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; background: <?= $sisa_saldo > 0 ? '#E8F8F2' : '#FFEFEF' ?>; color: <?= $sisa_saldo > 0 ? '#10B981' : '#EF4444' ?>; border: 1px solid <?= $sisa_saldo > 0 ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)' ?>;">
+                  <span style="width: 7px; height: 7px; border-radius: 50%; background: currentColor;"></span>
+                  <span id="appify-hero-status-text"><?= $sisa_saldo > 0 ? 'Iklan Jalan' : ($total_ditransfer_owner > 0 ? 'Saldo Habis' : 'Belum Ada Saldo') ?></span>
+                </span>
+              </div>
+            </div>
+
+            <!-- 2. Kartu Ungu Bergradien (My Wallet Hero) -->
+            <?php
+              $heroSpendPct = $total_ditransfer_owner > 0 ? round(($total_dibelanjakan_ads / $total_ditransfer_owner) * 100) : 0;
+              $heroSpendPctClamped = min(100, max(0, $heroSpendPct));
+            ?>
+            <div class="appify-hero-card" style="background: linear-gradient(135deg, #5B3DF5 0%, #7C5CFA 100%); border-radius: 20px; padding: 22px; color: #FFFFFF; box-shadow: 0 10px 25px rgba(91, 61, 245, 0.22); position: relative; overflow: hidden; margin-bottom: 18px;">
+              <div style="position: relative; z-index: 2;">
+                <div style="font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.85); margin-bottom: 4px;">
+                  Sisa Saldo Saat Ini
+                </div>
+                <div id="appify-hero-remaining" style="font-size: 24px; font-weight: 800; color: #FFFFFF; letter-spacing: -0.3px; margin-bottom: 14px;">
+                  Rp <?= number_format($sisa_saldo, 0, ',', '.') ?>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12.5px; color: rgba(255,255,255,0.9);">
+                  <span>Sudah Dibelanjakan</span>
+                  <span id="appify-hero-spend" style="font-weight: 700;">Spend: Rp <?= number_format($total_dibelanjakan_ads, 0, ',', '.') ?></span>
+                </div>
+                <!-- Progress bar putih transparan elegan -->
+                <div style="height: 8px; background: rgba(255, 255, 255, 0.25); border-radius: 999px; overflow: hidden;">
+                  <div id="appify-hero-progress" style="height: 100%; width: <?= $heroSpendPctClamped ?>%; background: #FFFFFF; border-radius: 999px; transition: width 0.4s ease;"></div>
+                </div>
+              </div>
+              <div style="position: absolute; right: -20px; top: -20px; width: 130px; height: 130px; border-radius: 50%; background: rgba(255,255,255,0.08); pointer-events: none;"></div>
+            </div>
+
+            <!-- 3. Baris 3 Tombol Aksi Cepat Sejajar (Top-Up & Spend | Minta Saldo | Segarkan) -->
+            <div class="appify-action-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px 0;">
+              <!-- Tombol 1: Top-Up & Spend -->
+              <button type="button" class="appify-action-btn" onclick="openConfirmPlatformTopupModal()" style="background: #FFFFFF; border-radius: 16px; padding: 14px 8px; border: 1px solid #F0F1F7; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: all 180ms ease; box-shadow: 0 4px 14px rgba(26,22,43,0.03);">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #F2EFFF; display: flex; align-items: center; justify-content: center; color: #5B3DF5;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="19" x2="12" y2="5"></line>
+                    <polyline points="5 12 12 5 19 12"></polyline>
+                  </svg>
+                </div>
+                <span style="font-size: 12px; font-weight: 600; color: #1A162B; text-align: center; line-height: 1.2;">Top-Up &amp; Spend</span>
+              </button>
+
+              <!-- Tombol 2: Minta Saldo -->
+              <button type="button" class="appify-action-btn" onclick="openRequestBalanceWorkerModal()" style="background: #FFFFFF; border-radius: 16px; padding: 14px 8px; border: 1px solid #F0F1F7; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: all 180ms ease; box-shadow: 0 4px 14px rgba(26,22,43,0.03);">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #FFF4E5; display: flex; align-items: center; justify-content: center; color: #F59E0B;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                  </svg>
+                </div>
+                <span style="font-size: 12px; font-weight: 600; color: #1A162B; text-align: center; line-height: 1.2;">Minta Saldo</span>
+              </button>
+
+              <!-- Tombol 3: Segarkan -->
+              <button type="button" class="appify-action-btn" onclick="loadAdsTrackerData()" style="background: #FFFFFF; border-radius: 16px; padding: 14px 8px; border: 1px solid #F0F1F7; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: all 180ms ease; box-shadow: 0 4px 14px rgba(26,22,43,0.03);">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #EEF2FF; display: flex; align-items: center; justify-content: center; color: #3B82F6;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <polyline points="1 20 1 14 7 14"></polyline>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                  </svg>
+                </div>
+                <span style="font-size: 12px; font-weight: 600; color: #1A162B; text-align: center; line-height: 1.2;">Segarkan</span>
+              </button>
+            </div>
+
+            <!-- 4. Riwayat Transaksi & Bukti Belanja Iklan (Recent Transactions Card List) -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 22px 0 12px;">
+              <h3 style="font-size: 15px; font-weight: 800; color: #1A162B; margin: 0; letter-spacing: -0.2px;">
+                Riwayat Transaksi &amp; Bukti
+              </h3>
+              <span style="background: #E8F8F2; color: #10B981; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; border: 1px solid rgba(16,185,129,0.2);">
+                Tampil di Portal Klien
+              </span>
+            </div>
+
+            <div id="appify-tx-list-container">
+              <div style="text-align: center; padding: 32px 16px; color: #7B7890; font-size: 13px; background: #FFFFFF; border-radius: 16px; border: 1px solid #F0F1F7;">
+                Memuat riwayat transaksi ads...
+              </div>
+            </div>
+
+            <!-- Hidden containers for JS compatibility -->
+            <div style="display: none;">
+              <div id="ads-kpi-container"></div>
+              <table><tbody id="tbody-ads-topups"></tbody></table>
+              <div id="ads-logs-feed-container"></div>
+            </div>
+          </div>
+          <?php endif; ?>
         </div>
 
         <!-- SECTION 3: Report & Rekap Pekerjaan (Bulanan / Per Proyek) -->
@@ -2464,45 +2512,66 @@ if ($isWorkerUser) {
         const unreadFeedbacks = parseInt(t.unread_feedbacks_count) || 0;
         const dateRangeText = (t.start_date ? formatDate(t.start_date) : '-') + ' s/d ' + (t.due_date ? formatDate(t.due_date) : '-');
 
+        let catIcon = '';
+        let catTintBg = '#F2EFFF';
+        let catTintCol = '#5B3DF5';
+        const catLow = catLabel.toLowerCase();
+        if (catLow.includes('iklan') || catLow.includes('ads')) {
+          catTintBg = '#F2EFFF'; catTintCol = '#5B3DF5';
+          catIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>';
+        } else if (catLow.includes('sosmed') || catLow.includes('konten')) {
+          catTintBg = '#E8F8F2'; catTintCol = '#10B981';
+          catIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>';
+        } else if (catLow.includes('desain') || catLow.includes('design') || catLow.includes('video')) {
+          catTintBg = '#FFF4E5'; catTintCol = '#F59E0B';
+          catIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>';
+        } else if (catLow.includes('web')) {
+          catTintBg = '#EEF2FF'; catTintCol = '#3B82F6';
+          catIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>';
+        } else {
+          catTintBg = '#F2EFFF'; catTintCol = '#5B3DF5';
+          catIcon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>';
+        }
+
         html += `
-          <div class="task-item-card ${cardExtraClass}">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
-              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <span class="status-pill ${sInfo.class}">
-                  <span>${sInfo.label}</span>
-                </span>
-                <span class="service-tag ${catClass}">
-                  ${escapeHtml(catLabel)}
-                </span>
-                <span class="badge-priority ${t.priority || 'medium'}">
-                  ${t.priority ? t.priority.toUpperCase() : 'MEDIUM'}
-                </span>
-                ${workerBadge}
+          <div class="task-item-card ${cardExtraClass}" style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 18px; margin-bottom: 14px; box-shadow: 0 4px 18px rgba(26,22,43,0.03);">
+            <!-- Appify Popular Services Style Top Bar -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
+              <div style="display: flex; align-items: flex-start; gap: 12px; min-width: 0; flex: 1;">
+                <!-- 44x44px Rounded Category Icon Box -->
+                <div style="width: 44px; height: 44px; border-radius: 14px; background: ${catTintBg}; color: ${catTintCol}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  ${catIcon}
+                </div>
+                <!-- Title & Client/Deadline -->
+                <div style="min-width: 0; flex: 1;">
+                  <h3 style="font-size: 14px; font-weight: 800; color: #1A162B; margin: 0 0 4px; line-height: 1.35;">
+                    ${escapeHtml(t.title)}
+                  </h3>
+                  <div style="font-size: 12px; color: #7B7890; line-height: 1.3;">
+                    <b>${escapeHtml(t.client_company || 'Klien')}</b> &bull; Deadline: ${t.due_date ? formatDate(t.due_date) : '-'}
+                  </div>
+                </div>
               </div>
 
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 11.5px; color: var(--text-muted);">
-                  <span>Waktu Pengerjaan: <b>${dateRangeText}</b></span>
+              <!-- Status Badge & Admin Action -->
+              <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end;">
+                <span class="status-pill ${sInfo.class}" style="border-radius: 20px; font-size: 11px; font-weight: 700; padding: 4px 10px;">
+                  <span>${sInfo.label}</span>
                 </span>
                 <?php if ($isAdminUser): ?>
-                  <button type="button" class="btn btn-secondary btn-sm" onclick="deleteTask(${t.id})" style="padding: 3px 8px; font-size: 11px; font-weight: 600; color: #B42318;" title="Hapus Tugas">
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="deleteTask(${t.id})" style="padding: 3px 8px; font-size: 11px; font-weight: 600; color: #B42318; border-color: #FECDCA;" title="Hapus Tugas">
                     Hapus
                   </button>
                 <?php endif; ?>
               </div>
             </div>
 
-            <div>
-              <div style="font-size: 11.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 2px;">
-                ${escapeHtml(t.client_company || 'Client')} &bull; Proyek: ${escapeHtml(t.project_name || 'Kalamedia')}
-              </div>
-              <h3 style="font-size: 16px; font-weight: 800; color: #101828; margin: 0 0 4px;">
-                ${escapeHtml(t.title)}
-              </h3>
-              <p style="font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.5;">
-                ${escapeHtml(t.description || 'Tidak ada deskripsi singkat.')}
+            <!-- Task Description (if any) -->
+            ${t.description ? `
+              <p style="font-size: 12.5px; color: #7B7890; margin: 0 0 12px; line-height: 1.5; padding-left: 56px;">
+                ${escapeHtml(t.description)}
               </p>
-            </div>
+            ` : ''}
 
             ${(t.is_ads_task || parseFloat(t.assigned_ads_budget) > 0) ? `
               <!-- Real-Time Ads Monitoring Panel (5 Required Indicators) -->
@@ -2604,36 +2673,36 @@ if ($isWorkerUser) {
             ` : ''}
 
             <!-- Deliverable Preview Link & Actions -->
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; flex-wrap: wrap; gap: 10px;">
-              <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #F0F1F7; padding-top: 12px; flex-wrap: wrap; gap: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
                 ${t.deliverable_link ? `
-                  <a href="${escapeHtml(t.deliverable_link)}" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 11.5px; font-weight: 700;">
+                  <a href="${escapeHtml(t.deliverable_link)}" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 11.5px; font-weight: 600; border-radius: 10px; height: 32px; padding: 0 12px; border: 1px solid #F0F1F7; color: #1A162B;">
                     <span>Lihat Preview Hasil</span>
                   </a>
                 ` : `
-                  <span style="font-size: 11.5px; color: var(--text-tertiary); font-style: italic;">Belum ada link hasil</span>
+                  <span style="font-size: 11.5px; color: #A09EB0; font-style: italic;">Belum ada link hasil</span>
                 `}
 
                 ${t.latest_feedback ? `
-                  <span style="font-size: 11.5px; color: var(--text-secondary); max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block;">
+                  <span style="font-size: 11.5px; color: #7B7890; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block;">
                     "${escapeHtml(t.latest_feedback)}"
                   </span>
                 ` : ''}
               </div>
 
-              <div style="display: flex; gap: 8px; align-items: center;">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="openDiscussionModal(${t.id})" style="font-size: 12px; font-weight: 700; position: relative;">
+              <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openDiscussionModal(${t.id})" style="font-size: 12px; font-weight: 600; border-radius: 10px; height: 32px; padding: 0 12px; border: 1px solid #F0F1F7; color: #1A162B; position: relative;">
                   <span>Diskusi Klien</span>
                   ${unreadFeedbacks > 0 ? `
                     <span style="background: #EF4444; color: #FFF; font-size: 9.5px; font-weight: 800; padding: 1px 6px; border-radius: 10px; margin-left: 4px;">
-                      ${unreadFeedbacks} Baru
+                      ${unreadFeedbacks}
                     </span>
                   ` : `
-                    <span style="color: var(--text-muted); font-size: 11px; margin-left: 4px;">(${t.feedbacks_count || 0})</span>
+                    <span style="color: #7B7890; font-size: 11px; margin-left: 4px;">(${t.feedbacks_count || 0})</span>
                   `}
                 </button>
 
-                <button type="button" class="btn btn-primary btn-sm" onclick="openUpdateProgressModal(${t.id}, '${t.status}', '${escapeHtml(t.deliverable_link || '')}')" style="font-size: 12px;">
+                <button type="button" class="btn btn-primary btn-sm" onclick="openUpdateProgressModal(${t.id}, '${t.status}', '${escapeHtml(t.deliverable_link || '')}')" style="font-size: 12px; font-weight: 600; background: #5B3DF5; border-color: #5B3DF5; color: #FFFFFF; border-radius: 10px; height: 32px; padding: 0 14px;">
                   Perbarui Progres
                 </button>
               </div>
@@ -3499,7 +3568,7 @@ if ($isWorkerUser) {
         `;
       }
       <?php else: ?>
-      // KARYAWAN / FREELANCER (TIM ADS) VIEW: EXACTLY 2 CARDS ONLY!
+      // KARYAWAN / FREELANCER (TIM ADS) VIEW: APPIFY HERO & TILES
       const s = data.summary || {};
       const transferred = Number(s.total_ditransfer_owner !== undefined ? s.total_ditransfer_owner : (s.total_transferred_from_owner || <?= (float)$total_ditransfer_owner ?>));
       const spend = Number(s.total_dibelanjakan_ads !== undefined ? s.total_dibelanjakan_ads : (s.total_spend_terpakai || <?= (float)$total_dibelanjakan_ads ?>));
@@ -3507,37 +3576,70 @@ if ($isWorkerUser) {
       const isRunning = (sisa > 0);
       const statusText = isRunning ? 'Iklan Jalan' : (transferred > 0 ? 'Saldo Habis' : 'Belum Ada Saldo');
 
-      container.innerHTML = `
-        <div class="kpi-tile">
-          <div class="metric-header">
-            <span class="metric-label">Saldo</span>
-            <span class="metric-icon">
-              <svg viewBox="0 0 24 24" width="16" height="16" stroke="#175CD3" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-            </span>
-          </div>
-          <div class="metric-value">
-            <span class="metric-num" style="color: #175CD3;">Rp ${transferred.toLocaleString('id-ID')}</span>
-          </div>
-          <div class="metric-subtitle">
-            <span>Nominal saldo yang ditransfer oleh Owner</span>
-          </div>
-        </div>
+      // Update Appify Hero elements
+      const elTrans = document.getElementById('appify-hero-transferred');
+      if (elTrans) elTrans.innerText = 'Rp ' + transferred.toLocaleString('id-ID');
 
-        <div class="kpi-tile ${sisa <= 0 ? 'urgent' : ''}">
-          <div class="metric-header">
-            <span class="metric-label" style="color: ${sisa <= 0 ? '#B42318' : '#027A48'};">Sisa Saldo</span>
-            <span class="metric-icon">
-              <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sisa <= 0 ? '#B42318' : '#027A48'}" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            </span>
+      const elRem = document.getElementById('appify-hero-remaining');
+      if (elRem) elRem.innerText = 'Rp ' + sisa.toLocaleString('id-ID');
+
+      const elSpend = document.getElementById('appify-hero-spend');
+      if (elSpend) elSpend.innerText = 'Spend: Rp ' + spend.toLocaleString('id-ID');
+
+      const elProg = document.getElementById('appify-hero-progress');
+      if (elProg) {
+        const pct = transferred > 0 ? Math.min(100, Math.max(0, Math.round((spend / transferred) * 100))) : 0;
+        elProg.style.width = pct + '%';
+      }
+
+      const elStatusPill = document.getElementById('appify-hero-status-pill');
+      const elStatusText = document.getElementById('appify-hero-status-text');
+      if (elStatusText) elStatusText.innerText = statusText;
+      if (elStatusPill) {
+        if (isRunning) {
+          elStatusPill.style.background = '#E8F8F2';
+          elStatusPill.style.color = '#10B981';
+          elStatusPill.style.borderColor = 'rgba(16,185,129,0.2)';
+        } else {
+          elStatusPill.style.background = '#FFEFEF';
+          elStatusPill.style.color = '#EF4444';
+          elStatusPill.style.borderColor = 'rgba(239,68,68,0.2)';
+        }
+      }
+
+      if (container) {
+        container.innerHTML = `
+          <div class="kpi-tile">
+            <div class="metric-header">
+              <span class="metric-label">Saldo</span>
+              <span class="metric-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#175CD3" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </span>
+            </div>
+            <div class="metric-value">
+              <span class="metric-num" style="color: #175CD3;">Rp ${transferred.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="metric-subtitle">
+              <span>Nominal saldo yang ditransfer oleh Owner</span>
+            </div>
           </div>
-          <div class="metric-value">
-            <span class="metric-num" style="color: ${sisa <= 0 ? '#B42318' : '#027A48'};">Rp ${sisa.toLocaleString('id-ID')}</span>
+
+          <div class="kpi-tile ${sisa <= 0 ? 'urgent' : ''}">
+            <div class="metric-header">
+              <span class="metric-label" style="color: ${sisa <= 0 ? '#B42318' : '#027A48'};">Sisa Saldo</span>
+              <span class="metric-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sisa <= 0 ? '#B42318' : '#027A48'}" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </span>
+            </div>
+            <div class="metric-value">
+              <span class="metric-num" style="color: ${sisa <= 0 ? '#B42318' : '#027A48'};">Rp ${sisa.toLocaleString('id-ID')}</span>
+            </div>
+            <div class="metric-subtitle">
+              <span>Sudah dibelanjakan: Rp ${spend.toLocaleString('id-ID')} &bull; Status: ${statusText}</span>
+            </div>
           </div>
-          <div class="metric-subtitle">
-            <span>Sudah dibelanjakan: Rp ${spend.toLocaleString('id-ID')} &bull; Status: ${statusText}</span>
-          </div>
-        </div>
-      `;
+        `;
+      }
       <?php endif; ?>
     }
 
@@ -3621,32 +3723,43 @@ if ($isWorkerUser) {
 
     function renderAdsTopupTable(data) {
       const tbody = document.getElementById('tbody-ads-topups');
-      if (!tbody) return;
+      const appifyEl = document.getElementById('appify-tx-list-container');
       const isPrivileged = <?= json_encode($isOwnerOrAdmin) ?> && (data.role === 'owner' || data.role === 'admin');
       const isOwner = (data.role === 'owner');
       const topups = data.topup_transactions || [];
 
       if (topups.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="7" style="text-align: center; padding: 36px 20px; color: var(--text-muted); background: #FCFCFD;">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 8px; display: block;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-              <div style="font-weight: 600; color: #111827; margin-bottom: 2px; font-size: 14px;">Belum Ada Riwayat Alur Transaksi Saldo Iklan</div>
-              <div style="font-size: 12px; color: #6B7280; margin-bottom: 12px;">
-                ${isPrivileged ? 'Owner dapat mencairkan saldo dengan menekan tombol <b>+ Transfer Saldo ke Tim Ads</b>.' : 'Owner belum mencairkan saldo iklan untuk tugas/proyek Anda.'}
-              </div>
-              ${isPrivileged ? `
-                <button type="button" class="btn btn-primary btn-sm" onclick="openTransferToWorkerModal()" style="font-size: 12px; font-weight: 600; background: #175CD3; border-color: #175CD3;">
-                  + Cairkan Saldo Sekarang
-                </button>
-              ` : ''}
-            </td>
-          </tr>
-        `;
+        if (tbody) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 36px 20px; color: var(--text-muted); background: #FCFCFD;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 8px; display: block;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                <div style="font-weight: 600; color: #111827; margin-bottom: 2px; font-size: 14px;">Belum Ada Riwayat Alur Transaksi Saldo Iklan</div>
+                <div style="font-size: 12px; color: #6B7280; margin-bottom: 12px;">
+                  ${isPrivileged ? 'Owner dapat mencairkan saldo dengan menekan tombol <b>+ Transfer Saldo ke Tim Ads</b>.' : 'Owner belum mencairkan saldo iklan untuk tugas/proyek Anda.'}
+                </div>
+                ${isPrivileged ? `
+                  <button type="button" class="btn btn-primary btn-sm" onclick="openTransferToWorkerModal()" style="font-size: 12px; font-weight: 600; background: #175CD3; border-color: #175CD3;">
+                    + Cairkan Saldo Sekarang
+                  </button>
+                ` : ''}
+              </td>
+            </tr>
+          `;
+        }
+        if (appifyEl) {
+          appifyEl.innerHTML = `
+            <div style="text-align: center; padding: 36px 16px; background: #FFFFFF; border-radius: 16px; border: 1px solid #F0F1F7; color: #7B7890;">
+              <div style="font-size: 14px; font-weight: 700; color: #1A162B; margin-bottom: 4px;">Belum Ada Riwayat Transaksi</div>
+              <div style="font-size: 12px; color: #7B7890;">Owner belum mencairkan saldo iklan untuk tugas/proyek Anda.</div>
+            </div>
+          `;
+        }
         return;
       }
 
       let html = '';
+      let appifyCardsHtml = '';
       topups.forEach(t => {
         const isVerified = (t.status === 'verified');
         const transferOwner = Number(t.transfer_amount_owner || t.topup_amount || 0);
@@ -3655,6 +3768,52 @@ if ($isWorkerUser) {
         const sisa = transferOwner - spend;
 
         const isPlatformToppedUp = (t.platform_topup_status === 'completed' || topupPlatform > 0);
+
+        // Appify Worker Card Item (Recent Transactions style)
+        const pInitial = (t.platform || 'Meta Ads').toLowerCase().includes('google') ? 'G' : ((t.platform || 'Meta Ads').toLowerCase().includes('tiktok') ? 'TT' : 'M');
+        appifyCardsHtml += `
+          <div class="appify-tx-card" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: #FFFFFF; border-radius: 16px; border: 1px solid #F0F1F7; margin-bottom: 10px; box-shadow: 0 2px 10px rgba(26, 22, 43, 0.02); gap: 12px; transition: all 180ms ease;">
+            <!-- Kiri: Ikon Platform + Nama Klien/Proyek + Subteks + Chip Bukti -->
+            <div style="display: flex; align-items: flex-start; gap: 12px; min-width: 0; flex: 1;">
+              <div style="width: 42px; height: 42px; border-radius: 12px; background: #F2EFFF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 800; font-size: 13px;">
+                ${pInitial}
+              </div>
+              <div style="min-width: 0; flex: 1;">
+                <div style="font-size: 14px; font-weight: 800; color: #1A162B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                  ${escapeHtml(t.client_company || 'Klien')} &bull; ${escapeHtml(t.project_name || 'Proyek')}
+                </div>
+                <div style="font-size: 12px; color: #7B7890; margin: 2px 0 6px;">
+                  ${escapeHtml(t.platform || 'Meta Ads')} &bull; ${escapeHtml(t.stage_label || 'Tahap 1')} &bull; ${formatDate(t.transaction_date)}
+                </div>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+                  ${t.transfer_proof_owner ? `
+                    <button type="button" onclick="previewAdsProof('${escapeHtml(t.transfer_proof_owner)}')" style="height: 26px; font-size: 11px; font-weight: 600; border-radius: 8px; border: 1px solid #E0DBFD; background: #F2EFFF; color: #5B3DF5; padding: 0 10px; cursor: pointer; display: inline-flex; align-items: center;">
+                      Bukti TF Owner
+                    </button>
+                  ` : ''}
+                  ${t.platform_topup_proof ? `
+                    <button type="button" onclick="previewAdsProof('${escapeHtml(t.platform_topup_proof)}')" style="height: 26px; font-size: 11px; font-weight: 600; border-radius: 8px; border: 1px solid #C4F1DE; background: #E8F8F2; color: #10B981; padding: 0 10px; cursor: pointer; display: inline-flex; align-items: center;">
+                      Bukti Ads
+                    </button>
+                  ` : ''}
+                  <button type="button" onclick="openConfirmPlatformTopupModal(${t.id}, ${transferOwner})" style="height: 26px; font-size: 11px; font-weight: 600; border-radius: 8px; border: 1px solid #F0F1F7; background: #FFFFFF; color: #1A162B; padding: 0 8px; cursor: pointer; display: inline-flex; align-items: center;">
+                    Update Spend
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Kanan: Saldo Masuk di atas & Spend di bawah -->
+            <div style="text-align: right; flex-shrink: 0;">
+              <div style="font-size: 13.5px; font-weight: 800; color: #10B981; line-height: 1.3;">
+                +Rp ${transferOwner.toLocaleString('id-ID')}
+              </div>
+              <div style="font-size: 12.5px; font-weight: 600; color: #1A162B; margin-top: 2px;">
+                -Rp ${spend.toLocaleString('id-ID')}
+              </div>
+            </div>
+          </div>
+        `;
 
         if (isPrivileged) {
           // OWNER / ADMIN VIEW: 7 Columns with full internal metrics
@@ -3752,8 +3911,7 @@ if ($isWorkerUser) {
             </tr>
           `;
         } else {
-          // KARYAWAN / FREELANCER (TIM ADS) VIEW: EXACTLY AS REQUESTED
-          // Columns: Tanggal & Proyek, Platform Ads, Saldo (Transfer dari Owner + Bukti TF Owner), Sudah Dibelanjakan (Bukti Top-Up/Spend Ads), Sisa Saldo, Status Kampanye, AKSI
+          // KARYAWAN / FREELANCER (TIM ADS) TABLE (Desktop Fallback)
           html += `
             <tr>
               <td style="white-space: nowrap;">
@@ -3834,7 +3992,8 @@ if ($isWorkerUser) {
         }
       });
 
-      tbody.innerHTML = html;
+      if (tbody) tbody.innerHTML = html;
+      if (appifyEl) appifyEl.innerHTML = appifyCardsHtml;
     }
 
     function renderAdsLogsFeed(data) {

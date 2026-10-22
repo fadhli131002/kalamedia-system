@@ -5,10 +5,10 @@
  * Typography: Inter (wght 400, 500, 600, 700)
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   --font-main: var(--font-sans);
   
   /* Canvas & Surfaces (SaaS Minimal) */
@@ -3538,19 +3538,19 @@ button:active,
   margin-bottom: 12px;
 }
 
-/* Mobile Bottom Navigation Bar */
+/* Mobile Bottom Navigation Bar - Appify Style */
 .mobile-bottom-nav {
   display: none;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 60px;
+  height: 64px;
   background: #FFFFFF;
-  border-top: 1px solid #EAECEF;
-  box-shadow: 0 -2px 10px rgba(16, 24, 40, 0.04);
+  border-top: 1px solid #F0F1F7;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
   z-index: 990;
-  padding: 0 6px;
+  padding: 0 8px;
   box-sizing: border-box;
 }
 
@@ -3565,7 +3565,23 @@ button:active,
   .main-wrapper,
   .content-body,
   .app-container {
-    padding-bottom: 68px !important;
+    padding-bottom: 74px !important;
+  }
+
+  /* Hide duplicate top segmented tabs for workers on mobile */
+  .worker-tabs-bar {
+    display: none !important;
+  }
+
+  /* 2x2 Grid for Report Ads KPI on Mobile */
+  .report-ads-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  /* Appify Quick Action Buttons Grid on Mobile */
+  .appify-action-grid {
+    gap: 8px !important;
   }
 }
 
@@ -3576,29 +3592,30 @@ button:active,
   justify-content: center;
   flex: 1;
   height: 100%;
-  color: #64748B;
+  color: #7B7890;
   text-decoration: none;
   background: transparent;
   border: none;
-  padding: 4px 0;
+  padding: 6px 0;
   cursor: pointer;
-  transition: color 150ms ease;
+  transition: all 160ms ease;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 
 .mob-nav-item:hover,
 .mob-nav-item:focus {
-  color: #2563EB;
+  color: #5B3DF5;
 }
 
 .mob-nav-item.active {
-  color: #2563EB;
+  color: #5B3DF5;
+  font-weight: 600;
 }
 
 .mob-nav-icon {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3608,26 +3625,106 @@ button:active,
   width: 20px;
   height: 20px;
   stroke: currentColor;
-  stroke-width: 2;
+  stroke-width: 1.9;
   fill: none;
   stroke-linecap: round;
-  stroke-linejoin="round";
+  stroke-linejoin: round;
+  transition: stroke 160ms ease;
 }
 
 .mob-nav-item.active .mob-nav-icon svg {
+  stroke: #5B3DF5;
   stroke-width: 2.3;
 }
 
 .mob-nav-label {
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 500;
   letter-spacing: -0.1px;
   margin-top: 3px;
-  line-height: 1;
+  line-height: 1.2;
 }
 
 .mob-nav-item.active .mob-nav-label {
   font-weight: 700;
+  color: #5B3DF5;
 }
+
+/* Appify Card & Action Button Micro-Interactions */
+.appify-action-btn:active {
+  transform: scale(0.96);
+  background-color: #F7F8FC !important;
+}
+
+.appify-tx-card:hover {
+  border-color: #E0DBFD !important;
+  box-shadow: 0 4px 18px rgba(91, 61, 245, 0.06) !important;
+}
+
+/* Report Ads Responsive KPI Grid & Filter Bar (Appify Style) */
+.report-ads-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+@media (max-width: 768px) {
+  .worker-tabs-bar,
+  .workspace-tabs-bar.worker-tabs-bar {
+    display: none !important;
+  }
+
+  .report-ads-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  .report-filter-form {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .report-filter-row-2col {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .report-ads-desktop-table {
+    display: none !important;
+  }
+
+  .report-ads-mobile-list {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .report-ads-mobile-list {
+    display: none !important;
+  }
+  
+  .report-ads-desktop-table {
+    display: block !important;
+  }
+
+  .report-filter-form {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  .report-filter-row-2col {
+    display: contents !important;
+  }
+}
+
 
 

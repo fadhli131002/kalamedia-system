@@ -199,10 +199,10 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
       color: #111827;
     }
     .report-tab-pill.active {
-      background: #111827;
+      background: #5B3DF5;
       color: #FFFFFF;
-      border-color: #111827;
-      box-shadow: 0 4px 12px rgba(17, 24, 39, 0.15);
+      border-color: #5B3DF5;
+      box-shadow: 0 4px 12px rgba(91, 61, 245, 0.25);
     }
     .metric-chip {
       display: inline-flex;
@@ -298,9 +298,9 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
           </div>
 
           <div style="display: flex; gap: 10px; align-items: center;">
-            <button type="button" class="btn btn-primary" onclick="openNewAdsReportModal()" style="font-weight: 700; border-radius: 10px; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 4px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              <span>+ Buat Report Ads Baru</span>
+            <button type="button" onclick="openNewAdsReportModal()" style="background: #5B3DF5; color: #FFFFFF; font-weight: 700; font-size: 13px; border-radius: 12px; height: 38px; padding: 0 16px; border: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(91, 61, 245, 0.28); cursor: pointer; transition: all 0.15s ease;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span>Buat Report Ads</span>
             </button>
             <?php if ($isOwnerOrAdmin): ?>
               <a href="<?= url('reports-form') ?>" class="btn btn-secondary btn-sm" style="border-radius: 10px;">
@@ -310,8 +310,9 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
           </div>
         </div>
 
-        <!-- Modern Segmented Tabs Bar -->
-        <div style="display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap;">
+        <?php if ($isOwnerOrAdmin || $isCreativeSpecialistUser): ?>
+        <!-- Modern Segmented Tabs Bar (Only when multiple views exist, hidden on mobile for workers) -->
+        <div class="worker-tabs-bar" style="display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap;">
           <a href="<?= url('reports?tab=ads_report') ?>" class="report-tab-pill <?= $activeTab === 'ads_report' ? 'active' : '' ?>">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
             <span>Report Ads (Standar Kalamedia)</span>
@@ -332,6 +333,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </a>
           <?php endif; ?>
         </div>
+        <?php endif; ?>
 
         <?php if ($activeTab === 'work_recap' && ($isOwnerOrAdmin || $isCreativeSpecialistUser)): ?>
           <!-- ================================================================= -->
@@ -475,95 +477,229 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <!-- SUB-PANEL: REPORT ADS & DECK PERFORMANCE MARKETING -->
           <!-- ================================================================= -->
 
-          <!-- 4 KPI Summary Cards for Performance Ads -->
-          <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr) !important; gap: 14px; margin-bottom: 22px;">
-            <!-- Managed Ad Spend -->
-            <div class="kpi-card" style="border-top: 3px solid #2563EB;">
-              <div class="kpi-header">
-                <span class="kpi-title" style="color: #2563EB; font-weight: 700;">Total Managed Ad Spend</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <!-- 4 KPI Summary Cards for Performance Ads (Appify 2x2 Grid on Mobile, 4-Cols on Desktop) -->
+          <div class="report-ads-kpi-grid">
+            <!-- 1. Total Spend -->
+            <div style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 14px 16px; box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <span style="font-size: 12px; font-weight: 700; color: #7B7890; white-space: nowrap;">Total Spend</span>
+                <div style="width: 28px; height: 28px; border-radius: 8px; background: #F2EFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B3DF5" stroke-width="2.2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </div>
               </div>
-              <div class="kpi-value" style="font-size: 22px; color: #111827;">
+              <div style="font-size: 17px; font-weight: 800; color: #1A162B; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                 Rp <?= number_format($totalSpend, 0, ',', '.') ?>
               </div>
-              <div class="kpi-meta"><?= count($reports) ?> Dokumen Laporan Terbit</div>
+              <div style="font-size: 11px; color: #7B7890; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <?= count($reports) ?> Dokumen Laporan Terbit
+              </div>
             </div>
 
-            <!-- Impressions & Reach -->
-            <div class="kpi-card" style="border-top: 3px solid #7C3AED;">
-              <div class="kpi-header">
-                <span class="kpi-title" style="color: #7C3AED; font-weight: 700;">Total Impressions &amp; Reach</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <!-- 2. Impressions -->
+            <div style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 14px 16px; box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <span style="font-size: 12px; font-weight: 700; color: #7B7890; white-space: nowrap;">Impressions</span>
+                <div style="width: 28px; height: 28px; border-radius: 8px; background: #EEF2FF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </div>
               </div>
-              <div class="kpi-value" style="font-size: 22px; color: #111827;">
-                <?= number_format($totalImpressions) ?>
+              <div style="font-size: 17px; font-weight: 800; color: #1A162B; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <?= number_format($totalImpressions, 0, ',', '.') ?>
               </div>
-              <div class="kpi-meta">Reach: <?= number_format($stats['total_reach'] ?? 0) ?> orang</div>
+              <div style="font-size: 11px; color: #7B7890; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                Reach: <?= number_format($stats['total_reach'] ?? 0) ?> orang
+              </div>
             </div>
 
-            <!-- Clicks & CTR -->
-            <div class="kpi-card" style="border-top: 3px solid #059669;">
-              <div class="kpi-header">
-                <span class="kpi-title" style="color: #059669; font-weight: 700;">Total Clicks &amp; Avg CTR</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            <!-- 3. Total Klik -->
+            <div style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 14px 16px; box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <span style="font-size: 12px; font-weight: 700; color: #7B7890; white-space: nowrap;">Total Klik</span>
+                <div style="width: 28px; height: 28px; border-radius: 8px; background: #E8F8F2; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                </div>
               </div>
-              <div class="kpi-value" style="font-size: 22px; color: #059669;">
+              <div style="font-size: 17px; font-weight: 800; color: #1A162B; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                 <?= number_format($totalClicks) ?> Klik
               </div>
-              <div class="kpi-meta">Rata-rata CTR: <b><?= number_format($avgCtr, 2) ?>%</b></div>
+              <div style="font-size: 11px; color: #7B7890; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                CTR: <b><?= number_format($avgCtr, 2) ?>%</b>
+              </div>
             </div>
 
-            <!-- Total Results & Avg CPA -->
-            <div class="kpi-card" style="border-top: 3px solid #EA580C;">
-              <div class="kpi-header">
-                <span class="kpi-title" style="color: #EA580C; font-weight: 700;">Total Results / Leads</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <!-- 4. Total Leads -->
+            <div style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 14px 16px; box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <span style="font-size: 12px; font-weight: 700; color: #7B7890; white-space: nowrap;">Total Leads</span>
+                <div style="width: 28px; height: 28px; border-radius: 8px; background: #FFF4E5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                </div>
               </div>
-              <div class="kpi-value" style="font-size: 22px; color: #111827;">
+              <div style="font-size: 17px; font-weight: 800; color: #1A162B; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                 <?= number_format($totalConversions) ?> Leads
               </div>
-              <div class="kpi-meta">Avg CPA: Rp <?= number_format($avgCplCpa, 0, ',', '.') ?></div>
+              <div style="font-size: 11px; color: #7B7890; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                Avg CPA: Rp <?= number_format($avgCplCpa, 0, ',', '.') ?>
+              </div>
             </div>
           </div>
 
-          <!-- Main Table Container -->
-          <div class="glass-panel" style="padding: 24px;">
+          <!-- Main Table / Card Container -->
+          <div class="glass-panel" style="padding: 20px; background: #FFFFFF; border-radius: 20px; border: 1px solid #F0F1F7; box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04);">
             <!-- Filter Bar Form -->
-            <form method="GET" action="<?= url('reports') ?>" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;">
+            <form method="GET" action="<?= url('reports') ?>" class="report-filter-form" style="margin-bottom: 18px;">
               <input type="hidden" name="tab" value="<?= htmlspecialchars($activeTab) ?>">
 
-              <div style="flex: 1; min-width: 220px;">
-                <input type="text" name="search" class="form-control" placeholder="Cari brand, objektif, atau ide materi..." value="<?= htmlspecialchars($searchQuery) ?>">
+              <div style="flex: 1; width: 100%;">
+                <input type="text" name="search" class="form-control" placeholder="Cari brand, objektif, atau ide materi..." value="<?= htmlspecialchars($searchQuery) ?>" style="border-radius: 12px; border: 1px solid #F0F1F7; background: #F7F8FC; padding: 10px 14px; font-size: 13px;">
               </div>
 
-              <div style="width: 180px;">
-                <select name="client_id" class="form-select" onchange="this.form.submit()">
-                  <option value="">Semua Klien PT</option>
-                  <?php foreach ($allClients as $cl): ?>
-                    <option value="<?= $cl['id'] ?>" <?= $selectedClient == $cl['id'] ? 'selected' : '' ?>>
-                      <?= htmlspecialchars($cl['company']) ?>
-                    </option>
-                  <?php endforeach; ?>
-                </select>
+              <div class="report-filter-row-2col">
+                <div style="flex: 1; min-width: 0;">
+                  <select name="client_id" class="form-select" onchange="this.form.submit()" style="border-radius: 12px; border: 1px solid #F0F1F7; background: #F7F8FC; padding: 9px 12px; font-size: 12.5px; width: 100%;">
+                    <option value="">Semua Klien PT</option>
+                    <?php foreach ($allClients as $cl): ?>
+                      <option value="<?= $cl['id'] ?>" <?= $selectedClient == $cl['id'] ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($cl['company']) ?>
+                      </option>
+                    <?php endforeach; ?>
+                  </select>
+                </div>
+
+                <div style="flex: 1; min-width: 0;">
+                  <select name="platform" class="form-select" onchange="this.form.submit()" style="border-radius: 12px; border: 1px solid #F0F1F7; background: #F7F8FC; padding: 9px 12px; font-size: 12.5px; width: 100%;">
+                    <option value="all">Semua Platform</option>
+                    <option value="Meta Ads" <?= $selectedPlatform === 'Meta Ads' ? 'selected' : '' ?>>Meta Ads</option>
+                    <option value="Google Ads" <?= $selectedPlatform === 'Google Ads' ? 'selected' : '' ?>>Google Ads</option>
+                    <option value="TikTok Ads" <?= $selectedPlatform === 'TikTok Ads' ? 'selected' : '' ?>>TikTok Ads</option>
+                  </select>
+                </div>
               </div>
 
-              <div style="width: 150px;">
-                <select name="platform" class="form-select" onchange="this.form.submit()">
-                  <option value="all">Semua Platform</option>
-                  <option value="Meta Ads" <?= $selectedPlatform === 'Meta Ads' ? 'selected' : '' ?>>Meta Ads</option>
-                  <option value="Google Ads" <?= $selectedPlatform === 'Google Ads' ? 'selected' : '' ?>>Google Ads</option>
-                  <option value="TikTok Ads" <?= $selectedPlatform === 'TikTok Ads' ? 'selected' : '' ?>>TikTok Ads</option>
-                </select>
+              <div style="display: flex; gap: 8px;">
+                <button type="submit" class="btn btn-secondary btn-sm" style="border-radius: 10px; padding: 9px 16px; font-weight: 600;">Filter</button>
+                <?php if ($selectedClient > 0 || !empty($searchQuery) || $selectedPlatform !== 'all'): ?>
+                  <a href="<?= url('reports?tab=' . $activeTab) ?>" class="btn btn-secondary btn-sm" style="border-radius: 10px; color: var(--danger-text); padding: 9px 14px;">Reset</a>
+                <?php endif; ?>
               </div>
-
-              <button type="submit" class="btn btn-secondary btn-sm" style="padding: 9px 16px;">Filter</button>
-              <?php if ($selectedClient > 0 || !empty($searchQuery) || $selectedPlatform !== 'all'): ?>
-                <a href="<?= url('reports?tab=' . $activeTab) ?>" class="btn btn-secondary btn-sm" style="color: var(--danger-text);">Reset</a>
-              <?php endif; ?>
             </form>
 
-            <!-- Table of Ads Reports -->
-            <div class="kala-table-scroll table-responsive" style="width: 100%; overflow-x: auto;">
+            <!-- 1. Mobile Cards List (Shown on Mobile, Hidden on Desktop) -->
+            <div class="report-ads-mobile-list">
+              <?php if (empty($reports)): ?>
+                <div style="text-align: center; padding: 36px 16px; color: #7B7890; background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7;">
+                  <div style="font-weight: 700; font-size: 15px; color: #1A162B; margin-bottom: 6px;">
+                    Belum Ada Laporan Report Ads
+                  </div>
+                  <p style="font-size: 13px; margin: 0 0 16px;">
+                    Mulai buat laporan performa iklan untuk klien Anda.
+                  </p>
+                  <button type="button" class="btn btn-primary btn-sm" onclick="openNewAdsReportModal()" style="border-radius: 10px; background: #5B3DF5; border: none; padding: 8px 16px;">
+                    + Buat Report Ads Pertama
+                  </button>
+                </div>
+              <?php else: ?>
+                <?php foreach ($reports as $r): 
+                  $pName = $r['platform'] ?: 'Meta Ads';
+                  $chipBg = (stripos($pName, 'google') !== false) ? '#FEF08A' : ((stripos($pName, 'tiktok') !== false) ? '#F3E8FF' : '#EFF6FF');
+                  $chipColor = (stripos($pName, 'google') !== false) ? '#854D0E' : ((stripos($pName, 'tiktok') !== false) ? '#6B21A8' : '#1D4ED8');
+                ?>
+                  <div class="appify-tx-card" style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 15px; box-shadow: 0 4px 16px rgba(26,22,43,0.03); transition: all 0.2s ease;">
+                    <!-- Top Row: Icon + Client + Platform -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                      <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                        <div style="width: 38px; height: 38px; border-radius: 12px; background: #F2EFFF; color: #5B3DF5; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                          <?= strtoupper(substr($r['client_company'] ?: $r['client_name'], 0, 2)) ?>
+                        </div>
+                        <div style="min-width: 0;">
+                          <div style="font-weight: 700; color: #1A162B; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            <?= htmlspecialchars($r['client_company']) ?>
+                          </div>
+                          <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+                            <span style="font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: <?= $chipBg ?>; color: <?= $chipColor ?>;">
+                              <?= htmlspecialchars($pName) ?>
+                            </span>
+                            <span style="font-size: 11.5px; color: #7B7890;">
+                              &bull; <?= htmlspecialchars($r['report_period']) ?>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <span style="font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: #F7F8FC; color: #1A162B; flex-shrink: 0;">
+                        <?= htmlspecialchars($r['objective'] ?: 'Leads / Sales') ?>
+                      </span>
+                    </div>
+
+                    <!-- Middle Row: Metrics Grid (2x2) -->
+                    <div style="background: #F7F8FC; border-radius: 12px; padding: 10px 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                      <div>
+                        <div style="font-size: 10.5px; font-weight: 600; color: #7B7890; text-transform: uppercase;">Total Spend</div>
+                        <div style="font-size: 13.5px; font-weight: 800; color: #1A162B; margin-top: 1px;">
+                          Rp <?= number_format($r['total_ad_spend'], 0, ',', '.') ?>
+                        </div>
+                      </div>
+                      <div>
+                        <div style="font-size: 10.5px; font-weight: 600; color: #7B7890; text-transform: uppercase;">Results / Leads</div>
+                        <div style="font-size: 13.5px; font-weight: 800; color: #10B981; margin-top: 1px;">
+                          <?= number_format($r['total_conversions']) ?> <span style="font-size: 11px; font-weight: 600; color: #7B7890;">(CPA Rp <?= number_format($r['cpl_cpa'], 0, ',', '.') ?>)</span>
+                        </div>
+                      </div>
+                      <div>
+                        <div style="font-size: 10.5px; font-weight: 600; color: #7B7890; text-transform: uppercase;">Impressions / Reach</div>
+                        <div style="font-size: 12px; font-weight: 700; color: #1A162B; margin-top: 1px;">
+                          <?= number_format($r['ads_impressions']) ?> views
+                        </div>
+                      </div>
+                      <div>
+                        <div style="font-size: 10.5px; font-weight: 600; color: #7B7890; text-transform: uppercase;">Clicks &amp; CTR</div>
+                        <div style="font-size: 12px; font-weight: 700; color: #5B3DF5; margin-top: 1px;">
+                          <?= number_format($r['total_clicks']) ?> klik (CTR: <?= number_format($r['ads_ctr'], 2) ?>%)
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Optional Notes / Screenshot Link -->
+                    <?php if (!empty($r['winning_creative_notes']) || !empty($r['dashboard_screenshot'])): ?>
+                      <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; font-size: 12px;">
+                        <?php if (!empty($r['winning_creative_notes'])): ?>
+                          <div style="color: #1A162B; background: #FFF4E5; padding: 6px 10px; border-radius: 8px; border: 1px solid #FED7AA;">
+                            🌟 <b>Winning:</b> <?= htmlspecialchars($r['winning_creative_notes']) ?>
+                          </div>
+                        <?php endif; ?>
+                        <?php if (!empty($r['dashboard_screenshot'])): ?>
+                          <a href="<?= url($r['dashboard_screenshot']) ?>" target="_blank" style="color: #5B3DF5; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; text-decoration: none;">
+                            🖼️ Lihat Bukti Screenshot Dashboard
+                          </a>
+                        <?php endif; ?>
+                      </div>
+                    <?php endif; ?>
+
+                    <!-- Bottom Action Row -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px solid #F0F1F7; padding-top: 10px;">
+                      <div style="font-size: 11px; color: #7B7890;">
+                        Oleh: <b><?= htmlspecialchars($r['author_name'] ?: 'Tim Ads') ?></b> &bull; <?= date('d M Y', strtotime($r['created_at'])) ?>
+                      </div>
+                      <div style="display: flex; gap: 6px;">
+                        <button type="button" onclick='viewAdsReportDetail(<?= json_encode($r) ?>)' style="background: #F2EFFF; color: #5B3DF5; border: none; border-radius: 10px; font-weight: 700; font-size: 12px; padding: 7px 12px; cursor: pointer;">
+                          Detail
+                        </button>
+                        <a href="<?= url("report-deck?id={$r['id']}") ?>" style="background: #F7F8FC; color: #1A162B; border: 1px solid #F0F1F7; border-radius: 10px; font-weight: 600; font-size: 12px; padding: 7px 10px; text-decoration: none; display: inline-flex; align-items: center;">
+                          Deck
+                        </a>
+                        <?php if ($isOwnerOrAdmin || ($isAdsSpecialistUser && (int)$r['created_by_user_id'] === $userId)): ?>
+                          <button type="button" onclick="deleteReport(<?= $r['id'] ?>, '<?= htmlspecialchars(addslashes($r['client_company'])) ?>', '<?= htmlspecialchars($r['report_period']) ?>')" style="background: #FFEFEF; color: #EF4444; border: none; border-radius: 10px; font-weight: 600; font-size: 12px; padding: 7px 10px; cursor: pointer;">
+                            Hapus
+                          </button>
+                        <?php endif; ?>
+                      </div>
+                    </div>
+                  </div>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </div>
+
+            <!-- 2. Desktop Table of Ads Reports (Shown on Desktop, Hidden on Mobile) -->
+            <div class="report-ads-desktop-table kala-table-scroll table-responsive" style="width: 100%; overflow-x: auto;">
               <table class="table-custom" style="min-width: 950px; width: 100%;">
                 <thead>
                   <tr>
@@ -586,7 +722,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <p style="font-size: 13px; max-width: 480px; margin: 0 auto 16px;">
                           Mulai buat laporan performa iklan untuk klien Anda. Laporan akan otomatis tampil di Dashboard Owner dan Portal Klien.
                         </p>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="openNewAdsReportModal()">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="openNewAdsReportModal()" style="border-radius: 10px; background: #5B3DF5; border: none;">
                           + Buat Report Ads Pertama
                         </button>
                       </td>

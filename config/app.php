@@ -254,15 +254,41 @@ function render_pwa_meta_tags(): void {
 
 /**
  * Smart Role & Specialization Detection: Tim Ads / Spesialis Iklan
- * Checks service_specialty & position for 'Ads' or 'Iklan'
+ * Checks service_specialty, position, and jobdesk for 'Ads' or 'Iklan'
  */
 function is_ads_specialist(?array $user = null): bool {
     $u = $user ?? (function_exists('current_user') ? current_user() : null);
-    if (!$u) return false;
+    if (!$u || empty($u['id'])) return false;
+
     $specialty = strtolower($u['service_specialty'] ?? '');
     $position = strtolower($u['position'] ?? '');
-    return (strpos($specialty, 'ads') !== false || strpos($specialty, 'iklan') !== false ||
-            strpos($position, 'ads') !== false || strpos($position, 'iklan') !== false);
+    $jobdesk = strtolower($u['jobdesk'] ?? '');
+
+    // Fallback: If missing from array or session, fetch directly from database to ensure 100% accuracy
+    if (empty($specialty) && empty($position) && empty($jobdesk)) {
+        try {
+            $db = Database::getConnection();
+            $stmt = $db->prepare("SELECT service_specialty, position, jobdesk FROM users WHERE id = ?");
+            $stmt->execute([(int)$u['id']]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row) {
+                $specialty = strtolower($row['service_specialty'] ?? '');
+                $position = strtolower($row['position'] ?? '');
+                $jobdesk = strtolower($row['jobdesk'] ?? '');
+                if (isset($GLOBALS['__ACTIVE_RESOLVED_ACCOUNT__']) && $GLOBALS['__ACTIVE_RESOLVED_ACCOUNT__']['id'] == $u['id']) {
+                    $GLOBALS['__ACTIVE_RESOLVED_ACCOUNT__']['service_specialty'] = $row['service_specialty'];
+                    $GLOBALS['__ACTIVE_RESOLVED_ACCOUNT__']['position'] = $row['position'];
+                    $GLOBALS['__ACTIVE_RESOLVED_ACCOUNT__']['jobdesk'] = $row['jobdesk'];
+                }
+            }
+        } catch (Throwable $e) {}
+    }
+
+    return (
+        strpos($specialty, 'ads') !== false || strpos($specialty, 'iklan') !== false ||
+        strpos($position, 'ads') !== false || strpos($position, 'iklan') !== false ||
+        strpos($jobdesk, 'ads') !== false || strpos($jobdesk, 'iklan') !== false
+    );
 }
 
 /**
@@ -270,15 +296,45 @@ function is_ads_specialist(?array $user = null): bool {
  */
 function is_creative_specialist(?array $user = null): bool {
     $u = $user ?? (function_exists('current_user') ? current_user() : null);
-    if (!$u) return false;
+    if (!$u || empty($u['id'])) return false;
+
+    // Strict isolation: Ads specialist is not creative specialist
+    if (is_ads_specialist($u)) return false;
+
     $specialty = strtolower($u['service_specialty'] ?? '');
     $position = strtolower($u['position'] ?? '');
-    return (strpos($specialty, 'desain') !== false || strpos($specialty, 'design') !== false ||
-            strpos($specialty, 'video') !== false || strpos($specialty, 'editor') !== false ||
-            strpos($specialty, 'copywriter') !== false || strpos($specialty, 'sosmed') !== false ||
-            strpos($position, 'desain') !== false || strpos($position, 'design') !== false ||
-            strpos($position, 'video') !== false || strpos($position, 'editor') !== false ||
-            strpos($position, 'copywriter') !== false || strpos($position, 'sosmed') !== false);
+    $jobdesk = strtolower($u['jobdesk'] ?? '');
+
+    if (empty($specialty) && empty($position) && empty($jobdesk)) {
+        try {
+            $db = Database::getConnection();
+            $stmt = $db->prepare("SELECT service_specialty, position, jobdesk FROM users WHERE id = ?");
+            $stmt->execute([(int)$u['id']]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if ($row) {
+                $specialty = strtolower($row['service_specialty'] ?? '');
+                $position = strtolower($row['position'] ?? '');
+                $jobdesk = strtolower($row['jobdesk'] ?? '');
+                if (isset($GLOBALS['__ACTIVE_RESOLVED_ACCOUNT__']) && $GLOBALS['__ACTIVE_RESOLVED_ACCOUNT__']['id'] == $u['id']) {
+                    $GLOBALS['__ACTIVE_RESOLVED_ACCOUNT__']['service_specialty'] = $row['service_specialty'];
+                    $GLOBALS['__ACTIVE_RESOLVED_ACCOUNT__']['position'] = $row['position'];
+                    $GLOBALS['__ACTIVE_RESOLVED_ACCOUNT__']['jobdesk'] = $row['jobdesk'];
+                }
+            }
+        } catch (Throwable $e) {}
+    }
+
+    return (
+        strpos($specialty, 'desain') !== false || strpos($specialty, 'design') !== false ||
+        strpos($specialty, 'video') !== false || strpos($specialty, 'editor') !== false ||
+        strpos($specialty, 'copywriter') !== false || strpos($specialty, 'sosmed') !== false ||
+        strpos($position, 'desain') !== false || strpos($position, 'design') !== false ||
+        strpos($position, 'video') !== false || strpos($position, 'editor') !== false ||
+        strpos($position, 'copywriter') !== false || strpos($position, 'sosmed') !== false ||
+        strpos($jobdesk, 'desain') !== false || strpos($jobdesk, 'design') !== false ||
+        strpos($jobdesk, 'video') !== false || strpos($jobdesk, 'editor') !== false ||
+        strpos($jobdesk, 'sosmed') !== false
+    );
 }
 
 /**
@@ -324,12 +380,19 @@ function client_has_sosmed_service(int $clientId): bool {
 
 /**
  * Checks if a worker/freelancer has any 'Kelola Sosmed' project assigned
+ * Strict Rule: Ads specialists NEVER have Sosmed projects
  */
 function worker_has_sosmed_projects(int $userId): bool {
     if ($userId <= 0) return false;
+    
+    // STRICT RULE: If the worker is an Ads Specialist, they do NOT handle Sosmed Content Calendar!
+    if (is_ads_specialist(['id' => $userId])) {
+        return false;
+    }
+
     try {
         $db = Database::getConnection();
-        $stmtU = $db->prepare("SELECT name, role, service_specialty, position FROM users WHERE id = ?");
+        $stmtU = $db->prepare("SELECT name, role, service_specialty, position, jobdesk FROM users WHERE id = ?");
         $stmtU->execute([$userId]);
         $u = $stmtU->fetch(PDO::FETCH_ASSOC);
         if (!$u) return false;

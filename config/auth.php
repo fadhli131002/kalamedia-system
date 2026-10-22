@@ -118,16 +118,34 @@ function resolve_active_account(): ?array {
     // If active account determined, normalize and synchronize for this request
     if ($selectedAccount) {
         $normalized = [
-            'id'              => (int)($selectedAccount['id'] ?? $selectedAccount['user_id']),
-            'user_id'         => (int)($selectedAccount['id'] ?? $selectedAccount['user_id']),
-            'name'            => $selectedAccount['name'] ?? '',
-            'email'           => $selectedAccount['email'] ?? '',
-            'role'            => $selectedAccount['role'] ?? '',
-            'employment_type' => $selectedAccount['employment_type'] ?? ($selectedAccount['role'] === 'client' ? 'client' : 'internal'),
-            'phone_wa'        => $selectedAccount['phone_wa'] ?? null,
-            'client_id'       => !empty($selectedAccount['client_id']) ? (int)$selectedAccount['client_id'] : null,
-            'avatar'          => $selectedAccount['avatar'] ?? null,
+            'id'                => (int)($selectedAccount['id'] ?? $selectedAccount['user_id']),
+            'user_id'           => (int)($selectedAccount['id'] ?? $selectedAccount['user_id']),
+            'name'              => $selectedAccount['name'] ?? '',
+            'email'             => $selectedAccount['email'] ?? '',
+            'role'              => $selectedAccount['role'] ?? '',
+            'employment_type'   => $selectedAccount['employment_type'] ?? ($selectedAccount['role'] === 'client' ? 'client' : 'internal'),
+            'phone_wa'          => $selectedAccount['phone_wa'] ?? null,
+            'client_id'         => !empty($selectedAccount['client_id']) ? (int)$selectedAccount['client_id'] : null,
+            'avatar'            => $selectedAccount['avatar'] ?? null,
+            'service_specialty' => $selectedAccount['service_specialty'] ?? null,
+            'position'          => $selectedAccount['position'] ?? null,
+            'jobdesk'           => $selectedAccount['jobdesk'] ?? null,
         ];
+
+        // Enrich missing specialization/position for internal staff/freelancer from database if not set
+        if (empty($normalized['service_specialty']) && empty($normalized['position']) && $normalized['role'] !== 'client' && !empty($normalized['id'])) {
+            try {
+                $db = Database::getConnection();
+                $uStmt = $db->prepare("SELECT service_specialty, position, jobdesk FROM users WHERE id = ?");
+                $uStmt->execute([$normalized['id']]);
+                $uRow = $uStmt->fetch(PDO::FETCH_ASSOC);
+                if ($uRow) {
+                    $normalized['service_specialty'] = $uRow['service_specialty'] ?? null;
+                    $normalized['position'] = $uRow['position'] ?? null;
+                    $normalized['jobdesk'] = $uRow['jobdesk'] ?? null;
+                }
+            } catch (Throwable $e) {}
+        }
 
         // Sync to legacy session fields so external templates don't break
         $_SESSION['user_id'] = $normalized['id'];

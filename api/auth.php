@@ -35,14 +35,17 @@ if ($action === 'login') {
             }
 
             $userPayload = [
-                'id'              => (int)$user['id'],
-                'name'            => $displayName,
-                'email'           => $user['email'],
-                'role'            => $user['role'],
-                'employment_type' => $user['employment_type'] ?? ($user['role'] === 'client' ? 'client' : 'internal'),
-                'phone_wa'        => $user['phone_wa'] ?? null,
-                'client_id'       => !empty($user['client_id']) ? (int)$user['client_id'] : null,
-                'avatar'          => $user['avatar'] ?? null
+                'id'                => (int)$user['id'],
+                'name'              => $displayName,
+                'email'             => $user['email'],
+                'role'              => $user['role'],
+                'employment_type'   => $user['employment_type'] ?? ($user['role'] === 'client' ? 'client' : 'internal'),
+                'phone_wa'          => $user['phone_wa'] ?? null,
+                'client_id'         => !empty($user['client_id']) ? (int)$user['client_id'] : null,
+                'avatar'            => $user['avatar'] ?? null,
+                'service_specialty' => $user['service_specialty'] ?? null,
+                'position'          => $user['position'] ?? null,
+                'jobdesk'           => $user['jobdesk'] ?? null
             ];
 
             if ($user['role'] === 'client') {
@@ -88,16 +91,19 @@ if ($action === 'login') {
                 $_SESSION['kala_accounts'] = [];
             }
             $_SESSION['kala_accounts'][$uidKey] = [
-                'user_id'         => (int)$user['id'],
-                'id'              => (int)$user['id'],
-                'name'            => $displayName,
-                'email'           => $user['email'],
-                'role'            => $user['role'],
-                'employment_type' => $userPayload['employment_type'],
-                'phone_wa'        => $user['phone_wa'] ?? null,
-                'client_id'       => !empty($user['client_id']) ? (int)$user['client_id'] : null,
-                'avatar'          => $user['avatar'] ?? null,
-                'login_time'      => time()
+                'user_id'           => (int)$user['id'],
+                'id'                => (int)$user['id'],
+                'name'              => $displayName,
+                'email'             => $user['email'],
+                'role'              => $user['role'],
+                'employment_type'   => $userPayload['employment_type'],
+                'phone_wa'          => $user['phone_wa'] ?? null,
+                'client_id'         => !empty($user['client_id']) ? (int)$user['client_id'] : null,
+                'avatar'            => $user['avatar'] ?? null,
+                'service_specialty' => $user['service_specialty'] ?? null,
+                'position'          => $user['position'] ?? null,
+                'jobdesk'           => $user['jobdesk'] ?? null,
+                'login_time'        => time()
             ];
 
             // 2. Set current active session for backwards compatibility

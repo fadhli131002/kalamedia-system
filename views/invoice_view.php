@@ -67,6 +67,7 @@ $totalFormatted = format_rupiah($invoice['total_amount']);
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || ($_SERVER['SERVER_PORT'] ?? '') == 443) ? "https://" : "http://";
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $invoiceUrl = $protocol . $host . url("invoice-view?id={$invoice['id']}");
+$clientPortalUrl = $protocol . $host . url("invoice-view?id={$invoice['id']}&portal=client&_slot=client");
 
 $waText = "*TAGIHAN INVOICE RESMI*\n";
 $waText .= "*PT Kala Kausa Prima*\n\n";
@@ -127,6 +128,12 @@ $waUrl = !empty($waPhone)
         <a href="<?= $waUrl ?>" target="_blank" class="btn-action-wa" title="Kirim rincian invoice ke WhatsApp Klien">
           <span>Share via WhatsApp</span>
         </a>
+
+        <!-- Share via Portal Button -->
+        <button type="button" class="btn-action-secondary" onclick="sharePortalLink('<?= htmlspecialchars($clientPortalUrl, ENT_QUOTES) ?>')" title="Salin Link Invoice Portal Klien" style="display: inline-flex; align-items: center; gap: 6px; color: #1D4ED8; border-color: #BFDBFE; background: #EFF6FF;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          <span>Share via Portal</span>
+        </button>
       <?php endif; ?>
 
       <?php if (!empty($invoice['receipt_file'])): ?>
@@ -334,6 +341,25 @@ $waUrl = !empty($waPhone)
       } finally {
         btn.disabled = false;
         btn.innerHTML = origHtml;
+      }
+    }
+
+    async function sharePortalLink(url) {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(url);
+          showToast('Link Invoice Portal Klien berhasil disalin ke clipboard!', 'success');
+        } else {
+          const temp = document.createElement('input');
+          temp.value = url;
+          document.body.appendChild(temp);
+          temp.select();
+          document.execCommand('copy');
+          document.body.removeChild(temp);
+          showToast('Link Invoice Portal Klien disalin!', 'success');
+        }
+      } catch (e) {
+        prompt('Salin link portal klien berikut:', url);
       }
     }
   </script>

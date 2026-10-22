@@ -31,14 +31,33 @@ if ($isWorkerUser) {
             t.assigned_user_id = ? OR t.uploaded_by_user_id = ?
             OR t.project_id IN (SELECT DISTINCT project_id FROM tasks WHERE assigned_to_user_id = ? AND COALESCE(is_deleted,0)=0)
             OR t.client_id IN (SELECT client_id FROM employee_clients WHERE user_id = ?)
+            OR t.project_id IN (SELECT DISTINCT project_id FROM freelancer_payouts WHERE (freelancer_name = ? OR freelancer_name LIKE ?) AND COALESCE(is_deleted,0)=0)
         )
     ");
-    $stmtWorkerAds->execute([$userId, $userId, $userId, $userId]);
+    $stmtWorkerAds->execute([$userId, $userId, $userId, $userId, $user['name'], '%' . $user['name'] . '%']);
     $workerSummaryRow = $stmtWorkerAds->fetch(PDO::FETCH_ASSOC);
     $total_ditransfer_owner = floatval($workerSummaryRow['total_transfer'] ?? 0);
     $total_dibelanjakan_ads = floatval($workerSummaryRow['total_spent'] ?? 0);
     $sisa_saldo = $total_ditransfer_owner - $total_dibelanjakan_ads;
     $status_iklan = ($sisa_saldo > 0) ? 'Iklan Jalan' : ($total_ditransfer_owner > 0 ? 'Saldo Habis' : 'Belum Ada Saldo');
+
+    // Freelancer Saldo & Honorarium Payouts (Real-Time from freelancer_payouts)
+    $freelancerPaid = 0.0;
+    $freelancerPending = 0.0;
+    if ($role === 'freelancer') {
+        $stmtFp = $db->prepare("
+            SELECT 
+                COALESCE(SUM(CASE WHEN status = 'Paid' THEN amount ELSE 0 END), 0) as paid_amount,
+                COALESCE(SUM(CASE WHEN status = 'Pending' THEN amount ELSE 0 END), 0) as pending_amount
+            FROM freelancer_payouts 
+            WHERE COALESCE(is_deleted, 0) = 0 
+            AND (freelancer_name = ? OR freelancer_name LIKE ? OR project_id IN (SELECT DISTINCT project_id FROM tasks WHERE assigned_to_user_id = ? AND COALESCE(is_deleted, 0) = 0))
+        ");
+        $stmtFp->execute([$user['name'], '%' . $user['name'] . '%', $userId]);
+        $fpRow = $stmtFp->fetch(PDO::FETCH_ASSOC);
+        $freelancerPaid = floatval($fpRow['paid_amount'] ?? 0);
+        $freelancerPending = floatval($fpRow['pending_amount'] ?? 0);
+    }
 }
 
 $allTeamWorkers = [];
@@ -829,6 +848,69 @@ if ($isWorkerUser) {
           <!-- Alert Banner for Workers if Revision / Client Feedback Arrived -->
           <div id="revision-alert-container" style="display: none;"></div>
 
+          <?php if ($role === 'freelancer'): ?>
+            <!-- Freelancer Saldo & Honorarium Payouts (Real-Time Dynamic Cards) -->
+            <div style="background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 20px; padding: 20px 22px; margin-bottom: 22px; box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #027A48; background: #ECFDF3; padding: 3px 10px; border-radius: 6px; border: 1px solid #A6F4C5;">
+                    SALDO PENDAPATAN &amp; FEE SAYA
+                  </span>
+                  <span style="font-size: 12.5px; color: var(--text-secondary); font-weight: 600;">Honorarium resmi mitra freelancer</span>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted);">
+                  Terverifikasi real-time dari sistem keuangan
+                </div>
+              </div>
+              <div class="kpi-grid" style="grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px;">
+                <div class="kpi-tile" style="border-left: 4px solid #059669; background: #F6FEF9; min-height: auto; padding: 16px 18px;">
+                  <div class="metric-header" style="margin-bottom: 6px;">
+                    <span class="metric-label" style="color: #059669; font-weight: 700; font-size: 12px;">Saldo Fee Terbayar (Lunas)</span>
+                    <span class="metric-icon">
+                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="#059669" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    </span>
+                  </div>
+                  <div class="metric-value">
+                    <span class="metric-num" id="kpi-freelancer-paid" style="color: #059669; font-size: 22px; font-weight: 800;"><?= format_rupiah($freelancerPaid) ?></span>
+                  </div>
+                  <div class="metric-subtitle" style="margin-top: 4px;">
+                    <span style="color: #059669; font-size: 11.5px;">Sudah ditransfer ke rekening Anda</span>
+                  </div>
+                </div>
+
+                <div class="kpi-tile" style="border-left: 4px solid #D97706; background: #FFFDF5; min-height: auto; padding: 16px 18px;">
+                  <div class="metric-header" style="margin-bottom: 6px;">
+                    <span class="metric-label" style="color: #D97706; font-weight: 700; font-size: 12px;">Fee Menunggu Pembayaran</span>
+                    <span class="metric-icon">
+                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="#D97706" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    </span>
+                  </div>
+                  <div class="metric-value">
+                    <span class="metric-num" id="kpi-freelancer-pending" style="color: #D97706; font-size: 22px; font-weight: 800;"><?= format_rupiah($freelancerPending) ?></span>
+                  </div>
+                  <div class="metric-subtitle" style="margin-top: 4px;">
+                    <span style="color: #D97706; font-size: 11.5px;">Dalam antrean transfer Owner</span>
+                  </div>
+                </div>
+
+                <div class="kpi-tile" style="border-left: 4px solid #2563EB; background: #F8F9FC; min-height: auto; padding: 16px 18px;">
+                  <div class="metric-header" style="margin-bottom: 6px;">
+                    <span class="metric-label" style="color: #2563EB; font-weight: 700; font-size: 12px;">Total Nilai Kontrak Fee</span>
+                    <span class="metric-icon">
+                      <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </span>
+                  </div>
+                  <div class="metric-value">
+                    <span class="metric-num" id="kpi-freelancer-total" style="color: #2563EB; font-size: 22px; font-weight: 800;"><?= format_rupiah($freelancerPaid + $freelancerPending) ?></span>
+                  </div>
+                  <div class="metric-subtitle" style="margin-top: 4px;">
+                    <span style="color: var(--text-secondary); font-size: 11.5px;">Akumulasi honorarium seluruh proyek</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <?php endif; ?>
+
           <?php if ($isWorkerUser): ?>
             <!-- Worker Info Section: Jobdesk & Assigned Clients -->
             <div class="kala-grid-2col" style="margin-bottom: 20px;">
@@ -1614,9 +1696,9 @@ if ($isWorkerUser) {
 
             <div class="form-group">
               <label class="form-label">Anggaran yang Sudah Terpasang / Terpakai (Rp) <span style="color:red;">*</span></label>
-              <input type="text" name="spend_installed" id="ads-spend-amount" class="form-control" placeholder="Contoh: 5.000.000" required oninput="formatRupiahInput(this)">
+              <input type="text" name="spend_installed" id="ads-spend-amount" class="form-control" placeholder="Contoh: 5.000.000" required oninput="formatRupiahInput(this); enforceAllocBudgetLimit(this);">
               <small style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 3px;">
-                Nominal akumulatif atau spend saat ini yang terserap di dashboard platform ads.
+                Nominal akumulatif atau spend saat ini (otomatis dibatasi maksimal sesuai pagu yang dialokasikan).
               </small>
             </div>
 
@@ -1907,17 +1989,17 @@ if ($isWorkerUser) {
             <div class="form-row kala-form-row">
               <div class="form-group">
                 <label class="form-label">Nominal Top-Up ke Platform Ads (Rp) <span style="color:red;">*</span></label>
-                <input type="text" name="platform_topup_amount" id="confirm-platform-amount" class="form-control" placeholder="Contoh: 200.000" required oninput="formatRupiahInput(this)">
+                <input type="text" name="platform_topup_amount" id="confirm-platform-amount" class="form-control" placeholder="Contoh: 200.000" required oninput="formatRupiahInput(this); enforceOwnerTransferLimit(this);">
                 <small style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 3px;">
-                  Jumlah saldo yang berhasil masuk ke akun Meta/Google Ads.
+                  Jumlah saldo yang disetor ke platform (otomatis dibatasi maksimal sesuai dana transfer Owner).
                 </small>
               </div>
 
               <div class="form-group">
                 <label class="form-label">Realisasi Belanja / Spend Saat Ini (Rp) <span style="color:red;">*</span></label>
-                <input type="text" name="ad_spend_amount" id="confirm-spend-amount" class="form-control" placeholder="Contoh: 150.000" required oninput="formatRupiahInput(this)">
+                <input type="text" name="ad_spend_amount" id="confirm-spend-amount" class="form-control" placeholder="Contoh: 150.000" required oninput="formatRupiahInput(this); enforceOwnerTransferLimit(this);">
                 <small style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 3px;">
-                  Total nominal saldo yang telah terserap/terbelanjakan.
+                  Total nominal saldo yang telah terserap/terbelanjakan (otomatis dibatasi maksimal).
                 </small>
               </div>
             </div>
@@ -2068,6 +2150,9 @@ if ($isWorkerUser) {
         if (data.success) {
           allLoadedTasks = data.tasks || [];
           renderKPIs(data.metrics);
+          if (data.freelancer_summary) {
+            renderFreelancerSaldo(data.freelancer_summary);
+          }
           applyFilters();
           checkRevisionAlerts();
         } else {
@@ -2076,6 +2161,16 @@ if ($isWorkerUser) {
       } catch (err) {
         showToast('Koneksi server gagal', 'danger');
       }
+    }
+
+    function renderFreelancerSaldo(fs) {
+      if (!fs) return;
+      const elPaid = document.getElementById('kpi-freelancer-paid');
+      if (elPaid) elPaid.innerText = fs.formatted_paid || ('Rp ' + Number(fs.paid_amount || 0).toLocaleString('id-ID'));
+      const elPend = document.getElementById('kpi-freelancer-pending');
+      if (elPend) elPend.innerText = fs.formatted_pending || ('Rp ' + Number(fs.pending_amount || 0).toLocaleString('id-ID'));
+      const elTot = document.getElementById('kpi-freelancer-total');
+      if (elTot) elTot.innerText = fs.formatted_total || ('Rp ' + Number(fs.total_fee || 0).toLocaleString('id-ID'));
     }
 
     function renderKPIs(m) {
@@ -2671,8 +2766,17 @@ if ($isWorkerUser) {
 
       function recalcModalAdsRemaining() {
         const inputEl = document.getElementById('ads-spend-input-amount');
-        const valStr = inputEl ? inputEl.value : '0';
-        const spent = parseFloat(valStr.replace(/[^0-9]/g, '')) || 0;
+        if (!inputEl) return;
+        const valStr = inputEl.value || '0';
+        let spent = parseFloat(valStr.replace(/[^0-9]/g, '')) || 0;
+
+        // Auto-limit to previously inputted maximum budget
+        if (currentEditingAdsBudget > 0 && spent > currentEditingAdsBudget) {
+          spent = currentEditingAdsBudget;
+          inputEl.value = Math.round(spent).toLocaleString('id-ID');
+          showToast(`Nominal otomatis dibatasi maksimal Rp ${Math.round(currentEditingAdsBudget).toLocaleString('id-ID')} sesuai budget tugas`, 'warning');
+        }
+
         const remaining = Math.max(0, currentEditingAdsBudget - spent);
         const remainingEl = document.getElementById('ads-spend-calc-remaining');
         if (remainingEl) {
@@ -2969,6 +3073,23 @@ if ($isWorkerUser) {
       }
     }
 
+    function parseAdsNumber(val) {
+      if (val === null || val === undefined || val === '') return 0;
+      if (typeof val === 'number') return val;
+      let str = String(val).trim().replace(/[^0-9,.-]/g, '');
+      if (str.indexOf('.') !== -1 && str.indexOf(',') !== -1) {
+        str = str.replace(/\./g, '').replace(',', '.');
+      } else if ((str.match(/\./g) || []).length > 1) {
+        str = str.replace(/\./g, '');
+      } else if ((str.match(/\./g) || []).length === 1) {
+        const parts = str.split('.');
+        if (parts[1] && parts[1].length === 3) {
+          str = parts[0] + parts[1];
+        }
+      }
+      return parseFloat(str) || 0;
+    }
+
     function renderAdsNotifications(data) {
       const container = document.getElementById('ads-notifications-container');
       if (!container) return;
@@ -2980,7 +3101,8 @@ if ($isWorkerUser) {
         if (workerReqs.length > 0) {
           let reqHtml = '';
           workerReqs.forEach(r => {
-            const amount = Number(r.amount_requested || 0);
+            const amount = parseAdsNumber(r.amount_requested);
+            const formattedAmount = (amount > 0) ? 'Rp ' + amount.toLocaleString('id-ID') : 'Rp 0';
             reqHtml += `
               <div style="background: #FFF9F2; border: 1.5px solid #FDB022; border-radius: 10px; padding: 14px 18px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.08);">
                 <div style="display: flex; align-items: flex-start; gap: 12px;">
@@ -2990,7 +3112,7 @@ if ($isWorkerUser) {
                       Permintaan Pencairan Saldo dari Tim Ads (${escapeHtml(r.requester_name || 'Tim Ads')})
                     </div>
                     <div style="font-size: 13px; color: #475467; margin-top: 2px;">
-                      Proyek: <b>${escapeHtml(r.client_company || '')} - ${escapeHtml(r.project_name || '')}</b> &bull; Kebutuhan: <b style="color: #B42318; font-size: 14px;">Rp ${amount.toLocaleString('id-ID')}</b>
+                      Proyek: <b>${escapeHtml(r.client_company || '')} - ${escapeHtml(r.project_name || '')}</b> &bull; Kebutuhan: <b style="color: #B42318; font-size: 14px;">${formattedAmount}</b>
                     </div>
                     <div style="font-size: 12px; color: #344054; margin-top: 5px; background: #FFFFFF; border: 1px dashed #FDB022; padding: 6px 10px; border-radius: 6px;">
                       <b>Catatan Tim Ads:</b> "${escapeHtml(r.notes || 'Saldo iklan telah menipis/habis.')}"
@@ -3011,17 +3133,24 @@ if ($isWorkerUser) {
       } else {
         // Worker view: check if any assigned projects have low or 0 balance
         const projects = data.projects || [];
-        const lowBalanceProjects = projects.filter(p => Number(p.sisa_saldo_di_tim_ads || 0) <= 0);
+        const lowBalanceProjects = projects.filter(p => {
+          const pagu = parseAdsNumber(p.total_pagu_ads_klien || p.allocated_ads_budget || 0);
+          const transferred = parseAdsNumber(p.total_ditransfer_ke_tim_ads || 0);
+          const sisa = parseAdsNumber(p.sisa_saldo_di_tim_ads || 0);
+          return (pagu > 0 || transferred > 0) && sisa <= 0;
+        });
         if (lowBalanceProjects.length > 0) {
           let alerts = '';
           lowBalanceProjects.forEach(p => {
             const hasPending = p.has_pending_request;
+            const sisa = parseAdsNumber(p.sisa_saldo_di_tim_ads || 0);
+            const formattedSisa = (sisa > 0) ? 'Rp ' + sisa.toLocaleString('id-ID') : 'Rp 0';
             alerts += `
               <div style="background: #FEF3F2; border: 1px solid #FECDCA; border-radius: 8px; padding: 12px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                   <span style="font-size: 20px;">⚠️</span>
                   <div style="font-size: 13px; color: #B42318; font-weight: 700;">
-                    Saldo Iklan untuk [${escapeHtml(p.client_company)}] ${escapeHtml(p.project_name)} Habis (Rp 0)!
+                    Saldo Iklan untuk [${escapeHtml(p.client_company || '')}] ${escapeHtml(p.project_name || '')} Habis (${formattedSisa})!
                     <span style="font-weight: 400; color: #475467; display: block; font-size: 11.5px; margin-top: 2px;">
                       ${hasPending ? 'Permintaan tambahan saldo sedang ditinjau oleh Owner.' : 'Segera ajukan pencairan saldo tahap berikutnya ke Owner agar kampanye iklan tidak terhenti.'}
                     </span>
@@ -3033,7 +3162,7 @@ if ($isWorkerUser) {
                       ⏳ Menunggu Konfirmasi Owner
                     </span>
                   ` : `
-                    <button type="button" class="btn btn-primary btn-sm" onclick="openRequestBalanceWorkerModal(${p.project_id})" style="background: #B42318; border-color: #B42318; font-weight: 700; font-size: 11px;">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="openRequestBalanceWorkerModal(${p.project_id || p.id})" style="background: #B42318; border-color: #B42318; font-weight: 700; font-size: 11px;">
                       🔔 Minta Saldo ke Owner
                     </button>
                   `}
@@ -3499,6 +3628,7 @@ if ($isWorkerUser) {
       if (selectReqOwner) selectReqOwner.innerHTML = optionsHtml;
     }
 
+    let currentSelectedAllocBudget = 0;
     function onAdsProjectSelectChange(selectElem) {
       const selectedOption = selectElem.options[selectElem.selectedIndex];
       const box = document.getElementById('box-allocated-info');
@@ -3506,6 +3636,7 @@ if ($isWorkerUser) {
       if (!box || !txt) return;
 
       const alloc = Number(selectedOption ? selectedOption.getAttribute('data-allocated') || 0 : 0);
+      currentSelectedAllocBudget = alloc;
       if (selectElem.value && alloc > 0) {
         txt.innerText = 'Rp ' + alloc.toLocaleString('id-ID');
         box.style.display = 'block';
@@ -3514,6 +3645,16 @@ if ($isWorkerUser) {
         box.style.display = 'block';
       } else {
         box.style.display = 'none';
+      }
+    }
+
+    function enforceAllocBudgetLimit(inputElem) {
+      if (!inputElem) return;
+      let val = parseFloat(inputElem.value.replace(/[^0-9]/g, '')) || 0;
+      if (currentSelectedAllocBudget > 0 && val > currentSelectedAllocBudget) {
+        val = currentSelectedAllocBudget;
+        inputElem.value = Math.round(val).toLocaleString('id-ID');
+        showToast(`Nominal otomatis dibatasi maksimal Rp ${Math.round(currentSelectedAllocBudget).toLocaleString('id-ID')} sesuai pagu yang dialokasikan`, 'warning');
       }
     }
 
@@ -3666,21 +3807,28 @@ if ($isWorkerUser) {
     // -------------------------------------------------------------
     // MODAL HANDLERS: KONFIRMASI TOP-UP PLATFORM & SPEND (TIM ADS)
     // -------------------------------------------------------------
+    let currentOwnerTransferAmount = 0;
     function openConfirmPlatformTopupModal(transId = null, ownerTransferAmount = 0, projectId = null) {
       const form = document.getElementById('form-confirm-platform-topup');
       if (form) form.reset();
 
+      currentOwnerTransferAmount = parseFloat(ownerTransferAmount) || 0;
       document.getElementById('confirm-topup-trans-id').value = transId || '';
-      document.getElementById('txt-confirm-owner-transfer').innerText = 'Rp ' + Number(ownerTransferAmount || 0).toLocaleString('id-ID');
+      document.getElementById('txt-confirm-owner-transfer').innerText = 'Rp ' + Number(currentOwnerTransferAmount || 0).toLocaleString('id-ID');
 
       if (allLoadedAdsData && allLoadedAdsData.topup_transactions) {
         const t = allLoadedAdsData.topup_transactions.find(x => String(x.id) === String(transId));
         if (t) {
+          const transOwnerAmt = parseFloat(t.transfer_amount_owner > 0 ? t.transfer_amount_owner : (t.topup_amount > 0 ? t.topup_amount : 0));
+          if (transOwnerAmt > 0) {
+            currentOwnerTransferAmount = transOwnerAmt;
+          }
+          document.getElementById('txt-confirm-owner-transfer').innerText = 'Rp ' + Number(currentOwnerTransferAmount || 0).toLocaleString('id-ID');
           document.getElementById('txt-confirm-topup-proj-info').innerText = `Proyek: [${t.client_company}] ${t.project_name} (${t.platform})`;
           if (t.platform_topup_amount > 0) {
             document.getElementById('confirm-platform-amount').value = Number(t.platform_topup_amount).toLocaleString('id-ID');
-          } else if (ownerTransferAmount > 0) {
-            document.getElementById('confirm-platform-amount').value = Number(ownerTransferAmount).toLocaleString('id-ID');
+          } else if (currentOwnerTransferAmount > 0) {
+            document.getElementById('confirm-platform-amount').value = Number(currentOwnerTransferAmount).toLocaleString('id-ID');
           }
           if (t.ad_spend_amount > 0) {
             document.getElementById('confirm-spend-amount').value = Number(t.ad_spend_amount).toLocaleString('id-ID');
@@ -3695,6 +3843,16 @@ if ($isWorkerUser) {
       }
 
       openModal('modal-confirm-platform-topup');
+    }
+
+    function enforceOwnerTransferLimit(inputElem) {
+      if (!inputElem) return;
+      let val = parseFloat(inputElem.value.replace(/[^0-9]/g, '')) || 0;
+      if (currentOwnerTransferAmount > 0 && val > currentOwnerTransferAmount) {
+        val = currentOwnerTransferAmount;
+        inputElem.value = Math.round(val).toLocaleString('id-ID');
+        showToast(`Nominal otomatis dibatasi maksimal Rp ${Math.round(currentOwnerTransferAmount).toLocaleString('id-ID')} sesuai dana yang ditransfer Owner`, 'warning');
+      }
     }
 
     function openConfirmPlatformTopupModalForProject(projectId, ownerTransferAmount = 0) {

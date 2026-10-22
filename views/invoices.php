@@ -18,7 +18,7 @@ if ($filterStatus !== 'all') {
 }
 
 $invoices = $db->query("
-    SELECT i.*, c.name as client_name, c.company as client_company, p.name as project_name
+    SELECT i.*, c.name as client_name, c.company as client_company, c.phone as client_phone, p.name as project_name
     FROM invoices i
     JOIN clients c ON i.client_id = c.id
     LEFT JOIN projects p ON i.project_id = p.id
@@ -137,6 +137,35 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
                   <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 32px; white-space: nowrap !important;">Tidak ada invoice ditemukan.</td></tr>
                 <?php else: ?>
                   <?php foreach ($invoices as $inv): ?>
+                    <?php
+                      // Build WA and Portal share links
+                      $rawPhone = preg_replace('/[^0-9]/', '', $inv['client_phone'] ?? '');
+                      if (str_starts_with($rawPhone, '0')) {
+                          $waPhone = '62' . substr($rawPhone, 1);
+                      } elseif (str_starts_with($rawPhone, '62')) {
+                          $waPhone = $rawPhone;
+                      } else {
+                          $waPhone = '';
+                      }
+                      $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || ($_SERVER['SERVER_PORT'] ?? '') == 443) ? "https://" : "http://";
+                      $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+                      $portalLink = $protocol . $host . url("invoice-view?id={$inv['id']}&portal=client&_slot=client");
+
+                      $waText = "*TAGIHAN INVOICE RESMI*\n*PT Kala Kausa Prima*\n\n"
+                              . "Halo Bapak/Ibu *" . ($inv['client_name'] ?: $inv['client_company']) . "* (" . $inv['client_company'] . "),\n"
+                              . "Berikut rincian tagihan invoice resmi Anda:\n\n"
+                              . "- No. Invoice: #" . $inv['invoice_number'] . "\n"
+                              . "- Proyek: " . ($inv['project_name'] ?: 'Layanan Kreatif & Media') . "\n"
+                              . "- Total Tagihan: *" . format_rupiah($inv['total_amount']) . "*\n"
+                              . "- Jatuh Tempo: " . format_date($inv['due_date']) . "\n"
+                              . "- Status: " . ($inv['status'] === 'Paid' ? 'LUNAS (PAID)' : 'MENUNGGU PEMBAYARAN') . "\n\n"
+                              . "Akses Portal Invoice Klien:\n" . $portalLink . "\n\n"
+                              . "Terima kasih atas kerja samanya.";
+
+                      $rowWaUrl = !empty($waPhone) 
+                          ? "https://api.whatsapp.com/send?phone=$waPhone&text=" . urlencode($waText) 
+                          : "https://api.whatsapp.com/send?text=" . urlencode($waText);
+                    ?>
                     <tr>
                       <td style="font-weight: 700; white-space: nowrap !important;">
                         <a href="<?= url('invoice-view?id=' . $inv['id'] . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" style="color: #101828; text-decoration: none; font-weight: 700; font-family: inherit;">
@@ -173,6 +202,18 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
                           </a>
 
                           <?php if (!$isClientUser): ?>
+                            <!-- Share WA Button -->
+                            <a href="<?= $rowWaUrl ?>" target="_blank" class="btn-action-share-wa" title="Share Invoice ke WhatsApp Klien" style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 600; text-decoration: none; background: #25D366; color: #FFFFFF; border: none; cursor: pointer;">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                              <span>WA</span>
+                            </a>
+
+                            <!-- Share Portal Button -->
+                            <button type="button" class="btn-action-share-portal" onclick="shareInvoicePortal('<?= htmlspecialchars($portalLink, ENT_QUOTES) ?>', '<?= htmlspecialchars($inv['invoice_number'], ENT_QUOTES) ?>')" title="Salin / Bagikan Link Portal Klien" style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 600; background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; cursor: pointer;">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                              <span>Portal</span>
+                            </button>
+
                             <?php if ($inv['status'] === 'Draft'): ?>
                               <button type="button" class="btn-action-edit" onclick="openEditInvoiceModal(<?= $inv['id'] ?>)" title="Edit Draft Invoice">
                                 <span>Edit</span>
@@ -202,6 +243,25 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
         </div>
 
   <script>
+    window.shareInvoicePortal = async function(url, invoiceNum) {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(url);
+          showToast(`Link portal Invoice #${invoiceNum} berhasil disalin ke clipboard!`, 'success');
+        } else {
+          const temp = document.createElement('input');
+          temp.value = url;
+          document.body.appendChild(temp);
+          temp.select();
+          document.execCommand('copy');
+          document.body.removeChild(temp);
+          showToast(`Link portal Invoice #${invoiceNum} berhasil disalin!`, 'success');
+        }
+      } catch (e) {
+        prompt(`Salin link portal invoice #${invoiceNum}:`, url);
+      }
+    };
+
     window.confirmDeleteInvoice = function(id, invoiceNumber) {
       if (typeof window.showConfirmDeleteModal === 'function') {
         window.showConfirmDeleteModal({

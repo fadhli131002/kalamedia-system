@@ -26,11 +26,14 @@ $dateConditionAds = "1=1";
 $dateConditionSalary = "1=1";
 
 if ($range === 'month') {
-    $currentMonth = date('Y-m');
-    $dateConditionInv = "strftime('%Y-%m', paid_at) = '$currentMonth' OR (paid_at IS NULL AND strftime('%Y-%m', issue_date) = '$currentMonth')";
-    $dateConditionPayout = "strftime('%Y-%m', paid_at) = '$currentMonth' OR (paid_at IS NULL AND strftime('%Y-%m', created_at) = '$currentMonth')";
+    $currentMonth = $_GET['month'] ?? date('Y-m');
+    if (!preg_match('/^\d{4}-\d{2}$/', $currentMonth)) {
+        $currentMonth = date('Y-m');
+    }
+    $dateConditionInv = "strftime('%Y-%m', COALESCE(NULLIF(paid_at, ''), issue_date)) = '$currentMonth'";
+    $dateConditionPayout = "strftime('%Y-%m', COALESCE(NULLIF(paid_at, ''), created_at)) = '$currentMonth'";
     $dateConditionAds = "strftime('%Y-%m', spent_date) = '$currentMonth'";
-    $dateConditionSalary = "strftime('%Y-%m', paid_at) = '$currentMonth' OR (paid_at IS NULL AND month_period = '$currentMonth')";
+    $dateConditionSalary = "strftime('%Y-%m', COALESCE(NULLIF(paid_at, ''), payment_date)) = '$currentMonth' OR month_period = '$currentMonth'";
 } elseif ($range === 'quarter') {
     $currentYear = date('Y');
     $currentQ = ceil(intval(date('n')) / 3);
@@ -39,16 +42,16 @@ if ($range === 'month') {
     $startDate = "$currentYear-$startMonth-01";
     $endDate = "$currentYear-$endMonth-31";
 
-    $dateConditionInv = "date(COALESCE(paid_at, issue_date)) BETWEEN '$startDate' AND '$endDate'";
-    $dateConditionPayout = "date(COALESCE(paid_at, created_at)) BETWEEN '$startDate' AND '$endDate'";
+    $dateConditionInv = "date(COALESCE(NULLIF(paid_at, ''), issue_date)) BETWEEN '$startDate' AND '$endDate'";
+    $dateConditionPayout = "date(COALESCE(NULLIF(paid_at, ''), created_at)) BETWEEN '$startDate' AND '$endDate'";
     $dateConditionAds = "date(spent_date) BETWEEN '$startDate' AND '$endDate'";
-    $dateConditionSalary = "date(COALESCE(paid_at, payment_date)) BETWEEN '$startDate' AND '$endDate'";
+    $dateConditionSalary = "date(COALESCE(NULLIF(paid_at, ''), payment_date)) BETWEEN '$startDate' AND '$endDate'";
 } elseif ($range === 'year') {
     $currentYear = date('Y');
-    $dateConditionInv = "strftime('%Y', COALESCE(paid_at, issue_date)) = '$currentYear'";
-    $dateConditionPayout = "strftime('%Y', COALESCE(paid_at, created_at)) = '$currentYear'";
+    $dateConditionInv = "strftime('%Y', COALESCE(NULLIF(paid_at, ''), issue_date)) = '$currentYear'";
+    $dateConditionPayout = "strftime('%Y', COALESCE(NULLIF(paid_at, ''), created_at)) = '$currentYear'";
     $dateConditionAds = "strftime('%Y', spent_date) = '$currentYear'";
-    $dateConditionSalary = "strftime('%Y', COALESCE(paid_at, payment_date)) = '$currentYear'";
+    $dateConditionSalary = "strftime('%Y', COALESCE(NULLIF(paid_at, ''), payment_date)) = '$currentYear'";
 }
 
 $action = $_GET['action'] ?? '';
@@ -124,16 +127,23 @@ if ($action === 'project_financial_breakdown') {
     $payoutStmt = $db->prepare("
         SELECT id, freelancer_name, freelancer_bank, freelancer_account, task_description, amount, status, paid_at, receipt_file, created_at
         FROM freelancer_payouts
-        WHERE project_id = ? AND COALESCE(is_deleted, 0) = 0
+        WHERE (project_id = ? OR (project_id IN (SELECT id FROM projects WHERE client_id = ?))) AND COALESCE(is_deleted, 0) = 0
         ORDER BY id DESC
     ");
-    $payoutStmt->execute([$pId]);
+    $payoutStmt->execute([$pId, $cId]);
     $freelancerPayouts = $payoutStmt->fetchAll();
 
     $totalFreelancerCost = 0;
+    $totalFreelancerPaid = 0;
+    $totalFreelancerPending = 0;
     foreach ($freelancerPayouts as &$fp) {
         $amt = floatval($fp['amount']);
         $totalFreelancerCost += $amt;
+        if ($fp['status'] === 'Paid') {
+            $totalFreelancerPaid += $amt;
+        } else {
+            $totalFreelancerPending += $amt;
+        }
         $fp['formatted_amount'] = format_rupiah($amt);
         $fp['formatted_payment_date'] = !empty($fp['paid_at']) ? format_date($fp['paid_at']) : format_date($fp['created_at']);
     }
@@ -204,6 +214,8 @@ if ($action === 'project_financial_breakdown') {
             'total_paid_inflow' => $totalPaidInflow,
             'total_unpaid_receivables' => $totalUnpaidReceivables,
             'total_freelancer_cost' => $totalFreelancerCost,
+            'total_freelancer_paid' => $totalFreelancerPaid,
+            'total_freelancer_pending' => $totalFreelancerPending,
             'total_ads_cost' => $totalAdsCost,
             'total_production_cost' => $totalProductionCost,
             'net_profit' => $netProfit,
@@ -216,6 +228,8 @@ if ($action === 'project_financial_breakdown') {
                 'total_paid_inflow' => format_rupiah($totalPaidInflow),
                 'total_unpaid' => format_rupiah($totalUnpaidReceivables),
                 'freelancer_cost' => format_rupiah($totalFreelancerCost),
+                'freelancer_paid' => format_rupiah($totalFreelancerPaid),
+                'freelancer_pending' => format_rupiah($totalFreelancerPending),
                 'ads_cost' => format_rupiah($totalAdsCost),
                 'production_cost' => format_rupiah($totalProductionCost),
                 'net_profit' => format_rupiah($netProfit),

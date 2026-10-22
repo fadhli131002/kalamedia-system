@@ -224,6 +224,29 @@ if ($action === 'list_tasks') {
 
             $overallProgress = ($totalTasks > 0) ? (int)round(($approvedCount / $totalTasks) * 100) : 0;
 
+            // Calculate Client's Freelancer Payouts Summary (Nominal yang sudah dibayarkan ke freelancer)
+            $stmtClientFp = $db->prepare("
+                SELECT 
+                    COALESCE(SUM(CASE WHEN fp.status = 'Paid' THEN fp.amount ELSE 0 END), 0) as paid_amount,
+                    COALESCE(SUM(CASE WHEN fp.status = 'Pending' THEN fp.amount ELSE 0 END), 0) as pending_amount
+                FROM freelancer_payouts fp
+                JOIN projects p ON fp.project_id = p.id
+                WHERE p.client_id = ? AND COALESCE(fp.is_deleted, 0) = 0
+            ");
+            $stmtClientFp->execute([$clientId]);
+            $clientFpRow = $stmtClientFp->fetch(PDO::FETCH_ASSOC);
+            $clientFpPaid = floatval($clientFpRow['paid_amount'] ?? 0);
+            $clientFpPending = floatval($clientFpRow['pending_amount'] ?? 0);
+
+            $freelancerSummary = [
+                'paid_amount' => $clientFpPaid,
+                'pending_amount' => $clientFpPending,
+                'total_fee' => $clientFpPaid + $clientFpPending,
+                'formatted_paid' => format_rupiah($clientFpPaid),
+                'formatted_pending' => format_rupiah($clientFpPending),
+                'formatted_total' => format_rupiah($clientFpPaid + $clientFpPending)
+            ];
+
             echo json_encode([
                 'success' => true,
                 'role' => 'client',
@@ -237,6 +260,7 @@ if ($action === 'list_tasks') {
                     'backlog_count' => $backlogCount,
                     'overall_progress' => $overallProgress
                 ],
+                'freelancer_summary' => $freelancerSummary,
                 'tasks' => $tasks
             ]);
             exit;
@@ -301,14 +325,41 @@ if ($action === 'list_tasks') {
                     assigned_user_id = ? OR uploaded_by_user_id = ?
                     OR project_id IN (SELECT DISTINCT project_id FROM tasks WHERE assigned_to_user_id = ? AND COALESCE(is_deleted,0)=0)
                     OR client_id IN (SELECT client_id FROM employee_clients WHERE user_id = ?)
+                    OR project_id IN (SELECT DISTINCT project_id FROM freelancer_payouts WHERE (freelancer_name = ? OR freelancer_name LIKE ?) AND COALESCE(is_deleted,0)=0)
                 )
             ");
-            $stmtWorkerAds->execute([$userId, $userId, $userId, $userId]);
+            $stmtWorkerAds->execute([$userId, $userId, $userId, $userId, $user['name'], '%' . $user['name'] . '%']);
             $wAds = $stmtWorkerAds->fetch(PDO::FETCH_ASSOC);
             $totalDitransfer = floatval($wAds['total_transfer'] ?? 0);
             $totalDibelanjakan = floatval($wAds['total_spent'] ?? 0);
             $sisaSaldo = $totalDitransfer - $totalDibelanjakan;
             $statusIklan = ($sisaSaldo > 0) ? 'Iklan Jalan' : ($totalDitransfer > 0 ? 'Saldo Habis' : 'Belum Ada Saldo');
+
+            // Calculate Freelancer Fee / Honorarium if role is freelancer
+            $freelancerSummary = null;
+            if ($role === 'freelancer') {
+                $stmtFp = $db->prepare("
+                    SELECT 
+                        COALESCE(SUM(CASE WHEN status = 'Paid' THEN amount ELSE 0 END), 0) as paid_amount,
+                        COALESCE(SUM(CASE WHEN status = 'Pending' THEN amount ELSE 0 END), 0) as pending_amount
+                    FROM freelancer_payouts 
+                    WHERE COALESCE(is_deleted, 0) = 0 
+                    AND (freelancer_name = ? OR freelancer_name LIKE ? OR project_id IN (SELECT DISTINCT project_id FROM tasks WHERE assigned_to_user_id = ? AND COALESCE(is_deleted, 0) = 0))
+                ");
+                $stmtFp->execute([$user['name'], '%' . $user['name'] . '%', $userId]);
+                $fpRow = $stmtFp->fetch(PDO::FETCH_ASSOC);
+                $freelancerPaid = floatval($fpRow['paid_amount'] ?? 0);
+                $freelancerPending = floatval($fpRow['pending_amount'] ?? 0);
+
+                $freelancerSummary = [
+                    'paid_amount' => $freelancerPaid,
+                    'pending_amount' => $freelancerPending,
+                    'total_fee' => $freelancerPaid + $freelancerPending,
+                    'formatted_paid' => format_rupiah($freelancerPaid),
+                    'formatted_pending' => format_rupiah($freelancerPending),
+                    'formatted_total' => format_rupiah($freelancerPaid + $freelancerPending)
+                ];
+            }
 
             echo json_encode([
                 'success' => true,
@@ -327,6 +378,7 @@ if ($action === 'list_tasks') {
                     'sisa_saldo'             => $sisaSaldo,
                     'status_iklan'           => $statusIklan
                 ],
+                'freelancer_summary' => $freelancerSummary,
                 'tasks' => $tasks
             ]);
             exit;
@@ -750,6 +802,9 @@ if ($action === 'update_ads_campaign_metrics') {
         }
 
         $assignedBudget = (float)($task['assigned_ads_budget'] ?? 0);
+        if ($assignedBudget > 0 && $spentAmount > $assignedBudget) {
+            $spentAmount = $assignedBudget; // Otomatis batasi maksimal sesuai budget yang sudah diinput sebelumnya
+        }
         $remainingBalance = max(0, $assignedBudget - $spentAmount);
 
         // Handle screenshot upload

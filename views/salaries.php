@@ -47,6 +47,40 @@ $totalSalaryAllTime = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) F
 
 // Available Month Periods for Filter
 $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE COALESCE(is_deleted, 0) = 0 ORDER BY month_period DESC")->fetchAll(PDO::FETCH_COLUMN);
+
+// Atur Periode for Total Payroll KPI
+$payrollPeriod = $_GET['payroll_period'] ?? 'all';
+$payrollPeriodLabel = 'Semua Waktu';
+$payrollWhere = "status = 'Paid' AND COALESCE(is_deleted, 0) = 0";
+
+if ($payrollPeriod === 'this_month') {
+    $curM = date('Y-m');
+    $payrollWhere .= " AND (month_period = '$curM' OR strftime('%Y-%m', paid_at) = '$curM')";
+    $payrollPeriodLabel = 'Bulan Ini (' . date('M Y') . ')';
+} elseif ($payrollPeriod === 'last_month') {
+    $lastM = date('Y-m', strtotime('-1 month'));
+    $payrollWhere .= " AND (month_period = '$lastM' OR strftime('%Y-%m', paid_at) = '$lastM')";
+    $payrollPeriodLabel = 'Bulan Lalu (' . date('M Y', strtotime('-1 month')) . ')';
+} elseif ($payrollPeriod === 'this_quarter') {
+    $curY = date('Y');
+    $curQ = ceil(intval(date('n')) / 3);
+    $startM = str_pad(($curQ - 1) * 3 + 1, 2, '0', STR_PAD_LEFT);
+    $endM = str_pad($curQ * 3, 2, '0', STR_PAD_LEFT);
+    $payrollWhere .= " AND (date(COALESCE(paid_at, payment_date)) BETWEEN '$curY-$startM-01' AND '$curY-$endM-31')";
+    $payrollPeriodLabel = "Kuartal $curQ ($curY)";
+} elseif ($payrollPeriod === 'this_year') {
+    $curY = date('Y');
+    $payrollWhere .= " AND (strftime('%Y', COALESCE(paid_at, payment_date)) = '$curY' OR month_period LIKE '$curY%')";
+    $payrollPeriodLabel = "Tahun $curY";
+} elseif (preg_match('/^\d{4}-\d{2}$/', $payrollPeriod)) {
+    $payrollWhere .= " AND (month_period = '$payrollPeriod' OR strftime('%Y-%m', paid_at) = '$payrollPeriod')";
+    $payrollPeriodLabel = date('M Y', strtotime($payrollPeriod . '-01'));
+} else {
+    $payrollPeriod = 'all';
+    $payrollPeriodLabel = 'Semua Waktu';
+}
+
+$totalSalarySelected = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) FROM salaries WHERE $payrollWhere")->fetchColumn());
 ?>
 
 <!DOCTYPE html>
@@ -154,15 +188,49 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
             <div class="kpi-meta">Tim internal creative &amp; tech</div>
           </div>
 
-          <div class="kpi-card">
-            <div class="kpi-header">
-              <span class="kpi-title">Total Payroll All-Time</span>
-              <span class="kpi-icon">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><line x1="6" y1="12" x2="6.01" y2="12"/><line x1="18" y1="12" x2="18.01" y2="12"/></svg>
-              </span>
+          <div class="kpi-card" style="position: relative; overflow: visible;">
+            <div class="kpi-header" style="display: flex; justify-content: space-between; align-items: center;">
+              <span class="kpi-title">Total Payroll</span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <button type="button" class="btn btn-secondary btn-xs" onclick="togglePayrollPeriodDropdown(event)" style="font-size: 11px; padding: 3px 8px; height: 24px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; background: #EEF2F6; border: 1px solid #CBD5E1; color: #1E293B; cursor: pointer; font-weight: 600;" title="Atur Periode Total Payroll">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                  <span>Atur Periode</span>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <span class="kpi-icon">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><line x1="6" y1="12" x2="6.01" y2="12"/><line x1="18" y1="12" x2="18.01" y2="12"/></svg>
+                </span>
+              </div>
             </div>
-            <div class="kpi-value"><?= format_rupiah($totalSalaryAllTime) ?></div>
-            <div class="kpi-meta">Akumulasi pengeluaran gaji</div>
+            <div class="kpi-value"><?= format_rupiah($totalSalarySelected) ?></div>
+            <div class="kpi-meta" style="display: flex; justify-content: space-between; align-items: center;">
+              <span>Periode: <strong style="color: #0F172A;"><?= htmlspecialchars($payrollPeriodLabel) ?></strong></span>
+            </div>
+
+            <!-- Dropdown Menu Atur Periode -->
+            <div id="payroll-period-menu" style="display: none; position: absolute; right: 8px; top: 38px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 8px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.15), 0 8px 10px -6px rgba(0,0,0,0.1); z-index: 100; width: 220px; padding: 6px;">
+              <div style="font-size: 10.5px; font-weight: 700; color: #64748B; padding: 5px 8px; text-transform: uppercase; letter-spacing: 0.5px;">Atur Periode Payroll</div>
+              <?php
+                $makePeriodUrl = function($p) {
+                    $q = array_merge($_GET, ['payroll_period' => $p]);
+                    return url('salaries?' . http_build_query($q));
+                };
+              ?>
+              <a href="<?= $makePeriodUrl('all') ?>" style="display: block; padding: 6px 8px; font-size: 12px; border-radius: 5px; color: <?= $payrollPeriod === 'all' ? '#2563EB; font-weight: 600; background: #EFF6FF;' : '#334155;' ?> text-decoration: none;">Semua Waktu (All-Time)</a>
+              <a href="<?= $makePeriodUrl('this_month') ?>" style="display: block; padding: 6px 8px; font-size: 12px; border-radius: 5px; color: <?= $payrollPeriod === 'this_month' ? '#2563EB; font-weight: 600; background: #EFF6FF;' : '#334155;' ?> text-decoration: none;">Bulan Ini (<?= date('M Y') ?>)</a>
+              <a href="<?= $makePeriodUrl('last_month') ?>" style="display: block; padding: 6px 8px; font-size: 12px; border-radius: 5px; color: <?= $payrollPeriod === 'last_month' ? '#2563EB; font-weight: 600; background: #EFF6FF;' : '#334155;' ?> text-decoration: none;">Bulan Lalu (<?= date('M Y', strtotime('-1 month')) ?>)</a>
+              <a href="<?= $makePeriodUrl('this_quarter') ?>" style="display: block; padding: 6px 8px; font-size: 12px; border-radius: 5px; color: <?= $payrollPeriod === 'this_quarter' ? '#2563EB; font-weight: 600; background: #EFF6FF;' : '#334155;' ?> text-decoration: none;">Kuartal Ini (Q<?= ceil(intval(date('n')) / 3) ?>)</a>
+              <a href="<?= $makePeriodUrl('this_year') ?>" style="display: block; padding: 6px 8px; font-size: 12px; border-radius: 5px; color: <?= $payrollPeriod === 'this_year' ? '#2563EB; font-weight: 600; background: #EFF6FF;' : '#334155;' ?> text-decoration: none;">Tahun Ini (<?= date('Y') ?>)</a>
+              <?php if (!empty($availablePeriods)): ?>
+                <div style="border-top: 1px solid #E2E8F0; margin: 4px 0;"></div>
+                <div style="font-size: 10px; font-weight: 600; color: #94A3B8; padding: 3px 8px;">BULAN SPESIFIK:</div>
+                <div style="max-height: 120px; overflow-y: auto;">
+                  <?php foreach ($availablePeriods as $ap): ?>
+                    <a href="<?= $makePeriodUrl($ap) ?>" style="display: block; padding: 4px 8px; font-size: 11.5px; border-radius: 4px; color: <?= $payrollPeriod === $ap ? '#2563EB; font-weight: 600; background: #EFF6FF;' : '#475569;' ?> text-decoration: none;"><?= date('F Y', strtotime($ap . '-01')) ?></a>
+                  <?php endforeach; ?>
+                </div>
+              <?php endif; ?>
+            </div>
           </div>
         </div>
 
@@ -493,6 +561,25 @@ $availablePeriods = $db->query("SELECT DISTINCT month_period FROM salaries WHERE
         }
       });
     }
+
+    // Toggle dropdown Atur Periode Payroll
+    function togglePayrollPeriodDropdown(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const menu = document.getElementById('payroll-period-menu');
+      if (menu) {
+        menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      const menu = document.getElementById('payroll-period-menu');
+      if (menu && !e.target.closest('#payroll-period-menu') && !e.target.closest('button[onclick*="togglePayrollPeriodDropdown"]')) {
+        menu.style.display = 'none';
+      }
+    });
   </script>
 </body>
 </html>

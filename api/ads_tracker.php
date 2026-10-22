@@ -258,16 +258,17 @@ if ($action === 'list') {
         // TIM ADS (WORKER) SCOPE
         // -----------------------------
         } elseif ($isWorkerUser) {
-            // Strict Worker Access: Projects assigned to this user
+            // Strict Worker Access: Projects assigned to this user (tasks, employee_clients, ads_topup, or freelancer_payouts)
             $stmt = $db->prepare($sqlProjects . "
                 AND (
                     p.id IN (SELECT DISTINCT project_id FROM tasks WHERE assigned_to_user_id = ? AND COALESCE(is_deleted,0)=0)
                     OR p.client_id IN (SELECT client_id FROM employee_clients WHERE user_id = ?)
                     OR p.id IN (SELECT DISTINCT project_id FROM ads_topup_transactions WHERE (assigned_user_id = ? OR uploaded_by_user_id = ?) AND COALESCE(is_deleted,0)=0)
+                    OR p.id IN (SELECT DISTINCT project_id FROM freelancer_payouts WHERE (freelancer_name = ? OR freelancer_name LIKE ?) AND COALESCE(is_deleted,0)=0)
                 )
                 ORDER BY c.company ASC, p.id DESC
             ");
-            $stmt->execute([$userId, $userId, $userId, $userId]);
+            $stmt->execute([$userId, $userId, $userId, $userId, $user['name'], '%' . $user['name'] . '%']);
             $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             $stmtTopup = $db->prepare($sqlTransactions . "
@@ -275,10 +276,11 @@ if ($action === 'list') {
                     t.assigned_user_id = ? OR t.uploaded_by_user_id = ?
                     OR t.project_id IN (SELECT DISTINCT project_id FROM tasks WHERE assigned_to_user_id = ? AND COALESCE(is_deleted,0)=0)
                     OR t.client_id IN (SELECT client_id FROM employee_clients WHERE user_id = ?)
+                    OR t.project_id IN (SELECT DISTINCT project_id FROM freelancer_payouts WHERE (freelancer_name = ? OR freelancer_name LIKE ?) AND COALESCE(is_deleted,0)=0)
                 )
                 ORDER BY t.transaction_date DESC, t.id DESC
             ");
-            $stmtTopup->execute([$userId, $userId, $userId, $userId]);
+            $stmtTopup->execute([$userId, $userId, $userId, $userId, $user['name'], '%' . $user['name'] . '%']);
             $topupTransactions = $stmtTopup->fetchAll(PDO::FETCH_ASSOC);
 
             // Check pending balance requests from this worker to Owner
@@ -587,6 +589,17 @@ if ($action === 'confirm_platform_topup') {
         if (!$trans) {
             echo json_encode(['success' => false, 'message' => 'Transaksi saldo tidak ditemukan.']);
             exit;
+        }
+
+        // Otomatis batasi maksimal sesuai nominal transfer yang telah diinput sebelumnya oleh Owner
+        $maxOwnerTransfer = floatval($trans['transfer_amount_owner'] > 0 ? $trans['transfer_amount_owner'] : $trans['topup_amount']);
+        if ($maxOwnerTransfer > 0) {
+            if ($platformTopupAmount > $maxOwnerTransfer) {
+                $platformTopupAmount = $maxOwnerTransfer;
+            }
+            if ($adSpendAmount > $maxOwnerTransfer) {
+                $adSpendAmount = $maxOwnerTransfer;
+            }
         }
 
         $proofPath = $trans['platform_topup_proof'];

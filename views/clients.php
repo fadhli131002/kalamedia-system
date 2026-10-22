@@ -12,7 +12,8 @@ $clients = $db->query("
     SELECT c.*,
            (SELECT COUNT(*) FROM projects WHERE client_id = c.id AND COALESCE(is_deleted, 0) = 0) as total_projects,
            (SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE client_id = c.id AND COALESCE(is_deleted, 0) = 0) as total_invoiced,
-           (SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE client_id = c.id AND status = 'Paid' AND COALESCE(is_deleted, 0) = 0) as total_paid
+           (SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE client_id = c.id AND status = 'Paid' AND COALESCE(is_deleted, 0) = 0) as total_paid,
+           (SELECT COALESCE(SUM(amount), 0) FROM freelancer_payouts WHERE project_id IN (SELECT id FROM projects WHERE client_id = c.id) AND status = 'Paid' AND COALESCE(is_deleted, 0) = 0) as total_freelancer_paid
     FROM clients c
     WHERE COALESCE(c.is_deleted, 0) = 0
     ORDER BY c.id DESC
@@ -37,6 +38,8 @@ $projects = $db->query("
     SELECT p.*, c.company as client_company, c.name as client_pic,
            c.contract_start_date as client_contract_start, c.contract_end_date as client_contract_end, c.contract_status as client_contract_status,
            (SELECT COALESCE(SUM(amount), 0) FROM freelancer_payouts WHERE project_id = p.id AND COALESCE(is_deleted, 0) = 0) as total_freelancer_cost,
+           (SELECT COALESCE(SUM(amount), 0) FROM freelancer_payouts WHERE project_id = p.id AND status = 'Paid' AND COALESCE(is_deleted, 0) = 0) as total_freelancer_paid,
+           (SELECT COALESCE(SUM(amount), 0) FROM freelancer_payouts WHERE project_id = p.id AND status = 'Pending' AND COALESCE(is_deleted, 0) = 0) as total_freelancer_pending,
            (SELECT COALESCE(SUM(amount), 0) FROM ads_spend WHERE project_id = p.id AND COALESCE(is_deleted, 0) = 0) as total_ads_cost,
            (SELECT COALESCE(SUM(assigned_ads_budget), 0) FROM tasks WHERE project_id = p.id AND COALESCE(is_deleted, 0) = 0) as total_assigned_ads_budget
     FROM projects p
@@ -222,6 +225,9 @@ $projects = $db->query("
                         </span>
                         <div style="font-weight: 700; color: #101828; font-size: 12px; margin-top: 3px;"><?= format_rupiah($c['total_invoiced']) ?></div>
                         <div style="font-size: 10.5px; color: var(--success-text); font-weight: 700;">Lunas: <?= format_rupiah($c['total_paid']) ?></div>
+                        <?php if (!empty($c['total_freelancer_paid']) && $c['total_freelancer_paid'] > 0): ?>
+                          <div style="font-size: 10.5px; color: #027A48; font-weight: 700; margin-top: 2px;">Freelancer Terbayar: <?= format_rupiah($c['total_freelancer_paid']) ?></div>
+                        <?php endif; ?>
                       </td>
 
                       <td class="td-actions" style="text-align: right; white-space: nowrap;">
@@ -281,6 +287,8 @@ $projects = $db->query("
                     $adsBudget = floatval($p['ads_budget_pool']);
                     $totalContract = floatval($p['total_contract_value'] > 0 ? $p['total_contract_value'] : ($serviceFee + $adsBudget));
                     $freelancerCost = floatval($p['total_freelancer_cost']);
+                    $freelancerPaid = floatval($p['total_freelancer_paid'] ?? 0);
+                    $freelancerPending = floatval($p['total_freelancer_pending'] ?? 0);
                     $profit = $serviceFee - $freelancerCost;
                     $margin = $serviceFee > 0 ? ($profit / $serviceFee) * 100 : 0;
                     $targetMargin = floatval($p['target_margin_percent']);
@@ -312,8 +320,11 @@ $projects = $db->query("
                         </div>
                       </td>
                       <td style="white-space: nowrap;">
-                        <div style="color: var(--danger-text); font-weight: 700;"><?= format_rupiah($freelancerCost) ?></div>
-                        <div style="font-size: 10.5px; color: var(--text-muted);">Biaya Talent Freelancer</div>
+                        <div style="color: #027A48; font-weight: 800; font-size: 13px;"><?= format_rupiah($freelancerPaid) ?> <span style="font-size: 9.5px; background: #ECFDF3; color: #027A48; padding: 1px 5px; border-radius: 4px; font-weight: 700;">Lunas</span></div>
+                        <?php if ($freelancerPending > 0): ?>
+                          <div style="font-size: 10.5px; color: #B54708; font-weight: 600; margin-top: 2px;">Pending: <?= format_rupiah($freelancerPending) ?></div>
+                        <?php endif; ?>
+                        <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Biaya Talent Freelancer</div>
                       </td>
                       <td style="font-weight: 700; color: <?= $profit >= 0 ? 'var(--success-text)' : 'var(--danger-text)' ?>; white-space: nowrap;">
                         <?= format_rupiah($profit) ?>

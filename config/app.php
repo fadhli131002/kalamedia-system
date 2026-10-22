@@ -180,7 +180,7 @@ function url($path = '', $preserveUid = true) {
 
 function format_rupiah($number, $with_prefix = true) {
     $val = number_format(floatval($number), 0, ',', '.');
-    return $with_prefix ? 'Rp' . $val : $val;
+    return $with_prefix ? 'Rp ' . $val : $val;
 }
 
 function format_date($date_str, $with_time = false) {

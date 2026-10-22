@@ -404,13 +404,22 @@ function formatRupiahDisplay(value) {
   return Number(num).toLocaleString('id-ID');
 }
 
+function formatRupiahInput(elOrValue) {
+  if (elOrValue && typeof elOrValue === 'object' && 'value' in elOrValue) {
+    const raw = elOrValue.value.replace(/[^0-9]/g, '');
+    elOrValue.value = raw ? Number(raw).toLocaleString('id-ID') : '';
+    return elOrValue.value;
+  }
+  return formatRupiahDisplay(elOrValue);
+}
+
 function unformatRupiah(value) {
   if (!value) return 0;
   return parseFloat(value.toString().replace(/[^0-9]/g, '')) || 0;
 }
 
 window.formatRupiahDisplay = formatRupiahDisplay;
-window.formatRupiahInput = formatRupiahDisplay;
+window.formatRupiahInput = formatRupiahInput;
 window.unformatRupiah = unformatRupiah;
 
 // Global Client Projects Loader for Select Dropdowns
@@ -445,7 +454,7 @@ window.loadProjectsForClient = async function(clientId, targetSelectId = 'inv-pr
 };
 
 function initRupiahInputs() {
-  document.querySelectorAll('.rupiah-input').forEach(input => {
+  document.querySelectorAll('.rupiah-input, [data-rupiah]').forEach(input => {
     if (input.dataset.rupiahInitialized) return;
     input.dataset.rupiahInitialized = 'true';
 
@@ -470,6 +479,19 @@ function initRupiahInputs() {
     });
   });
 }
+
+// Global Delegated Input Formatter for all Rupiah / Currency Inputs (handles dynamic elements & modals)
+document.addEventListener('input', (e) => {
+  if (e.target && (e.target.classList.contains('rupiah-input') || e.target.hasAttribute('data-rupiah') || e.target.classList.contains('currency-input'))) {
+    const input = e.target;
+    const raw = input.value.replace(/[^0-9]/g, '');
+    if (!raw) {
+      input.value = '';
+    } else {
+      input.value = Number(raw).toLocaleString('id-ID');
+    }
+  }
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   initRupiahInputs();

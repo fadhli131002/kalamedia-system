@@ -6,22 +6,29 @@
 require_owner();
 $db = Database::getConnection();
 
-// Initial data for page load (This Month by default)
-$currentMonth = date('Y-m');
-
-// 1. Total Revenue
-$totalRevenue = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0 AND strftime('%Y-%m', paid_at) = '$currentMonth'")->fetchColumn());
-if ($totalRevenue == 0) {
-    $totalRevenue = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0")->fetchColumn());
+// Selected Month (Defaults to current month)
+$selectedMonth = $_GET['month'] ?? date('Y-m');
+if (!preg_match('/^\d{4}-\d{2}$/', $selectedMonth)) {
+    $selectedMonth = date('Y-m');
 }
+$currentMonth = $selectedMonth;
 
-// 2. Total Expense
-$totalPayouts = floatval($db->query("SELECT COALESCE(SUM(amount), 0) FROM freelancer_payouts WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0")->fetchColumn());
-$totalAds = floatval($db->query("SELECT COALESCE(SUM(amount), 0) FROM ads_spend WHERE COALESCE(is_deleted, 0) = 0")->fetchColumn());
-$totalSalaries = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) FROM salaries WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0")->fetchColumn());
+$isMysql = (Database::getDriver() === 'mysql');
+$invDateExpr = $isMysql ? "DATE_FORMAT(COALESCE(NULLIF(paid_at, ''), issue_date), '%Y-%m')" : "strftime('%Y-%m', COALESCE(NULLIF(paid_at, ''), issue_date))";
+$payDateExpr = $isMysql ? "DATE_FORMAT(COALESCE(NULLIF(paid_at, ''), created_at), '%Y-%m')" : "strftime('%Y-%m', COALESCE(NULLIF(paid_at, ''), created_at))";
+$adsDateExpr = $isMysql ? "DATE_FORMAT(spent_date, '%Y-%m')" : "strftime('%Y-%m', spent_date)";
+$salDateExpr = $isMysql ? "DATE_FORMAT(COALESCE(NULLIF(paid_at, ''), payment_date), '%Y-%m')" : "strftime('%Y-%m', COALESCE(NULLIF(paid_at, ''), payment_date))";
+
+// 1. Total Monthly Revenue
+$totalRevenue = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0 AND {$invDateExpr} = '$currentMonth'")->fetchColumn());
+
+// 2. Total Monthly Expense (Freelancers, Ads Spend, Salaries this month)
+$totalPayouts = floatval($db->query("SELECT COALESCE(SUM(amount), 0) FROM freelancer_payouts WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0 AND {$payDateExpr} = '$currentMonth'")->fetchColumn());
+$totalAds = floatval($db->query("SELECT COALESCE(SUM(amount), 0) FROM ads_spend WHERE COALESCE(is_deleted, 0) = 0 AND {$adsDateExpr} = '$currentMonth'")->fetchColumn());
+$totalSalaries = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) FROM salaries WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0 AND ({$salDateExpr} = '$currentMonth' OR month_period = '$currentMonth')")->fetchColumn());
 $totalExpense = $totalPayouts + $totalAds + $totalSalaries;
 
-// 3. Net Profit & Margin
+// 3. Monthly Net Profit & Margin
 $netProfit = $totalRevenue - $totalExpense;
 $profitMargin = $totalRevenue > 0 ? ($netProfit / $totalRevenue) * 100 : 0;
 

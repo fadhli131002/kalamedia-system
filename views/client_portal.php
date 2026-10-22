@@ -278,6 +278,28 @@ $stmtPendingLimitReq = $db->prepare("
 ");
 $stmtPendingLimitReq->execute([$clientId]);
 $pendingLimitRequest = $stmtPendingLimitReq->fetch(PDO::FETCH_ASSOC);
+
+// Fetch Freelancer Payouts for this client's projects (Real-Time Transparency for Client)
+$stmtClientFreelancer = $db->prepare("
+    SELECT fp.*, p.name as project_name
+    FROM freelancer_payouts fp
+    JOIN projects p ON fp.project_id = p.id
+    WHERE p.client_id = ? AND COALESCE(fp.is_deleted, 0) = 0
+    ORDER BY fp.paid_at DESC, fp.created_at DESC
+");
+$stmtClientFreelancer->execute([$clientId]);
+$clientFreelancerPayouts = $stmtClientFreelancer->fetchAll(PDO::FETCH_ASSOC);
+
+$clientFreelancerPaid = 0;
+$clientFreelancerPending = 0;
+foreach ($clientFreelancerPayouts as $fp) {
+    if ($fp['status'] === 'Paid') {
+        $clientFreelancerPaid += floatval($fp['amount']);
+    } else {
+        $clientFreelancerPending += floatval($fp['amount']);
+    }
+}
+$clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -399,13 +421,13 @@ $pendingLimitRequest = $stmtPendingLimitReq->fetch(PDO::FETCH_ASSOC);
     /* Portal Stats Grid */
     .portal-stats-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
       margin-bottom: 22px;
     }
-    @media (max-width: 1024px) {
+    @media (max-width: 1200px) {
       .portal-stats-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 12px;
       }
     }
@@ -1122,6 +1144,19 @@ $pendingLimitRequest = $stmtPendingLimitReq->fetch(PDO::FETCH_ASSOC);
             <div class="kpi-value" id="stat-approved-tasks">0</div>
             <div class="kpi-meta">Deliverables telah final</div>
           </div>
+
+          <div class="kpi-card" style="border-left: 3px solid #10B981;">
+            <div class="kpi-header">
+              <span class="kpi-title" style="color: #027A48; font-weight: 700;">Fee Freelancer Terbayar</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="kpi-value" id="stat-freelancer-paid" style="color: #027A48; font-size: 19px;">
+              <?= format_rupiah($clientFreelancerPaid) ?>
+            </div>
+            <div class="kpi-meta" id="stat-freelancer-meta" style="color: #027A48; font-weight: 600;">
+              <?= $clientFreelancerPending > 0 ? 'Pending: ' . format_rupiah($clientFreelancerPending) : 'Lunas ditransfer ke talent' ?>
+            </div>
+          </div>
         </div>
 
         <!-- 3. Navigation Tabs (Modern Segmented Boxed Bar) -->
@@ -1195,6 +1230,95 @@ $pendingLimitRequest = $stmtPendingLimitReq->fetch(PDO::FETCH_ASSOC);
           <div class="tasks-grid" id="client-tasks-container">
             <div style="text-align: center; padding: 40px; color: var(--text-muted); background: #FFF; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
               Memuat daftar pekerjaan...
+            </div>
+          </div>
+
+          <!-- Riwayat & Transparansi Biaya Talent Freelancer Terbayar -->
+          <div class="glass-panel" style="margin-top: 24px; overflow: visible; min-width: 0; max-width: 100%;">
+            <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h3 class="panel-title" style="display: flex; align-items: center; gap: 8px;">
+                  <span>Riwayat &amp; Transparansi Fee Freelancer (Biaya Talent Produksi)</span>
+                  <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 11px;">
+                    Terbayar: <?= format_rupiah($clientFreelancerPaid) ?>
+                  </span>
+                </h3>
+                <p style="font-size: 12.5px; color: var(--text-secondary); margin-top: 2px;">
+                  Transparansi nominal honor/fee yang telah dibayarkan oleh Kalamedia kepada para talent freelancer yang mengerjakan proyek Anda.
+                </p>
+              </div>
+            </div>
+
+            <div class="kala-table-scroll table-responsive" style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; display: block;">
+              <table class="table-custom" style="min-width: 820px; width: 100%;">
+                <thead>
+                  <tr>
+                    <th style="min-width: 180px; white-space: nowrap;">NAMA FREELANCER &amp; TANGGAL</th>
+                    <th style="white-space: nowrap;">PROYEK &amp; TUGAS / JASA</th>
+                    <th style="white-space: nowrap;">NOMINAL DIBAYARKAN</th>
+                    <th style="white-space: nowrap;">STATUS PEMBAYARAN</th>
+                    <th style="text-align: right; white-space: nowrap;">BUKTI TRANSFER</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php if (empty($clientFreelancerPayouts)): ?>
+                    <tr>
+                      <td colspan="5" style="text-align: center; padding: 32px; color: var(--text-muted);">
+                        Belum ada riwayat pembayaran talent freelancer untuk proyek ini.
+                      </td>
+                    </tr>
+                  <?php else: ?>
+                    <?php foreach ($clientFreelancerPayouts as $payout): 
+                      $pAmount = floatval($payout['amount']);
+                      $isPaid = ($payout['status'] === 'Paid');
+                    ?>
+                      <tr>
+                        <td style="white-space: nowrap;">
+                          <div style="font-weight: 700; color: #101828;">
+                            <?= htmlspecialchars($payout['freelancer_name']) ?>
+                          </div>
+                          <div style="font-size: 11.5px; color: var(--text-secondary);">
+                            <?= !empty($payout['paid_at']) ? date('d M Y', strtotime($payout['paid_at'])) : date('d M Y', strtotime($payout['created_at'])) ?>
+                          </div>
+                        </td>
+                        <td style="white-space: nowrap;">
+                          <div style="font-weight: 700; color: #101828;">
+                            <?= htmlspecialchars($payout['project_name'] ?? 'Proyek Klien') ?>
+                          </div>
+                          <div style="font-size: 11.5px; color: var(--text-muted);">
+                            <?= htmlspecialchars($payout['task_description'] ?? 'Jasa Produksi / Kreatif') ?>
+                          </div>
+                        </td>
+                        <td style="white-space: nowrap;">
+                          <div style="font-weight: 800; color: #027A48; font-size: 13.5px;">
+                            Rp <?= number_format($pAmount, 0, ',', '.') ?>
+                          </div>
+                        </td>
+                        <td style="white-space: nowrap;">
+                          <?php if ($isPaid): ?>
+                            <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 11px;">
+                              ✓ Lunas Terbayar
+                            </span>
+                          <?php else: ?>
+                            <span class="badge" style="background: #FEF0C7; color: #B54708; font-weight: 700; font-size: 11px;">
+                              ⏳ Menunggu Pembayaran
+                            </span>
+                          <?php endif; ?>
+                        </td>
+                        <td style="text-align: right; white-space: nowrap;">
+                          <?php if (!empty($payout['receipt_file'])): ?>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('uploads/<?= htmlspecialchars(addslashes($payout['receipt_file'])) ?>', 'Bukti Transfer Fee Freelancer - <?= htmlspecialchars(addslashes($payout['freelancer_name'])) ?>')" style="font-size: 11px; font-weight: 700; padding: 3px 8px; color: #027A48; border-color: #A6F4C5; background: #ECFDF3;">
+                              📄 Bukti Transfer
+                            </button>
+                          <?php else: ?>
+                            <span style="font-size: 11px; color: var(--text-muted); font-style: italic;">Belum ada lampiran</span>
+                          <?php endif; ?>
+                        </td>
+                      </tr>
+                    <?php endforeach; ?>
+                  <?php endif; ?>
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -1748,7 +1872,7 @@ $pendingLimitRequest = $stmtPendingLimitReq->fetch(PDO::FETCH_ASSOC);
 
         if (data.success) {
           currentTasksList = data.tasks || [];
-          renderProgress(data.metrics);
+          renderProgress(data.metrics, data.freelancer_summary);
           applyClientTaskFilters();
         } else {
           renderTasks([]);
@@ -1758,7 +1882,7 @@ $pendingLimitRequest = $stmtPendingLimitReq->fetch(PDO::FETCH_ASSOC);
       }
     }
 
-    function renderProgress(m) {
+    function renderProgress(m, fs) {
       if (!m) return;
       const total = m.total_tasks || 0;
       const review = m.client_review_count || 0;
@@ -1769,6 +1893,17 @@ $pendingLimitRequest = $stmtPendingLimitReq->fetch(PDO::FETCH_ASSOC);
       document.getElementById('stat-review-tasks').innerText = review;
       document.getElementById('stat-progress-tasks').innerText = progress;
       document.getElementById('stat-approved-tasks').innerText = approved;
+
+      if (fs) {
+        const fpEl = document.getElementById('stat-freelancer-paid');
+        if (fpEl) fpEl.innerText = fs.formatted_paid || 'Rp 0';
+        const fpMeta = document.getElementById('stat-freelancer-meta');
+        if (fpMeta) {
+          fpMeta.innerText = (fs.pending_amount > 0)
+            ? `Pending: ${fs.formatted_pending}`
+            : 'Lunas ditransfer ke talent';
+        }
+      }
 
       // Update Boxed Filter Badges
       const bAll = document.getElementById('filter-count-all');
@@ -2077,6 +2212,21 @@ $pendingLimitRequest = $stmtPendingLimitReq->fetch(PDO::FETCH_ASSOC);
       if (tabName === 'ads') {
         requestAnimationFrame(() => setTimeout(loadClientAdsData, 90));
       }
+    function parseAdsNumber(val) {
+      if (val === null || val === undefined || val === '') return 0;
+      if (typeof val === 'number') return val;
+      let str = String(val).trim().replace(/[^0-9,.-]/g, '');
+      if (str.indexOf('.') !== -1 && str.indexOf(',') !== -1) {
+        str = str.replace(/\./g, '').replace(',', '.');
+      } else if ((str.match(/\./g) || []).length > 1) {
+        str = str.replace(/\./g, '');
+      } else if ((str.match(/\./g) || []).length === 1) {
+        const parts = str.split('.');
+        if (parts[1] && parts[1].length === 3) {
+          str = parts[0] + parts[1];
+        }
+      }
+      return parseFloat(str) || 0;
     }
 
     async function loadClientAdsData() {
@@ -2131,6 +2281,8 @@ $pendingLimitRequest = $stmtPendingLimitReq->fetch(PDO::FETCH_ASSOC);
         let bannerHtml = '';
         if (data.pending_limit_request) {
           const req = data.pending_limit_request;
+          const reqAmount = parseAdsNumber(req.amount_requested);
+          const formattedReqAmount = (reqAmount > 0) ? 'Rp ' + reqAmount.toLocaleString('id-ID') : 'Rp 0';
           bannerHtml = `
             <div id="client-banner-limit-request" style="background: linear-gradient(135deg, #FEF0C7 0%, #FEDF89 100%); border: 1.5px solid #FDB022; border-radius: 14px; padding: 18px 20px; margin-bottom: 22px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.18); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
               <div style="display: flex; align-items: flex-start; gap: 14px; max-width: 760px;">
@@ -2140,12 +2292,12 @@ $pendingLimitRequest = $stmtPendingLimitReq->fetch(PDO::FETCH_ASSOC);
                     Pengajuan Penambahan Limit Saldo Iklan dari Owner Kalamedia
                   </div>
                   <p style="font-size: 13px; color: #93370D; margin: 4px 0 0; line-height: 1.5;">
-                    Owner mengajukan penambahan limit saldo iklan sebesar <b>Rp ${Number(req.amount_requested || 0).toLocaleString('id-ID')}</b> untuk proyek <b>${escapeHtml(req.project_name || 'Kampanye Iklan')}</b> agar penayangan iklan di platform tidak terhenti.
+                    Owner mengajukan penambahan limit saldo iklan sebesar <b>${formattedReqAmount}</b> untuk proyek <b>${escapeHtml(req.project_name || 'Kampanye Iklan')}</b> agar penayangan iklan di platform tidak terhenti.
                     ${req.notes ? `<br><i>Catatan Owner: "${escapeHtml(req.notes)}"</i>` : ''}
                   </p>
                 </div>
               </div>
-              <button type="button" class="btn btn-primary" onclick="openClientApproveLimitModal(${req.project_id}, ${req.id}, ${req.amount_requested || 0}, '${escapeHtml(req.notes || '')}')" style="background: #027A48; border-color: #027A48; font-weight: 800; font-size: 12.5px; padding: 10px 18px; border-radius: 10px; box-shadow: 0 2px 6px rgba(2,122,72,0.3); display: inline-flex; align-items: center; gap: 6px;">
+              <button type="button" class="btn btn-primary" onclick="openClientApproveLimitModal(${req.project_id}, ${req.id}, ${reqAmount}, '${escapeHtml(req.notes || '')}')" style="background: #027A48; border-color: #027A48; font-weight: 800; font-size: 12.5px; padding: 10px 18px; border-radius: 10px; box-shadow: 0 2px 6px rgba(2,122,72,0.3); display: inline-flex; align-items: center; gap: 6px;">
                 <span>✅ Setuju Tambah Limit &amp; Upload Bukti Transfer</span>
               </button>
             </div>

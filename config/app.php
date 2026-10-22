@@ -220,6 +220,22 @@ function get_flash() {
     return null;
 }
 
+function flash_error(string $message): void {
+    set_flash('danger', $message);
+}
+
+function flash_success(string $message): void {
+    set_flash('success', $message);
+}
+
+function flash_warning(string $message): void {
+    set_flash('warning', $message);
+}
+
+function flash_info(string $message): void {
+    set_flash('info', $message);
+}
+
 function render_pwa_meta_tags(): void {
     ?>
     <!-- PWA Settings & Portal Kala Mobile Capabilities -->

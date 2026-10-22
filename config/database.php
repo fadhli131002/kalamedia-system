@@ -80,10 +80,10 @@ class Database {
             }
 
             // High Performance: Only run migrations if lock file does not exist (0ms overhead on requests)
-            $lockFile = BASE_PATH . '/database/.schema_v10.lock';
+            $lockFile = BASE_PATH . '/database/.schema_v11.lock';
             if (!file_exists($lockFile)) {
                 self::runMigrations(self::$instance, self::$driver);
-                @file_put_contents($lockFile, "Schema v10 initialized at " . date('Y-m-d H:i:s'));
+                @file_put_contents($lockFile, "Schema v11 initialized at " . date('Y-m-d H:i:s'));
             }
 
             // Ensure core system accounts (Owner & Admin) always exist
@@ -500,6 +500,9 @@ class Database {
             if (!in_array('project_name', $projCols)) {
                 $db->exec("ALTER TABLE projects ADD COLUMN project_name VARCHAR(200) DEFAULT NULL");
                 $db->exec("UPDATE projects SET project_name = name WHERE project_name IS NULL OR project_name = ''");
+            }
+            if (!in_array('package_name', $projCols)) {
+                $db->exec("ALTER TABLE projects ADD COLUMN package_name VARCHAR(100) DEFAULT NULL");
             }
             if (!in_array('service_type', $projCols)) {
                 $db->exec("ALTER TABLE projects ADD COLUMN service_type VARCHAR(200) DEFAULT 'Kelola Sosmed'");

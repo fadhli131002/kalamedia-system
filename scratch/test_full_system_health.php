@@ -146,35 +146,66 @@ if (!$perfReport) {
 echo "\n--- 3. AUDIT ALL VIEWS RENDERING ---\n";
 
 function test_render_view(string $viewPath, array $sessionData, array $getParams = []): array {
-    $_GET = $getParams;
-    $_POST = [];
-    $_SESSION = $sessionData;
+    $script = '<?php
+        error_reporting(E_ALL);
+        ini_set("display_errors", "1");
+        $_SERVER["DOCUMENT_ROOT"] = "c:/xampp/htdocs/Kalamedia";
+        $_SERVER["SCRIPT_NAME"] = "/index.php";
+        $_SERVER["REQUEST_URI"] = "/";
+        $_SERVER["REQUEST_METHOD"] = "GET";
+        $_SERVER["HTTP_HOST"] = "localhost";
+        require_once "config/app.php";
+        require_once "config/database.php";
+        require_once "config/auth.php";
+        $_SESSION = ' . var_export($sessionData, true) . ';
+        $_GET = ' . var_export($getParams, true) . ';
 
-    $notices = [];
-    set_error_handler(function($errno, $errstr, $errfile, $errline) use (&$notices) {
-        if (error_reporting() === 0) return false;
-        $notices[] = "Line $errline: $errstr in " . basename($errfile);
-        return true;
-    });
+        $notices = [];
+        set_error_handler(function($errno, $errstr, $errfile, $errline) use (&$notices) {
+            if (error_reporting() === 0) return false;
+            $notices[] = "Line $errline: $errstr in " . basename($errfile);
+            return true;
+        });
 
-    ob_start();
-    $exception = null;
-    try {
-        include $viewPath;
-    } catch (\Throwable $t) {
-        $exception = $t->getMessage() . " at " . basename($t->getFile()) . ":" . $t->getLine();
+        ob_start();
+        $exception = null;
+        try {
+            include ' . var_export($viewPath, true) . ';
+        } catch (\Throwable $t) {
+            $exception = $t->getMessage() . " at " . basename($t->getFile()) . ":" . $t->getLine();
+        }
+        $out = ob_get_clean();
+        restore_error_handler();
+
+        echo "---KALA_RESULT---\n";
+        echo json_encode([
+            "length" => strlen($out),
+            "notices" => $notices,
+            "exception" => $exception
+        ]);
+    ';
+
+    $tempScript = tempnam(sys_get_temp_dir(), 'kala_view_');
+    file_put_contents($tempScript, $script);
+    $cmd = 'php "' . $tempScript . '" 2>&1';
+    $rawOut = shell_exec($cmd);
+    @unlink($tempScript);
+
+    $parts = explode('---KALA_RESULT---', $rawOut);
+    if (isset($parts[1])) {
+        $json = json_decode(trim($parts[1]), true);
+        if ($json) return $json;
     }
-    $output = ob_get_clean();
-    restore_error_handler();
 
     return [
-        'length' => strlen($output),
-        'notices' => $notices,
-        'exception' => $exception
+        'length' => strlen($rawOut),
+        'notices' => [],
+        'exception' => null
     ];
 }
 
 $ownerSession = [
+    'kala_accounts' => ['u_1' => ['user_id' => 1, 'role' => 'owner', 'name' => 'Owner', 'email' => 'owner@kalamedia.id', 'employment_type' => 'internal']],
     'kala_auth' => [
         'internal' => ['user_id' => 1, 'role' => 'owner', 'name' => 'Owner', 'email' => 'owner@kalamedia.id', 'employment_type' => 'internal']
     ],
@@ -182,6 +213,7 @@ $ownerSession = [
 ];
 
 $adminSession = [
+    'kala_accounts' => ['u_2' => ['user_id' => 2, 'role' => 'admin', 'name' => 'Admin', 'email' => 'admin@kalamedia.id', 'employment_type' => 'internal']],
     'kala_auth' => [
         'internal' => ['user_id' => 2, 'role' => 'admin', 'name' => 'Admin', 'email' => 'admin@kalamedia.id', 'employment_type' => 'internal']
     ],
@@ -190,14 +222,16 @@ $adminSession = [
 
 $workerUser = $db->query("SELECT * FROM users WHERE role = 'karyawan' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 $workerSession = [
+    'kala_accounts' => ['u_' . $workerUser['id'] => ['user_id' => $workerUser['id'], 'role' => 'karyawan', 'name' => $workerUser['name'], 'email' => $workerUser['email'], 'employment_type' => 'internal', 'service_specialty' => 'Kelola Sosmed']],
     'kala_auth' => [
-        'internal' => ['user_id' => $workerUser['id'], 'role' => 'karyawan', 'name' => $workerUser['name'], 'email' => $workerUser['email'], 'employment_type' => 'internal']
+        'internal' => ['user_id' => $workerUser['id'], 'role' => 'karyawan', 'name' => $workerUser['name'], 'email' => $workerUser['email'], 'employment_type' => 'internal', 'service_specialty' => 'Kelola Sosmed']
     ],
-    'user' => ['id' => $workerUser['id'], 'role' => 'karyawan', 'name' => $workerUser['name'], 'email' => $workerUser['email']]
+    'user' => ['id' => $workerUser['id'], 'role' => 'karyawan', 'name' => $workerUser['name'], 'email' => $workerUser['email'], 'service_specialty' => 'Kelola Sosmed']
 ];
 
 $freelancerUser = $db->query("SELECT * FROM users WHERE role = 'freelancer' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 $freelancerSession = [
+    'kala_accounts' => ['u_' . $freelancerUser['id'] => ['user_id' => $freelancerUser['id'], 'role' => 'freelancer', 'name' => $freelancerUser['name'], 'email' => $freelancerUser['email'], 'employment_type' => 'freelancer']],
     'kala_auth' => [
         'internal' => ['user_id' => $freelancerUser['id'], 'role' => 'freelancer', 'name' => $freelancerUser['name'], 'email' => $freelancerUser['email'], 'employment_type' => 'freelancer']
     ],
@@ -206,6 +240,7 @@ $freelancerSession = [
 
 $clientUser = $db->query("SELECT * FROM users WHERE role = 'client' LIMIT 1")->fetch(PDO::FETCH_ASSOC);
 $clientSession = [
+    'kala_accounts' => ['u_' . $clientUser['id'] => ['user_id' => $clientUser['id'], 'role' => 'client', 'name' => $clientUser['name'], 'email' => $clientUser['email'], 'client_id' => $client['id']]],
     'kala_auth' => [
         'client' => ['user_id' => $clientUser['id'], 'role' => 'client', 'name' => $clientUser['name'], 'email' => $clientUser['email'], 'client_id' => $client['id']]
     ],
@@ -213,28 +248,28 @@ $clientSession = [
 ];
 
 $viewSuites = [
-    ['name' => 'owner_dashboard.php (Owner)', 'path' => BASE_PATH . '/views/owner_dashboard.php', 'session' => $ownerSession, 'get' => []],
-    ['name' => 'admin_dashboard.php (Admin)', 'path' => BASE_PATH . '/views/admin_dashboard.php', 'session' => $adminSession, 'get' => []],
-    ['name' => 'settings.php (Owner)', 'path' => BASE_PATH . '/views/settings.php', 'session' => $ownerSession, 'get' => []],
-    ['name' => 'invoices.php (Admin)', 'path' => BASE_PATH . '/views/invoices.php', 'session' => $adminSession, 'get' => []],
-    ['name' => 'invoice_view.php (Admin)', 'path' => BASE_PATH . '/views/invoice_view.php', 'session' => $adminSession, 'get' => ['id' => $invoice['id']]],
-    ['name' => 'expenses.php (Admin)', 'path' => BASE_PATH . '/views/expenses.php', 'session' => $adminSession, 'get' => []],
-    ['name' => 'salaries.php (Admin)', 'path' => BASE_PATH . '/views/salaries.php', 'session' => $adminSession, 'get' => []],
-    ['name' => 'salary_view.php (Admin)', 'path' => BASE_PATH . '/views/salary_view.php', 'session' => $adminSession, 'get' => ['id' => $salary['id']]],
-    ['name' => 'voucher_view.php (Admin)', 'path' => BASE_PATH . '/views/voucher_view.php', 'session' => $adminSession, 'get' => ['id' => $payout['id']]],
-    ['name' => 'ads_voucher_view.php (Admin)', 'path' => BASE_PATH . '/views/ads_voucher_view.php', 'session' => $adminSession, 'get' => ['id' => $adsSpend['id']]],
-    ['name' => 'clients.php (Admin)', 'path' => BASE_PATH . '/views/clients.php', 'session' => $adminSession, 'get' => []],
-    ['name' => 'team.php (Admin)', 'path' => BASE_PATH . '/views/team.php', 'session' => $adminSession, 'get' => []],
-    ['name' => 'tasks.php (Admin)', 'path' => BASE_PATH . '/views/tasks.php', 'session' => $adminSession, 'get' => []],
-    ['name' => 'tasks.php (Karyawan)', 'path' => BASE_PATH . '/views/tasks.php', 'session' => $workerSession, 'get' => []],
-    ['name' => 'tasks.php (Freelancer)', 'path' => BASE_PATH . '/views/tasks.php', 'session' => $freelancerSession, 'get' => []],
-    ['name' => 'content_dashboard.php (Admin)', 'path' => BASE_PATH . '/views/content_dashboard.php', 'session' => $adminSession, 'get' => []],
-    ['name' => 'content_dashboard.php (Karyawan)', 'path' => BASE_PATH . '/views/content_dashboard.php', 'session' => $workerSession, 'get' => []],
-    ['name' => 'reports.php (Admin)', 'path' => BASE_PATH . '/views/reports.php', 'session' => $adminSession, 'get' => []],
-    ['name' => 'reports_form.php (Admin)', 'path' => BASE_PATH . '/views/reports_form.php', 'session' => $adminSession, 'get' => []],
-    ['name' => 'report_deck.php (Admin)', 'path' => BASE_PATH . '/views/report_deck.php', 'session' => $adminSession, 'get' => ['id' => $perfReport['id']]],
-    ['name' => 'client_portal.php (Client)', 'path' => BASE_PATH . '/views/client_portal.php', 'session' => $clientSession, 'get' => ['tab' => 'deliverables', '_slot' => 'client']],
-    ['name' => 'client_portal.php (Admin Preview)', 'path' => BASE_PATH . '/views/client_portal.php', 'session' => $adminSession, 'get' => ['preview' => '1', 'client_id' => $client['id']]],
+    ['name' => 'owner_dashboard.php (Owner)', 'path' => BASE_PATH . '/views/owner_dashboard.php', 'session' => $ownerSession, 'get' => ['_u' => 'u_1']],
+    ['name' => 'admin_dashboard.php (Admin)', 'path' => BASE_PATH . '/views/admin_dashboard.php', 'session' => $adminSession, 'get' => ['_u' => 'u_2']],
+    ['name' => 'settings.php (Owner)', 'path' => BASE_PATH . '/views/settings.php', 'session' => $ownerSession, 'get' => ['_u' => 'u_1']],
+    ['name' => 'invoices.php (Admin)', 'path' => BASE_PATH . '/views/invoices.php', 'session' => $adminSession, 'get' => ['_u' => 'u_2']],
+    ['name' => 'invoice_view.php (Admin)', 'path' => BASE_PATH . '/views/invoice_view.php', 'session' => $adminSession, 'get' => ['id' => $invoice['id'], '_u' => 'u_2']],
+    ['name' => 'expenses.php (Admin)', 'path' => BASE_PATH . '/views/expenses.php', 'session' => $adminSession, 'get' => ['_u' => 'u_2']],
+    ['name' => 'salaries.php (Admin)', 'path' => BASE_PATH . '/views/salaries.php', 'session' => $adminSession, 'get' => ['_u' => 'u_2']],
+    ['name' => 'salary_view.php (Admin)', 'path' => BASE_PATH . '/views/salary_view.php', 'session' => $adminSession, 'get' => ['id' => $salary['id'], '_u' => 'u_2']],
+    ['name' => 'voucher_view.php (Admin)', 'path' => BASE_PATH . '/views/voucher_view.php', 'session' => $adminSession, 'get' => ['id' => $payout['id'], '_u' => 'u_2']],
+    ['name' => 'ads_voucher_view.php (Admin)', 'path' => BASE_PATH . '/views/ads_voucher_view.php', 'session' => $adminSession, 'get' => ['id' => $adsSpend['id'], '_u' => 'u_2']],
+    ['name' => 'clients.php (Admin)', 'path' => BASE_PATH . '/views/clients.php', 'session' => $adminSession, 'get' => ['_u' => 'u_2']],
+    ['name' => 'team.php (Admin)', 'path' => BASE_PATH . '/views/team.php', 'session' => $adminSession, 'get' => ['_u' => 'u_2']],
+    ['name' => 'tasks.php (Admin)', 'path' => BASE_PATH . '/views/tasks.php', 'session' => $adminSession, 'get' => ['_u' => 'u_2']],
+    ['name' => 'tasks.php (Karyawan)', 'path' => BASE_PATH . '/views/tasks.php', 'session' => $workerSession, 'get' => ['_u' => 'u_' . $workerUser['id']]],
+    ['name' => 'tasks.php (Freelancer)', 'path' => BASE_PATH . '/views/tasks.php', 'session' => $freelancerSession, 'get' => ['_u' => 'u_' . $freelancerUser['id']]],
+    ['name' => 'content_dashboard.php (Admin)', 'path' => BASE_PATH . '/views/content_dashboard.php', 'session' => $adminSession, 'get' => ['_u' => 'u_2']],
+    ['name' => 'content_dashboard.php (Karyawan)', 'path' => BASE_PATH . '/views/content_dashboard.php', 'session' => $workerSession, 'get' => ['_u' => 'u_' . $workerUser['id']]],
+    ['name' => 'reports.php (Admin)', 'path' => BASE_PATH . '/views/reports.php', 'session' => $adminSession, 'get' => ['_u' => 'u_2']],
+    ['name' => 'reports_form.php (Admin)', 'path' => BASE_PATH . '/views/reports_form.php', 'session' => $adminSession, 'get' => ['_u' => 'u_2']],
+    ['name' => 'report_deck.php (Admin)', 'path' => BASE_PATH . '/views/report_deck.php', 'session' => $adminSession, 'get' => ['id' => $perfReport['id'], '_u' => 'u_2']],
+    ['name' => 'client_portal.php (Client)', 'path' => BASE_PATH . '/views/client_portal.php', 'session' => $clientSession, 'get' => ['tab' => 'deliverables', '_slot' => 'client', '_u' => 'u_' . $clientUser['id']]],
+    ['name' => 'client_portal.php (Admin Preview)', 'path' => BASE_PATH . '/views/client_portal.php', 'session' => $adminSession, 'get' => ['preview' => '1', 'client_id' => $client['id'], '_u' => 'u_2']],
     ['name' => 'login.php (Guest)', 'path' => BASE_PATH . '/views/login.php', 'session' => [], 'get' => []]
 ];
 

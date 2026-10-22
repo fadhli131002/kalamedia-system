@@ -58,7 +58,7 @@ if ($isClientUser && $clientId) {
                COUNT(cp.id) as total_contents
         FROM clients c
         LEFT JOIN content_planner cp ON c.id = cp.client_id AND COALESCE(cp.is_deleted, 0) = 0
-        WHERE c.is_deleted = 0
+        WHERE COALESCE(c.is_deleted, 0) = 0
           AND (
               c.id IN (
                   SELECT DISTINCT p.client_id FROM projects p 
@@ -66,12 +66,12 @@ if ($isClientUser && $clientId) {
                     AND (
                         LOWER(COALESCE(p.service_type, '')) LIKE '%sosmed%' 
                         OR LOWER(COALESCE(p.service_type, '')) LIKE '%social%' 
-                        OR LOWER(COALESCE(p.package_name, '')) LIKE '%sosmed%'
+                        OR LOWER(COALESCE(p.project_name, '')) LIKE '%sosmed%'
                         OR (
                             LOWER(COALESCE(p.service_type, '')) NOT LIKE '%eceran%' 
                             AND LOWER(COALESCE(p.service_type, '')) NOT LIKE '%satuan%'
-                            AND LOWER(COALESCE(p.package_name, '')) NOT LIKE '%eceran%'
-                            AND LOWER(COALESCE(p.package_name, '')) NOT LIKE '%satuan%'
+                            AND LOWER(COALESCE(p.project_name, '')) NOT LIKE '%eceran%'
+                            AND LOWER(COALESCE(p.project_name, '')) NOT LIKE '%satuan%'
                             AND LOWER(COALESCE(p.service_type, '')) NOT LIKE '%ads%'
                             AND LOWER(COALESCE(p.service_type, '')) NOT LIKE '%iklan%'
                         )
@@ -79,6 +79,8 @@ if ($isClientUser && $clientId) {
               )
               OR LOWER(COALESCE(c.service_type, '')) LIKE '%sosmed%'
               OR LOWER(COALESCE(c.service_type, '')) LIKE '%social%'
+              OR LOWER(COALESCE(c.package_name, '')) LIKE '%sosmed%'
+              OR LOWER(COALESCE(c.package_name, '')) LIKE '%social%'
           )
         GROUP BY c.id
         ORDER BY c.company ASC

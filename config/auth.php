@@ -335,6 +335,15 @@ function require_auth(?string $context = null) {
 function require_owner() {
     require_auth('internal');
     if (!is_owner()) {
+        $uri = $_SERVER['REQUEST_URI'] ?? '';
+        $isApi = (strpos($uri, '/api/') !== false) ||
+                 (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') ||
+                 (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+        if ($isApi) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Hanya Owner yang berwenang.']);
+            exit;
+        }
         header('Location: ' . home_url_for_role());
         exit;
     }
@@ -343,6 +352,15 @@ function require_owner() {
 function require_admin() {
     require_auth('internal');
     if (!is_admin()) {
+        $uri = $_SERVER['REQUEST_URI'] ?? '';
+        $isApi = (strpos($uri, '/api/') !== false) ||
+                 (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') ||
+                 (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+        if ($isApi) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Hanya Admin / Owner yang berwenang.']);
+            exit;
+        }
         header('Location: ' . home_url_for_role());
         exit;
     }
@@ -351,6 +369,15 @@ function require_admin() {
 function require_worker() {
     require_auth('internal');
     if (!is_worker()) {
+        $uri = $_SERVER['REQUEST_URI'] ?? '';
+        $isApi = (strpos($uri, '/api/') !== false) ||
+                 (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') ||
+                 (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+        if ($isApi) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Akses ditolak: Hanya Anggota Tim (Karyawan / Freelancer) yang berwenang.']);
+            exit;
+        }
         header('Location: ' . home_url_for_role());
         exit;
     }

@@ -841,6 +841,10 @@ if ($isWorkerUser) {
             <span class="desktop-text">Pelacakan &amp; Koordinasi Anggaran Ads</span>
             <span class="mobile-text">Pelacakan Ads</span>
           </button>
+          <button type="button" class="workspace-tab-btn" id="tab-btn-recap" onclick="switchTaskWorkspaceTab('recap')">
+            <span class="desktop-text">Report &amp; Rekap Pekerjaan</span>
+            <span class="mobile-text">Rekap Kerja</span>
+          </button>
         </div>
 
         <!-- SECTION 1: Tasks & Deliverables -->
@@ -1293,6 +1297,126 @@ if ($isWorkerUser) {
 
             <div id="ads-logs-feed-container">
               <div style="text-align: center; padding: 28px; color: var(--text-muted);">Memuat riwayat koordinasi...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: Report & Rekap Pekerjaan (Bulanan / Per Proyek) -->
+        <div id="section-recap-content" style="display: none;">
+          <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 22px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h3 style="font-size: 16px; font-weight: 800; color: #101828; margin: 0;">
+                  Report &amp; Rekap Pekerjaan Saya (Bulanan &amp; Per Proyek)
+                </h3>
+                <p style="font-size: 12.5px; color: var(--text-secondary); margin: 4px 0 0;">
+                  Ringkasan kuantitatif dan daftar seluruh output pekerjaan yang Anda kerjakan beserta status approval klien.
+                </p>
+              </div>
+
+              <button type="button" class="btn btn-secondary btn-sm" onclick="exportWorkerRecapPrint()" style="font-weight: 700; border-radius: 8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                <span>Cetak / Ekspor PDF Report</span>
+              </button>
+            </div>
+
+            <!-- Filter Controls -->
+            <div style="background: #F9FAFB; border: 1px solid #ECEEF5; border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+              <!-- Month Filter -->
+              <div style="min-width: 150px;">
+                <label style="font-size: 11px; font-weight: 700; color: #4B5563; text-transform: uppercase; display: block; margin-bottom: 4px;">Bulan</label>
+                <select id="worker-recap-filter-month" class="form-select" onchange="loadWorkerRecapData()">
+                  <option value="">Semua Periode</option>
+                  <option value="<?= date('Y-m') ?>" selected>Bulan Ini (<?= date('M Y') ?>)</option>
+                  <option value="<?= date('Y-m', strtotime('-1 month')) ?>">Bulan Lalu (<?= date('M Y', strtotime('-1 month')) ?>)</option>
+                </select>
+              </div>
+
+              <!-- Project Filter -->
+              <div style="min-width: 200px;">
+                <label style="font-size: 11px; font-weight: 700; color: #4B5563; text-transform: uppercase; display: block; margin-bottom: 4px;">Klien / Proyek</label>
+                <select id="worker-recap-filter-project" class="form-select" onchange="loadWorkerRecapData()">
+                  <option value="">Semua Proyek PT</option>
+                </select>
+              </div>
+
+              <!-- Service Type Filter -->
+              <div style="min-width: 170px;">
+                <label style="font-size: 11px; font-weight: 700; color: #4B5563; text-transform: uppercase; display: block; margin-bottom: 4px;">Jenis Layanan</label>
+                <select id="worker-recap-filter-service" class="form-select" onchange="loadWorkerRecapData()">
+                  <option value="all">Semua Layanan</option>
+                  <option value="sosmed">Kelola Sosmed (Reguler)</option>
+                  <option value="eceran">Desain Eceran / Satuan</option>
+                  <option value="web">Jasa Buat Website</option>
+                  <option value="ads">Jasa Iklan Meta &amp; Google</option>
+                </select>
+              </div>
+
+              <div style="margin-top: 18px;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="loadWorkerRecapData()">Segarkan</button>
+              </div>
+            </div>
+
+            <!-- Dynamic 4 KPI Summary Cards -->
+            <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr) !important; gap: 14px; margin-bottom: 22px;">
+              <div class="kpi-card" style="border-top: 3px solid #2563EB;">
+                <div class="kpi-header">
+                  <span class="kpi-title" style="color: #2563EB; font-weight: 700;">Total Pekerjaan</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+                </div>
+                <div class="kpi-value" id="worker-recap-stat-total" style="font-size: 24px; color: #111827;">0</div>
+                <div class="kpi-meta">Seluruh item kerjaan Anda</div>
+              </div>
+
+              <div class="kpi-card" style="border-top: 3px solid #059669;">
+                <div class="kpi-header">
+                  <span class="kpi-title" style="color: #059669; font-weight: 700;">Selesai Disetujui (Approved)</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <div class="kpi-value" id="worker-recap-stat-approved" style="font-size: 24px; color: #059669;">0</div>
+                <div class="kpi-meta">Disetujui klien tanpa revisi</div>
+              </div>
+
+              <div class="kpi-card" style="border-top: 3px solid #F59E0B;">
+                <div class="kpi-header">
+                  <span class="kpi-title" style="color: #D97706; font-weight: 700;">In Progress / Review</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <div class="kpi-value" id="worker-recap-stat-progress" style="font-size: 24px; color: #D97706;">0</div>
+                <div class="kpi-meta">Dalam pengerjaan / review</div>
+              </div>
+
+              <div class="kpi-card" style="border-top: 3px solid #DC2626;">
+                <div class="kpi-header">
+                  <span class="kpi-title" style="color: #DC2626; font-weight: 700;">Revisi (Revision)</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div class="kpi-value" id="worker-recap-stat-revision" style="font-size: 24px; color: #DC2626;">0</div>
+                <div class="kpi-meta">Catatan revisi dari klien</div>
+              </div>
+            </div>
+
+            <!-- Detailed Table of Work Logs -->
+            <div id="printable-worker-recap-table" class="kala-table-scroll table-responsive" style="width: 100%; overflow-x: auto;">
+              <table class="table-custom" style="min-width: 900px; width: 100%;">
+                <thead>
+                  <tr>
+                    <th>TANGGAL</th>
+                    <th>KLIEN &amp; PROYEK</th>
+                    <th>JUDUL &amp; RINCIAN PEKERJAAN</th>
+                    <th>OUTPUT KATEGORI</th>
+                    <th>LINK HASIL KERJA</th>
+                    <th>STATUS &amp; APPROVAL KLIEN</th>
+                  </tr>
+                </thead>
+                <tbody id="worker-recap-tasks-tbody">
+                  <tr>
+                    <td colspan="6" style="text-align: center; padding: 32px; color: var(--text-muted);">
+                      Memuat data rekap pekerjaan...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -2136,7 +2260,16 @@ if ($isWorkerUser) {
     let currentFilterStatus = 'all';
 
     document.addEventListener('DOMContentLoaded', () => {
-      loadTasksData();
+      const urlParams = new URLSearchParams(window.location.search);
+      const reqTab = urlParams.get('tab');
+      if (reqTab === 'recap') {
+        switchTaskWorkspaceTab('recap');
+      } else if (reqTab === 'ads' || reqTab === 'ads_tracker') {
+        switchTaskWorkspaceTab('ads');
+      } else {
+        loadTasksData();
+      }
+
       <?php if ($isAdminUser): ?>
         loadDropdowns();
       <?php endif; ?>
@@ -3030,25 +3163,128 @@ if ($isWorkerUser) {
     // ADS BUDGET & SPEND TRACKER MODULE JS
     // -----------------------------------------------------------
     let allLoadedAdsData = null;
+    let allLoadedRecapData = null;
 
     function switchTaskWorkspaceTab(tab) {
       const btnTasks = document.getElementById('tab-btn-tasks');
       const btnAds = document.getElementById('tab-btn-ads');
+      const btnRecap = document.getElementById('tab-btn-recap');
       const secTasks = document.getElementById('section-tasks-content');
       const secAds = document.getElementById('section-ads-content');
+      const secRecap = document.getElementById('section-recap-content');
+
+      // Reset active states
+      btnTasks.classList.remove('active');
+      btnAds.classList.remove('active');
+      if (btnRecap) btnRecap.classList.remove('active');
+      secTasks.style.display = 'none';
+      secAds.style.display = 'none';
+      if (secRecap) secRecap.style.display = 'none';
 
       if (tab === 'ads') {
         btnAds.classList.add('active');
-        btnTasks.classList.remove('active');
-        secTasks.style.display = 'none';
         secAds.style.display = 'block';
         loadAdsTrackerData();
+      } else if (tab === 'recap') {
+        if (btnRecap) btnRecap.classList.add('active');
+        if (secRecap) secRecap.style.display = 'block';
+        loadWorkerRecapData();
       } else {
         btnTasks.classList.add('active');
-        btnAds.classList.remove('active');
-        secAds.style.display = 'none';
         secTasks.style.display = 'block';
       }
+    }
+
+    async function loadWorkerRecapData() {
+      const month = document.getElementById('worker-recap-filter-month') ? document.getElementById('worker-recap-filter-month').value : '';
+      const project = document.getElementById('worker-recap-filter-project') ? document.getElementById('worker-recap-filter-project').value : '';
+      const service = document.getElementById('worker-recap-filter-service') ? document.getElementById('worker-recap-filter-service').value : 'all';
+
+      try {
+        const uid = '<?= $userId ?>';
+        const res = await fetch(`api/portal_tasks.php?action=work_recap&month=${encodeURIComponent(month)}&project_id=${project}&service_type=${encodeURIComponent(service)}&_u=u_${uid}`);
+        const data = await res.json();
+        if (!data.success) {
+          showToast(data.message || 'Gagal memuat rekap pekerjaan', 'danger');
+          return;
+        }
+
+        allLoadedRecapData = data;
+
+        // Render 4 KPI Cards
+        document.getElementById('worker-recap-stat-total').innerText = data.summary.total_tasks || 0;
+        document.getElementById('worker-recap-stat-approved').innerText = data.summary.approved_tasks || 0;
+        document.getElementById('worker-recap-stat-progress').innerText = data.summary.in_progress_tasks || 0;
+        document.getElementById('worker-recap-stat-revision').innerText = data.summary.revision_tasks || 0;
+
+        // Populate Projects Dropdown if empty
+        const pSelect = document.getElementById('worker-recap-filter-project');
+        if (pSelect && pSelect.options.length <= 1 && data.filters.projects) {
+          data.filters.projects.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = `${p.client_company} • ${p.name}`;
+            pSelect.appendChild(opt);
+          });
+        }
+
+        // Render Table Rows
+        const tbody = document.getElementById('worker-recap-tasks-tbody');
+        tbody.innerHTML = '';
+
+        if (!data.tasks || data.tasks.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 32px; color: var(--text-muted);">Tidak ada pekerjaan pada filter yang dipilih.</td></tr>`;
+          return;
+        }
+
+        data.tasks.forEach(t => {
+          const tr = document.createElement('tr');
+          const statusBg = (t.status === 'approved') ? '#ECFDF5' : ((t.status === 'revision') ? '#FEF2F2' : '#EFF6FF');
+          const statusColor = (t.status === 'approved') ? '#047857' : ((t.status === 'revision') ? '#B91C1C' : '#1D4ED8');
+          const serviceBadgeBg = t.is_eceran ? '#FEF3C7' : '#F1F5F9';
+          const serviceBadgeColor = t.is_eceran ? '#92400E' : '#334155';
+
+          tr.innerHTML = `
+            <td style="white-space: nowrap;">
+              <div style="font-weight: 700; color: #111827; font-size: 12px;">${t.due_date ? t.due_date : (t.created_at ? t.created_at.substring(0, 10) : '-')}</div>
+              <div style="font-size: 10.5px; color: #9CA3AF;">Mulai: ${t.start_date || '-'}</div>
+            </td>
+            <td>
+              <div style="font-weight: 700; color: #111827; font-size: 12.5px;">${escapeHtml(t.client_company || t.client_name)}</div>
+              <div style="font-size: 11px; color: #6B7280;">${escapeHtml(t.project_name)}</div>
+              <span style="display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: ${serviceBadgeBg}; color: ${serviceBadgeColor}; margin-top: 2px;">
+                ${escapeHtml(t.service_badge)}
+              </span>
+            </td>
+            <td>
+              <div style="font-weight: 700; color: #111827; font-size: 13px;">${escapeHtml(t.title)}</div>
+              ${t.description ? `<div style="font-size: 11.5px; color: #6B7280; margin-top: 2px; max-width: 280px;">${escapeHtml(t.description)}</div>` : ''}
+              ${t.latest_feedback_message ? `<div style="font-size: 11px; color: #D97706; margin-top: 4px; background: #FFFBEB; padding: 3px 6px; border-radius: 4px;">💬 Masukan Klien: "${escapeHtml(t.latest_feedback_message)}"</div>` : ''}
+            </td>
+            <td>
+              <span style="font-size: 11px; font-weight: 700; background: #F3F4F6; color: #374151; padding: 3px 8px; border-radius: 6px;">
+                ${escapeHtml(t.category_label)}
+              </span>
+            </td>
+            <td>
+              ${t.deliverable_link ? `<a href="${escapeHtml(t.deliverable_link)}" target="_blank" style="font-size: 11.5px; font-weight: 700; color: #2563EB; text-decoration: underline; display: inline-flex; align-items: center; gap: 4px;">🔗 Preview File</a>` : '<span style="font-size: 11px; color: #9CA3AF;">Belum ada link</span>'}
+            </td>
+            <td>
+              <span style="display: inline-block; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; background: ${statusBg}; color: ${statusColor};">
+                ${escapeHtml(t.status_label)}
+              </span>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+        showToast('Koneksi server gagal memuat rekap pekerjaan', 'danger');
+      }
+    }
+
+    function exportWorkerRecapPrint() {
+      window.print();
     }
 
     async function loadAdsTrackerData() {
@@ -3599,6 +3835,74 @@ if ($isWorkerUser) {
       });
 
       tbody.innerHTML = html;
+    }
+
+    function renderAdsLogsFeed(data) {
+      const container = document.getElementById('ads-logs-feed-container');
+      if (!container) return;
+
+      const topups = data.topup_transactions || [];
+      const logs = topups.filter(t => t.notes || t.platform_topup_proof || t.transfer_proof_owner || (Number(t.ad_spend_amount || 0) > 0));
+
+      if (logs.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 32px 20px; color: var(--text-muted); background: #FCFCFD; border-radius: 8px;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 6px; display: block;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <div style="font-weight: 600; color: #111827; font-size: 13.5px;">Belum Ada Riwayat Update atau Screenshot</div>
+            <div style="font-size: 12px; color: #6B7280; margin-top: 2px;">
+              Setiap kali Tim Ads atau Owner mengunggah bukti transfer, top-up platform, atau memperbarui spend iklan, riwayatnya akan otomatis tercatat di sini.
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+      logs.forEach(item => {
+        const dateStr = formatDate(item.transaction_date || item.created_at);
+        const spend = Number(item.ad_spend_amount || item.spend_installed || 0);
+        const tfOwner = Number(item.transfer_amount_owner || item.topup_amount || 0);
+
+        html += `
+          <div style="background: #FAFAFA; border: 1px solid #EAECF0; border-radius: 10px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+            <div style="flex: 1; min-width: 260px;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="font-weight: 800; font-size: 13.5px; color: #101828;">${escapeHtml(item.client_company || 'Klien')} &bull; ${escapeHtml(item.project_name || 'Proyek')}</span>
+                <span class="badge" style="background: #F4F3FF; color: #5925DC; font-weight: 800; font-size: 10px;">${escapeHtml(item.platform || 'Meta Ads')}</span>
+                <span class="badge" style="background: #F2F4F7; color: #344054; font-size: 10px;">${escapeHtml(item.stage_label || 'Tahap 1')}</span>
+              </div>
+              <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;">
+                Tanggal: <b>${dateStr}</b> &bull; Dicatat oleh: <b>${escapeHtml(item.assigned_user_name || item.uploader_name || 'Tim Ads')}</b>
+              </div>
+              ${item.notes ? `
+                <div style="margin-top: 8px; font-size: 12.5px; color: #344054; background: #FFFFFF; border: 1px solid #E4E7EC; border-radius: 6px; padding: 8px 12px; line-height: 1.4;">
+                  ${escapeHtml(item.notes)}
+                </div>
+              ` : ''}
+              <div style="margin-top: 8px; display: flex; gap: 12px; font-size: 12px; color: #475467; flex-wrap: wrap;">
+                ${tfOwner > 0 ? `<span>Saldo Masuk: <b style="color: #175CD3;">Rp ${tfOwner.toLocaleString('id-ID')}</b></span>` : ''}
+                ${spend > 0 ? `<span>Realisasi Spend: <b style="color: #027A48;">Rp ${spend.toLocaleString('id-ID')}</b></span>` : ''}
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
+              ${item.transfer_proof_owner ? `
+                <button type="button" class="btn btn-secondary btn-sm" onclick="previewAdsProof('${escapeHtml(item.transfer_proof_owner)}')" style="font-size: 11px; font-weight: 700; color: #175CD3; border-color: #B2CCFF; background: #EFF8FF; display: inline-flex; align-items: center; gap: 4px;">
+                  📄 Bukti TF Owner
+                </button>
+              ` : ''}
+              ${item.platform_topup_proof ? `
+                <button type="button" class="btn btn-secondary btn-sm" onclick="previewAdsProof('${escapeHtml(item.platform_topup_proof)}')" style="font-size: 11px; font-weight: 700; color: #027A48; border-color: #A6F4C5; background: #ECFDF3; display: inline-flex; align-items: center; gap: 4px;">
+                  📈 Bukti Dashboard Ads
+                </button>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      });
+      html += '</div>';
+
+      container.innerHTML = html;
     }
 
     function populateAdsProjectDropdowns(projects) {
@@ -4173,16 +4477,26 @@ if ($isWorkerUser) {
     }
 
     function previewAdsProof(url) {
+      if (!url) return;
+      let finalUrl = String(url).trim();
+      if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://') && !finalUrl.startsWith('/') && !finalUrl.startsWith('assets/')) {
+        if (finalUrl.startsWith('uploads/')) {
+          finalUrl = 'assets/uploads/receipts/' + finalUrl.replace(/^uploads\/(receipts\/)?/, '');
+        } else {
+          finalUrl = 'assets/uploads/receipts/' + finalUrl;
+        }
+      }
+
       const img = document.getElementById('img-proof-preview');
       const iframe = document.getElementById('iframe-proof-preview');
 
-      if (url.toLowerCase().endsWith('.pdf')) {
+      if (finalUrl.toLowerCase().endsWith('.pdf')) {
         img.style.display = 'none';
-        iframe.src = url;
+        iframe.src = finalUrl;
         iframe.style.display = 'block';
       } else {
         iframe.style.display = 'none';
-        img.src = url;
+        img.src = finalUrl;
         img.style.display = 'inline-block';
       }
       openModal('modal-preview-ads-proof');

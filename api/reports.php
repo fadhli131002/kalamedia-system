@@ -485,6 +485,238 @@ if ($action === 'delete') {
     }
 }
 
+// 4b. GET PROJECT ADS DATA FOR AUTO-FILL
+if ($action === 'get_project_ads_data') {
+    try {
+        $projectId = intval($_GET['project_id'] ?? 0);
+        if ($projectId <= 0) {
+            echo json_encode(['success' => false, 'message' => 'Project ID tidak valid']);
+            exit;
+        }
+
+        $stmt = $db->prepare("
+            SELECT p.id as project_id, p.name as project_name, p.client_id,
+                   c.company as client_company, c.name as client_name,
+                   (
+                       SELECT COALESCE(SUM(COALESCE(NULLIF(t.ad_spend_amount, 0), t.spend_installed, 0)), 0)
+                       FROM ads_topup_transactions t
+                       WHERE t.project_id = p.id AND COALESCE(t.is_deleted, 0) = 0
+                   ) as total_ad_spend,
+                   (
+                       SELECT t2.platform
+                       FROM ads_topup_transactions t2
+                       WHERE t2.project_id = p.id AND COALESCE(t2.is_deleted, 0) = 0
+                       ORDER BY t2.id DESC
+                       LIMIT 1
+                   ) as latest_platform
+            FROM projects p
+            JOIN clients c ON p.client_id = c.id
+            WHERE p.id = ? AND p.is_deleted = 0
+        ");
+        $stmt->execute([$projectId]);
+        $data = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$data) {
+            echo json_encode(['success' => false, 'message' => 'Proyek tidak ditemukan']);
+            exit;
+        }
+
+        echo json_encode(['success' => true, 'data' => $data]);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        exit;
+    }
+}
+
+// 4c. SAVE ADS REPORT (STANDAR REPORT ADS KALAMEDIA - AUTO DELIVERED TO OWNER & CLIENT)
+if ($action === 'save_ads_report') {
+    try {
+        $currUser = current_user();
+        $userId = (int)($currUser['id'] ?? 0);
+        $authorName = $currUser['name'] ?? 'Tim Ads Kalamedia';
+
+        $id = intval($_POST['id'] ?? 0);
+        $clientId = intval($_POST['client_id'] ?? 0);
+        $projectId = intval($_POST['project_id'] ?? 0);
+        $reportPeriod = trim($_POST['report_period'] ?? '');
+        $platform = trim($_POST['platform'] ?? 'Meta Ads');
+        $objective = trim($_POST['objective'] ?? 'Leads / WhatsApp');
+
+        if ($clientId <= 0) {
+            echo json_encode(['success' => false, 'message' => 'Silakan pilih Klien / Proyek terlebih dahulu.']);
+            exit;
+        }
+
+        if (empty($reportPeriod)) {
+            echo json_encode(['success' => false, 'message' => 'Periode laporan wajib diisi (misal: 1 - 31 Oktober 2026).']);
+            exit;
+        }
+
+        // Metrics Input
+        $totalAdSpend = parse_report_number($_POST['total_ad_spend'] ?? '0');
+        $adsImpressions = parse_report_int($_POST['ads_impressions'] ?? '0');
+        $adsReach = parse_report_int($_POST['ads_reach'] ?? '0');
+        $totalClicks = parse_report_int($_POST['total_clicks'] ?? '0');
+        $totalConversions = parse_report_int($_POST['total_conversions'] ?? '0');
+        $roas = parse_report_number($_POST['roas'] ?? '0');
+        $revenue = parse_report_number($_POST['revenue'] ?? '0');
+        if ($revenue <= 0 && $roas > 0 && $totalAdSpend > 0) {
+            $revenue = $totalAdSpend * $roas;
+        }
+
+        // Auto calculations:
+        // CTR (%) = (Clicks / Impressions) * 100
+        $adsCtr = ($adsImpressions > 0 && $totalClicks > 0) 
+            ? round(($totalClicks / $adsImpressions) * 100, 2) 
+            : parse_report_number($_POST['ads_ctr'] ?? '0');
+
+        // CPA / CPL = Spend / Conversions
+        $cplCpa = ($totalConversions > 0 && $totalAdSpend > 0) 
+            ? round($totalAdSpend / $totalConversions, 2) 
+            : parse_report_number($_POST['cpl_cpa'] ?? '0');
+
+        // CPC = Spend / Clicks
+        $adsCpc = ($totalClicks > 0 && $totalAdSpend > 0) 
+            ? round($totalAdSpend / $totalClicks, 2) 
+            : 0;
+
+        // CPM = (Spend / Impressions) * 1000
+        $adsCpm = ($adsImpressions > 0 && $totalAdSpend > 0) 
+            ? round(($totalAdSpend / $adsImpressions) * 1000, 2) 
+            : 0;
+
+        $winningCreativeNotes = trim($_POST['winning_creative_notes'] ?? '');
+        $optimizingPlanNotes = trim($_POST['optimizing_plan_notes'] ?? '');
+
+        // Upload screenshot if provided
+        $existingScreenshot = trim($_POST['existing_dashboard_screenshot'] ?? '');
+        $dashboardScreenshot = handleCreativeUpload('dashboard_screenshot', $existingScreenshot);
+
+        // Client info for activity log & notifications
+        $clStmt = $db->prepare("SELECT company, name FROM clients WHERE id = ?");
+        $clStmt->execute([$clientId]);
+        $client = $clStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($id > 0) {
+            $stmt = $db->prepare("
+                UPDATE performance_reports SET
+                    client_id = ?,
+                    project_id = ?,
+                    report_period = ?,
+                    platform = ?,
+                    objective = ?,
+                    total_ad_spend = ?,
+                    revenue = ?,
+                    roas = ?,
+                    total_conversions = ?,
+                    cpl_cpa = ?,
+                    ads_reach = ?,
+                    ads_impressions = ?,
+                    total_clicks = ?,
+                    ads_ctr = ?,
+                    ads_cpc = ?,
+                    ads_cpm = ?,
+                    winning_creative_notes = ?,
+                    optimizing_plan_notes = ?,
+                    what_worked = ?,
+                    next_action_plan = ?,
+                    dashboard_screenshot = ?,
+                    updated_at = datetime('now', 'localtime')
+                WHERE id = ? AND is_deleted = 0
+            ");
+            $stmt->execute([
+                $clientId,
+                $projectId,
+                $reportPeriod,
+                $platform,
+                $objective,
+                $totalAdSpend,
+                $revenue,
+                $roas,
+                $totalConversions,
+                $cplCpa,
+                $adsReach,
+                $adsImpressions,
+                $totalClicks,
+                $adsCtr,
+                $adsCpc,
+                $adsCpm,
+                $winningCreativeNotes,
+                $optimizingPlanNotes,
+                $winningCreativeNotes,
+                $optimizingPlanNotes,
+                $dashboardScreenshot,
+                $id
+            ]);
+            $reportId = $id;
+            $msg = 'Report Ads berhasil diperbarui!';
+        } else {
+            $stmt = $db->prepare("
+                INSERT INTO performance_reports (
+                    client_id, project_id, report_period, platform, objective,
+                    total_ad_spend, revenue, roas, roi, total_conversions, cpl_cpa,
+                    ads_reach, ads_impressions, total_clicks, ads_ctr, ads_cpc, ads_cpm,
+                    winning_creative_notes, optimizing_plan_notes,
+                    what_worked, next_action_plan, dashboard_screenshot,
+                    author_name, created_by_user_id,
+                    created_at, updated_at, is_deleted
+                ) VALUES (
+                    ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?, ?,
+                    ?, ?, ?, ?, ?, ?,
+                    ?, ?,
+                    ?, ?, ?,
+                    ?, ?,
+                    datetime('now', 'localtime'), datetime('now', 'localtime'), 0
+                )
+            ");
+            $roi = ($totalAdSpend > 0 && $revenue > 0) ? round((($revenue - $totalAdSpend) / $totalAdSpend) * 100, 2) : 0;
+            $stmt->execute([
+                $clientId,
+                $projectId,
+                $reportPeriod,
+                $platform,
+                $objective,
+                $totalAdSpend,
+                $revenue,
+                $roas,
+                $roi,
+                $totalConversions,
+                $cplCpa,
+                $adsReach,
+                $adsImpressions,
+                $totalClicks,
+                $adsCtr,
+                $adsCpc,
+                $adsCpm,
+                $winningCreativeNotes,
+                $optimizingPlanNotes,
+                $winningCreativeNotes,
+                $optimizingPlanNotes,
+                $dashboardScreenshot,
+                $authorName,
+                $userId
+            ]);
+            $reportId = $db->lastInsertId();
+            $msg = 'Report Ads berhasil diterbitkan dan otomatis terkirim ke Owner & Portal Klien!';
+        }
+
+        log_activity('report', 'Report Ads Diterbitkan', "Report Ads {$platform} periode {$reportPeriod} untuk {$client['company']} oleh {$authorName}", $totalAdSpend);
+
+        echo json_encode([
+            'success' => true,
+            'message' => $msg,
+            'report_id' => $reportId,
+            'redirect' => url("reports?tab=ads_report")
+        ]);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Gagal menyimpan Report Ads: ' . $e->getMessage()]);
+        exit;
+    }
+}
+
 // 5. STANDALONE UPLOAD IMAGE ENDPOINT (AJAX Preview)
 if ($action === 'upload_image') {
     try {

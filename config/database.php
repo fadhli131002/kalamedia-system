@@ -80,10 +80,10 @@ class Database {
             }
 
             // High Performance: Only run migrations if lock file does not exist (0ms overhead on requests)
-            $lockFile = BASE_PATH . '/database/.schema_v8.lock';
+            $lockFile = BASE_PATH . '/database/.schema_v10.lock';
             if (!file_exists($lockFile)) {
                 self::runMigrations(self::$instance, self::$driver);
-                @file_put_contents($lockFile, "Schema v8 initialized at " . date('Y-m-d H:i:s'));
+                @file_put_contents($lockFile, "Schema v10 initialized at " . date('Y-m-d H:i:s'));
             }
 
             // Ensure core system accounts (Owner & Admin) always exist
@@ -655,6 +655,29 @@ class Database {
                     WHERE is_deleted = 0
                 ");
             } catch (Throwable $e) {}
+        }
+
+        // 3f. Migrate `performance_reports` columns for Ads Report
+        $perfCols = $getTableCols('performance_reports');
+        if (!empty($perfCols)) {
+            $neededPerfCols = [
+                'project_id'              => 'INT DEFAULT NULL',
+                'platform'                => "VARCHAR(50) DEFAULT 'Meta Ads'",
+                'total_clicks'            => 'INT DEFAULT 0',
+                'winning_creative_notes'  => 'TEXT DEFAULT NULL',
+                'optimizing_plan_notes'   => 'TEXT DEFAULT NULL',
+                'dashboard_screenshot'    => 'VARCHAR(255) DEFAULT NULL',
+                'author_name'             => 'VARCHAR(150) DEFAULT NULL',
+                'created_by_user_id'      => 'INT DEFAULT NULL',
+                'status'                  => "VARCHAR(30) DEFAULT 'published'"
+            ];
+            foreach ($neededPerfCols as $cName => $cDef) {
+                if (!in_array($cName, $perfCols)) {
+                    try {
+                        $db->exec("ALTER TABLE performance_reports ADD COLUMN {$cName} {$cDef}");
+                    } catch (Throwable $e) {}
+                }
+            }
         }
 
         // Populate sensible default contract dates for existing active clients, team & tasks

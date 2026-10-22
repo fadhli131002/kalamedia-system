@@ -281,6 +281,16 @@ if ($action === 'get_events') {
         $params[] = $platform;
     }
 
+    // Filter out pure eceran / satuan projects from Content Calendar
+    $where[] = "(cp.project_id IS NULL OR cp.project_id NOT IN (
+        SELECT p.id FROM projects p 
+        LEFT JOIN clients cl ON p.client_id = cl.id
+        WHERE LOWER(COALESCE(p.service_type, '')) LIKE '%eceran%' 
+           OR LOWER(COALESCE(p.service_type, '')) LIKE '%satuan%'
+           OR LOWER(COALESCE(cl.package_name, '')) LIKE '%eceran%'
+           OR LOWER(COALESCE(cl.package_name, '')) LIKE '%satuan%'
+    ))";
+
     $whereSql = implode(' AND ', $where);
 
     $sql = "
@@ -614,12 +624,47 @@ if ($action === 'delete') {
 
 // 8. GET METADATA (Clients with color badges, Projects, Employees)
 if ($action === 'get_metadata') {
-    $clients = $db->query("SELECT id, name, company FROM clients ORDER BY company ASC")->fetchAll();
+    // Only clients that have Kelola Sosmed or non-eceran projects
+    $clients = $db->query("
+        SELECT c.id, c.name, c.company 
+        FROM clients c
+        WHERE c.is_deleted = 0
+          AND (
+              c.id IN (
+                  SELECT DISTINCT p.client_id FROM projects p 
+                  WHERE p.is_deleted = 0 
+                    AND (
+                        LOWER(COALESCE(p.service_type, '')) LIKE '%sosmed%'
+                        OR LOWER(COALESCE(p.service_type, '')) LIKE '%social%'
+                        OR (
+                            LOWER(COALESCE(p.service_type, '')) NOT LIKE '%eceran%'
+                            AND LOWER(COALESCE(p.service_type, '')) NOT LIKE '%satuan%'
+                            AND LOWER(COALESCE(p.service_type, '')) NOT LIKE '%ads%'
+                            AND LOWER(COALESCE(p.service_type, '')) NOT LIKE '%iklan%'
+                        )
+                    )
+              )
+              OR LOWER(COALESCE(c.service_type, '')) LIKE '%sosmed%'
+              OR LOWER(COALESCE(c.service_type, '')) LIKE '%social%'
+          )
+        ORDER BY c.company ASC
+    ")->fetchAll();
     foreach ($clients as &$c) {
         $c['color_hex'] = get_client_color(intval($c['id']));
     }
 
-    $projects = $db->query("SELECT id, client_id, name FROM projects ORDER BY name ASC")->fetchAll();
+    // Exclude pure eceran / satuan projects from Content Planner
+    $projects = $db->query("
+        SELECT p.id, p.client_id, p.name, p.service_type 
+        FROM projects p
+        LEFT JOIN clients cl ON p.client_id = cl.id
+        WHERE COALESCE(p.is_deleted, 0) = 0
+          AND LOWER(COALESCE(p.service_type, '')) NOT LIKE '%eceran%' 
+          AND LOWER(COALESCE(p.service_type, '')) NOT LIKE '%satuan%'
+          AND LOWER(COALESCE(cl.package_name, '')) NOT LIKE '%eceran%'
+          AND LOWER(COALESCE(cl.package_name, '')) NOT LIKE '%satuan%'
+        ORDER BY p.name ASC
+    ")->fetchAll();
     $employees = $db->query("SELECT id, name, position, department FROM employees WHERE status = 'Active' ORDER BY name ASC")->fetchAll();
 
     echo json_encode([

@@ -84,10 +84,16 @@ $badgeLabel = $sidebarBadge;
         <span>Progress & Deliverables</span>
       </a>
 
+      <?php 
+        $clientCId = current_user_client_id();
+        $clientHasSosmed = $clientCId ? client_has_sosmed_service($clientCId) : true;
+        if ($clientHasSosmed): 
+      ?>
       <a href="<?= url('client-portal?tab=calendar&portal=client&_slot=client') ?>" class="nav-link <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'calendar') || in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span>Kalender Konten</span>
       </a>
+      <?php endif; ?>
 
       <a href="<?= url('client-portal?tab=invoices&portal=client&_slot=client') ?>" class="nav-link <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'invoices') || in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
@@ -100,18 +106,38 @@ $badgeLabel = $sidebarBadge;
       </a>
 
     <?php elseif ($isWorker): ?>
-      <!-- WORKER & FREELANCER NAVIGATION -->
+      <!-- WORKER & FREELANCER NAVIGATION (SMART SPECIALIZATION ADAPTIVE) -->
       <div class="nav-section-title">Workspace Tim</div>
 
-      <a href="<?= url('tasks?_slot=internal') ?>" class="nav-link <?= in_array($currentPage, ['tasks', 'team-workspace']) ? 'active' : '' ?>">
+      <a href="<?= url('tasks?_slot=internal') ?>" class="nav-link <?= (in_array($currentPage, ['tasks', 'team-workspace']) && ($_GET['tab'] ?? '') !== 'work_recap') ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         <span>Tugas Saya & Progres</span>
       </a>
 
-      <a href="<?= url('content-calendar?_slot=internal') ?>" class="nav-link <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span>Kalender Konten</span>
-      </a>
+      <?php if (is_ads_specialist($currentUser)): ?>
+        <!-- ATURAN ORANG ADS: Hapus Kalender Konten -> Ganti Jadi Report Ads -->
+        <a href="<?= url('reports?tab=ads_report&_slot=internal') ?>" class="nav-link <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span>Report Ads</span>
+        </a>
+      <?php else: ?>
+        <!-- ATURAN TIM KREATIF: Desain Grafis, Video Editor, Copywriter, Kelola Sosmed -->
+        <a href="<?= url('tasks?tab=work_recap&_slot=internal') ?>" class="nav-link <?= ($currentPage === 'tasks' && ($_GET['tab'] ?? '') === 'work_recap') ? 'active' : '' ?>">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span>Report Pekerjaan</span>
+        </a>
+
+        <?php 
+          $workerUid = (int)($currentUser['id'] ?? 0);
+          $hasSosmedProj = worker_has_sosmed_projects($workerUid);
+          if ($hasSosmedProj): 
+        ?>
+        <a href="<?= url('content-calendar?_slot=internal') ?>" class="nav-link <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Kalender Konten</span>
+        </a>
+        <?php endif; ?>
+      <?php endif; ?>
 
     <?php else: ?>
       <!-- OWNER & ADMIN NAVIGATION -->

@@ -1,6 +1,10 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # Fallback alias for uploads/ to assets/uploads/receipts/
+    RewriteRule ^uploads/receipts/(.*)$ assets/uploads/receipts/$1 [L]
+    RewriteRule ^uploads/(.*)$ assets/uploads/receipts/$1 [L]
+
     # Allow direct access to existing files and directories
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d

@@ -236,3 +236,116 @@ function render_pwa_meta_tags(): void {
     <?php
 }
 
+/**
+ * Smart Role & Specialization Detection: Tim Ads / Spesialis Iklan
+ * Checks service_specialty & position for 'Ads' or 'Iklan'
+ */
+function is_ads_specialist(?array $user = null): bool {
+    $u = $user ?? (function_exists('current_user') ? current_user() : null);
+    if (!$u) return false;
+    $specialty = strtolower($u['service_specialty'] ?? '');
+    $position = strtolower($u['position'] ?? '');
+    return (strpos($specialty, 'ads') !== false || strpos($specialty, 'iklan') !== false ||
+            strpos($position, 'ads') !== false || strpos($position, 'iklan') !== false);
+}
+
+/**
+ * Smart Role & Specialization Detection: Tim Kreatif (Desain Grafis, Video Editor, Copywriter, Sosmed)
+ */
+function is_creative_specialist(?array $user = null): bool {
+    $u = $user ?? (function_exists('current_user') ? current_user() : null);
+    if (!$u) return false;
+    $specialty = strtolower($u['service_specialty'] ?? '');
+    $position = strtolower($u['position'] ?? '');
+    return (strpos($specialty, 'desain') !== false || strpos($specialty, 'design') !== false ||
+            strpos($specialty, 'video') !== false || strpos($specialty, 'editor') !== false ||
+            strpos($specialty, 'copywriter') !== false || strpos($specialty, 'sosmed') !== false ||
+            strpos($position, 'desain') !== false || strpos($position, 'design') !== false ||
+            strpos($position, 'video') !== false || strpos($position, 'editor') !== false ||
+            strpos($position, 'copywriter') !== false || strpos($position, 'sosmed') !== false);
+}
+
+/**
+ * Checks if a project or service is strictly 'Desain Eceran / Satuan' (without Kelola Sosmed)
+ */
+function is_pure_eceran_service(?string $serviceType, ?string $packageName = null): bool {
+    $st = strtolower($serviceType ?? '');
+    $pkg = strtolower($packageName ?? '');
+    $isEceran = (strpos($st, 'eceran') !== false || strpos($st, 'satuan') !== false || strpos($st, '1-an') !== false ||
+                 strpos($pkg, 'eceran') !== false || strpos($pkg, 'satuan') !== false || strpos($pkg, '1-an') !== false);
+    $hasSosmed = (strpos($st, 'sosmed') !== false || strpos($pkg, 'sosmed') !== false || strpos($pkg, 'social media') !== false);
+    return ($isEceran && !$hasSosmed);
+}
+
+/**
+ * Checks if a client has any active 'Kelola Sosmed' project or service
+ */
+function client_has_sosmed_service(int $clientId): bool {
+    if ($clientId <= 0) return false;
+    try {
+        $db = Database::getConnection();
+        $stmtC = $db->prepare("SELECT service_type, package_name FROM clients WHERE id = ?");
+        $stmtC->execute([$clientId]);
+        $c = $stmtC->fetch(PDO::FETCH_ASSOC);
+        if ($c) {
+            $cType = strtolower($c['service_type'] ?? '');
+            $cPkg = strtolower($c['package_name'] ?? '');
+            if (strpos($cType, 'sosmed') !== false || strpos($cPkg, 'sosmed') !== false || strpos($cPkg, 'social media') !== false) {
+                return true;
+            }
+        }
+        $stmtP = $db->prepare("SELECT service_type FROM projects WHERE client_id = ? AND COALESCE(is_deleted,0)=0");
+        $stmtP->execute([$clientId]);
+        $projs = $stmtP->fetchAll(PDO::FETCH_COLUMN);
+        foreach ($projs as $p) {
+            if (strpos(strtolower($p ?: ''), 'sosmed') !== false) {
+                return true;
+            }
+        }
+    } catch (Throwable $e) {}
+    return false;
+}
+
+/**
+ * Checks if a worker/freelancer has any 'Kelola Sosmed' project assigned
+ */
+function worker_has_sosmed_projects(int $userId): bool {
+    if ($userId <= 0) return false;
+    try {
+        $db = Database::getConnection();
+        $stmtU = $db->prepare("SELECT name, role, service_specialty, position FROM users WHERE id = ?");
+        $stmtU->execute([$userId]);
+        $u = $stmtU->fetch(PDO::FETCH_ASSOC);
+        if (!$u) return false;
+        
+        $uName = $u['name'] ?? '';
+        $stmt = $db->prepare("
+            SELECT DISTINCT p.service_type, c.service_type as client_service_type 
+            FROM projects p
+            JOIN clients c ON p.client_id = c.id
+            WHERE COALESCE(p.is_deleted,0)=0
+              AND (
+                p.id IN (SELECT DISTINCT project_id FROM tasks WHERE assigned_to_user_id = ? AND COALESCE(is_deleted,0)=0)
+                OR p.client_id IN (SELECT client_id FROM employee_clients WHERE user_id = ?)
+                OR p.id IN (SELECT DISTINCT project_id FROM freelancer_payouts WHERE (freelancer_name = ? OR freelancer_name LIKE ?) AND COALESCE(is_deleted,0)=0)
+              )
+        ");
+        $stmt->execute([$userId, $userId, $uName, '%' . $uName . '%']);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (empty($rows)) {
+            $spec = strtolower($u['service_specialty'] ?? '');
+            $pos = strtolower($u['position'] ?? '');
+            return (strpos($spec, 'sosmed') !== false || strpos($pos, 'sosmed') !== false);
+        }
+        foreach ($rows as $r) {
+            $pType = strtolower($r['service_type'] ?? '');
+            $cType = strtolower($r['client_service_type'] ?? '');
+            if (strpos($pType, 'sosmed') !== false || strpos($cType, 'sosmed') !== false) {
+                return true;
+            }
+        }
+    } catch (Throwable $e) {}
+    return false;
+}
+
+

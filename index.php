@@ -173,6 +173,11 @@ switch ($route) {
     case 'content-calendar':
     case 'content-planner':
         require_auth('internal');
+        if (is_ads_specialist()) {
+            flash_error('Menu Kalender Konten tidak digunakan untuk Spesialis Iklan. Silakan gunakan menu Report Ads.');
+            header('Location: ' . url('reports?tab=ads_report&_slot=internal'));
+            exit;
+        }
         require_once __DIR__ . '/views/content_dashboard.php';
         break;
 

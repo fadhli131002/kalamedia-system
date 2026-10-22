@@ -7,16 +7,39 @@
 
 require_auth();
 
+// Adaptive SDM & Service Role Checks
+if (is_ads_specialist()) {
+    flash_error('Menu Kalender Konten tidak digunakan untuk Spesialis Iklan. Silakan gunakan menu Report Ads.');
+    header('Location: ' . url('reports?tab=ads_report&_slot=internal'));
+    exit;
+}
+
 $db = Database::getConnection();
 $portal = current_portal();
 $isOwner = ($portal === 'owner');
 $isClientUser = is_client();
 $clientId = current_user_client_id();
 
+// Client guard: Must have Kelola Sosmed
+if ($isClientUser && $clientId && !client_has_sosmed_service($clientId)) {
+    flash_error('Layanan Anda tidak mencakup Kalender Konten.');
+    header('Location: ' . url('client-portal?tab=deliverables&portal=client&_slot=client'));
+    exit;
+}
+
+// Worker guard: If worker has only eceran/ads and no sosmed projects
+$currUser = current_user();
+$isWorker = (current_user_role() === 'karyawan' || current_user_role() === 'freelancer');
+if ($isWorker && !empty($currUser['id']) && !worker_has_sosmed_projects((int)$currUser['id'])) {
+    flash_error('Anda tidak memiliki penugasan proyek Kelola Sosmed untuk Kalender Konten.');
+    header('Location: ' . url('tasks?_slot=internal'));
+    exit;
+}
+
 // Pre-defined client colors matching Slide 3
 $clientColorPalette = ['#2563EB', '#EC4899', '#16A34A', '#8B5CF6', '#F59E0B', '#06B6D4', '#EF4444', '#6366F1'];
 
-// Fetch clients (strictly scoped if client)
+// Fetch clients (strictly scoped if client, and exclude pure Eceran / Non-Sosmed)
 if ($isClientUser && $clientId) {
     $stmtClients = $db->prepare("
         SELECT c.id, c.name, c.company,
@@ -29,11 +52,34 @@ if ($isClientUser && $clientId) {
     $stmtClients->execute([$clientId]);
     $clients = $stmtClients->fetchAll();
 } else {
+    // Only clients who have Kelola Sosmed or non-eceran projects
     $clients = $db->query("
         SELECT c.id, c.name, c.company,
                COUNT(cp.id) as total_contents
         FROM clients c
         LEFT JOIN content_planner cp ON c.id = cp.client_id AND COALESCE(cp.is_deleted, 0) = 0
+        WHERE c.is_deleted = 0
+          AND (
+              c.id IN (
+                  SELECT DISTINCT p.client_id FROM projects p 
+                  WHERE COALESCE(p.is_deleted, 0) = 0
+                    AND (
+                        LOWER(COALESCE(p.service_type, '')) LIKE '%sosmed%' 
+                        OR LOWER(COALESCE(p.service_type, '')) LIKE '%social%' 
+                        OR LOWER(COALESCE(p.package_name, '')) LIKE '%sosmed%'
+                        OR (
+                            LOWER(COALESCE(p.service_type, '')) NOT LIKE '%eceran%' 
+                            AND LOWER(COALESCE(p.service_type, '')) NOT LIKE '%satuan%'
+                            AND LOWER(COALESCE(p.package_name, '')) NOT LIKE '%eceran%'
+                            AND LOWER(COALESCE(p.package_name, '')) NOT LIKE '%satuan%'
+                            AND LOWER(COALESCE(p.service_type, '')) NOT LIKE '%ads%'
+                            AND LOWER(COALESCE(p.service_type, '')) NOT LIKE '%iklan%'
+                        )
+                    )
+              )
+              OR LOWER(COALESCE(c.service_type, '')) LIKE '%sosmed%'
+              OR LOWER(COALESCE(c.service_type, '')) LIKE '%social%'
+          )
         GROUP BY c.id
         ORDER BY c.company ASC
     ")->fetchAll();

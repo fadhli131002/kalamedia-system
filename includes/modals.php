@@ -3223,7 +3223,7 @@ window.openProjectFinancialDetailModal = async function(projectId, clientId = 0)
           <td style="font-weight: 700; color: #B91C1C;">${fr.formatted_amount}</td>
           <td><span class="badge-status badge-${(fr.status || 'pending').toLowerCase()}">${fr.status}</span></td>
           <td style="text-align: right;">
-            ${fr.receipt_file ? `<button type="button" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px;" onclick="viewReceiptImage('uploads/${fr.receipt_file}', 'Bukti ${fr.freelancer_name}')">Struk</button>` : '<span style="color:var(--text-muted); font-size:11px;">-</span>'}
+            ${fr.receipt_file ? `<button type="button" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px;" onclick="viewReceiptImage('assets/uploads/receipts/${fr.receipt_file}', 'Bukti ${fr.freelancer_name}')">Struk</button>` : '<span style="color:var(--text-muted); font-size:11px;">-</span>'}
           </td>
         </tr>
       `).join('');
@@ -3241,7 +3241,7 @@ window.openProjectFinancialDetailModal = async function(projectId, clientId = 0)
           <td>${ad.formatted_spent_date}</td>
           <td style="font-weight: 700; color: #B91C1C;">${ad.formatted_amount}</td>
           <td style="text-align: right;">
-            ${ad.receipt_file ? `<button type="button" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px;" onclick="viewReceiptImage('uploads/${ad.receipt_file}', 'Bukti ${ad.platform}')">Struk</button>` : '<span style="color:var(--text-muted); font-size:11px;">-</span>'}
+            ${ad.receipt_file ? `<button type="button" class="btn btn-secondary btn-sm" style="padding: 4px 8px; font-size: 11px;" onclick="viewReceiptImage('assets/uploads/receipts/${ad.receipt_file}', 'Bukti ${ad.platform}')">Struk</button>` : '<span style="color:var(--text-muted); font-size:11px;">-</span>'}
           </td>
         </tr>
       `).join('');

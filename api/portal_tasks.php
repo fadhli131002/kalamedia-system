@@ -1226,6 +1226,242 @@ if ($action === 'delete_all_tasks') {
     }
 }
 
+// -------------------------------------------------------------
+// 11. GET: Work Recap & Productivity (Bulanan / Per Proyek)
+// -------------------------------------------------------------
+if ($action === 'work_recap') {
+    try {
+        $filterMonth = trim($_GET['month'] ?? '');
+        $filterProjectId = (int)($_GET['project_id'] ?? 0);
+        $filterClientId = (int)($_GET['client_id'] ?? 0);
+        $filterServiceType = trim($_GET['service_type'] ?? 'all');
+        $filterWorkerId = (int)($_GET['worker_user_id'] ?? 0);
+
+        // Strict Role Scoping
+        if (is_client()) {
+            $clientAuthId = current_user_client_id();
+            if ($clientAuthId > 0) {
+                $filterClientId = $clientAuthId;
+            } else {
+                echo json_encode(['success' => false, 'message' => 'Akun klien tidak terhubung ke data klien.']);
+                exit;
+            }
+        } elseif ($role === 'karyawan' || $role === 'freelancer') {
+            // Worker is locked to their own tasks
+            $filterWorkerId = $userId;
+        }
+
+        $where = ["COALESCE(t.is_deleted, 0) = 0", "(p.id IS NULL OR COALESCE(p.is_deleted, 0) = 0)", "(c.id IS NULL OR COALESCE(c.is_deleted, 0) = 0)"];
+        $params = [];
+
+        // Month filter (YYYY-MM)
+        if (!empty($filterMonth) && $filterMonth !== 'all') {
+            $monthLike = $filterMonth . '%';
+            $where[] = "(t.created_at LIKE ? OR t.due_date LIKE ? OR t.start_date LIKE ?)";
+            $params[] = $monthLike;
+            $params[] = $monthLike;
+            $params[] = $monthLike;
+        }
+
+        // Project filter
+        if ($filterProjectId > 0) {
+            $where[] = "t.project_id = ?";
+            $params[] = $filterProjectId;
+        }
+
+        // Client filter
+        if ($filterClientId > 0) {
+            $where[] = "(t.client_id = ? OR p.client_id = ?)";
+            $params[] = $filterClientId;
+            $params[] = $filterClientId;
+        }
+
+        // Worker filter
+        if ($filterWorkerId > 0) {
+            $where[] = "t.assigned_to_user_id = ?";
+            $params[] = $filterWorkerId;
+        }
+
+        // Service Type filter
+        if (!empty($filterServiceType) && $filterServiceType !== 'all') {
+            if ($filterServiceType === 'eceran') {
+                $where[] = "(LOWER(COALESCE(p.service_type, '')) LIKE '%eceran%' OR LOWER(COALESCE(p.service_type, '')) LIKE '%satuan%' OR LOWER(COALESCE(c.package_name, '')) LIKE '%eceran%' OR LOWER(COALESCE(c.package_name, '')) LIKE '%satuan%')";
+            } elseif ($filterServiceType === 'sosmed') {
+                $where[] = "(LOWER(COALESCE(p.service_type, '')) LIKE '%sosmed%' OR LOWER(COALESCE(p.service_type, '')) LIKE '%social%' OR LOWER(COALESCE(c.package_name, '')) LIKE '%sosmed%')";
+            } elseif ($filterServiceType === 'web') {
+                $where[] = "(LOWER(COALESCE(p.service_type, '')) LIKE '%web%' OR LOWER(COALESCE(c.package_name, '')) LIKE '%web%')";
+            } elseif ($filterServiceType === 'ads') {
+                $where[] = "(LOWER(COALESCE(p.service_type, '')) LIKE '%ads%' OR LOWER(COALESCE(p.service_type, '')) LIKE '%iklan%')";
+            } else {
+                $where[] = "p.service_type = ?";
+                $params[] = $filterServiceType;
+            }
+        }
+
+        $whereSql = implode(' AND ', $where);
+
+        // Summary Aggregates (100% dynamic via SQL COUNT)
+        $summarySql = "
+            SELECT 
+                COUNT(*) as total_tasks,
+                SUM(CASE WHEN t.status = 'approved' THEN 1 ELSE 0 END) as approved_tasks,
+                SUM(CASE WHEN t.status IN ('in_progress', 'internal_review', 'client_review') THEN 1 ELSE 0 END) as in_progress_tasks,
+                SUM(CASE WHEN t.status = 'revision' THEN 1 ELSE 0 END) as revision_tasks,
+                SUM(CASE WHEN t.status = 'backlog' THEN 1 ELSE 0 END) as backlog_tasks
+            FROM tasks t
+            LEFT JOIN projects p ON t.project_id = p.id
+            LEFT JOIN clients c ON (t.client_id = c.id OR p.client_id = c.id)
+            LEFT JOIN users u ON t.assigned_to_user_id = u.id
+            WHERE $whereSql
+        ";
+        $stmtSum = $db->prepare($summarySql);
+        $stmtSum->execute($params);
+        $summary = $stmtSum->fetch(PDO::FETCH_ASSOC);
+
+        // Fetch Detailed Tasks List
+        $taskSql = "
+            SELECT 
+                t.id, t.project_id, t.client_id, t.assigned_to_user_id,
+                t.title, t.description, t.category, t.worker_type, t.priority,
+                t.status, t.deliverable_link, t.start_date, t.due_date,
+                t.created_at, t.updated_at,
+                p.name as project_name, p.service_type as project_service_type, c.package_name,
+                c.name as client_name, c.company as client_company,
+                u.name as worker_name, u.position as worker_position, u.service_specialty as worker_specialty,
+                (
+                    SELECT fb.message 
+                    FROM task_feedbacks fb 
+                    WHERE fb.task_id = t.id 
+                    ORDER BY fb.id DESC 
+                    LIMIT 1
+                ) as latest_feedback_message,
+                (
+                    SELECT fb.feedback_type 
+                    FROM task_feedbacks fb 
+                    WHERE fb.task_id = t.id 
+                    ORDER BY fb.id DESC 
+                    LIMIT 1
+                ) as latest_feedback_type
+            FROM tasks t
+            LEFT JOIN projects p ON t.project_id = p.id
+            LEFT JOIN clients c ON (t.client_id = c.id OR p.client_id = c.id)
+            LEFT JOIN users u ON t.assigned_to_user_id = u.id
+            WHERE $whereSql
+            ORDER BY 
+                CASE 
+                    WHEN t.status = 'revision' THEN 1
+                    WHEN t.status = 'client_review' THEN 2
+                    WHEN t.status = 'in_progress' THEN 3
+                    WHEN t.status = 'approved' THEN 4
+                    ELSE 5
+                END,
+                t.id DESC
+        ";
+        $stmtTasks = $db->prepare($taskSql);
+        $stmtTasks->execute($params);
+        $rawTasks = $stmtTasks->fetchAll(PDO::FETCH_ASSOC);
+
+        $categoryLabels = [
+            'design' => 'Desain Grafis',
+            'video' => 'Edit Video',
+            'copywriting' => 'Copywriting',
+            'web' => 'Website / Dev',
+            'ads' => 'Advertising',
+            'social_media' => 'Kelola Sosmed'
+        ];
+
+        $statusLabels = [
+            'approved' => 'Selesai & Disetujui (Approved)',
+            'client_review' => 'Review Klien',
+            'internal_review' => 'Internal Review',
+            'revision' => 'Revisi Klien',
+            'in_progress' => 'Sedang Dikerjakan',
+            'backlog' => 'Antrean (Backlog)'
+        ];
+
+        $tasks = [];
+        foreach ($rawTasks as $r) {
+            $isEceran = is_pure_eceran_service($r['project_service_type'], $r['package_name']);
+            $r['is_eceran'] = $isEceran;
+            $r['service_badge'] = $isEceran ? 'Desain Eceran / Satuan' : ($r['project_service_type'] ?: 'Reguler');
+            $r['category_label'] = $categoryLabels[$r['category']] ?? ucfirst($r['category'] ?: 'Pekerjaan');
+            $r['status_label'] = $statusLabels[$r['status']] ?? ucfirst($r['status'] ?: 'Pending');
+            $tasks[] = $r;
+        }
+
+        // Available Months
+        $monthsSql = "
+            SELECT DISTINCT substr(created_at, 1, 7) as m
+            FROM tasks
+            WHERE is_deleted = 0 AND created_at IS NOT NULL
+            ORDER BY m DESC
+        ";
+        $months = $db->query($monthsSql)->fetchAll(PDO::FETCH_COLUMN);
+        if (empty($months)) {
+            $months = [date('Y-m')];
+        }
+
+        // Projects for Filter Dropdown
+        $projWhere = ["COALESCE(p.is_deleted, 0) = 0", "COALESCE(c.is_deleted, 0) = 0"];
+        $projParams = [];
+        if (is_client()) {
+            $projWhere[] = "p.client_id = ?";
+            $projParams[] = current_user_client_id();
+        } elseif ($role === 'karyawan' || $role === 'freelancer') {
+            $projWhere[] = "p.id IN (SELECT DISTINCT project_id FROM tasks WHERE assigned_to_user_id = ? AND COALESCE(is_deleted, 0) = 0)";
+            $projParams[] = $userId;
+        }
+        $projStmt = $db->prepare("
+            SELECT DISTINCT p.id, p.name, p.service_type, c.company as client_company
+            FROM projects p
+            JOIN clients c ON p.client_id = c.id
+            WHERE " . implode(' AND ', $projWhere) . "
+            ORDER BY c.company ASC, p.name ASC
+        ");
+        $projStmt->execute($projParams);
+        $filterProjects = $projStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Workers for Filter Dropdown (Owner/Admin)
+        $filterWorkers = [];
+        if (is_admin()) {
+            $filterWorkers = $db->query("
+                SELECT id, name, position, service_specialty, role
+                FROM users
+                WHERE role IN ('karyawan', 'freelancer') AND is_active = 1 AND COALESCE(is_deleted,0)=0
+                ORDER BY name ASC
+            ")->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        echo json_encode([
+            'success' => true,
+            'summary' => [
+                'total_tasks' => (int)($summary['total_tasks'] ?? 0),
+                'approved_tasks' => (int)($summary['approved_tasks'] ?? 0),
+                'in_progress_tasks' => (int)($summary['in_progress_tasks'] ?? 0),
+                'revision_tasks' => (int)($summary['revision_tasks'] ?? 0),
+                'backlog_tasks' => (int)($summary['backlog_tasks'] ?? 0),
+            ],
+            'tasks' => $tasks,
+            'filters' => [
+                'months' => $months,
+                'projects' => $filterProjects,
+                'workers' => $filterWorkers,
+                'current' => [
+                    'month' => $filterMonth,
+                    'project_id' => $filterProjectId,
+                    'client_id' => $filterClientId,
+                    'service_type' => $filterServiceType,
+                    'worker_user_id' => $filterWorkerId
+                ]
+            ]
+        ]);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Gagal memuat rekap pekerjaan: ' . $e->getMessage()]);
+        exit;
+    }
+}
+
 if (!empty($action) && $action !== 'none') {
     echo json_encode(['success' => false, 'message' => 'Aksi API tidak valid']);
 }

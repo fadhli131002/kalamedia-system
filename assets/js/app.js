@@ -243,16 +243,26 @@ window.addEventListener('pageshow', () => {
 // Universal Lightbox Preview for Receipts (Images & PDFs)
 function previewTransactionReceipt(fileUrl, title = 'Bukti Transaksi Saldo Iklan') {
   if (!fileUrl) {
-    showToast('File bukti transaksi tidak ditemukan.', 'warning');
-    return;
-  }
-  const modal = document.getElementById('modal-view-receipt');
-  if (!modal) {
-    window.open(fileUrl, '_blank');
+    if (typeof showToast === 'function') showToast('File bukti transaksi tidak ditemukan.', 'warning');
     return;
   }
 
-  const isPdf = fileUrl.toLowerCase().endsWith('.pdf');
+  let url = String(fileUrl).trim();
+  if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('/') && !url.startsWith('assets/')) {
+    if (url.startsWith('uploads/')) {
+      url = 'assets/uploads/receipts/' + url.replace(/^uploads\/(receipts\/)?/, '');
+    } else {
+      url = 'assets/uploads/receipts/' + url;
+    }
+  }
+
+  const modal = document.getElementById('modal-view-receipt');
+  if (!modal) {
+    window.open(url, '_blank');
+    return;
+  }
+
+  const isPdf = url.toLowerCase().endsWith('.pdf');
   const img = document.getElementById('view-receipt-img') || document.getElementById('receipt-preview-img');
   const iframe = document.getElementById('view-receipt-iframe');
   const titleEl = document.getElementById('view-receipt-title');
@@ -260,7 +270,7 @@ function previewTransactionReceipt(fileUrl, title = 'Bukti Transaksi Saldo Iklan
 
   if (titleEl) titleEl.innerText = title;
   if (downloadBtn) {
-    downloadBtn.href = fileUrl;
+    downloadBtn.href = url;
     downloadBtn.style.display = 'inline-flex';
   }
 
@@ -390,9 +400,21 @@ function viewReceiptImage(imgUrl, title = 'Bukti Pembayaran') {
   const modal = document.getElementById('modal-view-receipt');
   if (!modal) return;
 
-  document.getElementById('view-receipt-img').src = imgUrl;
-  document.getElementById('view-receipt-title').innerText = title;
-  document.getElementById('view-receipt-download').href = imgUrl;
+  let url = String(imgUrl || '').trim();
+  if (url && !url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('/') && !url.startsWith('assets/')) {
+    if (url.startsWith('uploads/')) {
+      url = 'assets/uploads/receipts/' + url.replace(/^uploads\/(receipts\/)?/, '');
+    } else {
+      url = 'assets/uploads/receipts/' + url;
+    }
+  }
+
+  const img = document.getElementById('view-receipt-img');
+  if (img) img.src = url;
+  const titleEl = document.getElementById('view-receipt-title');
+  if (titleEl) titleEl.innerText = title;
+  const dl = document.getElementById('view-receipt-download');
+  if (dl) dl.href = url;
   openModal('modal-view-receipt');
 }
 

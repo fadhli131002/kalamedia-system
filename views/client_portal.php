@@ -180,15 +180,21 @@ $stmtProj = $db->prepare("SELECT * FROM projects WHERE client_id = ? AND COALESC
 $stmtProj->execute([$clientId]);
 $project = $stmtProj->fetch();
 
-// Fetch Content Calendar items for this client
-$contentItems = $db->prepare("
-    SELECT * FROM content_planner 
-    WHERE client_id = ? AND COALESCE(is_deleted,0)=0 
-    ORDER BY publish_date ASC, publish_time ASC 
-    LIMIT 12
-");
-$contentItems->execute([$clientId]);
-$contents = $contentItems->fetchAll();
+// Check if client has Kelola Sosmed service
+$clientHasSosmed = client_has_sosmed_service($clientId);
+
+// Fetch Content Calendar items for this client (Only if client has Sosmed)
+$contents = [];
+if ($clientHasSosmed) {
+    $contentItems = $db->prepare("
+        SELECT * FROM content_planner 
+        WHERE client_id = ? AND COALESCE(is_deleted,0)=0 
+        ORDER BY publish_date ASC, publish_time ASC 
+        LIMIT 12
+    ");
+    $contentItems->execute([$clientId]);
+    $contents = $contentItems->fetchAll();
+}
 
 // Fetch Invoices for this client (STRICT: Financial privacy - only client-facing invoice totals)
 $stmtInvoices = $db->prepare("
@@ -1164,10 +1170,12 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
           <button class="portal-tab-btn active" onclick="switchPortalTab('deliverables', this)">
             <span>Progress & Deliverables</span>
           </button>
-          <button class="portal-tab-btn" onclick="switchPortalTab('calendar', this)">
-            <span>Kalender Konten</span>
-            <span class="portal-tab-badge"><?= count($contents) ?></span>
-          </button>
+          <?php if ($clientHasSosmed): ?>
+            <button class="portal-tab-btn" onclick="switchPortalTab('calendar', this)">
+              <span>Kalender Konten</span>
+              <span class="portal-tab-badge"><?= count($contents) ?></span>
+            </button>
+          <?php endif; ?>
           <button class="portal-tab-btn" onclick="switchPortalTab('invoices', this)">
             <span>Tagihan / Invoices</span>
             <span class="portal-tab-badge"><?= count($invoices) ?></span>
@@ -1306,8 +1314,13 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
                           <?php endif; ?>
                         </td>
                         <td style="text-align: right; white-space: nowrap;">
-                          <?php if (!empty($payout['receipt_file'])): ?>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('uploads/<?= htmlspecialchars(addslashes($payout['receipt_file'])) ?>', 'Bukti Transfer Fee Freelancer - <?= htmlspecialchars(addslashes($payout['freelancer_name'])) ?>')" style="font-size: 11px; font-weight: 700; padding: 3px 8px; color: #027A48; border-color: #A6F4C5; background: #ECFDF3;">
+                          <?php if (!empty($payout['receipt_file'])): 
+                            $pReceipt = $payout['receipt_file'];
+                            if (!str_starts_with($pReceipt, 'http') && !str_starts_with($pReceipt, 'assets/')) {
+                                $pReceipt = 'assets/uploads/receipts/' . ltrim(str_replace('uploads/', '', $pReceipt), '/');
+                            }
+                          ?>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($pReceipt)) ?>', 'Bukti Transfer Fee Freelancer - <?= htmlspecialchars(addslashes($payout['freelancer_name'])) ?>')" style="font-size: 11px; font-weight: 700; padding: 3px 8px; color: #027A48; border-color: #A6F4C5; background: #ECFDF3;">
                               📄 Bukti Transfer
                             </button>
                           <?php else: ?>
@@ -1461,6 +1474,7 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
           </div>
         </div>
 
+        <?php if ($clientHasSosmed): ?>
         <!-- TAB 2: Content Calendar -->
         <div id="tab-pane-calendar" style="display: none;">
           <div class="glass-panel">
@@ -1522,6 +1536,7 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
             </div>
           </div>
         </div>
+        <?php endif; ?>
 
         <!-- TAB 3: Client Invoices (Client Privacy Assured) -->
         <div id="tab-pane-invoices" style="display: none;">
@@ -1581,25 +1596,26 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
 
         <!-- TAB 4: Performance Reports (Pitch Deck & Blended Economics) -->
         <div id="tab-pane-reports" style="display: none;">
-          <div class="glass-panel">
+          <!-- 1. Report Ads & Performance Deck Panel -->
+          <div class="glass-panel" style="margin-bottom: 24px;">
             <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
               <div>
-                <h3 class="panel-title">Laporan Kinerja Full-Funnel Performance Marketing</h3>
+                <h3 class="panel-title">Laporan Performa Iklan &amp; Performance Marketing</h3>
                 <p style="font-size: 12.5px; color: var(--text-secondary); margin-top: 2px;">
-                  Dokumen laporan hasil kampanye paid ads dan strategi performa resmi agensi Kalamedia Creative.
+                  Dokumen laporan hasil kampanye paid ads resmi dari tim spesialis iklan agensi Kalamedia Creative.
                 </p>
               </div>
             </div>
 
             <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
-              <table class="table-custom" style="min-width: 720px !important; width: 100%;">
+              <table class="table-custom" style="min-width: 820px !important; width: 100%;">
                 <thead>
                   <tr>
-                    <th>PERIODE LAPORAN</th>
+                    <th>PERIODE &amp; PLATFORM</th>
                     <th>OBJEKTIF KAMPANYE</th>
-                    <th>TOTAL AD SPEND</th>
-                    <th>GROSS REVENUE</th>
-                    <th>BLENDED ROAS</th>
+                    <th>TOTAL SPEND &amp; HASIL</th>
+                    <th>IMPRESSIONS &amp; CTR</th>
+                    <th>WINNING CREATIVE</th>
                     <th style="text-align: right;">AKSI</th>
                   </tr>
                 </thead>
@@ -1611,35 +1627,160 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
                       </td>
                     </tr>
                   <?php else: ?>
-                    <?php foreach ($clientReports as $rep): ?>
+                    <?php foreach ($clientReports as $rep): 
+                      $pform = $rep['platform'] ?? 'Meta Ads';
+                    ?>
                       <tr>
-                        <td style="font-weight: 800; color: #101828;">
-                          <?= htmlspecialchars($rep['report_period'] ?? 'Periode Berjalan') ?>
+                        <td>
+                          <div style="font-weight: 800; color: #101828;">
+                            <?= htmlspecialchars($rep['report_period'] ?? 'Periode Berjalan') ?>
+                          </div>
+                          <span class="badge" style="background: #EFF6FF; color: #1E40AF; font-size: 11px; font-weight: 700; margin-top: 3px;">
+                            <?= htmlspecialchars($pform) ?>
+                          </span>
                         </td>
                         <td>
                           <span class="badge" style="background: #F2F4F7; color: #101828; font-weight: 700;">
                             <?= htmlspecialchars($rep['objective'] ?? 'Sales & Leads') ?>
                           </span>
                         </td>
-                        <td style="font-weight: 700;">
-                          Rp <?= number_format($rep['total_ad_spend'] ?? 0, 0, ',', '.') ?>
-                        </td>
-                        <td style="font-weight: 700; color: #027A48;">
-                          Rp <?= number_format($rep['revenue'] ?? 0, 0, ',', '.') ?>
+                        <td>
+                          <div style="font-weight: 700; color: #101828;">
+                            Rp <?= number_format($rep['total_ad_spend'] ?? 0, 0, ',', '.') ?>
+                          </div>
+                          <div style="font-size: 11.5px; color: #027A48; font-weight: 700;">
+                            <?= number_format($rep['total_conversions'] ?? 0) ?> Results (CPA: Rp <?= number_format($rep['cpl_cpa'] ?? 0, 0, ',', '.') ?>)
+                          </div>
                         </td>
                         <td>
-                          <span class="badge" style="background: #EEF2FF; color: #4338CA; font-weight: 800;">
-                            <?= number_format($rep['roas'] ?? 0, 2) ?>x
-                          </span>
+                          <div style="font-size: 12.5px; font-weight: 600; color: #344054;">
+                            <?= number_format($rep['ads_impressions'] ?? 0) ?> tayangan
+                          </div>
+                          <div style="font-size: 11px; color: #2563EB; font-weight: 700;">
+                            CTR: <?= number_format($rep['ads_ctr'] ?? 0, 2) ?>%
+                            <?php if (!empty($rep['roas']) && $rep['roas'] > 0): ?>
+                              &bull; ROAS: <?= number_format($rep['roas'], 2) ?>x
+                            <?php endif; ?>
+                          </div>
                         </td>
-                        <td style="text-align: right;">
-                          <a href="<?= url('report-deck?id=' . $rep['id'] . '&portal=client&_slot=client') ?>" class="btn btn-secondary btn-sm" style="font-size: 11.5px; font-weight: 700;">
-                            <span>Lihat Deck Laporan</span>
-                          </a>
+                        <td>
+                          <?php if (!empty($rep['winning_creative_notes']) || !empty($rep['what_worked'])): ?>
+                            <div style="font-size: 11.5px; color: #475467; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="<?= htmlspecialchars($rep['winning_creative_notes'] ?: $rep['what_worked']) ?>">
+                              🌟 <?= htmlspecialchars($rep['winning_creative_notes'] ?: $rep['what_worked']) ?>
+                            </div>
+                          <?php endif; ?>
+                          <?php if (!empty($rep['dashboard_screenshot'])): ?>
+                            <a href="<?= url($rep['dashboard_screenshot']) ?>" target="_blank" style="font-size: 11px; color: #175CD3; font-weight: 700; text-decoration: underline;">
+                              🖼️ Bukti Dashboard
+                            </a>
+                          <?php endif; ?>
+                        </td>
+                        <td style="text-align: right; white-space: nowrap;">
+                          <div class="table-actions" style="justify-content: flex-end;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick='viewClientAdsReportDetail(<?= json_encode($rep) ?>)' style="font-size: 11.5px; font-weight: 700;">
+                              <span>Lihat / Cetak PDF</span>
+                            </button>
+                            <a href="<?= url('report-deck?id=' . $rep['id'] . '&portal=client&_slot=client') ?>" class="btn btn-secondary btn-sm" style="font-size: 11.5px; font-weight: 700; background: #F8FAFC;">
+                              <span>Deck</span>
+                            </a>
+                          </div>
                         </td>
                       </tr>
                     <?php endforeach; ?>
                   <?php endif; ?>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 2. Section: Rekap Pekerjaan & Konten PT Anda (Monthly & Per-Project Output Recap) -->
+          <div class="glass-panel" style="padding: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
+              <div>
+                <h3 class="panel-title" style="font-size: 16px;">Rekap Pekerjaan &amp; Konten PT Anda</h3>
+                <p style="font-size: 12.5px; color: var(--text-secondary); margin-top: 2px;">
+                  Transparansi seluruh item pekerjaan (desain, video, konten, copy, web) yang dikerjakan Kalamedia untuk perusahaan Anda bulan ini.
+                </p>
+              </div>
+
+              <button type="button" class="btn btn-secondary btn-sm" onclick="exportClientWorkRecapPrint()" style="font-weight: 700; border-radius: 8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                <span>Cetak / Ekspor PDF Rekap Pekerjaan</span>
+              </button>
+            </div>
+
+            <!-- Month Filter -->
+            <div style="background: #F9FAFB; border: 1px solid #ECEEF5; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+              <div style="min-width: 180px;">
+                <label style="font-size: 11px; font-weight: 700; color: #4B5563; text-transform: uppercase; display: block; margin-bottom: 4px;">Pilih Bulan</label>
+                <select id="client-recap-filter-month" class="form-select" onchange="loadClientWorkRecap()">
+                  <option value="">Semua Periode</option>
+                  <option value="<?= date('Y-m') ?>" selected>Bulan Ini (<?= date('M Y') ?>)</option>
+                  <option value="<?= date('Y-m', strtotime('-1 month')) ?>">Bulan Lalu (<?= date('M Y', strtotime('-1 month')) ?>)</option>
+                </select>
+              </div>
+              <div style="margin-top: 18px;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="loadClientWorkRecap()">Segarkan</button>
+              </div>
+            </div>
+
+            <!-- 4 Dynamic KPI Cards for Client PT -->
+            <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr) !important; gap: 14px; margin-bottom: 22px;">
+              <div class="kpi-card" style="border-top: 3px solid #2563EB;">
+                <div class="kpi-header">
+                  <span class="kpi-title" style="color: #2563EB; font-weight: 700;">Total Pekerjaan</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+                </div>
+                <div class="kpi-value" id="client-recap-stat-total" style="font-size: 22px; color: #101828;">0</div>
+                <div class="kpi-meta">Seluruh output pekerjaan tim</div>
+              </div>
+
+              <div class="kpi-card" style="border-top: 3px solid #027A48;">
+                <div class="kpi-header">
+                  <span class="kpi-title" style="color: #027A48; font-weight: 700;">Selesai &amp; Disetujui (Approved)</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#027A48" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+                <div class="kpi-value" id="client-recap-stat-approved" style="font-size: 22px; color: #027A48;">0</div>
+                <div class="kpi-meta">Sudah tuntas &amp; disetujui Anda</div>
+              </div>
+
+              <div class="kpi-card" style="border-top: 3px solid #F79009;">
+                <div class="kpi-header">
+                  <span class="kpi-title" style="color: #B54708; font-weight: 700;">Sedang Dikerjakan / Review</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F79009" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <div class="kpi-value" id="client-recap-stat-progress" style="font-size: 22px; color: #B54708;">0</div>
+                <div class="kpi-meta">Proses pengerjaan / siap Anda review</div>
+              </div>
+
+              <div class="kpi-card" style="border-top: 3px solid #D92D20;">
+                <div class="kpi-header">
+                  <span class="kpi-title" style="color: #D92D20; font-weight: 700;">Revisi (Revision)</span>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D92D20" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div class="kpi-value" id="client-recap-stat-revision" style="font-size: 22px; color: #D92D20;">0</div>
+                <div class="kpi-meta">Sedang diperbaiki sesuai masukan</div>
+              </div>
+            </div>
+
+            <!-- Itemized Table of Work Logs -->
+            <div id="printable-client-work-recap-table" class="kala-table-scroll table-responsive" style="width: 100%; overflow-x: auto;">
+              <table class="table-custom" style="min-width: 820px; width: 100%;">
+                <thead>
+                  <tr>
+                    <th>TANGGAL SELESAI</th>
+                    <th>JUDUL &amp; RINCIAN PEKERJAAN</th>
+                    <th>OUTPUT KATEGORI</th>
+                    <th>HASIL KERJA / FILE</th>
+                    <th>STATUS &amp; APPROVAL ANDA</th>
+                  </tr>
+                </thead>
+                <tbody id="client-recap-tasks-tbody">
+                  <tr>
+                    <td colspan="5" style="text-align: center; padding: 32px; color: var(--text-muted);">
+                      Memuat rekap pekerjaan PT Anda...
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -2193,7 +2334,12 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
 
     function switchPortalTab(tabName, btn) {
       document.querySelectorAll('.portal-tab-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      if (btn) {
+        btn.classList.add('active');
+      } else {
+        const targetBtn = document.querySelector(`.portal-tab-btn[onclick*="'${tabName}'"]`);
+        if (targetBtn) targetBtn.classList.add('active');
+      }
 
       ['deliverables', 'calendar', 'invoices', 'reports', 'ads'].forEach(t => {
         const pane = document.getElementById('tab-pane-' + t);
@@ -2209,9 +2355,119 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
         }
       });
 
+      // Sync mobile bottom nav items if present
+      document.querySelectorAll('.mobile-bottom-nav .mob-nav-item').forEach(item => {
+        const href = item.getAttribute('href') || '';
+        if (href.includes('tab=' + tabName) || (tabName === 'deliverables' && !href.includes('tab='))) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+
       if (tabName === 'ads') {
         requestAnimationFrame(() => setTimeout(loadClientAdsData, 90));
+      } else if (tabName === 'reports') {
+        requestAnimationFrame(() => setTimeout(loadClientWorkRecap, 90));
       }
+    }
+
+    async function loadClientWorkRecap() {
+      const monthSelect = document.getElementById('client-recap-filter-month');
+      const month = monthSelect ? monthSelect.value : '';
+
+      try {
+        const res = await fetch(`api/portal_tasks.php?action=work_recap&month=${encodeURIComponent(month)}&_slot=client`);
+        const data = await res.json();
+        if (!data.success) return;
+
+        // 4 KPI Summary Cards
+        const elTot = document.getElementById('client-recap-stat-total');
+        const elApp = document.getElementById('client-recap-stat-approved');
+        const elProg = document.getElementById('client-recap-stat-progress');
+        const elRev = document.getElementById('client-recap-stat-revision');
+        if (elTot) elTot.innerText = data.summary.total_tasks || 0;
+        if (elApp) elApp.innerText = data.summary.approved_tasks || 0;
+        if (elProg) elProg.innerText = data.summary.in_progress_tasks || 0;
+        if (elRev) elRev.innerText = data.summary.revision_tasks || 0;
+
+        // Render Table Rows
+        const tbody = document.getElementById('client-recap-tasks-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (!data.tasks || data.tasks.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 32px; color: var(--text-muted);">Tidak ada pekerjaan pada periode yang dipilih.</td></tr>`;
+          return;
+        }
+
+        data.tasks.forEach(t => {
+          const tr = document.createElement('tr');
+          const statusBg = (t.status === 'approved') ? '#ECFDF5' : ((t.status === 'revision') ? '#FEF2F2' : '#EFF6FF');
+          const statusColor = (t.status === 'approved') ? '#027A48' : ((t.status === 'revision') ? '#B42318' : '#175CD3');
+
+          tr.innerHTML = `
+            <td style="white-space: nowrap;">
+              <div style="font-weight: 700; color: #101828; font-size: 12px;">${t.due_date ? t.due_date : (t.created_at ? t.created_at.substring(0, 10) : '-')}</div>
+            </td>
+            <td>
+              <div style="font-weight: 700; color: #101828; font-size: 13px;">${escapeHtml(t.title)}</div>
+              ${t.description ? `<div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 2px;">${escapeHtml(t.description)}</div>` : ''}
+              ${t.latest_feedback_message ? `<div style="font-size: 11px; color: #B54708; margin-top: 4px; background: #FFFAEB; padding: 2px 6px; border-radius: 4px;">💬 Masukan Anda: "${escapeHtml(t.latest_feedback_message)}"</div>` : ''}
+            </td>
+            <td>
+              <span style="font-size: 11px; font-weight: 700; background: #F2F4F7; color: #344054; padding: 3px 8px; border-radius: 6px;">
+                ${escapeHtml(t.category_label)}
+              </span>
+            </td>
+            <td>
+              ${t.deliverable_link ? `<a href="${escapeHtml(t.deliverable_link)}" target="_blank" style="font-size: 11.5px; font-weight: 700; color: #175CD3; text-decoration: underline; display: inline-flex; align-items: center; gap: 4px;">🔗 Buka File Hasil</a>` : '<span style="font-size: 11px; color: var(--text-tertiary);">Belum ada link</span>'}
+            </td>
+            <td>
+              <span style="display: inline-block; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; background: ${statusBg}; color: ${statusColor};">
+                ${escapeHtml(t.status_label)}
+              </span>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function exportClientWorkRecapPrint() {
+      window.print();
+    }
+
+    function viewClientAdsReportDetail(rep) {
+      document.getElementById('client-ads-detail-company').innerText = 'Laporan Performa ' + (rep.client_company || 'Perusahaan Anda');
+      document.getElementById('client-ads-detail-period').innerText = `${rep.platform || 'Meta Ads'} • Periode ${rep.report_period || ''} • Objektif: ${rep.objective || 'Leads'}`;
+      document.getElementById('client-ads-detail-spend').innerText = 'Rp ' + (parseFloat(rep.total_ad_spend || 0)).toLocaleString('id-ID');
+      document.getElementById('client-ads-detail-results').innerText = (parseInt(rep.total_conversions || 0)).toLocaleString('id-ID') + ' Results / Leads';
+      document.getElementById('client-ads-detail-cpa').innerText = 'Rp ' + (parseFloat(rep.cpl_cpa || 0)).toLocaleString('id-ID');
+      document.getElementById('client-ads-detail-impressions').innerText = (parseInt(rep.ads_impressions || 0)).toLocaleString('id-ID') + ' Tayangan';
+      document.getElementById('client-ads-detail-clicks-ctr').innerText = `${(parseInt(rep.total_clicks || 0)).toLocaleString('id-ID')} Klik (CTR: ${(parseFloat(rep.ads_ctr || 0)).toFixed(2)}%)`;
+      document.getElementById('client-ads-detail-reach').innerText = (parseInt(rep.ads_reach || 0)).toLocaleString('id-ID') + ' Orang';
+      document.getElementById('client-ads-detail-winning').innerText = rep.winning_creative_notes || rep.what_worked || 'Belum ada catatan materi iklan terbaik.';
+      document.getElementById('client-ads-detail-optimizing').innerText = rep.optimizing_plan_notes || rep.next_action_plan || 'Belum ada catatan evaluasi optimasi.';
+      document.getElementById('client-ads-detail-author').innerText = rep.author_name || 'Tim Ads Kalamedia';
+
+      const sBox = document.getElementById('client-ads-detail-screenshot-box');
+      if (rep.dashboard_screenshot) {
+        document.getElementById('client-ads-detail-screenshot-img').src = rep.dashboard_screenshot;
+        sBox.style.display = 'block';
+      } else {
+        sBox.style.display = 'none';
+      }
+
+      document.getElementById('modal-client-ads-detail').style.display = 'flex';
+    }
+
+    function closeClientAdsDetailModal() {
+      document.getElementById('modal-client-ads-detail').style.display = 'none';
+    }
+
     function parseAdsNumber(val) {
       if (val === null || val === undefined || val === '') return 0;
       if (typeof val === 'number') return val;
@@ -2515,18 +2771,32 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
       const modal = document.getElementById('modal-view-receipt');
       if (!modal) return;
 
+      if (!url) {
+        if (typeof showToast === 'function') showToast('File bukti transaksi tidak ditemukan.', 'warning');
+        return;
+      }
+
+      let finalUrl = String(url).trim();
+      if (!finalUrl.startsWith('http://') && !finalUrl.startsWith('https://') && !finalUrl.startsWith('/') && !finalUrl.startsWith('assets/')) {
+        if (finalUrl.startsWith('uploads/')) {
+          finalUrl = 'assets/uploads/receipts/' + finalUrl.replace(/^uploads\/(receipts\/)?/, '');
+        } else {
+          finalUrl = 'assets/uploads/receipts/' + finalUrl;
+        }
+      }
+
       const img = document.getElementById('view-receipt-img');
       const iframe = document.getElementById('view-receipt-iframe');
       const titleEl = document.getElementById('view-receipt-title');
       const downloadLink = document.getElementById('view-receipt-download');
 
       if (titleEl) titleEl.innerText = title;
-      if (downloadLink) downloadLink.href = url;
+      if (downloadLink) downloadLink.href = finalUrl;
 
-      if (url.toLowerCase().endsWith('.pdf')) {
+      if (finalUrl.toLowerCase().endsWith('.pdf')) {
         if (img) img.style.display = 'none';
         if (iframe) {
-          iframe.src = url;
+          iframe.src = finalUrl;
           iframe.style.display = 'block';
         }
       } else {
@@ -2535,7 +2805,7 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
           iframe.src = '';
         }
         if (img) {
-          img.src = url;
+          img.src = finalUrl;
           img.style.display = 'inline-block';
         }
       }
@@ -2758,6 +3028,87 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
             </button>
           </div>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Detail Report Ads Klien (Printable & Visual Card) -->
+  <div class="modal" id="modal-client-ads-detail" style="display: none; background: rgba(17, 24, 39, 0.65); backdrop-filter: blur(4px);">
+    <div class="modal-dialog" style="max-width: 740px;">
+      <div class="modal-content" style="border-radius: 16px;">
+        <div class="modal-header no-print">
+          <div>
+            <h4 class="modal-title" id="client-ads-detail-company">Laporan Performa Iklan</h4>
+            <span id="client-ads-detail-period" style="font-size: 12px; color: var(--text-secondary);"></span>
+          </div>
+          <button type="button" class="close-btn" onclick="closeClientAdsDetailModal()">&times;</button>
+        </div>
+
+        <div class="modal-body" id="printable-client-ads-report" style="padding: 24px;">
+          <!-- 3 KPI Cards -->
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+            <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; padding: 12px;">
+              <div style="font-size: 11px; font-weight: 700; color: #64748B;">TOTAL AD SPEND</div>
+              <div id="client-ads-detail-spend" style="font-size: 18px; font-weight: 800; color: #0F172A; margin-top: 2px;"></div>
+            </div>
+            <div style="background: #F0FDF4; border: 1px solid #DCFCE7; border-radius: 10px; padding: 12px;">
+              <div style="font-size: 11px; font-weight: 700; color: #166534;">TOTAL HASIL / LEADS</div>
+              <div id="client-ads-detail-results" style="font-size: 18px; font-weight: 800; color: #15803D; margin-top: 2px;"></div>
+            </div>
+            <div style="background: #EFF6FF; border: 1px solid #DBEAFE; border-radius: 10px; padding: 12px;">
+              <div style="font-size: 11px; font-weight: 700; color: #1E40AF;">COST PER RESULT (CPA)</div>
+              <div id="client-ads-detail-cpa" style="font-size: 18px; font-weight: 800; color: #1D4ED8; margin-top: 2px;"></div>
+            </div>
+          </div>
+
+          <!-- Secondary Metrics -->
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+            <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 10px;">
+              <div style="font-size: 11px; font-weight: 700; color: #6B7280;">TAYANGAN (IMPRESSIONS)</div>
+              <div id="client-ads-detail-impressions" style="font-size: 14px; font-weight: 700; color: #111827; margin-top: 2px;"></div>
+            </div>
+            <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 10px;">
+              <div style="font-size: 11px; font-weight: 700; color: #6B7280;">KLIK &amp; CTR</div>
+              <div id="client-ads-detail-clicks-ctr" style="font-size: 14px; font-weight: 700; color: #111827; margin-top: 2px;"></div>
+            </div>
+            <div style="background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 10px;">
+              <div style="font-size: 11px; font-weight: 700; color: #6B7280;">JANGKAUAN (REACH)</div>
+              <div id="client-ads-detail-reach" style="font-size: 14px; font-weight: 700; color: #111827; margin-top: 2px;"></div>
+            </div>
+          </div>
+
+          <!-- Winning Notes -->
+          <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 12px 14px; margin-bottom: 12px;">
+            <div style="font-size: 11.5px; font-weight: 800; color: #92400E; margin-bottom: 3px;">🌟 WINNING CREATIVE (IKLAN TERBAIK)</div>
+            <p id="client-ads-detail-winning" style="font-size: 12.5px; color: #78350F; margin: 0; line-height: 1.5; white-space: pre-wrap;"></p>
+          </div>
+
+          <!-- Optimizing Notes -->
+          <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;">
+            <div style="font-size: 11.5px; font-weight: 800; color: #166534; margin-bottom: 3px;">📈 EVALUASI &amp; RENCANA OPTIMASI</div>
+            <p id="client-ads-detail-optimizing" style="font-size: 12.5px; color: #14532D; margin: 0; line-height: 1.5; white-space: pre-wrap;"></p>
+          </div>
+
+          <!-- Screenshot Box -->
+          <div id="client-ads-detail-screenshot-box" style="display: none; margin-bottom: 14px;">
+            <div style="font-size: 11.5px; font-weight: 800; color: #374151; margin-bottom: 6px;">📸 BUKTI SCREENSHOT DASHBOARD ADS</div>
+            <div style="text-align: center; border: 1px solid #E5E7EB; border-radius: 10px; padding: 8px; background: #F8FAFC;">
+              <img id="client-ads-detail-screenshot-img" src="" alt="Screenshot" style="max-width: 100%; max-height: 380px; border-radius: 6px;">
+            </div>
+          </div>
+
+          <div style="font-size: 11px; color: #9CA3AF; text-align: right; border-top: 1px solid #F3F4F6; padding-top: 8px;">
+            Spesialis Pelaksana: <b id="client-ads-detail-author"></b> &bull; Kalamedia Official Report
+          </div>
+        </div>
+
+        <div class="modal-footer no-print">
+          <button type="button" class="btn btn-secondary" onclick="closeClientAdsDetailModal()">Tutup</button>
+          <button type="button" class="btn btn-primary" onclick="window.print()" style="font-weight: 700;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+            <span>Cetak / Unduh PDF</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>

@@ -4053,7 +4053,146 @@ button:active,
   display: block;
 }
 
-/* Worker bottom nav is unified with modern blue styling in base mobile-bottom-nav */
+/* Owner 5-Tab Bottom Navigation & Slide-Up Bottom Sheet Launcher */
+@media (max-width: 768px) {
+  .mobile-bottom-nav.owner-bottom-nav {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    padding: 0 6px !important;
+    box-sizing: border-box !important;
+    align-items: center !important;
+    height: 64px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+  }
+}
+
+.owner-bottom-nav .mob-nav-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  padding: 4px 2px !important;
+  box-sizing: border-box !important;
+  text-decoration: none !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  overflow: hidden !important;
+}
+
+.owner-bottom-nav .mob-nav-item .mob-nav-icon {
+  width: auto !important;
+  height: auto !important;
+  padding: 3px 8px !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: transparent !important;
+  transition: all 0.18s ease !important;
+}
+
+.owner-bottom-nav .mob-nav-item .mob-nav-icon svg {
+  width: 19px !important;
+  height: 19px !important;
+  stroke: #7B7890 !important;
+  stroke-width: 2 !important;
+  fill: none !important;
+}
+
+.owner-bottom-nav .mob-nav-item .mob-nav-label {
+  font-size: 10.5px !important;
+  font-weight: 600 !important;
+  color: #7B7890 !important;
+  letter-spacing: -0.2px !important;
+  margin-top: 2px !important;
+  line-height: 1.15 !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  overflow: visible !important;
+}
+
+.owner-bottom-nav .mob-nav-item.active .mob-nav-icon {
+  background: #EEF2FF !important;
+}
+
+.owner-bottom-nav .mob-nav-item.active .mob-nav-icon svg {
+  stroke: #5B3DF5 !important;
+  stroke-width: 2.2 !important;
+}
+
+.owner-bottom-nav .mob-nav-item.active .mob-nav-label {
+  color: #5B3DF5 !important;
+  font-weight: 700 !important;
+}
+
+.owner-bottom-nav .bottom-nav-sliding-pill {
+  display: none !important;
+}
+
+.owner-menu-grid-card:hover {
+  border-color: #D6D0FD !important;
+  box-shadow: 0 4px 12px rgba(91, 61, 245, 0.08) !important;
+  transform: translateY(-1px);
+}
+
+.owner-menu-grid-card:active {
+  transform: scale(0.96) !important;
+  background: #F8FAFC !important;
+}
+
+/* Quick Subtab Switcher Bar */
+.quick-subtab-bar {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.quick-subtab-btn {
+  transition: all 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.quick-subtab-btn:hover:not(.active) {
+  color: #1E293B !important;
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* Desktop Header & Control Bar Optimizations */
+@media (min-width: 769px) {
+  .sidebar-toggle-btn {
+    display: none !important;
+  }
+
+  .owner-control-bar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 16px !important;
+  }
+
+  .owner-period-filter-segmented {
+    width: auto !important;
+    min-width: 380px !important;
+    display: inline-grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  .owner-action-bar-row {
+    margin-top: 0 !important;
+    flex: 1 !important;
+    justify-content: flex-end !important;
+  }
+
+  .owner-bottom-sheet,
+  .owner-sheet-backdrop {
+    display: none !important;
+  }
+}
 
 
 

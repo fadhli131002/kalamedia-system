@@ -87,6 +87,45 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
     }
   }
 </script>
+<?php elseif ($userRole === 'owner'): 
+  $ownerAvatarSeed = urlencode($currentUser['name'] ?? 'Owner');
+  $ownerAvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed={$ownerAvatarSeed}&backgroundColor=d1d4f9,c0aede,b6e3f4";
+  $ownerFallbackSvgData = "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23EEF2FF%22/><text x=%2250%22 y=%2258%22 font-size=%2234%22 font-weight=%22700%22 fill=%22%235B3DF5%22 text-anchor=%22middle%22 font-family=%22Inter, sans-serif%22>OW</text></svg>";
+?>
+<header class="topbar appify-topbar owner-topbar" style="height: 64px !important; min-height: 64px !important; max-height: 64px !important; padding: 0 16px !important; margin: 0 !important; display: flex !important; align-items: center !important; justify-content: space-between !important; background: #FFFFFF !important; border-bottom: 1px solid #ECEEF5 !important; position: sticky !important; top: 0 !important; z-index: 100 !important; box-sizing: border-box !important;">
+  <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+    <button class="sidebar-toggle-btn" id="sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Buka Menu Navigasi" title="Buka Menu" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; width: 38px; height: 38px; align-items: center; justify-content: center; cursor: pointer; color: #334155; flex-shrink: 0; transition: all 0.15s ease;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+
+    <!-- Cartoon/Initial Avatar Round 40x40px Owner -->
+    <div class="cartoon-avatar-wrapper size-40" onclick="if(window.innerWidth<=768 && typeof openOwnerBottomSheet==='function'){openOwnerBottomSheet();}else{window.location.href='<?= url('owner-dashboard?_slot=internal') ?>';}" title="Pusat Menu Owner" style="cursor: pointer; width: 40px; height: 40px; min-width: 40px; min-height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+      <img src="<?= $ownerAvatarUrl ?>" 
+           alt="Owner" 
+           onerror="this.onerror=null; this.src='<?= $ownerFallbackSvgData ?>';"
+           style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: block;">
+    </div>
+
+    <div style="min-width: 0;">
+      <h1 style="font-size: 17px; font-weight: 700; color: #16141F; margin: 0; line-height: 1.25; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        Halo, Owner
+      </h1>
+      <div style="font-size: 12px; color: #6E6D7A; font-weight: 500; margin-top: 2px;">
+        <?= date('d M Y') ?>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex-shrink: 0;">
+    <span style="background: #EEF2FF; color: #5B3DF5; border-radius: 999px; padding: 4px 12px; font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; border: 1px solid #E0E7FF; letter-spacing: 0.1px;">
+      Executive
+    </span>
+  </div>
+</header>
 <?php else: ?>
 <header class="topbar" style="height: 64px !important; min-height: 64px !important; max-height: 64px !important; padding: 0 16px !important; margin: 0 !important; display: flex !important; align-items: center !important; justify-content: space-between !important; background: #FFFFFF !important; border-bottom: 1px solid #ECEEF5 !important; position: sticky !important; top: 0 !important; z-index: 100 !important; box-sizing: border-box !important;">
   <div class="greeting-text">
@@ -104,9 +143,7 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
         <span class="breadcrumb-current"><?= htmlspecialchars($currentPageInfo['name']) ?></span>
       </div>
       <?php
-        if ($userRole === 'owner') {
-            $greetingDisplayName = 'Owner';
-        } elseif ($userRole === 'admin') {
+        if ($userRole === 'admin') {
             $greetingDisplayName = 'Admin';
         } else {
             $greetingDisplayName = htmlspecialchars($currentUser['name'] ?? 'User Kalamedia');
@@ -120,18 +157,8 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
   </div>
 
   <div class="topbar-actions" style="display: flex; align-items: center; gap: 8px;">
-    <!-- Date Filter on Owner Dashboard -->
-    <?php if ($currentPage === 'owner-dashboard'): ?>
-      <div class="date-filter-group">
-        <button class="filter-btn active" onclick="changeTimeRange('month', this)">Bulan Ini</button>
-        <button class="filter-btn" onclick="changeTimeRange('quarter', this)">Kuartal Ini</button>
-        <button class="filter-btn" onclick="changeTimeRange('year', this)">Tahun Ini</button>
-        <button class="filter-btn" onclick="changeTimeRange('all', this)">Semua</button>
-      </div>
-    <?php endif; ?>
-
     <!-- Role Context Actions -->
-    <?php if (($userRole === 'owner' || $userRole === 'admin') && !$isClientUser && !in_array($userRole, ['client', 'karyawan', 'freelancer'])): ?>
+    <?php if ($userRole === 'admin' && !$isClientUser): ?>
       <button class="btn btn-primary btn-sm btn-create-invoice" onclick="openModal('modal-create-invoice')">
         <span>+ Buat Invoice</span>
       </button>

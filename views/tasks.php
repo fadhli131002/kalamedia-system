@@ -246,16 +246,58 @@ if ($isWorkerUser) {
     .workspace-tab-btn {
       position: relative !important;
       z-index: 2 !important;
-      transition: color 200ms ease, background-color 200ms ease !important;
+      padding: 7px 16px !important;
+      font-size: 12.5px !important;
+      font-weight: 600 !important;
+      color: #64748B !important;
+      background: transparent !important;
+      border: none !important;
+      border-radius: 10px !important;
+      cursor: pointer !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      white-space: nowrap !important;
+      box-shadow: none !important;
+      transition: color 150ms ease, background-color 150ms ease !important;
+      font-family: inherit !important;
     }
-    .workspace-tab-btn.active {
-      background: #5B3DF5 !important;
+    .workspace-tab-btn:hover:not(.active) {
+      color: #0F172A !important;
+      background: rgba(0, 0, 0, 0.04) !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    .workspace-tab-btn:active {
+      transform: scale(0.98);
+    }
+    .workspace-tab-btn.active,
+    .workspace-tab-btn.active span,
+    .workspace-tab-btn.active .desktop-text,
+    .workspace-tab-btn.active .mobile-text,
+    .workspace-tabs-bar.has-sliding-pill .workspace-tab-btn.active,
+    .workspace-tabs-bar.has-sliding-pill .workspace-tab-btn.active span,
+    .workspace-tabs-bar.has-sliding-pill .workspace-tab-btn.active .desktop-text,
+    .workspace-tabs-bar.has-sliding-pill .workspace-tab-btn.active .mobile-text {
       color: #FFFFFF !important;
-      box-shadow: 0 4px 12px rgba(91, 61, 245, 0.25) !important;
+      font-weight: 700 !important;
     }
     .workspace-tabs-bar.has-sliding-pill .workspace-tab-btn.active {
       background: transparent !important;
       box-shadow: none !important;
+    }
+    .workspace-tabs-bar:not(.has-sliding-pill) .workspace-tab-btn.active {
+      background: #5B3DF5 !important;
+      box-shadow: 0 4px 12px rgba(91, 61, 245, 0.25) !important;
+    }
+    .workspace-tab-btn.active:hover,
+    .workspace-tab-btn.active:hover span {
+      color: #FFFFFF !important;
+      background: transparent !important;
+    }
+    .workspace-tab-btn.active svg {
+      stroke: #FFFFFF !important;
+      color: #FFFFFF !important;
     }
 
     /* Task Management & Workspace Custom Styles - Bankio Minimal Finance */
@@ -274,57 +316,6 @@ if ($isWorkerUser) {
       align-items: center;
       flex-wrap: wrap;
       gap: 16px;
-    }
-
-    /* Workspace Tabs Bar - Modern Segmented Boxed Bar */
-    .workspace-tabs-bar {
-      display: inline-flex;
-      gap: 2px;
-      margin-bottom: 20px;
-      background: #F3F4F6;
-      border: none;
-      padding: 3px;
-      border-radius: 8px;
-      max-width: 100%;
-      overflow-x: auto;
-      white-space: nowrap;
-      scrollbar-width: none;
-    }
-    .workspace-tabs-bar::-webkit-scrollbar {
-      display: none;
-    }
-    .workspace-tab-btn {
-      padding: 6px 14px;
-      font-size: 12.5px;
-      font-weight: 500;
-      color: #6B7280;
-      background: transparent;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-      box-shadow: none;
-      transition: all 0.15s ease;
-      font-family: inherit;
-    }
-    .workspace-tab-btn:hover:not(.active) {
-      color: #111827;
-      background: rgba(0, 0, 0, 0.04);
-      transform: none;
-      box-shadow: none;
-    }
-    .workspace-tab-btn:active {
-      transform: scale(0.98);
-    }
-    .workspace-tab-btn.active {
-      background: #FFFFFF !important;
-      color: #111827 !important;
-      border: none !important;
-      font-weight: 600;
-      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08) !important;
     }
 
     .kpi-row {
@@ -789,6 +780,9 @@ if ($isWorkerUser) {
       }
 
       /* Workspace Tabs Bar: 2 Columns Side-by-Side */
+      .workspace-sliding-pill {
+        display: none !important;
+      }
       .workspace-tabs-bar {
         display: grid !important;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -808,6 +802,33 @@ if ($isWorkerUser) {
         text-align: center !important;
         white-space: nowrap !important;
         box-sizing: border-box !important;
+        background: transparent !important;
+        color: #64748B !important;
+        border: none !important;
+        transition: all 0.18s ease !important;
+      }
+      .workspace-tab-btn.active,
+      .workspace-tab-btn.active span,
+      .workspace-tab-btn.active .mobile-text,
+      .workspace-tabs-bar.has-sliding-pill .workspace-tab-btn.active,
+      .workspace-tabs-bar.has-sliding-pill .workspace-tab-btn.active span,
+      .workspace-tabs-bar.has-sliding-pill .workspace-tab-btn.active .mobile-text {
+        background: #5B3DF5 !important;
+        color: #FFFFFF !important;
+        font-weight: 700 !important;
+        box-shadow: 0 3px 10px rgba(91, 61, 245, 0.25) !important;
+        border-radius: 9px !important;
+      }
+      .workspace-tab-btn:not(.active),
+      .workspace-tab-btn:not(.active) span,
+      .workspace-tab-btn:not(.active) .mobile-text,
+      .workspace-tabs-bar.has-sliding-pill .workspace-tab-btn:not(.active),
+      .workspace-tabs-bar.has-sliding-pill .workspace-tab-btn:not(.active) span,
+      .workspace-tabs-bar.has-sliding-pill .workspace-tab-btn:not(.active) .mobile-text {
+        background: transparent !important;
+        color: #64748B !important;
+        font-weight: 600 !important;
+        box-shadow: none !important;
       }
 
       /* Global Mobile Layout & Spacing (Bento Style) */
@@ -960,29 +981,29 @@ if ($isWorkerUser) {
     }
 
     /* ============================================================
-       SLIDE 2: WORKER PROFILE VIEW (100% IDENTICAL TO "SANDRA GLAM")
+       WORKER PROFILE VIEW (RESPONSIVE: DESKTOP BENTO & MOBILE CARD)
        ============================================================ */
     .worker-slide2-profile-card {
-      max-width: 520px;
-      margin: 0 auto 30px auto;
-      margin-top: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 0 32px 0 !important;
       background: #FFFFFF !important;
-      border-radius: 18px !important;
-      padding: 18px !important;
+      border-radius: 20px !important;
+      padding: 24px 28px !important;
       box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
       border: 1px solid #ECEEF5 !important;
       box-sizing: border-box !important;
     }
 
-    @media (max-width: 768px) {
-      .worker-slide2-profile-card {
-        margin-top: 0 !important;
-        padding: 18px !important;
-        border-radius: 18px !important;
-        border: 1px solid #ECEEF5 !important;
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
-        background: #FFFFFF !important;
-      }
+    .slide2-header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 18px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #F1F5F9;
+      margin-bottom: 20px;
     }
 
     .slide2-action-btn {
@@ -1018,9 +1039,8 @@ if ($isWorkerUser) {
     .slide2-identity-header {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 18px;
-      padding: 0 4px;
+      gap: 18px;
+      min-width: 0;
     }
 
     .slide2-identity-info {
@@ -1029,10 +1049,10 @@ if ($isWorkerUser) {
     }
 
     .slide2-user-name {
-      font-size: 19px;
-      font-weight: 700;
-      color: #16141F;
-      margin: 0 0 3px 0;
+      font-size: 22px;
+      font-weight: 800;
+      color: #0F172A;
+      margin: 0 0 4px 0;
       letter-spacing: -0.3px;
       line-height: 1.25;
     }
@@ -1040,7 +1060,7 @@ if ($isWorkerUser) {
     .slide2-user-role {
       font-size: 13.5px;
       font-weight: 500;
-      color: #6E6D7A;
+      color: #64748B;
       margin: 0;
       line-height: 1.3;
     }
@@ -1048,124 +1068,96 @@ if ($isWorkerUser) {
     .slide2-quick-info-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 4px 4px 16px 4px;
-      gap: 12px;
+      padding: 0;
     }
 
     .slide2-quick-cols {
       display: flex;
       align-items: center;
-      gap: 24px;
+      gap: 14px;
     }
 
     .slide2-quick-col {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 9px 18px;
+      min-width: 150px;
+      text-align: left;
       display: flex;
       flex-direction: column;
     }
 
     .slide2-quick-label {
-      font-size: 11.5px;
-      font-weight: 500;
-      color: #6E6D7A;
+      font-size: 11px;
+      font-weight: 700;
+      color: #64748B;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
       margin-bottom: 2px;
     }
 
     .slide2-quick-val {
       font-size: 13.5px;
       font-weight: 700;
-      color: #16141F;
+      color: #0F172A;
       letter-spacing: -0.1px;
-    }
-
-    .slide2-quick-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .slide2-action-btn {
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      border: 1px solid #E6E4F0;
-      background: #FFFFFF;
-      color: #16141F;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-      transition: all 0.15s ease;
-    }
-
-    .slide2-action-btn:hover {
-      background: #F8FAFC;
-      border-color: #D5D3E3;
-      transform: translateY(-1px);
-    }
-
-    .slide2-action-btn:active {
-      transform: scale(0.96);
     }
 
     .slide2-pastel-kpi-grid {
       display: grid !important;
       grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-      gap: 10px !important;
+      gap: 16px !important;
       width: 100% !important;
-      margin: 16px 0 !important;
+      margin: 0 0 24px 0 !important;
       box-sizing: border-box !important;
     }
 
     .slide2-pastel-card {
       background: #FFFFFF !important;
-      border-radius: 18px !important;
-      border: 1px solid #F0F1F7 !important;
-      padding: 12px 10px !important;
-      box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04) !important;
+      border-radius: 16px !important;
+      border: 1px solid #F1F5F9 !important;
+      padding: 16px 20px !important;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
       display: flex !important;
       flex-direction: column !important;
       justify-content: space-between !important;
       align-items: stretch !important;
-      min-height: 94px !important;
-      height: 94px !important;
+      min-height: 104px !important;
       box-sizing: border-box !important;
       transition: transform 0.18s ease, box-shadow 0.18s ease !important;
-      overflow: hidden !important;
     }
 
     .slide2-pastel-card:hover {
       transform: translateY(-2px) !important;
-      box-shadow: 0 6px 24px rgba(26, 22, 43, 0.08) !important;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06) !important;
     }
 
     .slide2-card-header {
       display: flex !important;
       align-items: center !important;
       justify-content: space-between !important;
-      margin-bottom: 4px !important;
+      margin-bottom: 6px !important;
       width: 100% !important;
       gap: 4px !important;
     }
 
     .slide2-card-title {
-      font-size: 11px !important;
+      font-size: 12px !important;
       font-weight: 700 !important;
-      color: #7B7890 !important;
+      color: #64748B !important;
       white-space: nowrap !important;
       overflow: hidden !important;
       text-overflow: ellipsis !important;
       letter-spacing: -0.2px !important;
-      line-height: 1.2 !important;
     }
 
     .slide2-card-icon-badge {
-      width: 24px !important;
-      height: 24px !important;
-      min-width: 24px !important;
-      min-height: 24px !important;
-      border-radius: 8px !important;
+      width: 30px !important;
+      height: 30px !important;
+      min-width: 30px !important;
+      min-height: 30px !important;
+      border-radius: 9px !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
@@ -1173,128 +1165,252 @@ if ($isWorkerUser) {
     }
 
     .slide2-card-value {
-      font-size: 17px !important;
+      font-size: 24px !important;
       font-weight: 800 !important;
-      color: #1A162B !important;
+      color: #0F172A !important;
       line-height: 1.2 !important;
       white-space: nowrap !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
       display: flex !important;
       align-items: baseline !important;
-      gap: 3px !important;
+      gap: 4px !important;
     }
 
     .slide2-card-num {
-      font-size: 18px !important;
+      font-size: 26px !important;
       font-weight: 800 !important;
-      color: #1A162B !important;
+      color: #0F172A !important;
       line-height: 1 !important;
     }
 
     .slide2-card-unit {
-      font-size: 11.5px !important;
+      font-size: 13px !important;
       font-weight: 700 !important;
-      color: #7B7890 !important;
-      white-space: nowrap !important;
+      color: #64748B !important;
     }
 
     .slide2-card-subtext {
-      font-size: 10px !important;
+      font-size: 11.5px !important;
       font-weight: 500 !important;
-      color: #7B7890 !important;
-      margin-top: 2px !important;
-      white-space: nowrap !important;
-      overflow: hidden !important;
-      text-overflow: ellipsis !important;
+      color: #64748B !important;
+      margin-top: 4px !important;
       line-height: 1.2 !important;
     }
 
+    /* Menu / Details Bento Grid on Desktop */
     .slide2-menu-list {
-      display: flex;
-      flex-direction: column;
-      background: #FFFFFF;
-      border-radius: 20px;
-      padding: 4px 14px;
-      border: 1px solid #F1F3F9;
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 14px !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
     }
 
     .slide2-menu-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 4px;
-      border-bottom: 1px solid #F0F1F7;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background 0.15s ease;
-    }
-
-    .slide2-menu-item:last-child {
-      border-bottom: none;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      padding: 16px 20px !important;
+      border: 1px solid #ECEEF5 !important;
+      border-radius: 14px !important;
+      background: #FFFFFF !important;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02) !important;
+      cursor: pointer !important;
+      text-decoration: none !important;
+      transition: all 0.18s ease !important;
+      box-sizing: border-box !important;
+      margin: 0 !important;
     }
 
     .slide2-menu-item:hover {
-      background: #FAFBFD;
-      border-radius: 12px;
+      background: #F8FAFC !important;
+      border-color: #CBD5E1 !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06) !important;
+    }
+
+    .slide2-menu-item.slide2-logout-item {
+      background: #FFFDFD !important;
+      border-color: #FEE2E2 !important;
+    }
+
+    .slide2-menu-item.slide2-logout-item:hover {
+      background: #FEF2F2 !important;
+      border-color: #FCA5A5 !important;
+      box-shadow: 0 6px 18px rgba(239, 68, 68, 0.08) !important;
     }
 
     .slide2-menu-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-      flex: 1;
+      display: flex !important;
+      align-items: center !important;
+      gap: 14px !important;
+      min-width: 0 !important;
+      flex: 1 !important;
     }
 
     .slide2-menu-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: #F4F5FB;
-      color: #4B4958;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
+      width: 42px !important;
+      height: 42px !important;
+      border-radius: 12px !important;
+      background: #EEF2FF !important;
+      color: #4F46E5 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-shrink: 0 !important;
     }
 
     .slide2-menu-icon.logout-icon {
-      background: #FEE8E9;
-      color: #E5484D;
+      background: #FEF2F2 !important;
+      color: #EF4444 !important;
     }
 
     .slide2-menu-text {
-      min-width: 0;
-      flex: 1;
+      min-width: 0 !important;
+      flex: 1 !important;
     }
 
     .slide2-menu-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: #16141F;
-      margin: 0 0 2px 0;
-      line-height: 1.3;
+      font-size: 14px !important;
+      font-weight: 700 !important;
+      color: #0F172A !important;
+      margin: 0 0 3px 0 !important;
+      line-height: 1.3 !important;
     }
 
     .slide2-menu-desc {
-      font-size: 12.5px;
-      font-weight: 400;
-      color: #6E6D7A;
-      margin: 0;
-      line-height: 1.3;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-size: 12.5px !important;
+      font-weight: 400 !important;
+      color: #64748B !important;
+      margin: 0 !important;
+      line-height: 1.4 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
     }
 
     .slide2-menu-chevron {
-      color: #B5B2C4;
-      display: flex;
-      align-items: center;
-      flex-shrink: 0;
-      padding-left: 8px;
+      color: #94A3B8 !important;
+      display: flex !important;
+      align-items: center !important;
+      flex-shrink: 0 !important;
+      padding-left: 8px !important;
+      transition: transform 0.15s ease, color 0.15s ease !important;
+    }
+
+    .slide2-menu-item:hover .slide2-menu-chevron {
+      color: #4F46E5 !important;
+      transform: translateX(3px) !important;
+    }
+
+    .slide2-menu-item.slide2-logout-item:hover .slide2-menu-chevron {
+      color: #EF4444 !important;
+    }
+
+    /* Mobile Responsive Adaptation (<= 768px) */
+    @media (max-width: 768px) {
+      .worker-slide2-profile-card {
+        max-width: 520px !important;
+        margin: 0 auto 30px auto !important;
+        padding: 18px !important;
+        border-radius: 18px !important;
+      }
+      .slide2-header-container {
+        display: block !important;
+        border-bottom: none !important;
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+      }
+      .slide2-identity-header {
+        margin-bottom: 18px !important;
+        padding: 0 4px !important;
+      }
+      .slide2-user-name {
+        font-size: 19px !important;
+      }
+      .slide2-user-role {
+        font-size: 13.5px !important;
+      }
+      .slide2-quick-info-row {
+        padding: 4px 4px 16px 4px !important;
+      }
+      .slide2-quick-cols {
+        width: 100% !important;
+        justify-content: space-between !important;
+        gap: 0 !important;
+      }
+      .slide2-quick-col {
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        min-width: 0 !important;
+      }
+      .slide2-quick-col:last-child {
+        text-align: right !important;
+      }
+      .slide2-pastel-kpi-grid {
+        gap: 10px !important;
+        margin: 16px 0 !important;
+      }
+      .slide2-pastel-card {
+        min-height: 94px !important;
+        padding: 12px 10px !important;
+        border-radius: 18px !important;
+      }
+      .slide2-card-title {
+        font-size: 11px !important;
+      }
+      .slide2-card-icon-badge {
+        width: 24px !important;
+        height: 24px !important;
+        min-width: 24px !important;
+        min-height: 24px !important;
+        border-radius: 8px !important;
+      }
+      .slide2-card-num {
+        font-size: 18px !important;
+      }
+      .slide2-card-unit {
+        font-size: 11.5px !important;
+      }
+      .slide2-card-subtext {
+        font-size: 10px !important;
+      }
+      .slide2-menu-list {
+        display: flex !important;
+        flex-direction: column !important;
+        background: #FFFFFF !important;
+        border-radius: 20px !important;
+        padding: 4px 14px !important;
+        border: 1px solid #F1F3F9 !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+        gap: 0 !important;
+      }
+      .slide2-menu-item {
+        padding: 14px 4px !important;
+        border: none !important;
+        border-bottom: 1px solid #F0F1F7 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+      }
+      .slide2-menu-item:last-child {
+        border-bottom: none !important;
+      }
+      .slide2-menu-item:hover {
+        background: #FAFBFD !important;
+        border-radius: 12px !important;
+        transform: none !important;
+      }
+      .slide2-menu-icon {
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 10px !important;
+        background: #F4F5FB !important;
+        color: #4B4958 !important;
+      }
     }
   </style>
 </head>
@@ -1854,43 +1970,46 @@ if ($isWorkerUser) {
           </div>
         </div>
 
-        <!-- SECTION 4: Profile Karyawan (100% Identical to Slide 2 "Sandra Glam") -->
+        <!-- SECTION 4: Profile Karyawan -->
         <div id="section-profile-content" class="kala-page-view tab-pane" style="display: none;">
-          <div class="worker-slide2-profile-card" style="margin-top: 0 !important; border-radius: 18px !important; padding: 18px !important; background: #FFFFFF !important; border: 1px solid #ECEEF5 !important; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;">
+          <div class="worker-slide2-profile-card">
             
-            <!-- 1. Header Identitas: Avatar Kartun (72x72px) + Nama + Jabatan & Status -->
-            <div class="slide2-identity-header">
-              <div class="cartoon-avatar-wrapper size-72" title="Foto Profil" style="cursor: default;">
-                <img src="<?= $workerAvatarUrl ?>" 
-                     alt="Avatar <?= htmlspecialchars($user['name'] ?? 'Worker') ?>" 
-                     onerror="this.onerror=null; this.src='<?= $fallbackSvgData ?>';">
-              </div>
-              <div class="slide2-identity-info">
-                <h3 class="slide2-user-name"><?= htmlspecialchars($user['name'] ?? 'Tim Kalamedia') ?></h3>
-                <p class="slide2-user-role">
-                  <?= htmlspecialchars($workerProfile['position'] ?: 'Digital Ads Specialist') ?> &bull; <?= $user['role'] === 'freelancer' ? 'Mitra Kontrak (Freelance)' : 'Karyawan In-House' ?>
-                </p>
-              </div>
-            </div>
-
-            <!-- 2. Baris Info Ringkas: No. Telepon & Status Kontrak (Read-Only) -->
-            <div class="slide2-quick-info-row" style="padding: 4px 4px 16px 4px;">
-              <div class="slide2-quick-cols" style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
-                <div class="slide2-quick-col">
-                  <span class="slide2-quick-label">No. Telepon / WA</span>
-                  <span class="slide2-quick-val" id="profile-display-phone"><?= htmlspecialchars($workerProfile['phone_wa'] ?: 'Belum diisi') ?></span>
+            <!-- Header Container (Flex on Desktop, Stack on Mobile) -->
+            <div class="slide2-header-container">
+              <!-- 1. Header Identitas: Avatar Kartun (72x72px) + Nama + Jabatan & Status -->
+              <div class="slide2-identity-header">
+                <div class="cartoon-avatar-wrapper size-72" title="Foto Profil" style="cursor: default;">
+                  <img src="<?= $workerAvatarUrl ?>" 
+                       alt="Avatar <?= htmlspecialchars($user['name'] ?? 'Worker') ?>" 
+                       onerror="this.onerror=null; this.src='<?= $fallbackSvgData ?>';">
                 </div>
-                <div class="slide2-quick-col" style="text-align: right;">
-                  <span class="slide2-quick-label">Status Kontrak</span>
-                  <span class="slide2-quick-val">
-                    <?php 
-                      if (!empty($workerProfile['contract_end_date'])) {
-                        echo 'Aktif (s.d. ' . date('d M Y', strtotime($workerProfile['contract_end_date'])) . ')';
-                      } else {
-                        echo 'Aktif (Tetap)';
-                      }
-                    ?>
-                  </span>
+                <div class="slide2-identity-info">
+                  <h3 class="slide2-user-name"><?= htmlspecialchars($user['name'] ?? 'Tim Kalamedia') ?></h3>
+                  <p class="slide2-user-role">
+                    <?= htmlspecialchars($workerProfile['position'] ?: 'Digital Ads Specialist') ?> &bull; <?= $user['role'] === 'freelancer' ? 'Mitra Kontrak (Freelance)' : 'Karyawan In-House' ?>
+                  </p>
+                </div>
+              </div>
+
+              <!-- 2. Baris Info Ringkas: No. Telepon & Status Kontrak (Read-Only) -->
+              <div class="slide2-quick-info-row">
+                <div class="slide2-quick-cols">
+                  <div class="slide2-quick-col">
+                    <span class="slide2-quick-label">No. Telepon / WA</span>
+                    <span class="slide2-quick-val" id="profile-display-phone"><?= htmlspecialchars($workerProfile['phone_wa'] ?: 'Belum diisi') ?></span>
+                  </div>
+                  <div class="slide2-quick-col">
+                    <span class="slide2-quick-label">Status Kontrak</span>
+                    <span class="slide2-quick-val">
+                      <?php 
+                        if (!empty($workerProfile['contract_end_date'])) {
+                          echo 'Aktif (s.d. ' . date('d M Y', strtotime($workerProfile['contract_end_date'])) . ')';
+                        } else {
+                          echo 'Aktif (Tetap)';
+                        }
+                      ?>
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -3921,6 +4040,12 @@ if ($isWorkerUser) {
       const bar = document.getElementById('workspace-tabs-bar');
       const pill = document.getElementById('workspace-sliding-pill');
       if (!bar || !pill) return;
+      if (window.innerWidth <= 768) {
+        pill.style.display = 'none';
+        bar.classList.remove('has-sliding-pill');
+        return;
+      }
+      pill.style.display = 'block';
       bar.classList.add('has-sliding-pill');
       const activeBtn = targetBtn || bar.querySelector('.workspace-tab-btn.active');
       if (activeBtn && activeBtn.offsetParent !== null) {
@@ -3967,7 +4092,31 @@ if ($isWorkerUser) {
       // 1. Instantly update button states and slide the active pill
       [btnTasks, btnAds, btnRecap, btnProfile].forEach(b => { if (b) b.classList.remove('active'); });
       if (selected.btn) selected.btn.classList.add('active');
-      if (window.updateWorkspaceTabPill) window.updateWorkspaceTabPill();
+      if (window.updateWorkspaceTabPill) {
+        window.updateWorkspaceTabPill(selected.btn);
+        requestAnimationFrame(() => window.updateWorkspaceTabPill(selected.btn));
+      }
+
+      // Sync desktop sidebar active link
+      const sidebarLinks = document.querySelectorAll('.app-sidebar .nav-link');
+      if (sidebarLinks.length) {
+        sidebarLinks.forEach(link => {
+          const href = link.getAttribute('href') || '';
+          if (href.includes('tasks')) {
+            if (tab === 'profile' && href.includes('tab=profile')) {
+              link.classList.add('active');
+            } else if ((tab === 'ads' || tab === 'ads_tracker') && (href.includes('tab=ads') || href.includes('tab=ads_tracker'))) {
+              link.classList.add('active');
+            } else if (tab === 'recap' && href.includes('tab=work_recap')) {
+              link.classList.add('active');
+            } else if (tab === 'tasks' && !href.includes('tab=')) {
+              link.classList.add('active');
+            } else {
+              link.classList.remove('active');
+            }
+          }
+        });
+      }
 
       // 2. Sync mobile bottom navigation bar active state
       const mobNav = document.getElementById('mobile-bottom-nav');

@@ -250,6 +250,29 @@ $initialChartData = [
 
       <div class="content-body">
         
+        <!-- Owner Executive Control Bar: Time Range Filter & Actions -->
+        <div class="owner-control-bar" style="margin-top: 0; margin-bottom: 14px;">
+          <!-- Baris 1: Segmented Filter (Bulan Ini | Kuartal Ini | Tahun Ini | Semua) -->
+          <div class="owner-period-filter-segmented" style="width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box;">
+            <button type="button" class="filter-btn active" onclick="changeTimeRange('month', this)">Bulan Ini</button>
+            <button type="button" class="filter-btn" onclick="changeTimeRange('quarter', this)">Kuartal Ini</button>
+            <button type="button" class="filter-btn" onclick="changeTimeRange('year', this)">Tahun Ini</button>
+            <button type="button" class="filter-btn" onclick="changeTimeRange('all', this)">Semua</button>
+          </div>
+
+          <!-- Baris 2: Subtitle / Title & + Buat Invoice Baru -->
+          <div class="owner-action-bar-row" style="display: flex; align-items: center; justify-content: space-between; margin-top: 10px; gap: 10px; flex-wrap: wrap;">
+            <div>
+              <h2 style="font-size: 15px; font-weight: 700; color: #16141F; margin: 0; letter-spacing: -0.2px;">Ringkasan Finansial Agensi</h2>
+              <p style="font-size: 12px; color: #6E6D7A; margin: 2px 0 0 0;">Monitoring arus kas, margin laba &amp; piutang klien</p>
+            </div>
+            <button type="button" class="btn btn-primary btn-sm btn-create-invoice" onclick="openModal('modal-create-invoice')" style="background: #5B3DF5; color: #FFFFFF; font-weight: 600; font-size: 12.5px; border-radius: 10px; padding: 8px 16px; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(91, 61, 245, 0.25); white-space: nowrap; flex-shrink: 0;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              <span>+ Buat Invoice Baru</span>
+            </button>
+          </div>
+        </div>
+        
         <!-- Key Performance Indicators (KPI) Cards - Shopeers Format -->
         <div class="kpi-grid">
           <!-- Total Revenue -->
@@ -287,10 +310,10 @@ $initialChartData = [
             </div>
           </div>
 
-          <!-- Outstanding Receivables -->
+          <!-- Outstanding Receivables / Piutang Klien -->
           <div class="kpi-card">
             <div class="kpi-header">
-              <span class="kpi-title">Outstanding Receivables</span>
+              <span class="kpi-title">Piutang Klien</span>
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
             </div>
             <div class="kpi-value" id="kpi-receivables"><?= format_rupiah($outstandingReceivables) ?></div>

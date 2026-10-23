@@ -53,6 +53,23 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
       <?php require_once BASE_PATH . '/includes/header.php'; ?>
 
       <div class="content-body">
+        
+        <?php if (!$isClientUser && (is_owner() || is_admin())): ?>
+        <!-- Quick Sub-Tab Switcher: Invoice Klien | Pengeluaran | Penggajian -->
+        <div class="quick-subtab-bar" style="margin-bottom: 14px;">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
+            <a href="<?= url('invoices?_slot=internal') ?>" class="quick-subtab-btn active" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; text-align: center; white-space: nowrap; background: #5B3DF5; color: #FFFFFF; box-shadow: 0 2px 6px rgba(91,61,245,0.25);">
+              Invoice Klien
+            </a>
+            <a href="<?= url('expenses?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
+              Pengeluaran
+            </a>
+            <a href="<?= url('salaries?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
+              Penggajian
+            </a>
+          </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Summary Cards (Shopeers SaaS Style) -->
         <div class="kpi-grid">

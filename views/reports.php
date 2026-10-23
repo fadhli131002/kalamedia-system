@@ -684,12 +684,11 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
               </div>
 
-              <div style="display: flex; gap: 8px;">
-                <button type="submit" class="btn btn-secondary btn-sm" style="border-radius: 10px; padding: 9px 16px; font-weight: 600;">Filter</button>
-                <?php if ($selectedClient > 0 || !empty($searchQuery) || $selectedPlatform !== 'all'): ?>
-                  <a href="<?= url('reports?tab=' . $activeTab) ?>" class="btn btn-secondary btn-sm" style="border-radius: 10px; color: var(--danger-text); padding: 9px 14px;">Reset</a>
-                <?php endif; ?>
-              </div>
+              <?php if ($selectedClient > 0 || !empty($searchQuery) || $selectedPlatform !== 'all'): ?>
+                <div style="display: flex; gap: 8px; margin-top: 4px;">
+                  <a href="<?= url('reports?tab=' . $activeTab) ?>" class="btn btn-secondary btn-sm" style="border-radius: 10px; color: var(--danger-text); padding: 7px 14px; font-size: 12px; font-weight: 600;">Reset Filter</a>
+                </div>
+              <?php endif; ?>
             </form>
 
             <!-- 1. Mobile Cards List (Shown on Mobile, Hidden on Desktop) -->

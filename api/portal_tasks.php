@@ -1588,6 +1588,54 @@ if ($action === 'work_recap') {
 
 
 
+// -------------------------------------------------------------
+// QUICK UPDATE JOBDESK & TEAM PROFILE (Owner / Admin)
+// -------------------------------------------------------------
+if ($action === 'quick_update_jobdesk') {
+    if (!$isOwnerOrAdmin) {
+        echo json_encode(['success' => false, 'message' => 'Akses ditolak. Hanya Owner & Admin yang dapat mengedit profil tim.']);
+        exit;
+    }
+    $memberId = (int)($_POST['member_id'] ?? 0);
+    $position = trim($_POST['position'] ?? '');
+    $jobdesk = trim($_POST['jobdesk'] ?? '');
+    $phoneWa = trim($_POST['phone_wa'] ?? '');
+    $contractEndDate = trim($_POST['contract_end_date'] ?? '');
+
+    if ($memberId <= 0) {
+        echo json_encode(['success' => false, 'message' => 'ID anggota tim tidak valid']);
+        exit;
+    }
+
+    try {
+        $stmtU = $db->prepare("
+            UPDATE users 
+            SET position = ?, jobdesk = ?, phone_wa = ?, contract_end_date = NULLIF(?, '') 
+            WHERE id = ?
+        ");
+        $stmtU->execute([$position, $jobdesk, $phoneWa, $contractEndDate, $memberId]);
+
+        // Also update employees table if matching email or name
+        $stmtEmail = $db->prepare("SELECT email, name FROM users WHERE id = ?");
+        $stmtEmail->execute([$memberId]);
+        $uInfo = $stmtEmail->fetch(PDO::FETCH_ASSOC);
+        if ($uInfo) {
+            $stmtEmp = $db->prepare("
+                UPDATE employees 
+                SET position = ?, phone = ?, contract_end_date = NULLIF(?, '') 
+                WHERE email = ? OR name = ?
+            ");
+            $stmtEmp->execute([$position, $phoneWa, $contractEndDate, $uInfo['email'], $uInfo['name']]);
+        }
+
+        echo json_encode(['success' => true, 'message' => 'Jobdesk & profil karyawan berhasil diperbarui!']);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => 'Gagal memperbarui: ' . $e->getMessage()]);
+        exit;
+    }
+}
+
 if (!empty($action) && $action !== 'none') {
     echo json_encode(['success' => false, 'message' => 'Aksi API tidak valid']);
 }

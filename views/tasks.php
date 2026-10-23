@@ -63,27 +63,103 @@ if ($isWorkerUser) {
 $allTeamWorkers = [];
 if ($isAdminUser || $isOwnerUser) {
     $stmtWorkers = $db->query("SELECT id, name, role, employment_type FROM users WHERE (role IN ('karyawan', 'freelancer', 'admin', 'owner') OR employment_type IS NOT NULL) AND is_active = 1 ORDER BY name ASC");
-    $allTeamWorkers = $stmtWorkers->fetchAll();
+    $allTeamWorkers = $stmtWorkers ? $stmtWorkers->fetchAll() : [];
 }
 
-$workerProfile = null;
+// 100% Robust Cartoon SVG Fallback (URL-encoded data URI so quotes/special characters never break)
+$fallbackSvgData = "data:image/svg+xml;utf8," . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#EEF2FF"/><circle cx="50" cy="44" r="22" fill="#FFDFBA"/><path d="M32 38 Q50 16 68 38 Q50 26 32 38 Z" fill="#3D2645"/><circle cx="42" cy="42" r="3" fill="#1F2937"/><circle cx="58" cy="42" r="3" fill="#1F2937"/><circle cx="38" cy="47" r="2.5" fill="#FFB5A7" opacity="0.6"/><circle cx="62" cy="47" r="2.5" fill="#FFB5A7" opacity="0.6"/><path d="M45 50 Q50 54 55 50" stroke="#D95D39" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M25 94 C28 72 40 66 50 66 C60 66 72 72 75 94 Z" fill="#6366F1"/><circle cx="50" cy="68" r="5" fill="#FFDFBA"/></svg>');
+
+// Current User's cartoon avatar (Dicebear Adventurer)
+$currentUserSeed = urlencode(trim($user['name'] ?? 'Kalamedia'));
+$workerAvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed={$currentUserSeed}&backgroundColor=ffd5dc,c0aede,d1d4f9,b6e3f4";
+
+// Null-safe initialization
+$workerProfile = [];
 $assignedClients = [];
 $workerTotalTasks = 0;
 $workerDoneTasks = 0;
 $workerClientCount = 0;
 $clientNamesStr = 'Belum ada klien pegangan';
-$workerAvatarUrl = '';
-$fallbackSvgData = '';
+
+// Team directory for Owner & Admin to view all employees & freelancers
+$teamDirectory = [];
+if ($isAdminUser || $isOwnerUser) {
+    try {
+        $stmtTeam = $db->query("
+            SELECT u.id, u.name, u.email, u.role, u.employment_type, 
+                   COALESCE(NULLIF(u.phone_wa, ''), e.phone, '') as phone_wa,
+                   COALESCE(NULLIF(u.position, ''), e.position, '') as position,
+                   COALESCE(NULLIF(u.jobdesk, ''), u.service_specialty, e.service_specialty, '') as jobdesk,
+                   COALESCE(NULLIF(u.service_specialty, ''), e.service_specialty, '') as service_specialty,
+                   COALESCE(u.contract_start_date, e.contract_start_date) as contract_start_date,
+                   COALESCE(u.contract_end_date, e.contract_end_date) as contract_end_date
+            FROM users u
+            LEFT JOIN employees e ON (u.email = e.email OR u.name = e.name)
+            WHERE u.role IN ('karyawan', 'freelancer') AND COALESCE(u.is_active, 1) = 1
+            ORDER BY u.role ASC, u.name ASC
+        ");
+        $rawTeam = $stmtTeam ? $stmtTeam->fetchAll(PDO::FETCH_ASSOC) : [];
+        foreach ($rawTeam as $m) {
+            $mId = (int)$m['id'];
+
+            // Dynamic task counts
+            $stmtMStats = $db->prepare("
+                SELECT 
+                    COUNT(*) as total_tasks,
+                    SUM(CASE WHEN status IN ('approved', 'done') THEN 1 ELSE 0 END) as done_tasks
+                FROM tasks
+                WHERE assigned_to_user_id = ? AND COALESCE(is_deleted, 0) = 0
+            ");
+            $stmtMStats->execute([$mId]);
+            $mStats = $stmtMStats->fetch(PDO::FETCH_ASSOC);
+
+            // Assigned clients
+            $stmtMClients = $db->prepare("
+                SELECT c.id, c.company, c.name as pic_name
+                FROM clients c
+                JOIN employee_clients ec ON c.id = ec.client_id
+                WHERE ec.user_id = ? AND COALESCE(c.is_deleted, 0) = 0
+                ORDER BY c.company ASC
+            ");
+            $stmtMClients->execute([$mId]);
+            $mClients = $stmtMClients->fetchAll(PDO::FETCH_ASSOC);
+            $mClientNames = array_map(function($c) { return $c['company']; }, $mClients);
+
+            $mSeed = urlencode(trim($m['name'] ?? 'Staff'));
+            $mAvatar = "https://api.dicebear.com/7.x/adventurer/svg?seed={$mSeed}&backgroundColor=ffd5dc,c0aede,d1d4f9,b6e3f4";
+
+            $teamDirectory[] = [
+                'id' => $mId,
+                'name' => $m['name'] ?? 'Anggota Tim',
+                'email' => $m['email'] ?? '-',
+                'role' => $m['role'] ?? 'karyawan',
+                'employment_type' => $m['employment_type'] ?? ($m['role'] === 'freelancer' ? 'freelancer' : 'internal'),
+                'position' => !empty($m['position']) ? $m['position'] : ($m['role'] === 'freelancer' ? 'Digital Ads Specialist' : 'Content Creator & Sosmed'),
+                'jobdesk' => !empty($m['jobdesk']) ? $m['jobdesk'] : (!empty($m['service_specialty']) ? $m['service_specialty'] : 'Kelola ads meta & strategi iklan serta penugasan deliverables'),
+                'service_specialty' => $m['service_specialty'] ?? '',
+                'phone_wa' => !empty($m['phone_wa']) ? $m['phone_wa'] : 'Belum diisi',
+                'contract_start_date' => $m['contract_start_date'] ?? null,
+                'contract_end_date' => $m['contract_end_date'] ?? null,
+                'avatar_url' => $mAvatar,
+                'total_tasks' => (int)($mStats['total_tasks'] ?? 0),
+                'done_tasks' => (int)($mStats['done_tasks'] ?? 0),
+                'client_count' => count($mClients),
+                'client_list' => $mClients,
+                'client_names' => !empty($mClientNames) ? implode(', ', $mClientNames) : 'Belum ada klien pegangan'
+            ];
+        }
+    } catch (Exception $e) {
+        $teamDirectory = [];
+    }
+}
 
 if ($isWorkerUser) {
     $stmtW = $db->prepare("SELECT id, name, email, role, employment_type, phone_wa, position, jobdesk, service_specialty, contract_start_date, contract_end_date FROM users WHERE id = ?");
     $stmtW->execute([$userId]);
     $workerProfile = $stmtW->fetch(PDO::FETCH_ASSOC) ?: [];
-
-    // Avatar URL with Dicebear Adventurer & Fallback
-    $workerAvatarSeed = urlencode($user['name'] ?? 'Worker');
-    $workerAvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed={$workerAvatarSeed}&backgroundColor=ffd5dc,c0aede,d1d4f9,b6e3f4";
-    $fallbackSvgData = "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23FDE2E4%22/><circle cx=%2250%22 cy=%2244%22 r=%2222%22 fill=%22%23FFDFBA%22/><path d=%22M32 38 Q50 16 68 38 Q50 26 32 38 Z%22 fill=%22%233D2645%22/><circle cx=%2242%22 cy=%2242%22 r=%223%22 fill=%22%231F2937%22/><circle cx=%2258%22 cy=%2242%22 r=%223%22 fill=%22%231F2937%22/><circle cx=%2238%22 cy=%2247%22 r=%222.5%22 fill=%22%23FFB5A7%22 opacity=%220.6%22/><circle cx=%2262%22 cy=%2247%22 r=%222.5%22 fill=%22%23FFB5A7%22 opacity=%220.6%22/><path d=%22M45 50 Q50 54 55 50%22 stroke=%22%23D95D39%22 stroke-width=%222%22 fill=%22none%22 stroke-linecap=%22round%22/><path d=%22M25 94 C28 72 40 66 50 66 C60 66 72 72 75 94 Z%22 fill=%22%236C5CE7%22/><circle cx=%2250%22 cy=%2268%22 r=%225%22 fill=%22%23FFDFBA%22/></svg>";
+    if (!is_array($workerProfile)) {
+        $workerProfile = [];
+    }
 
     // Client companies
     $stmtAc = $db->prepare("
@@ -1476,8 +1552,13 @@ if ($isWorkerUser) {
             <span class="mobile-text">Rekap Kerja</span>
           </button>
           <button type="button" class="workspace-tab-btn" id="tab-btn-profile" onclick="switchTaskWorkspaceTab('profile')">
-            <span class="desktop-text">Profil Karyawan</span>
-            <span class="mobile-text">Profile</span>
+            <?php if ($isOwnerUser || $isAdminUser): ?>
+              <span class="desktop-text">Profil Tim &amp; Direktori Karyawan</span>
+              <span class="mobile-text">Profil Tim</span>
+            <?php else: ?>
+              <span class="desktop-text">Profil Karyawan</span>
+              <span class="mobile-text">Profile</span>
+            <?php endif; ?>
           </button>
         </div>
 
@@ -1970,247 +2051,468 @@ if ($isWorkerUser) {
           </div>
         </div>
 
-        <!-- SECTION 4: Profile Karyawan -->
+        <!-- SECTION 4: Profile Tim (Owner/Admin) / Profile Karyawan (Worker) -->
         <div id="section-profile-content" class="kala-page-view tab-pane" style="display: none;">
-          <div class="worker-slide2-profile-card">
-            
-            <!-- Header Container (Flex on Desktop, Stack on Mobile) -->
-            <div class="slide2-header-container">
-              <!-- 1. Header Identitas: Avatar Kartun (72x72px) + Nama + Jabatan & Status -->
-              <div class="slide2-identity-header">
-                <div class="cartoon-avatar-wrapper size-72" title="Foto Profil" style="cursor: default;">
-                  <img src="<?= $workerAvatarUrl ?>" 
-                       alt="Avatar <?= htmlspecialchars($user['name'] ?? 'Worker') ?>" 
-                       onerror="this.onerror=null; this.src='<?= $fallbackSvgData ?>';">
+          <?php if ($isOwnerUser || $isAdminUser): ?>
+            <!-- ============================================================== -->
+            <!-- OWNER / ADMIN VIEW: DIREKTORI PROFIL LENGKAP SELURUH KARYAWAN -->
+            <!-- ============================================================== -->
+            <div class="team-dir-header-bar" style="background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 20px; padding: 20px 24px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(15,23,42,0.03); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px;">
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <h3 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0; letter-spacing: -0.3px;">Direktori Profil Tim &amp; Karyawan</h3>
+                  <span class="badge" style="background: #EEF2FF; color: #4F46E5; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px;">
+                    <?= count($teamDirectory) ?> Anggota Terdaftar
+                  </span>
                 </div>
-                <div class="slide2-identity-info">
-                  <h3 class="slide2-user-name"><?= htmlspecialchars($user['name'] ?? 'Tim Kalamedia') ?></h3>
-                  <p class="slide2-user-role">
-                    <?= htmlspecialchars($workerProfile['position'] ?: 'Digital Ads Specialist') ?> &bull; <?= $user['role'] === 'freelancer' ? 'Mitra Kontrak (Freelance)' : 'Karyawan In-House' ?>
-                  </p>
-                </div>
+                <p style="font-size: 12.5px; color: #64748B; margin: 4px 0 0 0;">
+                  Pantau profil lengkap, lingkup jobdesk instruksi Owner, beban kerja tugas, dan kontak WhatsApp seluruh staf &amp; mitra freelance.
+                </p>
               </div>
-
-              <!-- 2. Baris Info Ringkas: No. Telepon & Status Kontrak (Read-Only) -->
-              <div class="slide2-quick-info-row">
-                <div class="slide2-quick-cols">
-                  <div class="slide2-quick-col">
-                    <span class="slide2-quick-label">No. Telepon / WA</span>
-                    <span class="slide2-quick-val" id="profile-display-phone"><?= htmlspecialchars($workerProfile['phone_wa'] ?: 'Belum diisi') ?></span>
-                  </div>
-                  <div class="slide2-quick-col">
-                    <span class="slide2-quick-label">Status Kontrak</span>
-                    <span class="slide2-quick-val">
-                      <?php 
-                        if (!empty($workerProfile['contract_end_date'])) {
-                          echo 'Aktif (s.d. ' . date('d M Y', strtotime($workerProfile['contract_end_date'])) . ')';
-                        } else {
-                          echo 'Aktif (Tetap)';
-                        }
-                      ?>
-                    </span>
-                  </div>
-                </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <a href="team" class="btn btn-secondary btn-sm" style="border-radius: 10px; font-weight: 600; font-size: 12px; padding: 8px 14px; display: inline-flex; align-items: center; gap: 6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                  Kelola di Menu Tim &rarr;
+                </a>
               </div>
             </div>
 
-            <!-- 4. 3 Kartu Statistik Executive (Persis Gaya Kartu Gambar 1!) -->
-            <div class="slide2-pastel-kpi-grid">
-              <!-- Kotak 1: Total Tugas (Badge Ungu Pastel #F2EFFF & Icon #5B3DF5) -->
-              <div class="slide2-pastel-card">
-                <div class="slide2-card-header">
-                  <span class="slide2-card-title">Total Tugas</span>
-                  <div class="slide2-card-icon-badge" style="background: #F2EFFF;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5B3DF5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
-                      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
-                      <line x1="9" y1="12" x2="15" y2="12"></line>
-                      <line x1="9" y1="16" x2="13" y2="16"></line>
-                    </svg>
-                  </div>
-                </div>
-                <div class="slide2-card-value">
-                  <span class="slide2-card-num"><?= $workerTotalTasks ?></span>
-                  <span class="slide2-card-unit">Tugas</span>
-                </div>
-                <div class="slide2-card-subtext">
-                  Deliverables
-                </div>
-              </div>
-
-              <!-- Kotak 2: Klien Aktif (Badge Biru Pastel #EEF2FF & Icon #3B82F6) -->
-              <div class="slide2-pastel-card">
-                <div class="slide2-card-header">
-                  <span class="slide2-card-title">Klien Aktif</span>
-                  <div class="slide2-card-icon-badge" style="background: #EEF2FF;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                      <circle cx="9" cy="7" r="4"></circle>
-                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                  </div>
-                </div>
-                <div class="slide2-card-value">
-                  <span class="slide2-card-num"><?= $workerClientCount ?></span>
-                  <span class="slide2-card-unit">Klien</span>
-                </div>
-                <div class="slide2-card-subtext">
-                  Partner Brand
-                </div>
-              </div>
-
-              <!-- Kotak 3: Tugas Selesai (Badge Hijau Pastel #E8F8F2 & Icon #10B981) -->
-              <div class="slide2-pastel-card">
-                <div class="slide2-card-header">
-                  <span class="slide2-card-title">Tugas Selesai</span>
-                  <div class="slide2-card-icon-badge" style="background: #E8F8F2;">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                    </svg>
-                  </div>
-                </div>
-                <div class="slide2-card-value">
-                  <span class="slide2-card-num"><?= $workerDoneTasks ?></span>
-                  <span class="slide2-card-unit">Selesai</span>
-                </div>
-                <div class="slide2-card-subtext">
-                  Telah Disetujui
-                </div>
-              </div>
+            <!-- Dropdown / Pill Selector Pilih Karyawan -->
+            <div class="team-dir-filter-bar" style="display: flex; align-items: center; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 20px; -webkit-overflow-scrolling: touch; scrollbar-width: none;">
+              <button type="button" class="team-filter-pill active" onclick="filterTeamDirectory('all', this)" style="padding: 7px 16px; border-radius: 999px; font-size: 12px; font-weight: 700; border: 1px solid #0F172A; background: #0F172A; color: #FFFFFF; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">
+                Semua Anggota Tim (<?= count($teamDirectory) ?>)
+              </button>
+              <?php foreach ($teamDirectory as $tm): ?>
+                <button type="button" class="team-filter-pill" onclick="filterTeamDirectory(<?= $tm['id'] ?>, this)" style="padding: 7px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid #E2E8F0; background: #FFFFFF; color: #475569; cursor: pointer; white-space: nowrap; transition: all 0.15s ease; display: inline-flex; align-items: center; gap: 6px;">
+                  <span><?= htmlspecialchars($tm['name']) ?></span>
+                  <span style="font-size: 10px; padding: 1px 6px; border-radius: 6px; font-weight: 700; <?= $tm['role'] === 'freelancer' ? 'background: #F3E8FF; color: #7E22CE;' : 'background: #EFF6FF; color: #1D4ED8;' ?>">
+                    <?= $tm['role'] === 'freelancer' ? 'Freelance' : 'In-House' ?>
+                  </span>
+                </button>
+              <?php endforeach; ?>
             </div>
 
-            <!-- 5. Daftar Rincian Informasi Karyawan (Menu List Bersih Persis Slide 2!) -->
-            <div class="slide2-menu-list">
+            <!-- List of Employee Profile Cards -->
+            <?php if (empty($teamDirectory)): ?>
+              <div style="background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 20px; padding: 48px 24px; text-align: center; color: #64748B;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.75" style="margin: 0 auto 12px auto; display: block;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <h4 style="font-size: 16px; font-weight: 700; color: #0F172A; margin: 0 0 6px 0;">Belum Ada Karyawan / Freelancer</h4>
+                <p style="font-size: 13px; margin: 0 0 16px 0;">Daftarkan anggota tim dan tetapkan jobdesk dari Manajemen Agensi.</p>
+                <a href="team" class="btn btn-primary btn-sm" style="border-radius: 10px; font-weight: 600;">+ Tambah Karyawan Baru</a>
+              </div>
+            <?php else: ?>
+              <div class="team-cards-container" id="team-cards-container">
+                <?php foreach ($teamDirectory as $m): ?>
+                  <div class="team-member-dir-card worker-slide2-profile-card" data-member-id="<?= $m['id'] ?>" style="margin-bottom: 24px;">
+                    <!-- Header Container -->
+                    <div class="slide2-header-container">
+                      <!-- 1. Identitas: Avatar Kartun (72x72px) + Nama + Jabatan & Status -->
+                      <div class="slide2-identity-header">
+                        <div class="cartoon-avatar-wrapper size-72" title="Foto Profil <?= htmlspecialchars($m['name']) ?>" style="cursor: default;">
+                          <img src="<?= $m['avatar_url'] ?>" 
+                               alt="Avatar <?= htmlspecialchars($m['name']) ?>" 
+                               onerror="this.onerror=null; this.src='<?= $fallbackSvgData ?>';">
+                        </div>
+                        <div class="slide2-identity-info">
+                          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
+                            <h3 class="slide2-user-name" style="margin: 0;"><?= htmlspecialchars($m['name']) ?></h3>
+                            <?php if ($m['role'] === 'freelancer'): ?>
+                              <span class="badge" style="background: #F3E8FF; color: #7E22CE; font-weight: 700; border-radius: 999px; padding: 2.5px 10px; font-size: 11px;">Mitra Freelancer</span>
+                            <?php else: ?>
+                              <span class="badge" style="background: #EFF6FF; color: #1D4ED8; font-weight: 700; border-radius: 999px; padding: 2.5px 10px; font-size: 11px;">Staf Internal (In-House)</span>
+                            <?php endif; ?>
+                          </div>
+                          <p class="slide2-user-role" style="color: #64748B;">
+                            <?= htmlspecialchars($m['position']) ?> &bull; <?= htmlspecialchars($m['email']) ?>
+                          </p>
+                        </div>
+                      </div>
+
+                      <!-- 2. Baris Info Ringkas: No. Telepon / WA & Status Kontrak -->
+                      <div class="slide2-quick-info-row">
+                        <div class="slide2-quick-cols">
+                          <div class="slide2-quick-col">
+                            <span class="slide2-quick-label">Kontak WhatsApp</span>
+                            <span class="slide2-quick-val" style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                              <span><?= htmlspecialchars($m['phone_wa']) ?></span>
+                              <?php 
+                                $cleanPhone = preg_replace('/[^0-9]/', '', str_replace('+62', '62', $m['phone_wa']));
+                                if (!empty($cleanPhone) && strlen($cleanPhone) >= 9):
+                              ?>
+                                <a href="https://wa.me/<?= $cleanPhone ?>" target="_blank" class="btn btn-sm" style="display: inline-flex; align-items: center; gap: 4px; background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; border-radius: 6px; font-size: 10.5px; font-weight: 700; padding: 2px 8px; text-decoration: none;" title="Chat WhatsApp Langsung">
+                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                                  Chat WA
+                                </a>
+                              <?php endif; ?>
+                            </span>
+                          </div>
+                          <div class="slide2-quick-col">
+                            <span class="slide2-quick-label">Masa Berlaku Kontrak</span>
+                            <span class="slide2-quick-val">
+                              <?php if (!empty($m['contract_end_date'])): ?>
+                                Aktif (s.d. <?= date('d M Y', strtotime($m['contract_end_date'])) ?>)
+                              <?php else: ?>
+                                Aktif (Tetap)
+                              <?php endif; ?>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 3 Kotak Statistik Seragam (Persis Style Slide 2) -->
+                    <div class="slide2-pastel-kpi-grid">
+                      <!-- Kotak 1: Total Tugas (Badge Ungu Pastel) -->
+                      <div class="slide2-pastel-card">
+                        <div class="slide2-card-header">
+                          <span class="slide2-card-title">Penugasan</span>
+                          <div class="slide2-card-icon-badge" style="background: #F2EFFF;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5B3DF5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                              <line x1="9" y1="12" x2="15" y2="12"></line>
+                              <line x1="9" y1="16" x2="13" y2="16"></line>
+                            </svg>
+                          </div>
+                        </div>
+                        <div class="slide2-card-value">
+                          <span class="slide2-card-num"><?= $m['total_tasks'] ?></span>
+                          <span class="slide2-card-unit">Tugas</span>
+                        </div>
+                        <div class="slide2-card-subtext">Deliverables Proyek</div>
+                      </div>
+
+                      <!-- Kotak 2: Klien Aktif (Badge Biru Pastel) -->
+                      <div class="slide2-pastel-card">
+                        <div class="slide2-card-header">
+                          <span class="slide2-card-title">Klien Aktif</span>
+                          <div class="slide2-card-icon-badge" style="background: #EEF2FF;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                              <circle cx="9" cy="7" r="4"></circle>
+                              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            </svg>
+                          </div>
+                        </div>
+                        <div class="slide2-card-value">
+                          <span class="slide2-card-num"><?= $m['client_count'] ?></span>
+                          <span class="slide2-card-unit">Klien</span>
+                        </div>
+                        <div class="slide2-card-subtext">Partner Brand Pegangan</div>
+                      </div>
+
+                      <!-- Kotak 3: Tugas Selesai (Badge Hijau Pastel) -->
+                      <div class="slide2-pastel-card">
+                        <div class="slide2-card-header">
+                          <span class="slide2-card-title">Terselesaikan</span>
+                          <div class="slide2-card-icon-badge" style="background: #E8F8F2;">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                          </div>
+                        </div>
+                        <div class="slide2-card-value">
+                          <span class="slide2-card-num"><?= $m['done_tasks'] ?></span>
+                          <span class="slide2-card-unit">Selesai</span>
+                        </div>
+                        <div class="slide2-card-subtext">Telah Disetujui Klien</div>
+                      </div>
+                    </div>
+
+                    <!-- Rincian Lingkup Kerja (Jobdesk) & Klien Pegangan -->
+                    <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 16px; padding: 16px 18px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px;">
+                      <!-- Jobdesk -->
+                      <div>
+                        <div style="font-size: 11px; font-weight: 700; color: #4F46E5; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: flex; align-items: center; gap: 6px;">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                          Rincian Lingkup Kerja (Jobdesk dari Owner)
+                        </div>
+                        <div style="font-size: 13px; color: #1E293B; line-height: 1.55; white-space: pre-line; background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 10px; padding: 10px 14px;">
+                          <?= htmlspecialchars($m['jobdesk']) ?>
+                        </div>
+                      </div>
+
+                      <!-- PT Klien Pegangan -->
+                      <div>
+                        <div style="font-size: 11px; font-weight: 700; color: #059669; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>
+                          Daftar PT Klien yang Dipegang (<?= $m['client_count'] ?>)
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                          <?php if (!empty($m['client_list'])): ?>
+                            <?php foreach ($m['client_list'] as $cl): ?>
+                              <span style="background: #FFFFFF; border: 1px solid #E2E8F0; padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600; color: #0F172A; display: inline-flex; align-items: center; gap: 4px;">
+                                🏢 <?= htmlspecialchars($cl['company']) ?>
+                              </span>
+                            <?php endforeach; ?>
+                          <?php else: ?>
+                            <span style="font-size: 12px; color: #94A3B8; font-style: italic;">Belum ada penugasan akun perusahaan klien</span>
+                          <?php endif; ?>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Footer Aksi Cepat Owner -->
+                    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; border-top: 1px solid #F1F5F9; padding-top: 14px;">
+                      <a href="team" class="btn btn-secondary btn-sm" style="border-radius: 10px; font-weight: 600; font-size: 12px; padding: 8px 14px;">
+                        Buka di Menu Tim
+                      </a>
+                      <button type="button" class="btn btn-primary btn-sm" onclick="openQuickEditJobdesk(<?= htmlspecialchars(json_encode($m), ENT_QUOTES, 'UTF-8') ?>)" style="border-radius: 10px; font-weight: 600; font-size: 12px; padding: 8px 16px; display: inline-flex; align-items: center; gap: 6px; background: #5B3DF5; border-color: #5B3DF5;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        Edit Jobdesk / Profil
+                      </button>
+                    </div>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            <?php endif; ?>
+
+          <?php else: ?>
+            <!-- ============================================================== -->
+            <!-- WORKER VIEW: PROFIL SAYA (KARYAWAN / FREELANCER PRIBADI)      -->
+            <!-- ============================================================== -->
+            <div class="worker-slide2-profile-card">
               
-              <!-- Baris 1: Tugas dari Manajemen -->
-              <div class="slide2-menu-item" onclick="openJobdeskDetailModal()" role="button" tabindex="0">
-                <div class="slide2-menu-left">
-                  <div class="slide2-menu-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                    </svg>
+              <!-- Header Container (Flex on Desktop, Stack on Mobile) -->
+              <div class="slide2-header-container">
+                <!-- 1. Header Identitas: Avatar Kartun (72x72px) + Nama + Jabatan & Status -->
+                <div class="slide2-identity-header">
+                  <div class="cartoon-avatar-wrapper size-72" title="Foto Profil" style="cursor: default;">
+                    <img src="<?= $workerAvatarUrl ?>" 
+                         alt="Avatar <?= htmlspecialchars($user['name'] ?? 'Worker') ?>" 
+                         onerror="this.onerror=null; this.src='<?= $fallbackSvgData ?>';">
                   </div>
-                  <div class="slide2-menu-text">
-                    <h4 class="slide2-menu-title">Tugas dari Manajemen</h4>
-                    <p class="slide2-menu-desc"><?= htmlspecialchars($workerProfile['jobdesk'] ?: ($workerProfile['service_specialty'] ?: 'Kelola ads meta & strategi iklan')) ?></p>
+                  <div class="slide2-identity-info">
+                    <h3 class="slide2-user-name"><?= htmlspecialchars($user['name'] ?? 'Tim Kalamedia') ?></h3>
+                    <p class="slide2-user-role">
+                      <?= htmlspecialchars($workerProfile['position'] ?? ($user['position'] ?? 'Spesialis Tim')) ?> &bull; <?= ($user['role'] ?? '') === 'freelancer' ? 'Mitra Kontrak (Freelance)' : 'Karyawan In-House' ?>
+                    </p>
                   </div>
                 </div>
-                <div class="slide2-menu-chevron">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
-                </div>
-              </div>
 
-              <!-- Baris 2: Jabatan & Divisi -->
-              <div class="slide2-menu-item">
-                <div class="slide2-menu-left">
-                  <div class="slide2-menu-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                    </svg>
-                  </div>
-                  <div class="slide2-menu-text">
-                    <h4 class="slide2-menu-title">Jabatan &amp; Divisi</h4>
-                    <p class="slide2-menu-desc"><?= htmlspecialchars($workerProfile['position'] ?: 'Digital Ads Specialist') ?> &bull; Divisi Pemasaran Kalamedia</p>
-                  </div>
-                </div>
-                <div class="slide2-menu-chevron">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
-                </div>
-              </div>
-
-              <!-- Baris 3: Nomor Telepon & WhatsApp (Read-Only) -->
-              <div class="slide2-menu-item" style="cursor: default;">
-                <div class="slide2-menu-left">
-                  <div class="slide2-menu-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                    </svg>
-                  </div>
-                  <div class="slide2-menu-text">
-                    <h4 class="slide2-menu-title">Nomor Telepon &amp; WhatsApp</h4>
-                    <p class="slide2-menu-desc" id="profile-menu-phone"><?= htmlspecialchars($workerProfile['phone_wa'] ?: 'Belum diisi') ?></p>
+                <!-- 2. Baris Info Ringkas: No. Telepon & Status Kontrak (Read-Only) -->
+                <div class="slide2-quick-info-row">
+                  <div class="slide2-quick-cols">
+                    <div class="slide2-quick-col">
+                      <span class="slide2-quick-label">No. Telepon / WA</span>
+                      <span class="slide2-quick-val" id="profile-display-phone"><?= htmlspecialchars(($workerProfile['phone_wa'] ?? '') ?: (($user['phone_wa'] ?? '') ?: 'Belum diisi')) ?></span>
+                    </div>
+                    <div class="slide2-quick-col">
+                      <span class="slide2-quick-label">Status Kontrak</span>
+                      <span class="slide2-quick-val">
+                        <?php 
+                          if (!empty($workerProfile['contract_end_date'])) {
+                            echo 'Aktif (s.d. ' . date('d M Y', strtotime($workerProfile['contract_end_date'])) . ')';
+                          } else {
+                            echo 'Aktif (Tetap)';
+                          }
+                        ?>
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Baris 4: Email Akses Ruang Kerja -->
-              <div class="slide2-menu-item">
-                <div class="slide2-menu-left">
-                  <div class="slide2-menu-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                      <polyline points="22,6 12,13 2,6"></polyline>
-                    </svg>
+              <!-- 4. 3 Kartu Statistik Executive -->
+              <div class="slide2-pastel-kpi-grid">
+                <!-- Kotak 1: Total Tugas (Badge Ungu Pastel #F2EFFF & Icon #5B3DF5) -->
+                <div class="slide2-pastel-card">
+                  <div class="slide2-card-header">
+                    <span class="slide2-card-title">Total Tugas</span>
+                    <div class="slide2-card-icon-badge" style="background: #F2EFFF;">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5B3DF5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                        <line x1="9" y1="12" x2="15" y2="12"></line>
+                        <line x1="9" y1="16" x2="13" y2="16"></line>
+                      </svg>
+                    </div>
                   </div>
-                  <div class="slide2-menu-text">
-                    <h4 class="slide2-menu-title">Email Akses Ruang Kerja</h4>
-                    <p class="slide2-menu-desc"><?= htmlspecialchars($user['email'] ?? '-') ?></p>
+                  <div class="slide2-card-value">
+                    <span class="slide2-card-num"><?= $workerTotalTasks ?></span>
+                    <span class="slide2-card-unit">Tugas</span>
+                  </div>
+                  <div class="slide2-card-subtext">
+                    Deliverables
                   </div>
                 </div>
-                <div class="slide2-menu-chevron">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
+
+                <!-- Kotak 2: Klien Aktif (Badge Biru Pastel #EEF2FF & Icon #3B82F6) -->
+                <div class="slide2-pastel-card">
+                  <div class="slide2-card-header">
+                    <span class="slide2-card-title">Klien Aktif</span>
+                    <div class="slide2-card-icon-badge" style="background: #EEF2FF;">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="slide2-card-value">
+                    <span class="slide2-card-num"><?= $workerClientCount ?></span>
+                    <span class="slide2-card-unit">Klien</span>
+                  </div>
+                  <div class="slide2-card-subtext">
+                    Partner Brand
+                  </div>
+                </div>
+
+                <!-- Kotak 3: Tugas Selesai (Badge Hijau Pastel #E8F8F2 & Icon #10B981) -->
+                <div class="slide2-pastel-card">
+                  <div class="slide2-card-header">
+                    <span class="slide2-card-title">Tugas Selesai</span>
+                    <div class="slide2-card-icon-badge" style="background: #E8F8F2;">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="slide2-card-value">
+                    <span class="slide2-card-num"><?= $workerDoneTasks ?></span>
+                    <span class="slide2-card-unit">Selesai</span>
+                  </div>
+                  <div class="slide2-card-subtext">
+                    Telah Disetujui
+                  </div>
                 </div>
               </div>
 
-              <!-- Baris 5: Klien & Proyek Aktif -->
-              <div class="slide2-menu-item" onclick="openAssignedClientsModal()" role="button" tabindex="0">
-                <div class="slide2-menu-left">
-                  <div class="slide2-menu-icon">
+              <!-- 5. Daftar Rincian Informasi Karyawan -->
+              <div class="slide2-menu-list">
+                
+                <!-- Baris 1: Tugas dari Manajemen -->
+                <div class="slide2-menu-item" onclick="openJobdeskDetailModal()" role="button" tabindex="0">
+                  <div class="slide2-menu-left">
+                    <div class="slide2-menu-icon">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                      </svg>
+                    </div>
+                    <div class="slide2-menu-text">
+                      <h4 class="slide2-menu-title">Tugas dari Manajemen</h4>
+                      <p class="slide2-menu-desc"><?= htmlspecialchars(($workerProfile['jobdesk'] ?? '') ?: (($workerProfile['service_specialty'] ?? '') ?: 'Kelola ads meta & strategi iklan')) ?></p>
+                    </div>
+                  </div>
+                  <div class="slide2-menu-chevron">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M3 21h18"></path>
-                      <path d="M5 21V7l8-4v18"></path>
-                      <path d="M19 21V11l-6-4"></path>
-                      <line x1="9" y1="9" x2="9" y2="9.01"></line>
-                      <line x1="9" y1="13" x2="9" y2="13.01"></line>
-                      <line x1="9" y1="17" x2="9" y2="17.01"></line>
+                      <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                   </div>
-                  <div class="slide2-menu-text">
-                    <h4 class="slide2-menu-title">Klien &amp; Proyek Aktif</h4>
-                    <p class="slide2-menu-desc"><?= htmlspecialchars($clientNamesStr) ?></p>
+                </div>
+
+                <!-- Baris 2: Jabatan & Divisi -->
+                <div class="slide2-menu-item">
+                  <div class="slide2-menu-left">
+                    <div class="slide2-menu-icon">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                      </svg>
+                    </div>
+                    <div class="slide2-menu-text">
+                      <h4 class="slide2-menu-title">Jabatan &amp; Divisi</h4>
+                      <p class="slide2-menu-desc"><?= htmlspecialchars(($workerProfile['position'] ?? '') ?: 'Digital Ads Specialist') ?> &bull; Divisi Operasional Kalamedia</p>
+                    </div>
+                  </div>
+                  <div class="slide2-menu-chevron">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
                   </div>
                 </div>
-                <div class="slide2-menu-chevron">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
-                </div>
-              </div>
 
-              <!-- Baris 6: Keluar (Logout) -->
-              <a href="logout" class="slide2-menu-item slide2-logout-item" onclick="return confirm('Apakah Anda yakin ingin keluar dari akun workspace ini?');">
-                <div class="slide2-menu-left">
-                  <div class="slide2-menu-icon logout-icon">
+                <!-- Baris 3: Nomor Telepon & WhatsApp (Read-Only) -->
+                <div class="slide2-menu-item" style="cursor: default;">
+                  <div class="slide2-menu-left">
+                    <div class="slide2-menu-icon">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                      </svg>
+                    </div>
+                    <div class="slide2-menu-text">
+                      <h4 class="slide2-menu-title">Nomor Telepon &amp; WhatsApp</h4>
+                      <p class="slide2-menu-desc" id="profile-menu-phone"><?= htmlspecialchars(($workerProfile['phone_wa'] ?? '') ?: 'Belum diisi') ?></p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Baris 4: Email Akses Ruang Kerja -->
+                <div class="slide2-menu-item">
+                  <div class="slide2-menu-left">
+                    <div class="slide2-menu-icon">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                      </svg>
+                    </div>
+                    <div class="slide2-menu-text">
+                      <h4 class="slide2-menu-title">Email Akses Ruang Kerja</h4>
+                      <p class="slide2-menu-desc"><?= htmlspecialchars($user['email'] ?? '-') ?></p>
+                    </div>
+                  </div>
+                  <div class="slide2-menu-chevron">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Baris 5: Klien & Proyek Aktif -->
+                <div class="slide2-menu-item" onclick="openAssignedClientsModal()" role="button" tabindex="0">
+                  <div class="slide2-menu-left">
+                    <div class="slide2-menu-icon">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 21h18"></path>
+                        <path d="M5 21V7l8-4v18"></path>
+                        <path d="M19 21V11l-6-4"></path>
+                        <line x1="9" y1="9" x2="9" y2="9.01"></line>
+                        <line x1="9" y1="13" x2="9" y2="13.01"></line>
+                        <line x1="9" y1="17" x2="9" y2="17.01"></line>
+                      </svg>
+                    </div>
+                    <div class="slide2-menu-text">
+                      <h4 class="slide2-menu-title">Klien &amp; Proyek Aktif</h4>
+                      <p class="slide2-menu-desc"><?= htmlspecialchars($clientNamesStr) ?></p>
+                    </div>
+                  </div>
+                  <div class="slide2-menu-chevron">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Baris 6: Keluar (Logout) -->
+                <a href="logout" class="slide2-menu-item slide2-logout-item" onclick="return confirm('Apakah Anda yakin ingin keluar dari akun workspace ini?');">
+                  <div class="slide2-menu-left">
+                    <div class="slide2-menu-icon logout-icon">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E5484D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                      </svg>
+                    </div>
+                    <div class="slide2-menu-text">
+                      <h4 class="slide2-menu-title" style="color: #E5484D;">Keluar (Logout)</h4>
+                      <p class="slide2-menu-desc">Akhiri sesi akun Anda pada perangkat ini</p>
+                    </div>
+                  </div>
+                  <div class="slide2-menu-chevron">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E5484D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                      <polyline points="16 17 21 12 16 7"></polyline>
-                      <line x1="21" y1="12" x2="9" y2="12"></line>
+                      <polyline points="9 18 15 12 9 6"></polyline>
                     </svg>
                   </div>
-                  <div class="slide2-menu-text">
-                    <h4 class="slide2-menu-title" style="color: #E5484D;">Keluar (Logout)</h4>
-                    <p class="slide2-menu-desc">Akhiri sesi akun Anda pada perangkat ini</p>
-                  </div>
-                </div>
-                <div class="slide2-menu-chevron">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E5484D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
-                </div>
-              </a>
+                </a>
+
+              </div>
 
             </div>
-
-          </div>
+          <?php endif; ?>
         </div>
 
       </div>
@@ -2240,17 +2542,17 @@ if ($isWorkerUser) {
           <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px; padding: 14px; margin-bottom: 14px;">
             <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Peran &amp; Spesialisasi</div>
             <div style="font-size: 15px; font-weight: 700; color: #0F172A;">
-              <?= htmlspecialchars($workerProfile['position'] ?? 'Team Member') ?>
+              <?= htmlspecialchars($workerProfile['position'] ?? ($user['position'] ?? 'Team Member')) ?>
             </div>
             <div style="font-size: 12px; color: #4F46E5; font-weight: 600; margin-top: 2px;">
-              <?= htmlspecialchars($workerProfile['service_specialty'] ?? 'Layanan Agensi Kalamedia') ?>
+              <?= htmlspecialchars($workerProfile['service_specialty'] ?? ($user['service_specialty'] ?? 'Layanan Agensi Kalamedia')) ?>
             </div>
           </div>
 
           <div style="margin-bottom: 6px;">
             <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">Rincian Instruksi &amp; Uraian Tugas</div>
             <div style="font-size: 13.5px; color: #1E293B; line-height: 1.6; white-space: pre-line; background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 12px; padding: 14px;">
-              <?= nl2br(htmlspecialchars($workerProfile['jobdesk'] ?: "1. Menjalankan penugasan deliverables tepat waktu sesuai tenggat waktu (deadline).\n2. Melakukan optimasi dan pelaporan berkala kepada Manajemen.\n3. Berkoordinasi langsung dengan tim internal dan klien melalui Room Diskusi Pekerjaan.")) ?>
+              <?= nl2br(htmlspecialchars(($workerProfile['jobdesk'] ?? '') ?: "1. Menjalankan penugasan deliverables tepat waktu sesuai tenggat waktu (deadline).\n2. Melakukan optimasi dan pelaporan berkala kepada Manajemen.\n3. Berkoordinasi langsung dengan tim internal dan klien melalui Room Diskusi Pekerjaan.")) ?>
             </div>
           </div>
         </div>
@@ -2261,6 +2563,69 @@ if ($isWorkerUser) {
       </div>
     </div>
   </div>
+
+  <!-- MODAL: Quick Edit Jobdesk / Profil Karyawan (Owner / Admin) -->
+  <?php if ($isAdminUser || $isOwnerUser): ?>
+  <div class="modal" id="modal-quick-edit-jobdesk" style="display: none;">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-content" style="border-radius: 20px; overflow: hidden; border: 1px solid #ECEEF5;">
+        <div class="modal-header" style="background: #F8FAFC; border-bottom: 1px solid #F1F5F9; padding: 16px 20px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: #EEF2FF; color: #4F46E5; display: flex; align-items: center; justify-content: center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            </div>
+            <div>
+              <h4 class="modal-title" style="font-size: 15px; font-weight: 700; color: #0F172A; margin: 0;">Edit Jobdesk &amp; Profil Karyawan</h4>
+              <span style="font-size: 11.5px; color: #64748B;" id="quick-edit-subtitle">Perbarui arahan tugas untuk anggota tim</span>
+            </div>
+          </div>
+          <button type="button" class="close-btn" onclick="closeModal('modal-quick-edit-jobdesk')">&times;</button>
+        </div>
+
+        <form id="form-quick-edit-jobdesk" onsubmit="handleQuickEditJobdesk(event)">
+          <input type="hidden" name="member_id" id="quick-edit-member-id">
+
+          <div class="modal-body" style="padding: 20px;">
+            <div class="form-group">
+              <label class="form-label" style="font-size: 12px; font-weight: 700;">Nama Lengkap Karyawan</label>
+              <input type="text" id="quick-edit-name" class="form-control" readonly style="background: #F8FAFC; font-weight: 600; color: #475569;">
+            </div>
+
+            <div class="form-row kala-form-row">
+              <div class="form-group">
+                <label class="form-label" style="font-size: 12px; font-weight: 700;">Jabatan / Posisi <span style="color:red;">*</span></label>
+                <input type="text" name="position" id="quick-edit-position" class="form-control" required placeholder="Contoh: Digital Ads Specialist">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" style="font-size: 12px; font-weight: 700;">No. WhatsApp / HP</label>
+                <input type="text" name="phone_wa" id="quick-edit-phone" class="form-control" placeholder="Contoh: 081234567890">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" style="font-size: 12px; font-weight: 700;">Masa Berlaku Kontrak (Akhir Kontrak)</label>
+              <input type="date" name="contract_end_date" id="quick-edit-contract-end" class="form-control">
+              <span style="font-size: 11px; color: #64748B; margin-top: 3px; display: block;">Biarkan kosong jika kontrak tetap / tidak berbatas waktu.</span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" style="font-size: 12px; font-weight: 700;">Rincian Lingkup Kerja (Jobdesk dari Owner) <span style="color:red;">*</span></label>
+              <textarea name="jobdesk" id="quick-edit-jobdesk" class="form-control" rows="4" placeholder="Tuliskan instruksi tugas dan tanggung jawab karyawan ini..." required></textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer" style="background: #F8FAFC; border-top: 1px solid #F1F5F9; padding: 12px 20px;">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('modal-quick-edit-jobdesk')" style="border-radius: 8px; font-weight: 600;">Batal</button>
+            <button type="submit" class="btn btn-primary btn-sm" id="btn-submit-quick-edit" style="border-radius: 8px; font-weight: 600; background: #5B3DF5; border-color: #5B3DF5;">
+              Simpan Perubahan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <?php endif; ?>
 
   <!-- MODAL: Assigned Clients Modal -->
   <div class="modal" id="modal-assigned-clients" style="display: none;">
@@ -4180,6 +4545,86 @@ if ($isWorkerUser) {
     }
     function closeAssignedClientsModal() {
       closeModal('modal-assigned-clients');
+    }
+
+    // Team Directory & Quick Edit Handlers (Owner / Admin)
+    function filterTeamDirectory(memberId, btn) {
+      document.querySelectorAll('.team-filter-pill').forEach(b => {
+        b.classList.remove('active');
+        b.style.background = '#FFFFFF';
+        b.style.color = '#475569';
+        b.style.borderColor = '#E2E8F0';
+      });
+      if (btn) {
+        btn.classList.add('active');
+        btn.style.background = '#0F172A';
+        btn.style.color = '#FFFFFF';
+        btn.style.borderColor = '#0F172A';
+      }
+
+      const cards = document.querySelectorAll('.team-member-dir-card');
+      cards.forEach(card => {
+        if (memberId === 'all' || card.getAttribute('data-member-id') == memberId) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function openQuickEditJobdesk(member) {
+      if (!member) return;
+      const idEl = document.getElementById('quick-edit-member-id');
+      const nameEl = document.getElementById('quick-edit-name');
+      const posEl = document.getElementById('quick-edit-position');
+      const phoneEl = document.getElementById('quick-edit-phone');
+      const dateEl = document.getElementById('quick-edit-contract-end');
+      const deskEl = document.getElementById('quick-edit-jobdesk');
+      const subEl = document.getElementById('quick-edit-subtitle');
+
+      if (idEl) idEl.value = member.id || '';
+      if (nameEl) nameEl.value = member.name || '';
+      if (posEl) posEl.value = member.position || '';
+      if (phoneEl) phoneEl.value = (member.phone_wa && member.phone_wa !== 'Belum diisi') ? member.phone_wa : '';
+      if (dateEl) dateEl.value = member.contract_end_date || '';
+      if (deskEl) deskEl.value = member.jobdesk || '';
+      if (subEl) subEl.innerText = 'Perbarui arahan tugas untuk ' + (member.name || 'anggota tim');
+
+      openModal('modal-quick-edit-jobdesk');
+    }
+
+    async function handleQuickEditJobdesk(e) {
+      e.preventDefault();
+      const form = document.getElementById('form-quick-edit-jobdesk');
+      const btn = document.getElementById('btn-submit-quick-edit');
+      const origText = btn ? btn.innerHTML : 'Simpan';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = 'Menyimpan...';
+      }
+
+      const formData = new FormData(form);
+      try {
+        const res = await fetch('api/portal_tasks.php?action=quick_update_jobdesk', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(data.message || 'Jobdesk berhasil diperbarui!', 'success');
+          closeModal('modal-quick-edit-jobdesk');
+          setTimeout(() => window.location.reload(), 600);
+        } else {
+          showToast(data.message || 'Gagal menyimpan perubahan', 'danger');
+        }
+      } catch (err) {
+        showToast('Koneksi server gagal', 'danger');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origText;
+        }
+      }
     }
 
     async function loadWorkerRecapData() {

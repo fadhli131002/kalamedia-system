@@ -649,142 +649,92 @@ if ($isWorkerUser) {
         box-sizing: border-box !important;
       }
 
-      /* Mobile Content Body Breathing Room (Anti-cut off by Header & Bottom Nav) */
-      .content-body {
-        padding-top: 12px !important;
-        padding-bottom: 84px !important;
-        padding-left: 14px !important;
-        padding-right: 14px !important;
+      /* Global Mobile Layout & Spacing (Bento Style) */
+      body,
+      .app-container,
+      .main-wrapper {
+        background: #F8FAFC !important;
       }
 
-      /* Compact KPI Tiles Grid: 1 Hero card + 2x2 grid */
-      .kpi-row {
+      .content-body {
+        padding-top: 14px !important;
+        padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+      }
+
+      /* Bento Metric Cards: 2x2 Grid with Minimalist Typography */
+      .bento-deliverables-2x2-grid {
+        display: grid !important;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 8px !important;
+        gap: 10px !important;
         margin-bottom: 14px !important;
       }
-      .kpi-row > .kpi-tile:first-child {
-        grid-column: 1 / -1 !important;
-        background: linear-gradient(135deg, #F8FAFC 0%, #EEF2F6 100%) !important;
-        border-color: #DDE1EE !important;
-      }
-      .kpi-row > .kpi-tile:last-child,
-      .kpi-row > *:last-child:nth-child(odd) {
-        grid-column: auto !important;
-      }
-      .kpi-tile {
-        padding: 12px 14px !important;
-        border-radius: 14px !important;
-        min-height: auto !important;
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: space-between !important;
-      }
-      .kpi-tile .metric-header {
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        margin-bottom: 2px !important;
-      }
-      .kpi-tile .metric-label,
-      .kpi-tile > div:first-child span.metric-label,
-      .kpi-tile > span:first-child {
-        font-size: 11px !important;
-        font-weight: 600 !important;
-        color: #7B7890 !important;
-        letter-spacing: 0.02em !important;
-        line-height: 1.2 !important;
-      }
-      .kpi-tile.urgent .metric-label { color: #B42318 !important; }
-      .kpi-tile.review .metric-label { color: #B54708 !important; }
-
-      .kpi-tile .metric-value,
-      .kpi-tile .metric-num,
-      .kpi-tile > div:nth-child(2) {
-        font-size: 20px !important;
-        font-weight: 800 !important;
-        color: #1A162B !important;
-        margin: 2px 0 !important;
-        line-height: 1.2 !important;
-        letter-spacing: -0.2px !important;
-      }
-      .kpi-tile.urgent .metric-num { color: #B42318 !important; }
-      .kpi-tile.review .metric-num { color: #B54708 !important; }
-
-      .kpi-tile .metric-subtitle,
-      .kpi-tile .metric-subtitle span,
-      .kpi-tile > div:last-child span,
-      .kpi-tile > span:last-child {
-        font-size: 11px !important;
-        font-weight: 400 !important;
-        color: #9CA3AF !important;
-        line-height: 1.2 !important;
-      }
-      .kpi-tile.urgent .metric-subtitle span { color: #B42318 !important; }
-      .kpi-tile.review .metric-subtitle span { color: #B54708 !important; }
-
-      /* Filter Panel */
-      .filter-panel {
-        padding: 14px !important;
-        border-radius: 16px !important;
-        gap: 12px !important;
-        margin-bottom: 16px !important;
-      }
-      .task-filter-title {
-        font-size: 11px !important;
-      }
-      .task-filter-hint {
-        font-size: 10px !important;
-      }
-      .task-services-track {
-        overflow-x: auto !important;
-        flex-wrap: nowrap !important;
-        padding-bottom: 4px !important;
-        width: 100% !important;
-      }
-      .task-service-pill {
-        padding: 7px 13px !important;
-        font-size: 11.5px !important;
-        border-radius: 9px !important;
+      .bento-metric-card,
+      .bento-total-card {
+        background: #FFFFFF !important;
+        border: 1px solid #F1F5F9 !important;
+        border-radius: 20px !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
       }
 
-      /* Filter Status Pekerjaan: 1 Baris Horizontal Pill Bar Scrollable (Anti 3-Baris Kotak Besar) */
+      /* Bento Filter & Search Panel */
+      .bento-filter-panel {
+        background: #FFFFFF !important;
+        border: 1px solid #F1F5F9 !important;
+        border-radius: 20px !important;
+        padding: 16px !important;
+        margin-bottom: 14px !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+      }
+
+      /* Segmented Controls Chips (bg-slate-100 p-1 rounded-xl) */
+      .bento-segmented-control,
+      .task-services-track,
       #status-filter-group.task-status-grid,
       .task-status-grid {
         display: flex !important;
         flex-direction: row !important;
         overflow-x: auto !important;
         white-space: nowrap !important;
-        gap: 6px !important;
+        gap: 4px !important;
         width: 100% !important;
         box-sizing: border-box !important;
         -webkit-overflow-scrolling: touch !important;
         scrollbar-width: none !important;
-        background: #F3F4F6 !important;
-        padding: 3px !important;
-        border-radius: 8px !important;
+        background: #F1F5F9 !important;
+        padding: 4px !important;
+        border-radius: 12px !important;
         flex-wrap: nowrap !important;
       }
-      #status-filter-group.task-status-grid::-webkit-scrollbar,
+      .bento-segmented-control::-webkit-scrollbar,
+      .task-services-track::-webkit-scrollbar,
       .task-status-grid::-webkit-scrollbar {
         display: none !important;
       }
-      #status-filter-group.task-status-grid .filter-btn,
+
+      .task-service-pill,
       .task-status-grid .filter-btn {
         width: auto !important;
         flex-shrink: 0 !important;
-        padding: 6px 14px !important;
+        padding: 7px 14px !important;
         font-size: 12px !important;
         font-weight: 500 !important;
-        border-radius: 6px !important;
-        justify-content: center !important;
-        text-align: center !important;
+        color: #64748B !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
         white-space: nowrap !important;
+        transition: all 0.15s ease !important;
         box-sizing: border-box !important;
       }
-      #status-filter-group.task-status-grid .filter-btn:first-child,
-      .task-status-grid .filter-btn:first-child {
-        grid-column: auto !important;
+      .task-service-pill.active,
+      .task-status-grid .filter-btn.active {
+        background: #FFFFFF !important;
+        color: #0F172A !important;
+        font-weight: 600 !important;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
       }
 
       /* Quick Action Buttons in Tab Saldo Ads (Round 38px circle anti-gepeng) */
@@ -799,6 +749,10 @@ if ($isWorkerUser) {
         align-items: center !important;
         justify-content: center !important;
         gap: 6px !important;
+        border-radius: 16px !important;
+        border: 1px solid #F1F5F9 !important;
+        background: #FFFFFF !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
         box-sizing: border-box !important;
       }
       .appify-action-icon-circle {
@@ -812,55 +766,14 @@ if ($isWorkerUser) {
         align-items: center !important;
         justify-content: center !important;
       }
-      .task-bottom-toolbar {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        gap: 10px !important;
-        padding-top: 10px !important;
-      }
-      .task-bottom-left-group {
-        flex-direction: column !important;
-        align-items: stretch !important;
-        width: 100% !important;
-        gap: 8px !important;
-      }
-      .task-select-wrap,
-      .task-sdm-select {
-        width: 100% !important;
-        min-width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-      }
-      .task-search-wrap {
-        width: 100% !important;
-        min-width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-      }
-      .task-search-input {
-        width: 100% !important;
-        height: 38px !important;
-        font-size: 12.5px !important;
-        box-sizing: border-box !important;
-      }
-      .task-count-pill {
-        width: 100% !important;
-        text-align: center !important;
-        justify-content: center !important;
-        box-sizing: border-box !important;
-      }
 
-      /* Section 2 Ads Tracker Header Actions */
-      .ads-tracker-header-actions {
-        width: 100% !important;
-        display: flex !important;
-        flex-direction: column !important;
-        gap: 8px !important;
-      }
-      .ads-tracker-header-actions .btn {
-        width: 100% !important;
-        justify-content: center !important;
-        text-align: center !important;
+      /* Task Items Bento Card */
+      .task-item-card {
+        border-radius: 20px !important;
+        border: 1px solid #F1F5F9 !important;
+        padding: 16px 18px !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+        margin-bottom: 12px !important;
       }
     }
   </style>
@@ -933,111 +846,84 @@ if ($isWorkerUser) {
           <div id="revision-alert-container" style="display: none;"></div>
 
           <?php if ($role === 'freelancer'): ?>
-            <!-- Freelancer Saldo & Honorarium Payouts (Appify Style) -->
-            <div style="background: #FFFFFF; border: 1px solid #F0F1F7; border-radius: 18px; padding: 18px 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04);">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                  <span style="font-size: 11px; font-weight: 700; color: #10B981; background: #E8F8F2; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(16, 185, 129, 0.2);">
-                    Saldo Pendapatan &amp; Fee Saya
-                  </span>
-                  <span style="font-size: 12px; color: #7B7890; font-weight: 500;">Honorarium resmi mitra freelancer</span>
-                </div>
-                <div style="font-size: 11.5px; color: #7B7890;">
-                  Terverifikasi real-time
-                </div>
-              </div>
-
-              <div class="kpi-grid freelancer-fee-grid" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
-                <!-- Card 1: Fee Diterima -->
-                <div class="appify-card-mini" style="background: #FFFFFF; border: 1px solid #F0F1F7; border-radius: 16px; padding: 14px 16px; box-shadow: 0 2px 10px rgba(26, 22, 43, 0.02);">
+            <!-- Freelancer Saldo & Honorarium Payouts (Clean 2-Column Bento Grid) -->
+            <div class="freelancer-bento-fee-grid" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px;">
+              <!-- Card 1: Fee Diterima -->
+              <div class="bento-metric-card" style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 20px; padding: 16px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="color: #7B7890; font-weight: 600; font-size: 12.5px; white-space: normal; line-height: 1.2;">Fee Diterima</span>
-                    <div style="width: 28px; height: 28px; border-radius: 8px; background: #E8F8F2; display: flex; align-items: center; justify-content: center; color: #10B981; flex-shrink: 0;">
-                      <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                    </div>
+                    <span style="font-size: 12px; font-weight: 600; color: #64748B;">Fee Diterima</span>
+                    <span style="background: #ECFDF5; color: #059669; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px;">Lunas</span>
                   </div>
-                  <div style="font-size: 18px; font-weight: 800; color: #1A162B; line-height: 1.2; letter-spacing: -0.2px;">
+                  <div style="font-size: 20px; font-weight: 800; color: #0F172A; line-height: 1.2; letter-spacing: -0.3px; margin: 4px 0 2px;">
                     <span id="kpi-freelancer-paid"><?= format_rupiah($freelancerPaid) ?></span>
                   </div>
-                  <div style="margin-top: 4px; font-size: 11.5px; color: #10B981; font-weight: 500; line-height: 1.2;">
-                    Sudah ditransfer ke rekening Anda
-                  </div>
                 </div>
-
-                <!-- Card 2: Menunggu Transfer -->
-                <div class="appify-card-mini" style="background: #FFFFFF; border: 1px solid #F0F1F7; border-radius: 16px; padding: 14px 16px; box-shadow: 0 2px 10px rgba(26, 22, 43, 0.02);">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="color: #7B7890; font-weight: 600; font-size: 12.5px; white-space: normal; line-height: 1.2;">Menunggu Transfer</span>
-                    <div style="width: 28px; height: 28px; border-radius: 8px; background: #FFF4E5; display: flex; align-items: center; justify-content: center; color: #F59E0B; flex-shrink: 0;">
-                      <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                    </div>
-                  </div>
-                  <div style="font-size: 18px; font-weight: 800; color: #1A162B; line-height: 1.2; letter-spacing: -0.2px;">
-                    <span id="kpi-freelancer-pending"><?= format_rupiah($freelancerPending) ?></span>
-                  </div>
-                  <div style="margin-top: 4px; font-size: 11.5px; color: #F59E0B; font-weight: 500; line-height: 1.2;">
-                    Dalam antrean transfer Owner
-                  </div>
-                </div>
-
-                <!-- Card 3: Total Kontrak Fee -->
-                <div class="appify-card-mini" style="background: #FFFFFF; border: 1px solid #F0F1F7; border-radius: 16px; padding: 14px 16px; box-shadow: 0 2px 10px rgba(26, 22, 43, 0.02);">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="color: #7B7890; font-weight: 600; font-size: 12.5px; white-space: normal; line-height: 1.2;">Total Kontrak Fee</span>
-                    <div style="width: 28px; height: 28px; border-radius: 8px; background: #EEF2FF; display: flex; align-items: center; justify-content: center; color: #5B3DF5; flex-shrink: 0;">
-                      <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                    </div>
-                  </div>
-                  <div style="font-size: 18px; font-weight: 800; color: #1A162B; line-height: 1.2; letter-spacing: -0.2px;">
-                    <span id="kpi-freelancer-total"><?= format_rupiah($freelancerPaid + $freelancerPending) ?></span>
-                  </div>
-                  <div style="margin-top: 4px; font-size: 11.5px; color: #7B7890; font-weight: 500; line-height: 1.2;">
-                    Akumulasi seluruh proyek
-                  </div>
+                <div style="font-size: 11px; color: #059669; font-weight: 500; margin-top: 4px;">
+                  ✓ Sudah ditransfer ke rekening
                 </div>
               </div>
+
+              <!-- Card 2: Menunggu Transfer -->
+              <div class="bento-metric-card" style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 20px; padding: 16px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-size: 12px; font-weight: 600; color: #64748B;">Menunggu Transfer</span>
+                    <span style="background: #FFFBEB; color: #D97706; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 999px;">Antrean</span>
+                  </div>
+                  <div style="font-size: 20px; font-weight: 800; color: #0F172A; line-height: 1.2; letter-spacing: -0.3px; margin: 4px 0 2px;">
+                    <span id="kpi-freelancer-pending"><?= format_rupiah($freelancerPending) ?></span>
+                  </div>
+                </div>
+                <div style="font-size: 11px; color: #D97706; font-weight: 500; margin-top: 4px;">
+                  ⏳ Dalam proses Owner
+                </div>
+              </div>
+
+              <!-- Hidden Total Fee for data-binding compatibility -->
+              <span id="kpi-freelancer-total" style="display: none;"><?= format_rupiah($freelancerPaid + $freelancerPending) ?></span>
             </div>
           <?php endif; ?>
 
           <?php if ($isWorkerUser): ?>
-            <!-- Worker Info Section: Jobdesk & Assigned Clients -->
-            <div class="kala-grid-2col" style="margin-bottom: 20px;">
+            <!-- Worker Info Section: Jobdesk & Assigned Clients (Clean Bento Style) -->
+            <div class="kala-grid-2col" style="margin-bottom: 16px; gap: 12px;">
               <!-- 1. Jobdesk Saya dari Owner -->
-              <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                  <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #175CD3; background: #EFF8FF; padding: 2px 8px; border-radius: 4px; border: 1px solid #B2DDFF;">
-                    JOBDESK DARI OWNER
+              <div class="bento-metric-card" style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 20px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(15,23,42,0.03);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #4F46E5; background: #EEF2FF; padding: 3px 10px; border-radius: 999px;">
+                    JOBDESK SAYA
                   </span>
-                  <span style="font-size: 12px; font-weight: 700; color: #101828;">
+                  <span style="font-size: 12px; font-weight: 700; color: #334155;">
                     <?= htmlspecialchars($workerProfile['position'] ?? 'Spesialis Tim') ?>
                   </span>
                 </div>
-                <h4 style="font-size: 14px; font-weight: 800; color: #101828; margin: 0 0 6px;">Tanggung Jawab Utama Anda:</h4>
-                <p style="font-size: 13px; color: var(--text-secondary); margin: 0; line-height: 1.5; white-space: pre-line;">
+                <h4 style="font-size: 14px; font-weight: 700; color: #0F172A; margin: 0 0 4px;">Tanggung Jawab:</h4>
+                <p style="font-size: 13px; color: #64748B; margin: 0; line-height: 1.5; white-space: pre-line;">
                   <?= !empty($workerProfile['jobdesk']) ? htmlspecialchars($workerProfile['jobdesk']) : 'Menangani pengerjaan deliverables kreatif, kampanye, dan revisi klien sesuai arahan Owner Kalamedia.' ?>
                 </p>
               </div>
 
               <!-- 2. Klien & Proyek yang Saya Pegang -->
-              <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+              <div class="bento-metric-card" style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 20px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(15,23,42,0.03);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                  <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #027A48; background: #ECFDF3; padding: 2px 8px; border-radius: 4px; border: 1px solid #A6F4C5;">
-                    KLIEN & PT YANG SAYA PEGANG
+                  <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #059669; background: #ECFDF5; padding: 3px 10px; border-radius: 999px;">
+                    KLIEN SAYA
                   </span>
-                  <span style="font-size: 12px; font-weight: 700; color: var(--text-muted);">
+                  <span style="font-size: 12px; font-weight: 600; color: #64748B;">
                     <?= count($assignedClients) ?> Perusahaan
                   </span>
                 </div>
                 <?php if (empty($assignedClients)): ?>
-                  <p style="font-size: 12.5px; color: var(--text-muted); font-style: italic; margin: 0;">
-                    Belum ada klien khusus yang dialokasikan oleh Owner ke Anda. Anda dapat mengerjakan seluruh penugasan aktif di bawah.
+                  <p style="font-size: 12.5px; color: #94A3B8; font-style: italic; margin: 0;">
+                    Belum ada klien khusus yang dialokasikan ke Anda. Anda dapat mengerjakan seluruh penugasan aktif di bawah.
                   </p>
                 <?php else: ?>
                   <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                     <?php foreach ($assignedClients as $ac): ?>
-                      <div style="background: #F9FAFB; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px 12px; display: inline-flex; flex-direction: column; gap: 2px;">
-                        <span style="font-size: 13px; font-weight: 800; color: #101828;"><?= htmlspecialchars($ac['company']) ?></span>
-                        <span style="font-size: 11px; color: var(--text-secondary);">PIC: <?= htmlspecialchars($ac['pic_name']) ?> &bull; <b><?= (int)$ac['my_task_count'] ?> Tugas</b></span>
+                      <div style="background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 12px; padding: 8px 12px; display: inline-flex; flex-direction: column; gap: 2px;">
+                        <span style="font-size: 13px; font-weight: 700; color: #0F172A;"><?= htmlspecialchars($ac['company']) ?></span>
+                        <span style="font-size: 11px; color: #64748B;">PIC: <?= htmlspecialchars($ac['pic_name']) ?> &bull; <b><?= (int)$ac['my_task_count'] ?> Tugas</b></span>
                       </div>
                     <?php endforeach; ?>
                   </div>
@@ -1046,148 +932,142 @@ if ($isWorkerUser) {
             </div>
           <?php endif; ?>
 
-          <!-- KPI Metrics Row (Shopeers SaaS Style) -->
-          <div class="kpi-row">
-            <div class="kpi-tile">
-              <div class="metric-header">
-                <span class="metric-label">Total Deliverables</span>
-                <span class="metric-icon">
-                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                </span>
+          <!-- Bento Metric Cards (Total Deliverables & Structured 2x2 Grid) -->
+          <div class="bento-total-card" style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 20px; padding: 14px 18px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(15,23,42,0.03); display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 38px; height: 38px; border-radius: 10px; background: #EEF2FF; color: #4F46E5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               </div>
-              <div class="metric-value">
-                <span class="metric-num" id="kpi-total">0</span>
-              </div>
-              <div class="metric-subtitle">
-                <span>Pekerjaan aktif</span>
+              <div>
+                <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px;">TOTAL DELIVERABLES</div>
+                <div style="font-size: 18px; font-weight: 800; color: #0F172A; line-height: 1.2;">
+                  <span id="kpi-total">0</span> <span style="font-size: 12px; font-weight: 500; color: #64748B;">Pekerjaan aktif</span>
+                </div>
               </div>
             </div>
+            <span style="background: #F1F5F9; color: #475569; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 999px;">Semua Proyek</span>
+          </div>
 
-            <div class="kpi-tile urgent">
-              <div class="metric-header">
-                <span class="metric-label" style="color: #B42318;">Butuh Revisi</span>
-                <span class="metric-icon">
-                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="#B42318" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                </span>
+          <!-- Structured 2x2 Bento Metric Grid -->
+          <div class="bento-deliverables-2x2-grid" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 16px;">
+            <!-- 1. Butuh Revisi -->
+            <div class="bento-metric-card" style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 20px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(15,23,42,0.03);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-size: 11.5px; font-weight: 600; color: #EF4444;">Butuh Revisi</span>
+                <div style="width: 26px; height: 26px; border-radius: 8px; background: #FEF2F2; color: #EF4444; display: flex; align-items: center; justify-content: center;">
+                  <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
               </div>
-              <div class="metric-value">
-                <span class="metric-num" id="kpi-revision" style="color: #B42318;">0</span>
+              <div style="font-size: 22px; font-weight: 800; color: #EF4444; line-height: 1.2; letter-spacing: -0.3px; margin: 2px 0;">
+                <span id="kpi-revision">0</span>
               </div>
-              <div class="metric-subtitle">
-                <span style="color: #B42318;">Permintaan klien</span>
-              </div>
+              <div style="font-size: 11px; color: #94A3B8;">Permintaan klien</div>
             </div>
 
-            <div class="kpi-tile review">
-              <div class="metric-header">
-                <span class="metric-label" style="color: #B54708;">Review Klien</span>
-                <span class="metric-icon">
-                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="#B54708" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
-                </span>
+            <!-- 2. Review Klien -->
+            <div class="bento-metric-card" style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 20px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(15,23,42,0.03);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-size: 11.5px; font-weight: 600; color: #F59E0B;">Review Klien</span>
+                <div style="width: 26px; height: 26px; border-radius: 8px; background: #FFFBEB; color: #F59E0B; display: flex; align-items: center; justify-content: center;">
+                  <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+                </div>
               </div>
-              <div class="metric-value">
-                <span class="metric-num" id="kpi-review" style="color: #B54708;">0</span>
+              <div style="font-size: 22px; font-weight: 800; color: #F59E0B; line-height: 1.2; letter-spacing: -0.3px; margin: 2px 0;">
+                <span id="kpi-review">0</span>
               </div>
-              <div class="metric-subtitle">
-                <span style="color: #B54708;">Menunggu approval</span>
-              </div>
+              <div style="font-size: 11px; color: #94A3B8;">Menunggu approval</div>
             </div>
 
-            <div class="kpi-tile">
-              <div class="metric-header">
-                <span class="metric-label">Sedang Dikerjakan</span>
-                <span class="metric-icon">
-                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="#2563EB" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                </span>
+            <!-- 3. Sedang Dikerjakan -->
+            <div class="bento-metric-card" style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 20px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(15,23,42,0.03);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-size: 11.5px; font-weight: 600; color: #64748B;">Sedang Dikerjakan</span>
+                <div style="width: 26px; height: 26px; border-radius: 8px; background: #EEF2FF; color: #4F46E5; display: flex; align-items: center; justify-content: center;">
+                  <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </div>
               </div>
-              <div class="metric-value">
-                <span class="metric-num" id="kpi-progress">0</span>
+              <div style="font-size: 22px; font-weight: 800; color: #0F172A; line-height: 1.2; letter-spacing: -0.3px; margin: 2px 0;">
+                <span id="kpi-progress">0</span>
               </div>
-              <div class="metric-subtitle">
-                <span>Tahap produksi</span>
-              </div>
+              <div style="font-size: 11px; color: #94A3B8;">Tahap produksi</div>
             </div>
 
-            <div class="kpi-tile">
-              <div class="metric-header">
-                <span class="metric-label">Selesai &amp; Disetujui</span>
-                <span class="metric-icon">
-                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="#059669" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                </span>
+            <!-- 4. Selesai & Disetujui -->
+            <div class="bento-metric-card" style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 20px; padding: 14px 16px; box-shadow: 0 1px 3px rgba(15,23,42,0.03);">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <span style="font-size: 11.5px; font-weight: 600; color: #10B981;">Selesai &amp; Disetujui</span>
+                <div style="width: 26px; height: 26px; border-radius: 8px; background: #ECFDF5; color: #10B981; display: flex; align-items: center; justify-content: center;">
+                  <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
               </div>
-              <div class="metric-value">
-                <span class="metric-num" id="kpi-approved">0</span>
+              <div style="font-size: 22px; font-weight: 800; color: #0F172A; line-height: 1.2; letter-spacing: -0.3px; margin: 2px 0;">
+                <span id="kpi-approved">0</span>
               </div>
-              <div class="metric-subtitle">
-                <span>Hasil final rampung</span>
-              </div>
+              <div style="font-size: 11px; color: #94A3B8;">Hasil rampung</div>
             </div>
           </div>
 
-          <!-- Filter Panel -->
-          <div class="filter-panel">
-            <!-- Row 1: Kategori Jasa (Clean Segmented Control 1 Baris) -->
-            <div class="task-services-section">
-              <div class="task-filter-header-bar">
-                <span class="task-filter-title">Kategori Layanan</span>
-                <span class="task-filter-hint">Geser untuk memilih spesialisasi jasa</span>
+          <!-- Bento Filter & Search Panel -->
+          <div class="bento-filter-panel" style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 20px; padding: 16px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);">
+            <!-- Row 1: Kategori Jasa (Clean Segmented Control) -->
+            <div style="margin-bottom: 12px;">
+              <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+                Kategori Layanan
               </div>
-              <div class="task-services-track">
-                <button type="button" class="task-service-pill active" onclick="filterTaskService('all', this)">
+              <div class="bento-segmented-control task-services-track" style="background: #F1F5F9; padding: 4px; border-radius: 12px; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; width: 100%; box-sizing: border-box;">
+                <button type="button" class="task-service-pill active" onclick="filterTaskService('all', this)" style="border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 500; color: #64748B; background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">
                   <span>Semua Jasa</span>
                 </button>
-                <button type="button" class="task-service-pill" onclick="filterTaskService('Kelola Sosmed', this)">
+                <button type="button" class="task-service-pill" onclick="filterTaskService('Kelola Sosmed', this)" style="border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 500; color: #64748B; background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">
                   <span>Kelola Sosmed</span>
                 </button>
-                <button type="button" class="task-service-pill" onclick="filterTaskService('Desain Eceran', this)">
-                  <span>Desain Eceran / Satuan</span>
+                <button type="button" class="task-service-pill" onclick="filterTaskService('Desain Eceran', this)" style="border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 500; color: #64748B; background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">
+                  <span>Desain Eceran</span>
                 </button>
-                <button type="button" class="task-service-pill" onclick="filterTaskService('Jasa Buat Web', this)">
-                  <span>Jasa Buat Web</span>
+                <button type="button" class="task-service-pill" onclick="filterTaskService('Jasa Buat Web', this)" style="border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 500; color: #64748B; background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">
+                  <span>Buat Web</span>
                 </button>
-                <button type="button" class="task-service-pill" onclick="filterTaskService('Jasa Iklan', this)">
-                  <span>Jasa Iklan Meta &amp; Google</span>
+                <button type="button" class="task-service-pill" onclick="filterTaskService('Jasa Iklan', this)" style="border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 500; color: #64748B; background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">
+                  <span>Iklan Ads</span>
                 </button>
               </div>
             </div>
 
-            <!-- Row 2: Status Pekerjaan (Clean Segmented Control 1 Baris) -->
-            <div class="task-status-section">
-              <div class="task-filter-header-bar">
-                <span class="task-filter-title">Status Pekerjaan</span>
+            <!-- Row 2: Status Pekerjaan (Clean Segmented Control) -->
+            <div style="margin-bottom: 14px;">
+              <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px;">
+                Status Pekerjaan
               </div>
-              <div class="task-status-grid" id="status-filter-group">
-                <button type="button" class="filter-btn active" onclick="filterByStatus('all', this)">Semua Status</button>
-                <button type="button" class="filter-btn" onclick="filterByStatus('revision', this)">Revisi</button>
-                <button type="button" class="filter-btn" onclick="filterByStatus('client_review', this)">Review Klien</button>
-                <button type="button" class="filter-btn" onclick="filterByStatus('in_progress', this)">In Progress</button>
-                <button type="button" class="filter-btn" onclick="filterByStatus('approved', this)">Selesai</button>
+              <div class="bento-segmented-control task-status-grid" id="status-filter-group" style="background: #F1F5F9; padding: 4px; border-radius: 12px; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; width: 100%; box-sizing: border-box;">
+                <button type="button" class="filter-btn active" onclick="filterByStatus('all', this)" style="border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 500; color: #64748B; background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">Semua Status</button>
+                <button type="button" class="filter-btn" onclick="filterByStatus('revision', this)" style="border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 500; color: #64748B; background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">Revisi</button>
+                <button type="button" class="filter-btn" onclick="filterByStatus('client_review', this)" style="border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 500; color: #64748B; background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">Review Klien</button>
+                <button type="button" class="filter-btn" onclick="filterByStatus('in_progress', this)" style="border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 500; color: #64748B; background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">In Progress</button>
+                <button type="button" class="filter-btn" onclick="filterByStatus('approved', this)" style="border: none; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 500; color: #64748B; background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">Selesai</button>
               </div>
             </div>
 
             <!-- Row 3: SDM Dropdown, Search Box, & Task Counter -->
-            <div class="task-bottom-toolbar">
-              <div class="task-bottom-left-group">
-                <?php if ($isAdminUser): ?>
-                  <div class="task-select-wrap">
-                    <select id="filter-worker-type" class="form-control task-sdm-select" onchange="applyFilters()">
-                      <option value="">Semua SDM (Karyawan &amp; Freelancer)</option>
-                      <option value="karyawan">Karyawan (In-House)</option>
-                      <option value="freelancer">Freelancer</option>
-                    </select>
-                  </div>
-                <?php endif; ?>
-
-                <div class="task-search-wrap">
-                  <span class="task-search-icon">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                  </span>
-                  <input type="text" id="task-search-input" class="form-control task-search-input" placeholder="Cari deliverables, klien, PIC..." oninput="handleTaskSearch()">
-                  <button type="button" class="task-search-clear" id="task-search-clear-btn" style="display: none;" onclick="clearTaskSearch()">&times;</button>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <?php if ($isAdminUser): ?>
+                <div style="margin-bottom: 2px;">
+                  <select id="filter-worker-type" class="form-control" onchange="applyFilters()" style="height: 40px; border-radius: 12px; border: 1px solid #E2E8F0; background: #F8FAFC; font-size: 13px; font-weight: 600; color: #334155; padding: 0 12px; width: 100%;">
+                    <option value="">Semua SDM (Karyawan &amp; Freelancer)</option>
+                    <option value="karyawan">Karyawan (In-House)</option>
+                    <option value="freelancer">Freelancer</option>
+                  </select>
                 </div>
+              <?php endif; ?>
+
+              <div style="position: relative; display: flex; align-items: center; width: 100%;">
+                <span style="position: absolute; left: 14px; display: flex; align-items: center; pointer-events: none; color: #94A3B8;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
+                <input type="text" id="task-search-input" class="form-control" placeholder="Cari deliverables, klien, PIC..." oninput="handleTaskSearch()" style="width: 100%; height: 40px; border-radius: 12px; border: 1px solid #E2E8F0; background: #F8FAFC; padding: 8px 36px 8px 38px; font-size: 13.5px; color: #0F172A; outline: none; box-sizing: border-box; transition: all 0.15s ease;">
+                <button type="button" id="task-search-clear-btn" style="position: absolute; right: 12px; background: transparent; border: none; color: #94A3B8; font-size: 18px; cursor: pointer; display: none; line-height: 1;" onclick="clearTaskSearch()">&times;</button>
               </div>
 
-              <div class="task-count-pill" id="tasks-count-label">
+              <div style="font-size: 11.5px; color: #64748B; font-weight: 500; text-align: right;" id="tasks-count-label">
                 Menampilkan 0 tugas
               </div>
             </div>
@@ -1326,20 +1206,20 @@ if ($isWorkerUser) {
           <?php else: ?>
           <!-- WORKER / FREELANCER (TIM ADS): APPIFY "MY WALLET" WORKSPACE -->
           <div class="appify-wallet-container" style="max-width: 100%; margin: 0 auto 24px;">
-            <!-- 1. Bagian Atas: Label Saldo Diterima + Angka Besar + Pill Status -->
-            <div style="margin-bottom: 16px;">
-              <div style="font-size: 13px; font-weight: 600; color: #7B7890; margin-bottom: 6px;">
-                Saldo Diterima dari Owner
-              </div>
-              <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                <span id="appify-hero-transferred" style="font-size: 28px; font-weight: 800; color: #1A162B; letter-spacing: -0.5px; line-height: 1.2;">
+            <!-- 1. Bento Card: Saldo Diterima dari Owner -->
+            <div class="bento-saldo-owner-card" style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 20px; padding: 16px 18px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(15,23,42,0.03); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <div>
+                <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                  Saldo Diterima dari Owner
+                </div>
+                <div id="appify-hero-transferred" style="font-size: 24px; font-weight: 800; color: #0F172A; letter-spacing: -0.5px; line-height: 1.2;">
                   Rp <?= number_format($total_ditransfer_owner, 0, ',', '.') ?>
-                </span>
-                <span id="appify-hero-status-pill" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; background: <?= $sisa_saldo > 0 ? '#E8F8F2' : '#FFEFEF' ?>; color: <?= $sisa_saldo > 0 ? '#10B981' : '#EF4444' ?>; border: 1px solid <?= $sisa_saldo > 0 ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)' ?>;">
-                  <span style="width: 7px; height: 7px; border-radius: 50%; background: currentColor;"></span>
-                  <span id="appify-hero-status-text"><?= $sisa_saldo > 0 ? 'Iklan Jalan' : ($total_ditransfer_owner > 0 ? 'Saldo Habis' : 'Belum Ada Saldo') ?></span>
-                </span>
+                </div>
               </div>
+              <span id="appify-hero-status-pill" style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: <?= $sisa_saldo > 0 ? '#ECFDF5' : '#FEF2F2' ?>; color: <?= $sisa_saldo > 0 ? '#059669' : '#EF4444' ?>; border: 1px solid <?= $sisa_saldo > 0 ? '#A7F3D0' : '#FECACA' ?>;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></span>
+                <span id="appify-hero-status-text"><?= $sisa_saldo > 0 ? 'Iklan Jalan' : ($total_ditransfer_owner > 0 ? 'Saldo Habis' : 'Belum Ada Saldo') ?></span>
+              </span>
             </div>
 
             <!-- 2. Kartu Ungu Bergradien (My Wallet Hero) -->
@@ -2615,174 +2495,137 @@ if ($isWorkerUser) {
         }
 
         html += `
-          <div class="task-item-card ${cardExtraClass}" style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 18px; margin-bottom: 14px; box-shadow: 0 4px 18px rgba(26,22,43,0.03);">
-            <!-- Appify Popular Services Style Top Bar -->
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px;">
-              <div style="display: flex; align-items: flex-start; gap: 12px; min-width: 0; flex: 1;">
-                <!-- 44x44px Rounded Category Icon Box -->
-                <div style="width: 44px; height: 44px; border-radius: 14px; background: ${catTintBg}; color: ${catTintCol}; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                  ${catIcon}
+          <div class="task-item-card ${cardExtraClass}" style="background: #FFFFFF; border-radius: 20px; border: 1px solid #F1F5F9; padding: 16px 18px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(15,23,42,0.03); display: flex; flex-direction: column; gap: 8px;">
+            <!-- Top row: Task Title + Client & Deadline subtitle -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+              <div style="min-width: 0; flex: 1;">
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap;">
+                  <span class="status-pill ${sInfo.class}" style="border-radius: 999px; font-size: 10.5px; font-weight: 700; padding: 2px 8px;">
+                    ${sInfo.label}
+                  </span>
+                  <span style="font-size: 10.5px; font-weight: 600; color: #64748B; background: #F1F5F9; padding: 2px 7px; border-radius: 6px;">
+                    ${escapeHtml(catLabel)}
+                  </span>
                 </div>
-                <!-- Title & Client/Deadline -->
-                <div style="min-width: 0; flex: 1;">
-                  <h3 style="font-size: 14px; font-weight: 800; color: #1A162B; margin: 0 0 4px; line-height: 1.35;">
-                    ${escapeHtml(t.title)}
-                  </h3>
-                  <div style="font-size: 12px; color: #7B7890; line-height: 1.3;">
-                    <b>${escapeHtml(t.client_company || 'Klien')}</b> &bull; Deadline: ${t.due_date ? formatDate(t.due_date) : '-'}
-                  </div>
+                <h3 style="font-size: 14.5px; font-weight: 700; color: #0F172A; margin: 0 0 3px; line-height: 1.35; letter-spacing: -0.2px;">
+                  ${escapeHtml(t.title)}
+                </h3>
+                <div style="font-size: 12px; color: #64748B; line-height: 1.3;">
+                  <b>${escapeHtml(t.client_company || 'Klien')}</b> &bull; Deadline: <span style="color: #475569;">${t.due_date ? formatDate(t.due_date) : '-'}</span>
                 </div>
               </div>
 
-              <!-- Status Badge & Admin Action -->
-              <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end;">
-                <span class="status-pill ${sInfo.class}" style="border-radius: 20px; font-size: 11px; font-weight: 700; padding: 4px 10px;">
-                  <span>${sInfo.label}</span>
-                </span>
-                <?php if ($isAdminUser): ?>
-                  <button type="button" class="btn btn-secondary btn-sm" onclick="deleteTask(${t.id})" style="padding: 3px 8px; font-size: 11px; font-weight: 600; color: #B42318; border-color: #FECDCA;" title="Hapus Tugas">
-                    Hapus
-                  </button>
-                <?php endif; ?>
-              </div>
+              <?php if ($isAdminUser): ?>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="deleteTask(${t.id})" style="padding: 3px 8px; font-size: 10.5px; font-weight: 600; color: #EF4444; border-color: #FEE2E2; background: #FEF2F2; border-radius: 8px; flex-shrink: 0;" title="Hapus Tugas">
+                  Hapus
+                </button>
+              <?php endif; ?>
             </div>
 
-            <!-- Task Description (if any) -->
+            <!-- Middle row: Description text in muted slate -->
             ${t.description ? `
-              <p style="font-size: 12.5px; color: #7B7890; margin: 0 0 12px; line-height: 1.5; padding-left: 56px;">
+              <p style="font-size: 13px; color: #64748B; margin: 2px 0 6px; line-height: 1.45;">
                 ${escapeHtml(t.description)}
               </p>
             ` : ''}
 
             ${(t.is_ads_task || parseFloat(t.assigned_ads_budget) > 0) ? `
               <!-- Real-Time Ads Monitoring Panel (5 Required Indicators) -->
-              <div style="background: #F8F9FC; border: 1.5px solid #EAECF0; border-radius: 12px; padding: 14px; margin: 12px 0;">
+              <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 12px; margin: 6px 0;">
                 ${t.is_depleted ? `
-                  <div style="background: #FFEFEF; border: 1.5px solid #FECDCA; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; color: #B42318; font-weight: 700; font-size: 12.5px; display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 18px;">⚠️</span>
-                    <span><b>SALDO IKLAN HABIS (Rp 0)!</b> Kampanye dihentikan sementara. Harap segera koordinasi dengan Client / Owner untuk Top-Up Saldo Ads proyek.</span>
+                  <div style="background: #FFEFEF; border: 1px solid #FECDCA; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; color: #B42318; font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">⚠️</span>
+                    <span><b>SALDO IKLAN HABIS (Rp 0)!</b> Kampanye dihentikan sementara.</span>
                   </div>
                 ` : (t.is_warning ? `
-                  <div style="background: #FEF6E7; border: 1.5px solid #FEDF89; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; color: #B54708; font-weight: 700; font-size: 12.5px; display: flex; align-items: center; gap: 8px;">
-                    <span style="font-size: 18px;">⚠️</span>
-                    <span><b>SALDO IKLAN HAMPIR HABIS (&le; 20%)!</b> Sisa saldo menipis, segera siapkan top-up saldo agar iklan tidak berhenti.</span>
+                  <div style="background: #FEF6E7; border: 1px solid #FEDF89; border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; color: #B54708; font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px;">⚠️</span>
+                    <span><b>SALDO IKLAN HAMPIR HABIS (&le; 20%)!</b> Sisa saldo menipis.</span>
                   </div>
                 ` : '')}
 
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
-                  <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <span class="badge" style="background: #F4F3FF; color: #5925DC; font-weight: 800; font-size: 11px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;">
+                  <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                    <span style="background: #EEF2FF; color: #4F46E5; font-weight: 700; font-size: 10.5px; padding: 2px 7px; border-radius: 6px;">
                       ${escapeHtml(t.ads_platform || 'Meta Ads')}
                     </span>
 
-                    <!-- Indikator 4: Status Tayang Iklan Jalan / Tidak -->
                     ${t.campaign_run_status === 'running' ? `
-                      <span style="background: #E8F7F0; color: #30A46C; border: 1px solid #A6F4C5; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px;">
-                        <span style="width: 7px; height: 7px; border-radius: 50%; background: #30A46C; box-shadow: 0 0 6px #30A46C; display: inline-block;"></span>
-                        Iklan Jalan (Running)
-                      </span>
-                    ` : (t.campaign_run_status === 'paused' ? `
-                      <span style="background: #FEF6E7; color: #F5A524; border: 1px solid #FEDF89; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px;">
-                        <span style="width: 7px; height: 7px; border-radius: 50%; background: #F5A524; display: inline-block;"></span>
-                        Iklan Dijeda (Paused)
+                      <span style="background: #ECFDF5; color: #059669; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px;">
+                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #059669;"></span>
+                        Iklan Jalan
                       </span>
                     ` : `
-                      <span style="background: #FFEFEF; color: #E5484D; border: 1px solid #FECDCA; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px;">
-                        <span style="width: 7px; height: 7px; border-radius: 50%; background: #E5484D; display: inline-block;"></span>
-                        Iklan Berhenti (Stopped)
+                      <span style="background: #FFFBEB; color: #D97706; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 5px;">
+                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #D97706;"></span>
+                        Dijeda
                       </span>
-                    `)}
-
-                    <!-- Indikator 5: Status Saldo Masih Ada / Habis -->
-                    ${t.balance_health_status === 'safe' ? `
-                      <span class="badge" style="background: #E8F7F0; color: #30A46C; font-weight: 800; font-size: 11px; padding: 3px 8px; border-radius: 6px;">
-                        Saldo Masih Tersedia (Aman)
-                      </span>
-                    ` : (t.balance_health_status === 'warning' ? `
-                      <span class="badge" style="background: #FEF6E7; color: #F5A524; font-weight: 800; font-size: 11px; padding: 3px 8px; border-radius: 6px;">
-                        Saldo Hampir Habis (Segera Top-Up)
-                      </span>
-                    ` : `
-                      <span class="badge" style="background: #FFEFEF; color: #E5484D; font-weight: 800; font-size: 11px; padding: 3px 8px; border-radius: 6px;">
-                        SALDO HABIS (Rp 0)
-                      </span>
-                    `)}
+                    `}
                   </div>
 
-                  <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                  <div style="display: flex; gap: 6px; align-items: center;">
                     ${t.transfer_proof_url ? `
-                      <button type="button" class="btn btn-secondary btn-sm" onclick="openUniversalTransferProofModal('${escapeHtml(t.transfer_proof_url)}', 'Bukti Transfer Saldo Ads', '${escapeHtml(t.title)}')" style="font-size: 11px; font-weight: 700; gap: 4px; display: inline-flex; align-items: center;">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                        Lihat Bukti Transfer
+                      <button type="button" class="btn btn-secondary btn-sm" onclick="openUniversalTransferProofModal('${escapeHtml(t.transfer_proof_url)}', 'Bukti Transfer Saldo Ads', '${escapeHtml(t.title)}')" style="font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px;">
+                        Bukti TF
                       </button>
                     ` : ''}
-
-                    <button type="button" class="btn btn-primary btn-sm" onclick='openUpdateAdsSpendModal(${JSON.stringify(t)})' style="font-size: 11px; font-weight: 700; background: #175CD3; border-color: #175CD3;">
-                      ⚡ Update Pemakaian &amp; Status Iklan
+                    <button type="button" class="btn btn-primary btn-sm" onclick='openUpdateAdsSpendModal(${JSON.stringify(t)})' style="font-size: 11px; font-weight: 600; background: #5B3DF5; border-color: #5B3DF5; padding: 3px 8px; border-radius: 6px;">
+                      Update Ads
                     </button>
                   </div>
                 </div>
 
-                <!-- 3 Key Metric Columns: Budget, Spent, Remaining -->
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; background: #FFFFFF; border: 1px solid #EAECF0; border-radius: 8px; padding: 12px; margin-bottom: 10px; text-align: center;">
-                  <div>
-                    <span style="font-size: 10.5px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; display: block;">1. Total Budget Saldo Ads</span>
-                    <span style="font-size: 14px; font-weight: 800; color: #101828;">${t.assigned_ads_budget_formatted}</span>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; text-align: center; margin-bottom: 8px;">
+                  <div style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 8px; padding: 6px;">
+                    <span style="font-size: 10px; color: #64748B; display: block;">Budget</span>
+                    <span style="font-size: 12px; font-weight: 700; color: #0F172A;">${t.assigned_ads_budget_formatted}</span>
                   </div>
-                  <div style="border-left: 1px solid #EAECF0; border-right: 1px solid #EAECF0;">
-                    <span style="font-size: 10.5px; color: #B42318; font-weight: 600; text-transform: uppercase; display: block;">2. Sudah Dibelanjakan</span>
-                    <span style="font-size: 14px; font-weight: 800; color: #B42318;">${t.ads_spent_amount_formatted} (${t.spent_percent}%)</span>
+                  <div style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 8px; padding: 6px;">
+                    <span style="font-size: 10px; color: #EF4444; display: block;">Spend (${t.spent_percent}%)</span>
+                    <span style="font-size: 12px; font-weight: 700; color: #EF4444;">${t.ads_spent_amount_formatted}</span>
                   </div>
-                  <div>
-                    <span style="font-size: 10.5px; color: #027A48; font-weight: 600; text-transform: uppercase; display: block;">3. Sisa Saldo Ads</span>
-                    <span style="font-size: 14px; font-weight: 800; color: #027A48;">${t.remaining_ads_balance_formatted}</span>
+                  <div style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 8px; padding: 6px;">
+                    <span style="font-size: 10px; color: #10B981; display: block;">Sisa</span>
+                    <span style="font-size: 12px; font-weight: 700; color: #10B981;">${t.remaining_ads_balance_formatted}</span>
                   </div>
                 </div>
 
-                <!-- Real-time Progress Bar -->
-                <div style="height: 8px; background: #E5E7EB; border-radius: 999px; overflow: hidden; margin-bottom: 6px;">
-                  <div style="height: 100%; width: ${Math.min(100, t.spent_percent)}%; background: ${t.spent_percent >= 100 ? '#E5484D' : (t.spent_percent >= 80 ? '#F5A524' : '#30A46C')}; border-radius: 999px; transition: width 0.4s ease;"></div>
+                <div style="height: 6px; background: #E2E8F0; border-radius: 999px; overflow: hidden;">
+                  <div style="height: 100%; width: ${Math.min(100, t.spent_percent)}%; background: ${t.spent_percent >= 100 ? '#EF4444' : (t.spent_percent >= 80 ? '#F59E0B' : '#10B981')}; border-radius: 999px;"></div>
                 </div>
-
-                ${t.ads_spent_notes ? `
-                  <div style="font-size: 12px; color: #475467; font-style: italic; margin-top: 6px;">
-                    Catatan Terakhir: "${escapeHtml(t.ads_spent_notes)}"
-                    ${t.ads_spent_proof_url ? ` &bull; <a href="${escapeHtml(t.ads_spent_proof_url)}" target="_blank" style="color: #175CD3; font-weight: 700; text-decoration: none;">[Lihat Screenshot Ads Manager]</a>` : ''}
-                  </div>
-                ` : ''}
               </div>
             ` : ''}
 
             ${t.latest_feedback ? `
-              <div style="font-size: 11.5px; color: #7B7890; margin-top: 8px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; background: #F8FAFC; padding: 4px 8px; border-radius: 6px;">
-                <span style="color: #5B3DF5;">💬</span>
-                <span style="overflow: hidden; text-overflow: ellipsis;">"${escapeHtml(t.latest_feedback)}"</span>
+              <div style="font-size: 11.5px; color: #64748B; margin-bottom: 4px; background: #F8FAFC; border: 1px solid #F1F5F9; padding: 6px 10px; border-radius: 8px; display: flex; align-items: center; gap: 6px;">
+                <span style="color: #6366F1;">💬</span>
+                <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">"${escapeHtml(t.latest_feedback)}"</span>
               </div>
             ` : ''}
 
-            <!-- Deliverable Preview Link & Actions (Grid Container Rapi) -->
-            <div style="display: grid; grid-template-columns: auto 1fr 1fr; gap: 8px; align-items: center; padding-top: 12px; border-top: 1px solid #F0F1F7; width: 100%; box-sizing: border-box;">
-              <!-- Tombol 1: Preview ikon mata / link -->
+            <!-- Bottom action row: Clean button group aligned neatly in a single horizontal row with uniform button heights -->
+            <div style="display: grid; grid-template-columns: auto 1fr 1fr; gap: 8px; align-items: center; padding-top: 10px; border-top: 1px solid #F1F5F9; width: 100%; box-sizing: border-box;">
+              <!-- Tombol 1: Preview -->
               ${t.deliverable_link ? `
-                <a href="${escapeHtml(t.deliverable_link)}" target="_blank" class="btn btn-secondary btn-sm" style="height: 34px; padding: 0 10px; border-radius: 9px; font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 5px; border: 1px solid #ECEEF5; color: #1A162B; text-decoration: none;" title="Buka Link Preview Hasil">
+                <a href="${escapeHtml(t.deliverable_link)}" target="_blank" class="btn btn-secondary btn-sm" style="height: 36px; padding: 0 12px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 5px; border: 1px solid #E2E8F0; background: #FFFFFF; color: #334155; text-decoration: none;" title="Buka Link Preview Hasil">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                   <span>Preview</span>
                 </a>
               ` : `
-                <span style="height: 34px; padding: 0 10px; border-radius: 9px; font-size: 11.5px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 1px dashed #E5E7EB; color: #9CA3AF; background: #F9FAFB;" title="Link belum diset">
+                <span style="height: 36px; padding: 0 10px; border-radius: 10px; font-size: 11.5px; font-weight: 500; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 1px dashed #CBD5E1; color: #94A3B8; background: #F8FAFC;" title="Link belum diset">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6;"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
                   <span>No Link</span>
                 </span>
               `}
 
               <!-- Tombol 2: Chat Diskusi (X) -->
-              <button type="button" class="btn btn-secondary btn-sm" onclick="KalaRoomChat.openRoom(${t.id})" style="height: 34px; padding: 0 10px; border-radius: 9px; font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 5px; border: 1px solid #ECEEF5; color: #1A162B; background: #FFFFFF; width: 100%; box-sizing: border-box;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B3DF5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="KalaRoomChat.openRoom(${t.id})" style="height: 36px; padding: 0 12px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 5px; border: 1px solid #E2E8F0; color: #4F46E5; background: #FFFFFF; width: 100%; box-sizing: border-box;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4F46E5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                 <span>Chat (${unreadFeedbacks > 0 ? `<b style="color: #EF4444;">${unreadFeedbacks}</b>` : (t.feedbacks_count || 0)})</span>
               </button>
 
-              <!-- Tombol 3: Update Progres warna #5B3DF5 -->
-              <button type="button" class="btn btn-primary btn-sm" onclick="openUpdateProgressModal(${t.id}, '${t.status}', '${escapeHtml(t.deliverable_link || '')}')" style="height: 34px; padding: 0 12px; border-radius: 9px; font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 5px; background: #5B3DF5; border-color: #5B3DF5; color: #FFFFFF; width: 100%; box-sizing: border-box;">
+              <!-- Tombol 3: Update Progres -->
+              <button type="button" class="btn btn-primary btn-sm" onclick="openUpdateProgressModal(${t.id}, '${t.status}', '${escapeHtml(t.deliverable_link || '')}')" style="height: 36px; padding: 0 12px; border-radius: 10px; font-size: 12px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 5px; background: #5B3DF5; border: 1px solid #5B3DF5; color: #FFFFFF; width: 100%; box-sizing: border-box; box-shadow: 0 1px 2px rgba(91, 61, 245, 0.2);">
                 <span>Perbarui Progres</span>
               </button>
             </div>

@@ -3538,19 +3538,21 @@ button:active,
   margin-bottom: 12px;
 }
 
-/* Mobile Bottom Navigation Bar - Appify Style */
+/* Mobile Bottom Navigation Bar - Bento Modern Style */
 .mobile-bottom-nav {
   display: none;
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  height: 64px;
-  background: #FFFFFF;
-  border-top: 1px solid #F0F1F7;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+  height: calc(60px + env(safe-area-inset-bottom, 0px));
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid #E2E8F0;
+  box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.04);
   z-index: 990;
-  padding: 0 8px;
+  padding: 0 12px env(safe-area-inset-bottom, 0px) 12px;
   box-sizing: border-box;
 }
 
@@ -3565,7 +3567,7 @@ button:active,
   .main-wrapper,
   .content-body,
   .app-container {
-    padding-bottom: 74px !important;
+    padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   /* Hide duplicate top segmented tabs for workers on mobile */

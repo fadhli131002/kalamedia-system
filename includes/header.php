@@ -39,27 +39,27 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
 ?>
 
 <?php if ($isWorker): ?>
-<header class="topbar appify-topbar" style="background: #FFFFFF; border-bottom: 1px solid #F0F1F7; padding: 12px 16px; min-height: 60px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(26,22,43,0.02);">
-  <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
-    <button class="sidebar-toggle-btn" id="sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Buka Menu Navigasi" title="Buka Menu" style="background: #FFFFFF; border: 1px solid #F0F1F7; border-radius: 12px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #1A162B; flex-shrink: 0; box-shadow: 0 2px 6px rgba(26,22,43,0.03);">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+<header class="topbar appify-topbar" style="background: #FFFFFF; border-bottom: 1px solid #F1F5F9; padding: 10px 16px; min-height: 56px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 2px rgba(15,23,42,0.03); position: sticky; top: 0; z-index: 980;">
+  <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+    <button class="sidebar-toggle-btn" id="sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Buka Menu Navigasi" title="Buka Menu" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #334155; flex-shrink: 0; transition: all 0.15s ease;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="3" y1="6" x2="21" y2="6"></line>
         <line x1="3" y1="12" x2="21" y2="12"></line>
         <line x1="3" y1="18" x2="21" y2="18"></line>
       </svg>
     </button>
     <div style="min-width: 0;">
-      <h1 style="font-size: 18px; font-weight: 800; color: #1A162B; margin: 0; line-height: 1.2; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+      <h1 style="font-size: 15px; font-weight: 700; color: #0F172A; margin: 0; line-height: 1.25; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
         Halo, <?= htmlspecialchars($currentUser['name'] ?? 'Tim Kalamedia') ?>
       </h1>
-      <div style="font-size: 12px; color: #7B7890; margin-top: 2px;">
+      <div style="font-size: 11px; color: #64748B; font-weight: 500; margin-top: 2px;">
         <?= date('d M Y') ?>
       </div>
     </div>
   </div>
 
   <div style="flex-shrink: 0;">
-    <span style="display: inline-flex; align-items: center; background: #F2EFFF; color: #5B3DF5; font-size: 11.5px; font-weight: 700; padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(91, 61, 245, 0.15); letter-spacing: 0.2px;">
+    <span style="display: inline-flex; align-items: center; background: #EEF2FF; color: #4F46E5; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 999px; border: 1px solid #E0E7FF; letter-spacing: 0.1px;">
       <?= $userRole === 'freelancer' ? 'Freelancer' : 'Staff' ?>
     </span>
   </div>

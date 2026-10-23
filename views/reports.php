@@ -318,9 +318,10 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .kala-modal-backdrop {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(17, 24, 39, 0.6);
-      backdrop-filter: blur(4px);
-      z-index: 1050;
+      background: rgba(17, 24, 39, 0.65);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      z-index: 10000 !important;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -330,31 +331,63 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
       background: #FFFFFF;
       border-radius: 20px;
       width: 100%;
-      max-width: 820px;
+      max-width: 680px;
       max-height: 90vh;
-      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
       border: 1px solid #E5E7EB;
     }
     .kala-modal-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid #F3F4F6;
+      padding: 18px 22px;
+      border-bottom: 1px solid #F1F5F9;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      flex-shrink: 0;
+      background: #FFFFFF;
     }
     .kala-modal-body {
-      padding: 24px;
+      padding: 20px 22px;
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      box-sizing: border-box;
     }
     .kala-modal-footer {
-      padding: 16px 24px;
-      background: #F9FAFB;
-      border-top: 1px solid #F3F4F6;
-      border-bottom-left-radius: 20px;
+      padding: 14px 22px;
+      background: #FFFFFF;
+      border-top: 1px solid #F1F5F9;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05);
       display: flex;
       align-items: center;
       justify-content: flex-end;
       gap: 10px;
+      border-bottom-left-radius: 20px;
+      border-bottom-right-radius: 20px;
+      flex-shrink: 0;
+      position: sticky;
+      bottom: 0;
+      z-index: 20;
+    }
+    @media (max-width: 640px) {
+      .kala-modal-backdrop {
+        padding: 8px !important;
+      }
+      .kala-modal-dialog {
+        max-height: 95vh !important;
+        border-radius: 18px !important;
+      }
+      .kala-modal-header {
+        padding: 14px 16px !important;
+      }
+      .kala-modal-body {
+        padding: 16px 14px !important;
+      }
+      .kala-modal-footer {
+        padding: 12px 14px !important;
+      }
     }
     @media (max-width: 768px) {
       .content-body {
@@ -948,22 +981,22 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <button type="button" class="pwa-banner-close" onclick="closeAdsReportModal()" style="font-size: 22px; cursor: pointer; border: none; background: none;">&times;</button>
       </div>
 
-      <form id="form-create-ads-report" onsubmit="submitAdsReport(event)">
+      <form id="form-create-ads-report" onsubmit="submitAdsReport(event)" style="display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden;">
         <input type="hidden" name="id" id="form-ads-id" value="0">
         <input type="hidden" name="client_id" id="form-ads-client-id" value="0">
 
         <div class="kala-modal-body">
           <!-- 1. Pilih Proyek & Klien PT -->
-          <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 14px 16px; margin-bottom: 18px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-              <label style="font-size: 12.5px; font-weight: 800; color: #1E293B;">
-                1. Pilih Klien / Proyek Kampanye PT <span style="color: #DC2626;">*</span>
+          <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 14px; padding: 14px 16px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+              <label style="font-size: 12.5px; font-weight: 700; color: #1E293B; margin: 0;">
+                Pilih Klien &amp; Proyek Kampanye <span style="color: #DC2626;">*</span>
               </label>
-              <button type="button" class="btn btn-secondary btn-sm" onclick="autoPullProjectAdsSpend()" style="font-size: 11px; padding: 3px 8px; border-radius: 6px;">
-                ⚡ Tarik Realisasi Spend Proyek
+              <button type="button" class="btn btn-secondary btn-sm" onclick="autoPullProjectAdsSpend()" style="font-size: 11.5px; font-weight: 600; padding: 5px 12px; border-radius: 8px; background: #EEF2FF; color: #4F46E5; border: 1px solid #C7D2FE; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; transition: all 0.15s ease;">
+                <span>⚡ Tarik Realisasi Spend</span>
               </button>
             </div>
-            <select name="project_id" id="form-ads-project-id" class="form-select" onchange="onReportProjectChange(this.value)" required style="font-weight: 600;">
+            <select name="project_id" id="form-ads-project-id" class="form-select" onchange="onReportProjectChange(this.value)" required style="font-weight: 600; border-radius: 12px; border: 1px solid #E2E8F0; padding: 11px 14px; background: #FFFFFF; width: 100%; font-size: 13px; color: #0F172A;">
               <option value="">-- Pilih Proyek Iklan Klien --</option>
               <?php foreach ($formProjects as $pr): ?>
                 <option value="<?= $pr['id'] ?>" data-client-id="<?= $pr['client_id'] ?>" data-client-company="<?= htmlspecialchars($pr['client_company']) ?>">
@@ -973,20 +1006,20 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </select>
           </div>
 
-          <!-- 2. Periode & Platform & Objektif -->
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px;">
-            <div>
-              <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 5px;">
+          <!-- 2. Periode, Platform & Objektif (Clean 2-Column Responsive Layout) -->
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px;">
+            <div style="grid-column: span 2;">
+              <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 6px;">
                 Periode Laporan <span style="color: #DC2626;">*</span>
               </label>
-              <input type="text" name="report_period" id="form-ads-period" class="form-control" placeholder="Contoh: 1 - 31 Oktober 2026" required value="<?= date('1 - t M Y') ?>">
+              <input type="text" name="report_period" id="form-ads-period" class="form-control" placeholder="Contoh: 1 - 31 Oktober 2026" required value="<?= date('1 - t M Y') ?>" style="border-radius: 12px; border: 1px solid #E2E8F0; padding: 11px 14px; font-size: 13px; background: #F8FAFC; width: 100%; box-sizing: border-box;">
             </div>
 
             <div>
-              <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 5px;">
+              <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 6px;">
                 Platform Iklan <span style="color: #DC2626;">*</span>
               </label>
-              <select name="platform" id="form-ads-platform" class="form-select" required>
+              <select name="platform" id="form-ads-platform" class="form-select" required style="border-radius: 12px; border: 1px solid #E2E8F0; padding: 11px 14px; font-size: 13px; background: #F8FAFC; width: 100%; box-sizing: border-box;">
                 <option value="Meta Ads">Meta Ads (Instagram &amp; FB)</option>
                 <option value="Google Ads">Google Ads (Search &amp; YT)</option>
                 <option value="TikTok Ads">TikTok Ads</option>
@@ -994,128 +1027,126 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <div>
-              <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 5px;">
+              <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 6px;">
                 Objektif Kampanye <span style="color: #DC2626;">*</span>
               </label>
-              <select name="objective" id="form-ads-objective" class="form-select" required>
-                <option value="Leads / WhatsApp">Leads / WhatsApp (Pesan Masuk)</option>
-                <option value="Sales / Konversi Web">Sales / Konversi Website (Purchase)</option>
-                <option value="Traffic Website">Traffic / Kunjungan Website (LP)</option>
+              <select name="objective" id="form-ads-objective" class="form-select" required style="border-radius: 12px; border: 1px solid #E2E8F0; padding: 11px 14px; font-size: 13px; background: #F8FAFC; width: 100%; box-sizing: border-box;">
+                <option value="Leads / WhatsApp">Leads / WhatsApp</option>
+                <option value="Sales / Konversi Web">Sales / Konversi Website</option>
+                <option value="Traffic Website">Traffic / Kunjungan Website</option>
                 <option value="Brand Awareness / Reach">Brand Awareness &amp; Reach</option>
               </select>
             </div>
           </div>
 
-          <!-- 3. Metrik Template Report Ads (Dihitung Otomatis) -->
-          <div style="border: 1px solid #E5E7EB; border-radius: 14px; padding: 16px; margin-bottom: 18px; background: #FFFFFF;">
-            <div style="font-size: 12.5px; font-weight: 800; color: #111827; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-              <span>📊 Metrik Performa Iklan (Otomatis Menghitung CTR &amp; CPA/CPL)</span>
+          <!-- 3. Metrik Performa Iklan (Strict 2-Column Grid!) -->
+          <div style="border: 1px solid #E5E7EB; border-radius: 16px; padding: 16px; margin-bottom: 16px; background: #FFFFFF; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);">
+            <div style="font-size: 13px; font-weight: 800; color: #111827; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 16px;">📊</span>
+              <span>Metrik Performa Iklan (Otomatis Menghitung CTR &amp; CPA/CPL)</span>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
-              <!-- 1. Total Spend -->
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">
+              <!-- Total Spend -->
               <div>
-                <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
-                  1. Total Spend (Rp) <span style="color: #DC2626;">*</span>
+                <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 6px;">
+                  Total Spend (Rp) <span style="color: #DC2626;">*</span>
                 </label>
-                <input type="number" step="1" name="total_ad_spend" id="form-ads-spend" class="form-control" placeholder="Rp 0" required oninput="calculateAdsMetrics()">
+                <input type="number" step="1" name="total_ad_spend" id="form-ads-spend" class="form-control" placeholder="Rp 0" required oninput="calculateAdsMetrics()" style="border-radius: 12px; border: 1px solid #E2E8F0; padding: 11px 14px; font-size: 13px; background: #F8FAFC; width: 100%; box-sizing: border-box;">
               </div>
 
-              <!-- 2. Impressions -->
+              <!-- Impressions -->
               <div>
-                <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
-                  2. Impressions (Tayangan)
+                <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 6px;">
+                  Impressions (Tayangan)
                 </label>
-                <input type="number" name="ads_impressions" id="form-ads-impressions" class="form-control" placeholder="0" oninput="calculateAdsMetrics()">
+                <input type="number" name="ads_impressions" id="form-ads-impressions" class="form-control" placeholder="0" oninput="calculateAdsMetrics()" style="border-radius: 12px; border: 1px solid #E2E8F0; padding: 11px 14px; font-size: 13px; background: #F8FAFC; width: 100%; box-sizing: border-box;">
               </div>
 
-              <!-- 3. Reach -->
+              <!-- Reach -->
               <div>
-                <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
-                  3. Reach (Jangkauan Orang)
+                <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 6px;">
+                  Reach (Jangkauan Orang)
                 </label>
-                <input type="number" name="ads_reach" id="form-ads-reach" class="form-control" placeholder="0">
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
-              <!-- 4. Clicks -->
-              <div>
-                <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
-                  4. Clicks (Jumlah Klik)
-                </label>
-                <input type="number" name="total_clicks" id="form-ads-clicks" class="form-control" placeholder="0" oninput="calculateAdsMetrics()">
+                <input type="number" name="ads_reach" id="form-ads-reach" class="form-control" placeholder="0" style="border-radius: 12px; border: 1px solid #E2E8F0; padding: 11px 14px; font-size: 13px; background: #F8FAFC; width: 100%; box-sizing: border-box;">
               </div>
 
-              <!-- 5. CTR Auto-calculated -->
+              <!-- Clicks -->
               <div>
-                <label style="font-size: 12px; font-weight: 700; color: #1D4ED8; display: block; margin-bottom: 4px;">
-                  5. CTR (%) &bull; Otomatis
+                <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 6px;">
+                  Clicks (Jumlah Klik)
                 </label>
-                <input type="text" name="ads_ctr" id="form-ads-ctr" class="form-control" placeholder="0.00 %" readonly style="background: #EFF6FF; font-weight: 800; color: #1D4ED8;">
+                <input type="number" name="total_clicks" id="form-ads-clicks" class="form-control" placeholder="0" oninput="calculateAdsMetrics()" style="border-radius: 12px; border: 1px solid #E2E8F0; padding: 11px 14px; font-size: 13px; background: #F8FAFC; width: 100%; box-sizing: border-box;">
               </div>
 
-              <!-- 6. Total Results -->
+              <!-- CTR Auto-calculated -->
               <div>
-                <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
-                  6. Total Results / Leads <span style="color: #DC2626;">*</span>
+                <label style="font-size: 12px; font-weight: 700; color: #1D4ED8; display: block; margin-bottom: 6px;">
+                  CTR (%) &bull; Otomatis
                 </label>
-                <input type="number" name="total_conversions" id="form-ads-results" class="form-control" placeholder="0" required oninput="calculateAdsMetrics()">
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
-              <!-- 7. Cost Per Result / CPA / CPL -->
-              <div>
-                <label style="font-size: 12px; font-weight: 700; color: #047857; display: block; margin-bottom: 4px;">
-                  7. Cost Per Result / CPA (Rp) &bull; Otomatis
-                </label>
-                <input type="text" name="cpl_cpa" id="form-ads-cpa" class="form-control" placeholder="Rp 0 / result" readonly style="background: #ECFDF5; font-weight: 800; color: #047857;">
+                <input type="text" name="ads_ctr" id="form-ads-ctr" class="form-control" placeholder="0.00 %" readonly style="background: #EFF6FF; border-radius: 12px; border: 1px solid #BFDBFE; padding: 11px 14px; font-size: 13px; font-weight: 800; color: #1D4ED8; width: 100%; box-sizing: border-box;">
               </div>
 
-              <!-- 8. ROAS -->
+              <!-- Total Results -->
               <div>
-                <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
-                  8. ROAS / Nilai Balik (Opsional)
+                <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 6px;">
+                  Total Results / Leads <span style="color: #DC2626;">*</span>
                 </label>
-                <input type="number" step="0.01" name="roas" id="form-ads-roas" class="form-control" placeholder="Contoh: 3.5">
+                <input type="number" name="total_conversions" id="form-ads-results" class="form-control" placeholder="0" required oninput="calculateAdsMetrics()" style="border-radius: 12px; border: 1px solid #E2E8F0; padding: 11px 14px; font-size: 13px; background: #F8FAFC; width: 100%; box-sizing: border-box;">
+              </div>
+
+              <!-- Cost Per Result / CPA / CPL -->
+              <div>
+                <label style="font-size: 12px; font-weight: 700; color: #047857; display: block; margin-bottom: 6px;">
+                  Cost Per Result / CPA &bull; Otomatis
+                </label>
+                <input type="text" name="cpl_cpa" id="form-ads-cpa" class="form-control" placeholder="Rp 0 / result" readonly style="background: #ECFDF5; border-radius: 12px; border: 1px solid #A7F3D0; padding: 11px 14px; font-size: 13px; font-weight: 800; color: #047857; width: 100%; box-sizing: border-box;">
+              </div>
+
+              <!-- ROAS -->
+              <div>
+                <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 6px;">
+                  ROAS (Opsional)
+                </label>
+                <input type="number" step="0.01" name="roas" id="form-ads-roas" class="form-control" placeholder="Contoh: 3.5" style="border-radius: 12px; border: 1px solid #E2E8F0; padding: 11px 14px; font-size: 13px; background: #F8FAFC; width: 100%; box-sizing: border-box;">
               </div>
             </div>
           </div>
 
-          <!-- 4. Winning Creative & Optimasi -->
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 18px;">
+          <!-- 4. Winning Creative & Optimasi (Spacious Stacked Layout) -->
+          <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px;">
             <div>
-              <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
-                🌟 Winning Creative / Iklan Terbaik <span style="color: #DC2626;">*</span>
+              <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 6px;">
+                🌟 Winning Creative / Format Iklan Terbaik <span style="color: #DC2626;">*</span>
               </label>
-              <textarea name="winning_creative_notes" id="form-ads-winning" class="form-control" rows="3" placeholder="Tuliskan format iklan, materi hook, atau sudut pandang yang menghasilkan performa tertinggi..." required></textarea>
+              <textarea name="winning_creative_notes" id="form-ads-winning" class="form-control" rows="3" placeholder="Tuliskan format iklan, materi hook, atau sudut pandang yang menghasilkan performa tertinggi..." required style="border-radius: 12px; border: 1px solid #E2E8F0; padding: 11px 14px; font-size: 13px; background: #F8FAFC; width: 100%; box-sizing: border-box; resize: vertical;"></textarea>
             </div>
 
             <div>
-              <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
+              <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 6px;">
                 📈 Evaluasi &amp; Rencana Optimasi Selanjutnya <span style="color: #DC2626;">*</span>
               </label>
-              <textarea name="optimizing_plan_notes" id="form-ads-optimizing" class="form-control" rows="3" placeholder="Rencana testing audience baru, scaling budget, penyesuaian copywriting, dsb..." required></textarea>
+              <textarea name="optimizing_plan_notes" id="form-ads-optimizing" class="form-control" rows="3" placeholder="Rencana testing audience baru, scaling budget, penyesuaian copywriting, dsb..." required style="border-radius: 12px; border: 1px solid #E2E8F0; padding: 11px 14px; font-size: 13px; background: #F8FAFC; width: 100%; box-sizing: border-box; resize: vertical;"></textarea>
             </div>
           </div>
 
           <!-- 5. Upload Screenshot Bukti Dashboard Ads Manager -->
-          <div>
-            <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">
-              📸 Upload Screenshot Bukti Dashboard Ads Manager (Meta / Google / TikTok)
+          <div style="margin-bottom: 10px;">
+            <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 6px;">
+              📸 Upload Bukti Screenshot Dashboard Ads (Meta / Google / TikTok)
             </label>
-            <input type="file" name="dashboard_screenshot" id="form-ads-file" class="form-control" accept="image/*" onchange="previewAdsScreenshot(this)">
+            <input type="file" name="dashboard_screenshot" id="form-ads-file" class="form-control" accept="image/*" onchange="previewAdsScreenshot(this)" style="border-radius: 12px; border: 1px solid #E2E8F0; padding: 9px 12px; font-size: 12.5px; background: #F8FAFC; width: 100%; box-sizing: border-box;">
             <input type="hidden" name="existing_dashboard_screenshot" id="form-ads-existing-screenshot" value="">
-            <div id="form-ads-screenshot-preview" style="margin-top: 8px; display: none;">
-              <img src="" alt="Screenshot Ads" style="max-height: 120px; border-radius: 8px; border: 1px solid #E5E7EB;">
+            <div id="form-ads-screenshot-preview" style="margin-top: 10px; display: none;">
+              <img src="" alt="Screenshot Ads" style="max-height: 140px; border-radius: 10px; border: 1px solid #E2E8F0; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
             </div>
           </div>
         </div>
 
+        <!-- STICKY BOTTOM ACTION BAR -->
         <div class="kala-modal-footer">
-          <button type="button" class="btn btn-secondary" onclick="closeAdsReportModal()">Batal</button>
-          <button type="submit" id="btn-submit-ads-report" class="btn btn-primary" style="font-weight: 800;">
+          <button type="button" class="btn btn-secondary" onclick="closeAdsReportModal()" style="border-radius: 10px; padding: 10px 18px; font-weight: 600; font-size: 13px;">Batal</button>
+          <button type="submit" id="btn-submit-ads-report" class="btn btn-primary" style="font-weight: 700; font-size: 13px; border-radius: 10px; padding: 10px 20px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(91, 61, 245, 0.3);">
             <span>🚀 Simpan &amp; Terbitkan Laporan</span>
           </button>
         </div>
@@ -1232,6 +1263,9 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
       document.getElementById('form-ads-screenshot-preview').style.display = 'none';
       const titleEl = document.querySelector('#modal-ads-report-form h3');
       if (titleEl) titleEl.innerText = 'Form & Template Standar Report Ads Kalamedia';
+      const fab = document.getElementById('btn-floating-room-chat');
+      if (fab) fab.style.display = 'none';
+      document.body.classList.add('modal-open');
       document.getElementById('modal-ads-report-form').style.display = 'flex';
     }
 
@@ -1269,11 +1303,17 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
       calculateAdsMetrics();
       const titleEl = document.querySelector('#modal-ads-report-form h3');
       if (titleEl) titleEl.innerText = 'Edit Laporan Report Ads';
+      const fab = document.getElementById('btn-floating-room-chat');
+      if (fab) fab.style.display = 'none';
+      document.body.classList.add('modal-open');
       document.getElementById('modal-ads-report-form').style.display = 'flex';
     }
 
     function closeAdsReportModal() {
       document.getElementById('modal-ads-report-form').style.display = 'none';
+      const fab = document.getElementById('btn-floating-room-chat');
+      if (fab) fab.style.display = 'flex';
+      document.body.classList.remove('modal-open');
     }
 
     function onReportProjectChange(projectId) {
@@ -1397,11 +1437,17 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
         sBox.style.display = 'none';
       }
 
+      const fab = document.getElementById('btn-floating-room-chat');
+      if (fab) fab.style.display = 'none';
+      document.body.classList.add('modal-open');
       document.getElementById('modal-ads-report-detail').style.display = 'flex';
     }
 
     function closeAdsDetailModal() {
       document.getElementById('modal-ads-report-detail').style.display = 'none';
+      const fab = document.getElementById('btn-floating-room-chat');
+      if (fab) fab.style.display = 'flex';
+      document.body.classList.remove('modal-open');
     }
 
     async function deleteReport(id, company, period) {

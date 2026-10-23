@@ -254,11 +254,24 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
       background: #F9FAFB;
       border-top: 1px solid #F3F4F6;
       border-bottom-left-radius: 20px;
-      border-bottom-right-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: flex-end;
       gap: 10px;
+    }
+    @media (max-width: 768px) {
+      .content-body {
+        padding-top: 14px !important;
+        padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+      }
+      .glass-panel {
+        padding: 14px !important;
+        border-radius: 18px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
     }
     @media print {
       body * { visibility: hidden !important; }
@@ -278,32 +291,32 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <div class="content-body">
 
         <!-- Role Badge Header -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
-          <div>
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <h1 style="font-size: 22px; font-weight: 800; color: #111827; margin: 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+          <div style="min-width: 0;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <h2 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0; line-height: 1.25;">
                 <?= $isAdsSpecialistUser ? 'Workspace Report Ads Kalamedia' : 'Pusat Laporan & Performa Klien' ?>
-              </h1>
+              </h2>
               <?php if ($isAdsSpecialistUser): ?>
-                <span style="background: #EFF6FF; color: #1D4ED8; font-weight: 800; font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid #BFDBFE;">
-                  ✨ Mode Spesialis Ads
+                <span style="background: #EEF2FF; color: #4F46E5; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 1px solid #E0E7FF;">
+                  Mode Spesialis Ads
                 </span>
               <?php endif; ?>
             </div>
-            <p style="font-size: 13px; color: #6B7280; margin: 4px 0 0;">
+            <p style="font-size: 12.5px; color: #64748B; margin: 3px 0 0; line-height: 1.4;">
               <?= $isAdsSpecialistUser 
-                ? 'Template laporan iklan standar Kalamedia. Setiap laporan yang Anda terbitkan otomatis terkirim ke Owner & Portal Klien terkait.' 
+                ? 'Template laporan iklan standar Kalamedia. Laporan otomatis terkirim ke Owner & Portal Klien.' 
                 : 'Pusat laporan performa iklan berbayar (Meta, Google, TikTok Ads) dan rekap pekerjaan tim kreatif.' ?>
             </p>
           </div>
 
-          <div style="display: flex; gap: 10px; align-items: center;">
-            <button type="button" onclick="openNewAdsReportModal()" style="background: #5B3DF5; color: #FFFFFF; font-weight: 700; font-size: 13px; border-radius: 12px; height: 38px; padding: 0 16px; border: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(91, 61, 245, 0.28); cursor: pointer; transition: all 0.15s ease;">
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <button type="button" onclick="openNewAdsReportModal()" style="background: #5B3DF5; color: #FFFFFF; font-weight: 700; font-size: 12.5px; border-radius: 10px; height: 36px; padding: 0 14px; border: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(91, 61, 245, 0.25); cursor: pointer; transition: all 0.15s ease;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              <span>Buat Report Ads</span>
+              <span>+ Buat Report Ads</span>
             </button>
             <?php if ($isOwnerOrAdmin): ?>
-              <a href="<?= url('reports-form') ?>" class="btn btn-secondary btn-sm" style="border-radius: 10px;">
+              <a href="<?= url('reports-form') ?>" class="btn btn-secondary btn-sm" style="border-radius: 10px; height: 36px; display: inline-flex; align-items: center;">
                 <span>+ Buat Pitch Deck</span>
               </a>
             <?php endif; ?>
@@ -585,10 +598,10 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </form>
 
             <!-- 1. Mobile Cards List (Shown on Mobile, Hidden on Desktop) -->
-            <div class="report-ads-mobile-list">
+            <div class="report-ads-mobile-list" style="width: 100%; box-sizing: border-box;">
               <?php if (empty($reports)): ?>
-                <div style="text-align: center; padding: 36px 16px; color: #7B7890; background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7;">
-                  <div style="font-weight: 700; font-size: 15px; color: #1A162B; margin-bottom: 6px;">
+                <div style="text-align: center; padding: 36px 16px; color: #64748B; background: #FFFFFF; border-radius: 18px; border: 1px solid #F1F5F9;">
+                  <div style="font-weight: 700; font-size: 15px; color: #0F172A; margin-bottom: 6px;">
                     Belum Ada Laporan Report Ads
                   </div>
                   <p style="font-size: 13px; margin: 0 0 16px;">
@@ -601,93 +614,79 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <?php else: ?>
                 <?php foreach ($reports as $r): 
                   $pName = $r['platform'] ?: 'Meta Ads';
-                  $chipBg = (stripos($pName, 'google') !== false) ? '#FEF08A' : ((stripos($pName, 'tiktok') !== false) ? '#F3E8FF' : '#EFF6FF');
+                  $chipBg = (stripos($pName, 'google') !== false) ? '#FEF9C3' : ((stripos($pName, 'tiktok') !== false) ? '#F3E8FF' : '#EFF6FF');
                   $chipColor = (stripos($pName, 'google') !== false) ? '#854D0E' : ((stripos($pName, 'tiktok') !== false) ? '#6B21A8' : '#1D4ED8');
                 ?>
-                  <div class="appify-tx-card" style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 15px; box-shadow: 0 4px 16px rgba(26,22,43,0.03); transition: all 0.2s ease;">
-                    <!-- Top Row: Icon + Client + Platform -->
-                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                      <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
-                        <div style="width: 38px; height: 38px; border-radius: 12px; background: #F2EFFF; color: #5B3DF5; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <div class="appify-tx-card" style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F1F5F9; padding: 14px; box-shadow: 0 1px 3px rgba(15,23,42,0.03); width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden; margin-bottom: 10px;">
+                    <!-- Baris Atas: Avatar PR + Nama Klien + Badge Meta Ads & Oktober 2026 -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; width: 100%; box-sizing: border-box;">
+                      <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
+                        <div style="width: 38px; height: 38px; border-radius: 10px; background: #EEF2FF; color: #4F46E5; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                           <?= strtoupper(substr($r['client_company'] ?: $r['client_name'], 0, 2)) ?>
                         </div>
-                        <div style="min-width: 0;">
-                          <div style="font-weight: 700; color: #1A162B; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        <div style="min-width: 0; flex: 1;">
+                          <div style="font-weight: 700; color: #0F172A; font-size: 13.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                             <?= htmlspecialchars($r['client_company']) ?>
                           </div>
-                          <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                            <span style="font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: <?= $chipBg ?>; color: <?= $chipColor ?>;">
+                          <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px; flex-wrap: wrap;">
+                            <span style="font-size: 10.5px; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: <?= $chipBg ?>; color: <?= $chipColor ?>;">
                               <?= htmlspecialchars($pName) ?>
                             </span>
-                            <span style="font-size: 11.5px; color: #7B7890;">
+                            <span style="font-size: 11px; color: #64748B;">
                               &bull; <?= htmlspecialchars($r['report_period']) ?>
                             </span>
+                            <?php if (!empty($r['objective'])): ?>
+                              <span style="font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px; background: #F1F5F9; color: #475569;">
+                                <?= htmlspecialchars($r['objective']) ?>
+                              </span>
+                            <?php endif; ?>
                           </div>
                         </div>
                       </div>
-                      <span style="font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: #F7F8FC; color: #1A162B; flex-shrink: 0;">
-                        <?= htmlspecialchars($r['objective'] ?: 'Leads / Sales') ?>
-                      </span>
                     </div>
 
-                    <!-- Middle Row: Metrics Grid (2x2) -->
-                    <div style="background: #F7F8FC; border-radius: 12px; padding: 10px 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-                      <div>
-                        <div style="font-size: 10.5px; font-weight: 600; color: #7B7890; text-transform: uppercase;">Total Spend</div>
-                        <div style="font-size: 13.5px; font-weight: 800; color: #1A162B; margin-top: 1px;">
+                    <!-- Baris Tengah: Grid 2x2 (Total Spend | Impressions | Clicks (CTR) | Results / Leads) -->
+                    <div style="background: #F8FAFC; border: 1px solid #F1F5F9; border-radius: 12px; padding: 10px 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 10px; margin-bottom: 10px; width: 100%; box-sizing: border-box; overflow: hidden;">
+                      <div style="min-width: 0;">
+                        <div style="font-size: 10px; font-weight: 600; color: #64748B; text-transform: uppercase;">Total Spend</div>
+                        <div style="font-size: 13px; font-weight: 800; color: #0F172A; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                           Rp <?= number_format($r['total_ad_spend'], 0, ',', '.') ?>
                         </div>
                       </div>
-                      <div>
-                        <div style="font-size: 10.5px; font-weight: 600; color: #7B7890; text-transform: uppercase;">Results / Leads</div>
-                        <div style="font-size: 13.5px; font-weight: 800; color: #10B981; margin-top: 1px;">
-                          <?= number_format($r['total_conversions']) ?> <span style="font-size: 11px; font-weight: 600; color: #7B7890;">(CPA Rp <?= number_format($r['cpl_cpa'], 0, ',', '.') ?>)</span>
-                        </div>
-                      </div>
-                      <div>
-                        <div style="font-size: 10.5px; font-weight: 600; color: #7B7890; text-transform: uppercase;">Impressions / Reach</div>
-                        <div style="font-size: 12px; font-weight: 700; color: #1A162B; margin-top: 1px;">
+                      <div style="min-width: 0;">
+                        <div style="font-size: 10px; font-weight: 600; color: #64748B; text-transform: uppercase;">Impressions</div>
+                        <div style="font-size: 12px; font-weight: 700; color: #0F172A; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                           <?= number_format($r['ads_impressions']) ?> views
                         </div>
                       </div>
-                      <div>
-                        <div style="font-size: 10.5px; font-weight: 600; color: #7B7890; text-transform: uppercase;">Clicks &amp; CTR</div>
-                        <div style="font-size: 12px; font-weight: 700; color: #5B3DF5; margin-top: 1px;">
-                          <?= number_format($r['total_clicks']) ?> klik (CTR: <?= number_format($r['ads_ctr'], 2) ?>%)
+                      <div style="min-width: 0;">
+                        <div style="font-size: 10px; font-weight: 600; color: #64748B; text-transform: uppercase;">Clicks (CTR)</div>
+                        <div style="font-size: 12px; font-weight: 700; color: #4F46E5; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                          <?= number_format($r['total_clicks']) ?> (<?= number_format($r['ads_ctr'], 2) ?>%)
+                        </div>
+                      </div>
+                      <div style="min-width: 0;">
+                        <div style="font-size: 10px; font-weight: 600; color: #64748B; text-transform: uppercase;">Results / Leads</div>
+                        <div style="font-size: 13px; font-weight: 800; color: #10B981; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                          <?= number_format($r['total_conversions']) ?> <span style="font-size: 10.5px; font-weight: 500; color: #64748B;">(Rp <?= number_format($r['cpl_cpa'], 0, ',', '.') ?>)</span>
                         </div>
                       </div>
                     </div>
 
-                    <!-- Optional Notes / Screenshot Link -->
-                    <?php if (!empty($r['winning_creative_notes']) || !empty($r['dashboard_screenshot'])): ?>
-                      <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; font-size: 12px;">
-                        <?php if (!empty($r['winning_creative_notes'])): ?>
-                          <div style="color: #1A162B; background: #FFF4E5; padding: 6px 10px; border-radius: 8px; border: 1px solid #FED7AA;">
-                            🌟 <b>Winning:</b> <?= htmlspecialchars($r['winning_creative_notes']) ?>
-                          </div>
-                        <?php endif; ?>
-                        <?php if (!empty($r['dashboard_screenshot'])): ?>
-                          <a href="<?= url($r['dashboard_screenshot']) ?>" target="_blank" style="color: #5B3DF5; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; text-decoration: none;">
-                            🖼️ Lihat Bukti Screenshot Dashboard
-                          </a>
-                        <?php endif; ?>
+                    <!-- Baris Bawah: Tombol Aksi (Lihat Detail / PDF & Edit) -->
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px solid #F1F5F9; padding-top: 10px; width: 100%; box-sizing: border-box;">
+                      <div style="font-size: 11px; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;">
+                        Oleh: <b><?= htmlspecialchars($r['author_name'] ?: 'Tim Ads') ?></b>
                       </div>
-                    <?php endif; ?>
-
-                    <!-- Bottom Action Row -->
-                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; border-top: 1px solid #F0F1F7; padding-top: 10px;">
-                      <div style="font-size: 11px; color: #7B7890;">
-                        Oleh: <b><?= htmlspecialchars($r['author_name'] ?: 'Tim Ads') ?></b> &bull; <?= date('d M Y', strtotime($r['created_at'])) ?>
-                      </div>
-                      <div style="display: flex; gap: 6px;">
-                        <button type="button" onclick='viewAdsReportDetail(<?= json_encode($r) ?>)' style="background: #F2EFFF; color: #5B3DF5; border: none; border-radius: 10px; font-weight: 700; font-size: 12px; padding: 7px 12px; cursor: pointer;">
-                          Detail
+                      <div style="display: flex; gap: 6px; flex-shrink: 0;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick='viewAdsReportDetail(<?= json_encode($r) ?>)' style="height: 32px; padding: 0 10px; border-radius: 8px; font-size: 11.5px; font-weight: 600; background: #EEF2FF; color: #4F46E5; border: 1px solid #E0E7FF; cursor: pointer;">
+                          Detail / PDF
                         </button>
-                        <a href="<?= url("report-deck?id={$r['id']}") ?>" style="background: #F7F8FC; color: #1A162B; border: 1px solid #F0F1F7; border-radius: 10px; font-weight: 600; font-size: 12px; padding: 7px 10px; text-decoration: none; display: inline-flex; align-items: center;">
-                          Deck
-                        </a>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick='openEditAdsReportModal(<?= json_encode($r) ?>)' style="height: 32px; padding: 0 10px; border-radius: 8px; font-size: 11.5px; font-weight: 600; background: #FFFFFF; color: #334155; border: 1px solid #E2E8F0; cursor: pointer;">
+                          Edit
+                        </button>
                         <?php if ($isOwnerOrAdmin || ($isAdsSpecialistUser && (int)$r['created_by_user_id'] === $userId)): ?>
-                          <button type="button" onclick="deleteReport(<?= $r['id'] ?>, '<?= htmlspecialchars(addslashes($r['client_company'])) ?>', '<?= htmlspecialchars($r['report_period']) ?>')" style="background: #FFEFEF; color: #EF4444; border: none; border-radius: 10px; font-weight: 600; font-size: 12px; padding: 7px 10px; cursor: pointer;">
+                          <button type="button" class="btn btn-secondary btn-sm" onclick="deleteReport(<?= $r['id'] ?>, '<?= htmlspecialchars(addslashes($r['client_company'])) ?>', '<?= htmlspecialchars($r['report_period']) ?>')" style="height: 32px; padding: 0 8px; border-radius: 8px; font-size: 11.5px; font-weight: 600; background: #FEF2F2; color: #EF4444; border: 1px solid #FEE2E2; cursor: pointer;">
                             Hapus
                           </button>
                         <?php endif; ?>
@@ -1137,6 +1136,45 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
       document.getElementById('form-ads-client-id').value = '0';
       document.getElementById('form-ads-existing-screenshot').value = '';
       document.getElementById('form-ads-screenshot-preview').style.display = 'none';
+      const titleEl = document.querySelector('#modal-ads-report-form h3');
+      if (titleEl) titleEl.innerText = 'Form & Template Standar Report Ads Kalamedia';
+      document.getElementById('modal-ads-report-form').style.display = 'flex';
+    }
+
+    function openEditAdsReportModal(r) {
+      document.getElementById('form-create-ads-report').reset();
+      document.getElementById('form-ads-id').value = r.id || '0';
+      document.getElementById('form-ads-client-id').value = r.client_id || '0';
+      
+      const pSel = document.getElementById('form-ads-project-id');
+      if (pSel) pSel.value = r.project_id || '';
+      
+      if (document.getElementById('form-ads-period')) document.getElementById('form-ads-period').value = r.report_period || '';
+      if (document.getElementById('form-ads-platform')) document.getElementById('form-ads-platform').value = r.platform || 'Meta Ads';
+      if (document.getElementById('form-ads-objective')) document.getElementById('form-ads-objective').value = r.objective || 'Leads / WhatsApp';
+      if (document.getElementById('form-ads-spend')) document.getElementById('form-ads-spend').value = r.total_ad_spend || 0;
+      if (document.getElementById('form-ads-impressions')) document.getElementById('form-ads-impressions').value = r.ads_impressions || 0;
+      if (document.getElementById('form-ads-reach')) document.getElementById('form-ads-reach').value = r.ads_reach || 0;
+      if (document.getElementById('form-ads-clicks')) document.getElementById('form-ads-clicks').value = r.total_clicks || 0;
+      if (document.getElementById('form-ads-results')) document.getElementById('form-ads-results').value = r.total_conversions || 0;
+      if (document.getElementById('form-ads-roas')) document.getElementById('form-ads-roas').value = r.roas || 0;
+      if (document.getElementById('form-ads-revenue')) document.getElementById('form-ads-revenue').value = r.revenue || 0;
+      if (document.getElementById('form-ads-winning')) document.getElementById('form-ads-winning').value = r.winning_creative_notes || r.what_worked || '';
+      if (document.getElementById('form-ads-optimizing')) document.getElementById('form-ads-optimizing').value = r.optimizing_plan_notes || r.next_action_plan || '';
+      
+      if (r.dashboard_screenshot) {
+        document.getElementById('form-ads-existing-screenshot').value = r.dashboard_screenshot;
+        const previewBox = document.getElementById('form-ads-screenshot-preview');
+        previewBox.querySelector('img').src = r.dashboard_screenshot;
+        previewBox.style.display = 'block';
+      } else {
+        document.getElementById('form-ads-existing-screenshot').value = '';
+        document.getElementById('form-ads-screenshot-preview').style.display = 'none';
+      }
+
+      calculateAdsMetrics();
+      const titleEl = document.querySelector('#modal-ads-report-form h3');
+      if (titleEl) titleEl.innerText = 'Edit Laporan Report Ads';
       document.getElementById('modal-ads-report-form').style.display = 'flex';
     }
 
@@ -1397,5 +1435,8 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
       document.addEventListener('DOMContentLoaded', fetchAdminWorkRecap);
     <?php endif; ?>
   </script>
+
+  <?php require_once BASE_PATH . '/includes/bottom_nav.php'; ?>
+  <?php require_once BASE_PATH . '/includes/room_chat_modal.php'; ?>
 </body>
 </html>

@@ -126,14 +126,14 @@ $isAdmin = is_admin();
 
     <?php if ($isAdsSpecialistUser): ?>
       <!-- ORANG ADS: Saldo Ads + Report Ads (Kalender Konten Dihapus) -->
-      <a href="<?= url('tasks?tab=ads_tracker&_slot=internal') ?>" class="mob-nav-item <?= ($currentPage === 'tasks' && ($_GET['tab'] ?? '') === 'ads_tracker') ? 'active' : '' ?>">
+      <a href="<?= url('tasks?tab=ads_tracker&_slot=internal') ?>" class="mob-nav-item <?= ($currentPage === 'tasks' && in_array(($_GET['tab'] ?? ''), ['ads', 'ads_tracker'])) ? 'active' : '' ?>">
         <div class="mob-nav-icon">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="12 6 12 12 16 14"/></svg>
         </div>
         <span class="mob-nav-label">Saldo Ads</span>
       </a>
 
-      <a href="<?= url('reports?tab=ads_report&_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['reports', 'report-deck']) ? 'active' : '' ?>">
+      <a href="<?= url('reports?tab=ads_report&_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
         <div class="mob-nav-icon">
           <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         </div>

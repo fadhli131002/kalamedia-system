@@ -109,12 +109,18 @@ $badgeLabel = $sidebarBadge;
       <!-- WORKER & FREELANCER NAVIGATION (SMART SPECIALIZATION ADAPTIVE) -->
       <div class="nav-section-title">Workspace Tim</div>
 
-      <a href="<?= url('tasks?_slot=internal') ?>" class="nav-link <?= (in_array($currentPage, ['tasks', 'team-workspace']) && ($_GET['tab'] ?? '') !== 'work_recap') ? 'active' : '' ?>">
+      <a href="<?= url('tasks?_slot=internal') ?>" class="nav-link <?= (in_array($currentPage, ['tasks', 'team-workspace']) && (empty($_GET['tab']) || $_GET['tab'] === 'tasks')) ? 'active' : '' ?>">
         <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         <span>Tugas Saya & Progres</span>
       </a>
 
       <?php if (is_ads_specialist($currentUser)): ?>
+        <!-- Menu Saldo Ads untuk Tim Ads (Sinkron dengan Bottom Navigation Bar) -->
+        <a href="<?= url('tasks?tab=ads&_slot=internal') ?>" class="nav-link <?= (in_array($currentPage, ['tasks', 'team-workspace']) && in_array(($_GET['tab'] ?? ''), ['ads', 'ads_tracker'])) ? 'active' : '' ?>">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="12 6 12 12 16 14"/></svg>
+          <span>Saldo Ads</span>
+        </a>
+
         <!-- ATURAN ORANG ADS: Hapus Kalender Konten -> Ganti Jadi Report Ads -->
         <a href="<?= url('reports?tab=ads_report&_slot=internal') ?>" class="nav-link <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
           <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>

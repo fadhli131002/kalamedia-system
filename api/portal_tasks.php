@@ -186,7 +186,9 @@ if ($action === 'list_tasks') {
                        u.position as worker_position, u.jobdesk as worker_jobdesk,
                        u.avatar as worker_avatar, u.phone_wa as worker_phone,
                        (SELECT COUNT(*) FROM task_feedbacks WHERE task_id = t.id) as feedbacks_count,
-                       (SELECT message FROM task_feedbacks WHERE task_id = t.id ORDER BY id DESC LIMIT 1) as latest_feedback
+                       (SELECT COUNT(*) FROM task_feedbacks WHERE task_id = t.id AND is_read_by_client = 0 AND user_id != ?) as unread_feedbacks_count,
+                       (SELECT message FROM task_feedbacks WHERE task_id = t.id ORDER BY id DESC LIMIT 1) as latest_feedback,
+                       (SELECT created_at FROM task_feedbacks WHERE task_id = t.id ORDER BY id DESC LIMIT 1) as latest_feedback_time
                 FROM tasks t
                 LEFT JOIN projects p ON t.project_id = p.id
                 LEFT JOIN users u ON t.assigned_to_user_id = u.id
@@ -203,7 +205,7 @@ if ($action === 'list_tasks') {
                     END,
                     t.due_date ASC, t.id DESC
             ");
-            $stmt->execute([$clientId]);
+            $stmt->execute([$userId, $clientId]);
             $tasks = array_map('decorate_task_ads_metrics', $stmt->fetchAll());
 
             // Calculate Project Statistics
@@ -433,8 +435,9 @@ if ($action === 'list_tasks') {
                        u.avatar as worker_avatar, u.phone_wa as worker_phone,
                        u_by.name as assigned_by_name,
                        (SELECT COUNT(*) FROM task_feedbacks WHERE task_id = t.id) as feedbacks_count,
-                       (SELECT COUNT(*) FROM task_feedbacks WHERE task_id = t.id AND is_read_by_worker = 0) as unread_feedbacks_count,
-                       (SELECT message FROM task_feedbacks WHERE task_id = t.id ORDER BY id DESC LIMIT 1) as latest_feedback
+                       (SELECT COUNT(*) FROM task_feedbacks WHERE task_id = t.id AND is_read_by_owner = 0 AND user_id != ?) as unread_feedbacks_count,
+                       (SELECT message FROM task_feedbacks WHERE task_id = t.id ORDER BY id DESC LIMIT 1) as latest_feedback,
+                       (SELECT created_at FROM task_feedbacks WHERE task_id = t.id ORDER BY id DESC LIMIT 1) as latest_feedback_time
                 FROM tasks t
                 LEFT JOIN projects p ON t.project_id = p.id
                 LEFT JOIN clients c ON t.client_id = c.id
@@ -453,7 +456,7 @@ if ($action === 'list_tasks') {
                     END,
                     t.due_date ASC, t.id DESC
             ");
-            $stmt->execute($params);
+            $stmt->execute(array_merge([$userId], $params));
             $tasks = array_map('decorate_task_ads_metrics', $stmt->fetchAll());
 
             // Overall Stats across all tasks (scoped to client_id if passed)
@@ -483,6 +486,80 @@ if ($action === 'list_tasks') {
         }
     } catch (Exception $e) {
         echo json_encode(['success' => false, 'message' => 'Gagal mengambil data tugas: ' . $e->getMessage()]);
+        exit;
+    }
+}
+
+// -------------------------------------------------------------
+// 2a. GET: List All Chat Rooms (with latest message and unread counts)
+// -------------------------------------------------------------
+if ($action === 'list_chat_rooms') {
+    try {
+        $where = ["t.is_deleted = 0"];
+        $params = [];
+
+        if ($role === 'client') {
+            $where[] = "t.client_id = ?";
+            $params[] = $clientId;
+        } elseif ($role === 'karyawan' || $role === 'freelancer') {
+            $where[] = "t.assigned_to_user_id = ?";
+            $params[] = $userId;
+        }
+        // Owner and Admin see ALL tasks!
+
+        $sqlWhere = implode(" AND ", $where);
+
+        $unreadCol = ($role === 'client') 
+            ? "is_read_by_client" 
+            : (($role === 'karyawan' || $role === 'freelancer') ? "is_read_by_worker" : "is_read_by_owner");
+
+        $sql = "
+            SELECT t.id, t.title, t.category, t.status, t.deliverable_link, t.due_date,
+                   t.client_id, c.company as client_company, c.name as client_pic_name,
+                   t.assigned_to_user_id as worker_id, u.name as worker_name, u.role as worker_role,
+                   u.avatar as worker_avatar, u.employment_type as worker_emp_type,
+                   (SELECT COUNT(*) FROM task_feedbacks WHERE task_id = t.id) as feedbacks_count,
+                   (SELECT COUNT(*) FROM task_feedbacks WHERE task_id = t.id AND {$unreadCol} = 0 AND user_id != ?) as unread_count,
+                   (SELECT message FROM task_feedbacks WHERE task_id = t.id ORDER BY id DESC LIMIT 1) as latest_feedback,
+                   (SELECT feedback_type FROM task_feedbacks WHERE task_id = t.id ORDER BY id DESC LIMIT 1) as latest_feedback_type,
+                   (SELECT created_at FROM task_feedbacks WHERE task_id = t.id ORDER BY id DESC LIMIT 1) as latest_feedback_time,
+                   (SELECT u_s.name FROM task_feedbacks tf_s JOIN users u_s ON tf_s.user_id = u_s.id WHERE tf_s.task_id = t.id ORDER BY tf_s.id DESC LIMIT 1) as latest_sender_name,
+                   (SELECT u_s.role FROM task_feedbacks tf_s JOIN users u_s ON tf_s.user_id = u_s.id WHERE tf_s.task_id = t.id ORDER BY tf_s.id DESC LIMIT 1) as latest_sender_role
+            FROM tasks t
+            LEFT JOIN clients c ON t.client_id = c.id
+            LEFT JOIN users u ON t.assigned_to_user_id = u.id
+            WHERE {$sqlWhere}
+            ORDER BY 
+                CASE WHEN (SELECT COUNT(*) FROM task_feedbacks WHERE task_id = t.id AND {$unreadCol} = 0 AND user_id != ?) > 0 THEN 0 ELSE 1 END,
+                COALESCE((SELECT MAX(created_at) FROM task_feedbacks WHERE task_id = t.id), t.updated_at, t.created_at) DESC
+        ";
+
+        $fullParams = array_merge([$userId], $params, [$userId]);
+        $stmt = $db->prepare($sql);
+        $stmt->execute($fullParams);
+        $rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $totalUnread = 0;
+        foreach ($rooms as &$r) {
+            $totalUnread += (int)$r['unread_count'];
+            $r['latest_feedback_snippet'] = !empty($r['latest_feedback']) 
+                ? (mb_strlen($r['latest_feedback']) > 45 ? mb_substr($r['latest_feedback'], 0, 42) . '...' : $r['latest_feedback'])
+                : 'Belum ada obrolan diskusi';
+            $r['latest_feedback_time_formatted'] = !empty($r['latest_feedback_time'])
+                ? date('H:i', strtotime($r['latest_feedback_time']))
+                : '';
+        }
+
+        echo json_encode([
+            'success' => true,
+            'role' => $role,
+            'user_name' => $user['name'] ?? '',
+            'rooms' => $rooms,
+            'total_unread' => $totalUnread
+        ]);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         exit;
     }
 }
@@ -526,13 +603,20 @@ if ($action === 'get_task_details') {
                 echo json_encode(['success' => false, 'message' => 'Anda tidak memiliki akses ke tugas ini']);
                 exit;
             }
+            // Mark feedbacks as read for client
+            $db->prepare("UPDATE task_feedbacks SET is_read_by_client = 1 WHERE task_id = ? AND user_id != ?")
+               ->execute([$taskId, $userId]);
         } elseif ($role === 'karyawan' || $role === 'freelancer') {
-            if ((int)$task['assigned_to_user_id'] !== $userId) {
+            if ((int)$task['assigned_to_user_id'] !== $userId && !$isOwnerOrAdmin) {
                 echo json_encode(['success' => false, 'message' => 'Tugas ini bukan bagian dari tanggung jawab Anda']);
                 exit;
             }
-            // Mark feedbacks as read for this worker
+            // Mark feedbacks as read for worker
             $db->prepare("UPDATE task_feedbacks SET is_read_by_worker = 1 WHERE task_id = ? AND user_id != ?")
+               ->execute([$taskId, $userId]);
+        } else {
+            // Owner and Admin mark feedbacks as read for owner
+            $db->prepare("UPDATE task_feedbacks SET is_read_by_owner = 1 WHERE task_id = ? AND user_id != ?")
                ->execute([$taskId, $userId]);
         }
 
@@ -547,7 +631,14 @@ if ($action === 'get_task_details') {
             ORDER BY tf.created_at ASC
         ");
         $stmtFb->execute([$taskId]);
-        $feedbacks = $stmtFb->fetchAll();
+        $rawFeedbacks = $stmtFb->fetchAll(PDO::FETCH_ASSOC);
+        $feedbacks = [];
+        foreach ($rawFeedbacks as $fb) {
+            $fb['is_self'] = ((int)$fb['user_id'] === $userId);
+            $fb['time_formatted'] = !empty($fb['created_at']) ? date('H:i', strtotime($fb['created_at'])) : '';
+            $fb['date_formatted'] = !empty($fb['created_at']) ? date('d M Y', strtotime($fb['created_at'])) : '';
+            $feedbacks[] = $fb;
+        }
 
         echo json_encode([
             'success' => true,
@@ -970,9 +1061,14 @@ if ($action === 'submit_feedback') {
         exit;
     }
 
-    if (empty($message) && $feedbackType !== 'approval') {
+    $hasAttachment = (!empty($_FILES['attachment']['name']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK);
+    if (empty($message) && !$hasAttachment && $feedbackType !== 'approval') {
         echo json_encode(['success' => false, 'message' => 'Catatan / pesan masukan wajib diisi']);
         exit;
+    }
+
+    if (empty($message) && $hasAttachment) {
+        $message = 'Lampiran gambar / screenshot referensi';
     }
 
     if ($feedbackType === 'approval' && empty($message)) {
@@ -1024,13 +1120,17 @@ if ($action === 'submit_feedback') {
             }
         }
 
-        // Insert into task_feedbacks
-        $isRead = ($role === 'client') ? 0 : 1; // Unread for worker if submitted by client
+        // Insert into task_feedbacks with 3-role read flags
+        $isReadWorker = ($role === 'karyawan' || $role === 'freelancer') ? 1 : 0;
+        $isReadClient = ($role === 'client') ? 1 : 0;
+        $isReadOwner = $isOwnerOrAdmin ? 1 : 0;
+
         $fbInsert = $db->prepare("
-            INSERT INTO task_feedbacks (task_id, user_id, feedback_type, message, attachment_path, is_read_by_worker)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO task_feedbacks (task_id, user_id, feedback_type, message, attachment_path, is_read_by_worker, is_read_by_client, is_read_by_owner)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ");
-        $fbInsert->execute([$taskId, $userId, $feedbackType, $message, $attachmentPath, $isRead]);
+        $fbInsert->execute([$taskId, $userId, $feedbackType, $message, $attachmentPath, $isReadWorker, $isReadClient, $isReadOwner]);
+        $newFbId = $db->lastInsertId();
 
         // Auto-update task status based on client feedback type
         $newStatus = null;
@@ -1065,8 +1165,24 @@ if ($action === 'submit_feedback') {
 
         echo json_encode([
             'success' => true,
-            'message' => ($feedbackType === 'approval') ? 'Pekerjaan berhasil disetujui! Terima kasih.' : 'Masukan Anda berhasil dikirim ke tim Kalamedia.',
-            'new_status' => $newStatus
+            'message' => ($feedbackType === 'approval') ? 'Pekerjaan berhasil disetujui! Terima kasih.' : 'Pesan berhasil dikirim ke room diskusi.',
+            'new_status' => $newStatus,
+            'feedback' => [
+                'id' => (int)$newFbId,
+                'task_id' => $taskId,
+                'user_id' => $userId,
+                'sender_name' => $user['name'],
+                'sender_role' => $role,
+                'sender_emp_type' => $user['employment_type'] ?? '',
+                'sender_avatar' => $user['avatar'] ?? '',
+                'feedback_type' => $feedbackType,
+                'message' => $message,
+                'attachment_path' => $attachmentPath,
+                'created_at' => date('Y-m-d H:i:s'),
+                'time_formatted' => date('H:i'),
+                'date_formatted' => date('d M Y'),
+                'is_self' => true
+            ]
         ]);
         exit;
     } catch (Exception $e) {
@@ -1081,8 +1197,16 @@ if ($action === 'submit_feedback') {
 if ($action === 'mark_feedbacks_read') {
     $taskId = (int)($_POST['task_id'] ?? 0);
     if ($taskId) {
-        $db->prepare("UPDATE task_feedbacks SET is_read_by_worker = 1 WHERE task_id = ? AND user_id != ?")
-           ->execute([$taskId, $userId]);
+        if ($role === 'client') {
+            $db->prepare("UPDATE task_feedbacks SET is_read_by_client = 1 WHERE task_id = ? AND user_id != ?")
+               ->execute([$taskId, $userId]);
+        } elseif ($role === 'karyawan' || $role === 'freelancer') {
+            $db->prepare("UPDATE task_feedbacks SET is_read_by_worker = 1 WHERE task_id = ? AND user_id != ?")
+               ->execute([$taskId, $userId]);
+        } else {
+            $db->prepare("UPDATE task_feedbacks SET is_read_by_owner = 1 WHERE task_id = ? AND user_id != ?")
+               ->execute([$taskId, $userId]);
+        }
     }
     echo json_encode(['success' => true]);
     exit;

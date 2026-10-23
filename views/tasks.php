@@ -649,11 +649,19 @@ if ($isWorkerUser) {
         box-sizing: border-box !important;
       }
 
-      /* Balanced KPI Tiles Grid: 1 Hero card + 2x2 grid */
+      /* Mobile Content Body Breathing Room (Anti-cut off by Header & Bottom Nav) */
+      .content-body {
+        padding-top: 12px !important;
+        padding-bottom: 84px !important;
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+      }
+
+      /* Compact KPI Tiles Grid: 1 Hero card + 2x2 grid */
       .kpi-row {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         gap: 8px !important;
-        margin-bottom: 16px !important;
+        margin-bottom: 14px !important;
       }
       .kpi-row > .kpi-tile:first-child {
         grid-column: 1 / -1 !important;
@@ -668,18 +676,52 @@ if ($isWorkerUser) {
         padding: 12px 14px !important;
         border-radius: 14px !important;
         min-height: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
       }
+      .kpi-tile .metric-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        margin-bottom: 2px !important;
+      }
+      .kpi-tile .metric-label,
+      .kpi-tile > div:first-child span.metric-label,
       .kpi-tile > span:first-child {
-        font-size: 9.5px !important;
-        letter-spacing: 0.04em !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        color: #7B7890 !important;
+        letter-spacing: 0.02em !important;
+        line-height: 1.2 !important;
       }
-      .kpi-tile > div {
-        font-size: 18px !important;
+      .kpi-tile.urgent .metric-label { color: #B42318 !important; }
+      .kpi-tile.review .metric-label { color: #B54708 !important; }
+
+      .kpi-tile .metric-value,
+      .kpi-tile .metric-num,
+      .kpi-tile > div:nth-child(2) {
+        font-size: 20px !important;
+        font-weight: 800 !important;
+        color: #1A162B !important;
         margin: 2px 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.2px !important;
       }
+      .kpi-tile.urgent .metric-num { color: #B42318 !important; }
+      .kpi-tile.review .metric-num { color: #B54708 !important; }
+
+      .kpi-tile .metric-subtitle,
+      .kpi-tile .metric-subtitle span,
+      .kpi-tile > div:last-child span,
       .kpi-tile > span:last-child {
-        font-size: 10.5px !important;
+        font-size: 11px !important;
+        font-weight: 400 !important;
+        color: #9CA3AF !important;
+        line-height: 1.2 !important;
       }
+      .kpi-tile.urgent .metric-subtitle span { color: #B42318 !important; }
+      .kpi-tile.review .metric-subtitle span { color: #B54708 !important; }
 
       /* Filter Panel */
       .filter-panel {
@@ -705,31 +747,70 @@ if ($isWorkerUser) {
         font-size: 11.5px !important;
         border-radius: 9px !important;
       }
+
+      /* Filter Status Pekerjaan: 1 Baris Horizontal Pill Bar Scrollable (Anti 3-Baris Kotak Besar) */
       #status-filter-group.task-status-grid,
       .task-status-grid {
-        display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 8px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        gap: 6px !important;
         width: 100% !important;
         box-sizing: border-box !important;
-        overflow: visible !important;
-        flex-wrap: unset !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        background: #F3F4F6 !important;
+        padding: 3px !important;
+        border-radius: 8px !important;
+        flex-wrap: nowrap !important;
       }
-      #status-filter-group.task-status-grid .filter-btn:first-child,
-      .task-status-grid .filter-btn:first-child {
-        grid-column: 1 / -1 !important;
+      #status-filter-group.task-status-grid::-webkit-scrollbar,
+      .task-status-grid::-webkit-scrollbar {
+        display: none !important;
       }
       #status-filter-group.task-status-grid .filter-btn,
       .task-status-grid .filter-btn {
-        width: 100% !important;
-        padding: 8px 10px !important;
-        font-size: 11.5px !important;
-        border-radius: 9px !important;
+        width: auto !important;
+        flex-shrink: 0 !important;
+        padding: 6px 14px !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        border-radius: 6px !important;
         justify-content: center !important;
         text-align: center !important;
         white-space: nowrap !important;
         box-sizing: border-box !important;
-        flex-shrink: unset !important;
+      }
+      #status-filter-group.task-status-grid .filter-btn:first-child,
+      .task-status-grid .filter-btn:first-child {
+        grid-column: auto !important;
+      }
+
+      /* Quick Action Buttons in Tab Saldo Ads (Round 38px circle anti-gepeng) */
+      .appify-action-grid {
+        gap: 8px !important;
+      }
+      .appify-action-btn {
+        padding: 12px 6px !important;
+        height: auto !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        box-sizing: border-box !important;
+      }
+      .appify-action-icon-circle {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        border-radius: 50% !important;
+        flex-shrink: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
       }
       .task-bottom-toolbar {
         flex-direction: column !important;
@@ -1287,39 +1368,39 @@ if ($isWorkerUser) {
             </div>
 
             <!-- 3. Baris 3 Tombol Aksi Cepat Sejajar (Top-Up & Spend | Minta Saldo | Segarkan) -->
-            <div class="appify-action-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px 0;">
+            <div class="appify-action-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px 0;">
               <!-- Tombol 1: Top-Up & Spend -->
-              <button type="button" class="appify-action-btn" onclick="openConfirmPlatformTopupModal()" style="background: #FFFFFF; border-radius: 16px; padding: 14px 8px; border: 1px solid #F0F1F7; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: all 180ms ease; box-shadow: 0 4px 14px rgba(26,22,43,0.03);">
-                <div style="width: 40px; height: 40px; border-radius: 50%; background: #F2EFFF; display: flex; align-items: center; justify-content: center; color: #5B3DF5;">
+              <button type="button" class="appify-action-btn" onclick="openConfirmPlatformTopupModal()" style="background: #FFFFFF; border-radius: 16px; padding: 12px 6px; height: auto; border: 1px solid #F0F1F7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 180ms ease; box-shadow: 0 4px 14px rgba(26,22,43,0.03);">
+                <div class="appify-action-icon-circle" style="width: 38px !important; height: 38px !important; min-width: 38px !important; min-height: 38px !important; border-radius: 50% !important; flex-shrink: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: #F2EFFF; color: #5B3DF5;">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="19" x2="12" y2="5"></line>
                     <polyline points="5 12 12 5 19 12"></polyline>
                   </svg>
                 </div>
-                <span style="font-size: 12px; font-weight: 600; color: #1A162B; text-align: center; line-height: 1.2;">Top-Up &amp; Spend</span>
+                <span style="font-size: 11.5px; font-weight: 600; color: #1A162B; text-align: center; line-height: 1.2;">Top-Up &amp; Spend</span>
               </button>
 
               <!-- Tombol 2: Minta Saldo -->
-              <button type="button" class="appify-action-btn" onclick="openRequestBalanceWorkerModal()" style="background: #FFFFFF; border-radius: 16px; padding: 14px 8px; border: 1px solid #F0F1F7; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: all 180ms ease; box-shadow: 0 4px 14px rgba(26,22,43,0.03);">
-                <div style="width: 40px; height: 40px; border-radius: 50%; background: #FFF4E5; display: flex; align-items: center; justify-content: center; color: #F59E0B;">
+              <button type="button" class="appify-action-btn" onclick="openRequestBalanceWorkerModal()" style="background: #FFFFFF; border-radius: 16px; padding: 12px 6px; height: auto; border: 1px solid #F0F1F7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 180ms ease; box-shadow: 0 4px 14px rgba(26,22,43,0.03);">
+                <div class="appify-action-icon-circle" style="width: 38px !important; height: 38px !important; min-width: 38px !important; min-height: 38px !important; border-radius: 50% !important; flex-shrink: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: #FFF4E5; color: #F59E0B;">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                     <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                   </svg>
                 </div>
-                <span style="font-size: 12px; font-weight: 600; color: #1A162B; text-align: center; line-height: 1.2;">Minta Saldo</span>
+                <span style="font-size: 11.5px; font-weight: 600; color: #1A162B; text-align: center; line-height: 1.2;">Minta Saldo</span>
               </button>
 
               <!-- Tombol 3: Segarkan -->
-              <button type="button" class="appify-action-btn" onclick="loadAdsTrackerData()" style="background: #FFFFFF; border-radius: 16px; padding: 14px 8px; border: 1px solid #F0F1F7; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: all 180ms ease; box-shadow: 0 4px 14px rgba(26,22,43,0.03);">
-                <div style="width: 40px; height: 40px; border-radius: 50%; background: #EEF2FF; display: flex; align-items: center; justify-content: center; color: #3B82F6;">
+              <button type="button" class="appify-action-btn" onclick="loadAdsTrackerData()" style="background: #FFFFFF; border-radius: 16px; padding: 12px 6px; height: auto; border: 1px solid #F0F1F7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 180ms ease; box-shadow: 0 4px 14px rgba(26,22,43,0.03);">
+                <div class="appify-action-icon-circle" style="width: 38px !important; height: 38px !important; min-width: 38px !important; min-height: 38px !important; border-radius: 50% !important; flex-shrink: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: #EEF2FF; color: #3B82F6;">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="23 4 23 10 17 10"></polyline>
                     <polyline points="1 20 1 14 7 14"></polyline>
                     <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
                   </svg>
                 </div>
-                <span style="font-size: 12px; font-weight: 600; color: #1A162B; text-align: center; line-height: 1.2;">Segarkan</span>
+                <span style="font-size: 11.5px; font-weight: 600; color: #1A162B; text-align: center; line-height: 1.2;">Segarkan</span>
               </button>
             </div>
 
@@ -2672,40 +2753,38 @@ if ($isWorkerUser) {
               </div>
             ` : ''}
 
-            <!-- Deliverable Preview Link & Actions -->
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #F0F1F7; padding-top: 12px; flex-wrap: wrap; gap: 10px;">
-              <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
-                ${t.deliverable_link ? `
-                  <a href="${escapeHtml(t.deliverable_link)}" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 11.5px; font-weight: 600; border-radius: 10px; height: 32px; padding: 0 12px; border: 1px solid #F0F1F7; color: #1A162B;">
-                    <span>Lihat Preview Hasil</span>
-                  </a>
-                ` : `
-                  <span style="font-size: 11.5px; color: #A09EB0; font-style: italic;">Belum ada link hasil</span>
-                `}
-
-                ${t.latest_feedback ? `
-                  <span style="font-size: 11.5px; color: #7B7890; max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block;">
-                    "${escapeHtml(t.latest_feedback)}"
-                  </span>
-                ` : ''}
+            ${t.latest_feedback ? `
+              <div style="font-size: 11.5px; color: #7B7890; margin-top: 8px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 5px; background: #F8FAFC; padding: 4px 8px; border-radius: 6px;">
+                <span style="color: #5B3DF5;">💬</span>
+                <span style="overflow: hidden; text-overflow: ellipsis;">"${escapeHtml(t.latest_feedback)}"</span>
               </div>
+            ` : ''}
 
-              <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0;">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="openDiscussionModal(${t.id})" style="font-size: 12px; font-weight: 600; border-radius: 10px; height: 32px; padding: 0 12px; border: 1px solid #F0F1F7; color: #1A162B; position: relative;">
-                  <span>Diskusi Klien</span>
-                  ${unreadFeedbacks > 0 ? `
-                    <span style="background: #EF4444; color: #FFF; font-size: 9.5px; font-weight: 800; padding: 1px 6px; border-radius: 10px; margin-left: 4px;">
-                      ${unreadFeedbacks}
-                    </span>
-                  ` : `
-                    <span style="color: #7B7890; font-size: 11px; margin-left: 4px;">(${t.feedbacks_count || 0})</span>
-                  `}
-                </button>
+            <!-- Deliverable Preview Link & Actions (Grid Container Rapi) -->
+            <div style="display: grid; grid-template-columns: auto 1fr 1fr; gap: 8px; align-items: center; padding-top: 12px; border-top: 1px solid #F0F1F7; width: 100%; box-sizing: border-box;">
+              <!-- Tombol 1: Preview ikon mata / link -->
+              ${t.deliverable_link ? `
+                <a href="${escapeHtml(t.deliverable_link)}" target="_blank" class="btn btn-secondary btn-sm" style="height: 34px; padding: 0 10px; border-radius: 9px; font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 5px; border: 1px solid #ECEEF5; color: #1A162B; text-decoration: none;" title="Buka Link Preview Hasil">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  <span>Preview</span>
+                </a>
+              ` : `
+                <span style="height: 34px; padding: 0 10px; border-radius: 9px; font-size: 11.5px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 1px dashed #E5E7EB; color: #9CA3AF; background: #F9FAFB;" title="Link belum diset">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.6;"><circle cx="12" cy="12" r="10"></circle><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line></svg>
+                  <span>No Link</span>
+                </span>
+              `}
 
-                <button type="button" class="btn btn-primary btn-sm" onclick="openUpdateProgressModal(${t.id}, '${t.status}', '${escapeHtml(t.deliverable_link || '')}')" style="font-size: 12px; font-weight: 600; background: #5B3DF5; border-color: #5B3DF5; color: #FFFFFF; border-radius: 10px; height: 32px; padding: 0 14px;">
-                  Perbarui Progres
-                </button>
-              </div>
+              <!-- Tombol 2: Chat Diskusi (X) -->
+              <button type="button" class="btn btn-secondary btn-sm" onclick="KalaRoomChat.openRoom(${t.id})" style="height: 34px; padding: 0 10px; border-radius: 9px; font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 5px; border: 1px solid #ECEEF5; color: #1A162B; background: #FFFFFF; width: 100%; box-sizing: border-box;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B3DF5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span>Chat (${unreadFeedbacks > 0 ? `<b style="color: #EF4444;">${unreadFeedbacks}</b>` : (t.feedbacks_count || 0)})</span>
+              </button>
+
+              <!-- Tombol 3: Update Progres warna #5B3DF5 -->
+              <button type="button" class="btn btn-primary btn-sm" onclick="openUpdateProgressModal(${t.id}, '${t.status}', '${escapeHtml(t.deliverable_link || '')}')" style="height: 34px; padding: 0 12px; border-radius: 9px; font-size: 12px; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 5px; background: #5B3DF5; border-color: #5B3DF5; color: #FFFFFF; width: 100%; box-sizing: border-box;">
+                <span>Perbarui Progres</span>
+              </button>
             </div>
           </div>
         `;
@@ -3772,45 +3851,48 @@ if ($isWorkerUser) {
         // Appify Worker Card Item (Recent Transactions style)
         const pInitial = (t.platform || 'Meta Ads').toLowerCase().includes('google') ? 'G' : ((t.platform || 'Meta Ads').toLowerCase().includes('tiktok') ? 'TT' : 'M');
         appifyCardsHtml += `
-          <div class="appify-tx-card" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: #FFFFFF; border-radius: 16px; border: 1px solid #F0F1F7; margin-bottom: 10px; box-shadow: 0 2px 10px rgba(26, 22, 43, 0.02); gap: 12px; transition: all 180ms ease;">
-            <!-- Kiri: Ikon Platform + Nama Klien/Proyek + Subteks + Chip Bukti -->
-            <div style="display: flex; align-items: flex-start; gap: 12px; min-width: 0; flex: 1;">
-              <div style="width: 42px; height: 42px; border-radius: 12px; background: #F2EFFF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 800; font-size: 13px;">
-                ${pInitial}
+          <div class="appify-tx-card" style="display: flex; flex-direction: column; padding: 14px 16px; background: #FFFFFF; border-radius: 16px; border: 1px solid #F0F1F7; margin-bottom: 10px; box-shadow: 0 2px 10px rgba(26, 22, 43, 0.02); gap: 8px; transition: all 180ms ease;">
+            <!-- Baris Atas: Info Klien + Nominal Saldo -->
+            <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; width: 100%;">
+              <div style="display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1;">
+                <div style="width: 40px; height: 40px; min-width: 40px; border-radius: 12px; background: #F2EFFF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: 800; font-size: 13px;">
+                  ${pInitial}
+                </div>
+                <div style="min-width: 0; flex: 1;">
+                  <div style="font-size: 13.5px; font-weight: 800; color: #1A162B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    ${escapeHtml(t.client_company || 'Klien')} &bull; ${escapeHtml(t.project_name || 'Proyek')}
+                  </div>
+                  <div style="font-size: 11.5px; color: #7B7890; margin-top: 2px;">
+                    ${escapeHtml(t.platform || 'Meta Ads')} &bull; ${escapeHtml(t.stage_label || 'Tahap 1')} &bull; ${formatDate(t.transaction_date)}
+                  </div>
+                </div>
               </div>
-              <div style="min-width: 0; flex: 1;">
-                <div style="font-size: 14px; font-weight: 800; color: #1A162B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                  ${escapeHtml(t.client_company || 'Klien')} &bull; ${escapeHtml(t.project_name || 'Proyek')}
+
+              <div style="text-align: right; flex-shrink: 0;">
+                <div style="font-size: 13.5px; font-weight: 800; color: #10B981; line-height: 1.3;">
+                  +Rp ${transferOwner.toLocaleString('id-ID')}
                 </div>
-                <div style="font-size: 12px; color: #7B7890; margin: 2px 0 6px;">
-                  ${escapeHtml(t.platform || 'Meta Ads')} &bull; ${escapeHtml(t.stage_label || 'Tahap 1')} &bull; ${formatDate(t.transaction_date)}
-                </div>
-                <div style="display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
-                  ${t.transfer_proof_owner ? `
-                    <button type="button" onclick="previewAdsProof('${escapeHtml(t.transfer_proof_owner)}')" style="height: 26px; font-size: 11px; font-weight: 600; border-radius: 8px; border: 1px solid #E0DBFD; background: #F2EFFF; color: #5B3DF5; padding: 0 10px; cursor: pointer; display: inline-flex; align-items: center;">
-                      Bukti TF Owner
-                    </button>
-                  ` : ''}
-                  ${t.platform_topup_proof ? `
-                    <button type="button" onclick="previewAdsProof('${escapeHtml(t.platform_topup_proof)}')" style="height: 26px; font-size: 11px; font-weight: 600; border-radius: 8px; border: 1px solid #C4F1DE; background: #E8F8F2; color: #10B981; padding: 0 10px; cursor: pointer; display: inline-flex; align-items: center;">
-                      Bukti Ads
-                    </button>
-                  ` : ''}
-                  <button type="button" onclick="openConfirmPlatformTopupModal(${t.id}, ${transferOwner})" style="height: 26px; font-size: 11px; font-weight: 600; border-radius: 8px; border: 1px solid #F0F1F7; background: #FFFFFF; color: #1A162B; padding: 0 8px; cursor: pointer; display: inline-flex; align-items: center;">
-                    Update Spend
-                  </button>
+                <div style="font-size: 12px; font-weight: 600; color: #1A162B; margin-top: 2px;">
+                  -Rp ${spend.toLocaleString('id-ID')}
                 </div>
               </div>
             </div>
 
-            <!-- Kanan: Saldo Masuk di atas & Spend di bawah -->
-            <div style="text-align: right; flex-shrink: 0;">
-              <div style="font-size: 13.5px; font-weight: 800; color: #10B981; line-height: 1.3;">
-                +Rp ${transferOwner.toLocaleString('id-ID')}
-              </div>
-              <div style="font-size: 12.5px; font-weight: 600; color: #1A162B; margin-top: 2px;">
-                -Rp ${spend.toLocaleString('id-ID')}
-              </div>
+            <!-- Baris Bawah: Ke-3 Tombol Berjejer Rapi ke Samping (1 Baris) -->
+            <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #F4F5F9; align-items: center;">
+              ${t.transfer_proof_owner ? `
+                <button type="button" onclick="previewAdsProof('${escapeHtml(t.transfer_proof_owner)}')" style="height: 28px; padding: 0 10px; font-size: 11.5px; border-radius: 8px; font-weight: 600; border: 1px solid #E0DBFD; background: #F2EFFF; color: #5B3DF5; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                  <span>Bukti TF Owner</span>
+                </button>
+              ` : ''}
+              ${t.platform_topup_proof ? `
+                <button type="button" onclick="previewAdsProof('${escapeHtml(t.platform_topup_proof)}')" style="height: 28px; padding: 0 10px; font-size: 11.5px; border-radius: 8px; font-weight: 600; border: 1px solid #C4F1DE; background: #E8F8F2; color: #10B981; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                  <span>Bukti Ads</span>
+                </button>
+              ` : ''}
+              <button type="button" onclick="openConfirmPlatformTopupModal(${t.id}, ${transferOwner})" style="height: 28px; padding: 0 10px; font-size: 11.5px; border-radius: 8px; font-weight: 600; border: 1px solid #E5E7EB; background: #FFFFFF; color: #1A162B; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                <span>Update Spend</span>
+              </button>
             </div>
           </div>
         `;
@@ -4673,6 +4755,7 @@ if ($isWorkerUser) {
 
   <?php require_once BASE_PATH . '/includes/bottom_nav.php'; ?>
   <?php require_once BASE_PATH . '/includes/modals.php'; ?>
+  <?php require_once BASE_PATH . '/includes/room_chat_modal.php'; ?>
   <script src="assets/js/app.js?v=<?= time() ?>"></script>
   <script src="assets/js/invoice.js?v=<?= time() ?>"></script>
 </body>

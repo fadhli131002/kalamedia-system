@@ -80,10 +80,10 @@ class Database {
             }
 
             // High Performance: Only run migrations if lock file does not exist (0ms overhead on requests)
-            $lockFile = BASE_PATH . '/database/.schema_v11.lock';
+            $lockFile = BASE_PATH . '/database/.schema_v12.lock';
             if (!file_exists($lockFile)) {
                 self::runMigrations(self::$instance, self::$driver);
-                @file_put_contents($lockFile, "Schema v11 initialized at " . date('Y-m-d H:i:s'));
+                @file_put_contents($lockFile, "Schema v12 initialized at " . date('Y-m-d H:i:s'));
             }
 
             // Ensure core system accounts (Owner & Admin) always exist
@@ -176,6 +176,8 @@ class Database {
                 message TEXT NOT NULL,
                 attachment_path VARCHAR(255) DEFAULT NULL,
                 is_read_by_worker INT NOT NULL DEFAULT 0,
+                is_read_by_client INT NOT NULL DEFAULT 0,
+                is_read_by_owner INT NOT NULL DEFAULT 0,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
@@ -678,6 +680,22 @@ class Database {
                 if (!in_array($cName, $perfCols)) {
                     try {
                         $db->exec("ALTER TABLE performance_reports ADD COLUMN {$cName} {$cDef}");
+                    } catch (Throwable $e) {}
+                }
+            }
+        }
+
+        // 3g. Migrate `task_feedbacks` columns for Room Chat read receipts
+        $fbCols = $getTableCols('task_feedbacks');
+        if (!empty($fbCols)) {
+            $neededFbCols = [
+                'is_read_by_client' => 'INT NOT NULL DEFAULT 0',
+                'is_read_by_owner'  => 'INT NOT NULL DEFAULT 0'
+            ];
+            foreach ($neededFbCols as $cName => $cDef) {
+                if (!in_array($cName, $fbCols)) {
+                    try {
+                        $db->exec("ALTER TABLE task_feedbacks ADD COLUMN {$cName} {$cDef}");
                     } catch (Throwable $e) {}
                 }
             }

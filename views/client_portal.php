@@ -2294,33 +2294,30 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
               </div>
             ` : ''}
 
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; flex-wrap: wrap; gap: 10px;">
-              <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 ${hasPreview ? `
-                  <a href="${escapeHtml(t.deliverable_link)}" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 11.5px; font-weight: 700;">
-                    <span>Lihat Preview Hasil</span>
+                  <a href="${escapeHtml(t.deliverable_link)}" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 12px; font-weight: 700; height: 34px; padding: 0 10px; border-radius: 9px; display: inline-flex; align-items: center; gap: 5px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <span>Preview</span>
                   </a>
-                ` : `
-                  <span style="font-size: 11.5px; color: var(--text-tertiary); font-style: italic;">Preview belum tersedia</span>
-                `}
+                ` : ''}
 
-                <span style="font-size: 11.5px; color: var(--text-muted);">
-                  <b>${feedbacksCount}</b> masukan
-                </span>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="if(window.KalaRoomChat){KalaRoomChat.openRoom(${t.id});}else{openFeedbackModal(${t.id});}" style="font-size: 12px; font-weight: 700; height: 34px; padding: 0 12px; border-radius: 9px; display: inline-flex; align-items: center; gap: 6px; background: #FAF9FE; border-color: #E2DCFF; color: #5B3DF5; position: relative;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  <span>Chat Diskusi (${feedbacksCount})</span>
+                  ${(t.unread_count && t.unread_count > 0) ? `<span style="position: absolute; top: -5px; right: -5px; min-width: 17px; height: 17px; border-radius: 999px; background: #EF4444; color: #FFF; font-size: 10px; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; padding: 0 4px; border: 2px solid #FFF;">${t.unread_count}</span>` : ''}
+                </button>
               </div>
 
               <div style="display: flex; gap: 8px;">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="openFeedbackModal(${t.id})" style="font-size: 12px; font-weight: 700;">
-                  Beri Masukan / Revisi
-                </button>
-
                 ${t.status !== 'approved' ? `
-                  <button type="button" class="btn btn-primary btn-sm" onclick="quickApproveTask(${t.id})" style="font-size: 12px; background: #027A48; border-color: #027A48;">
+                  <button type="button" class="btn btn-primary btn-sm" onclick="quickApproveTask(${t.id})" style="font-size: 12px; font-weight: 700; height: 34px; padding: 0 12px; border-radius: 9px; background: #027A48; border-color: #027A48; display: inline-flex; align-items: center; gap: 4px;">
                     ✓ Setujui (Approve)
                   </button>
                 ` : `
-                  <span style="font-size: 12px; color: #027A48; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px;">
-                    ✓ Telah Disetujui
+                  <span style="font-size: 12px; color: #027A48; font-weight: 800; display: inline-flex; align-items: center; gap: 4px; padding: 0 8px; height: 34px;">
+                    ✓ Disetujui
                   </span>
                 `}
               </div>
@@ -2814,6 +2811,10 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
     window.previewTransactionReceipt = previewTransactionReceipt;
 
     async function openFeedbackModal(taskId) {
+      if (window.KalaRoomChat) {
+        KalaRoomChat.openRoom(taskId);
+        return;
+      }
       try {
         const res = await fetch(`api/portal_tasks.php?action=get_task_details&id=${taskId}&_slot=client`);
         const data = await res.json();
@@ -3115,6 +3116,7 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
 
   <?php require_once BASE_PATH . '/includes/bottom_nav.php'; ?>
   <?php require_once BASE_PATH . '/includes/modals.php'; ?>
+  <?php require_once BASE_PATH . '/includes/room_chat_modal.php'; ?>
   <script src="assets/js/app.js?v=<?= time() ?>"></script>
   <script src="assets/js/invoice.js?v=<?= time() ?>"></script>
 </body>

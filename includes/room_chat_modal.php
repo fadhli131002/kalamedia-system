@@ -50,7 +50,7 @@ $chatUserName = htmlspecialchars($chatUser['name'] ?? 'User');
 
         <!-- Search Box In Inbox -->
         <div class="chat-search-bar">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           <input type="text" id="chat-inbox-search" placeholder="Cari nama tugas, PT klien, atau PIC..." oninput="KalaRoomChat.filterInbox()">
         </div>
 
@@ -334,9 +334,10 @@ $chatUserName = htmlspecialchars($chatUser['name'] ?? 'User');
    INBOX / ALL MESSAGE STYLES (GAMBAR 3 LAYAR 1)
    ========================================== */
 .chat-inbox-header {
-  background: linear-gradient(135deg, #5B3DF5 0%, #6D4AFF 100%);
+  background: #FFFFFF;
+  border-bottom: 1px solid #ECEEF5;
   padding: 16px 18px 14px;
-  color: #FFFFFF;
+  color: #0F172A;
 }
 .chat-inbox-header-top {
   display: flex;
@@ -347,12 +348,12 @@ $chatUserName = htmlspecialchars($chatUser['name'] ?? 'User');
 .chat-inbox-greeting {
   font-size: 12px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.85);
+  color: #64748B;
 }
 .chat-inbox-title {
   font-size: 17px;
   font-weight: 800;
-  color: #FFFFFF;
+  color: #0F172A;
   margin: 2px 0 0;
   letter-spacing: -0.3px;
 }
@@ -360,68 +361,86 @@ $chatUserName = htmlspecialchars($chatUser['name'] ?? 'User');
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.16);
-  border: none;
-  color: #FFFFFF;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  color: #334155;
   font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: all 0.15s ease;
 }
 .chat-header-btn:hover {
-  background: rgba(255, 255, 255, 0.26);
+  background: #F1F5F9;
+  color: #0F172A;
+  border-color: #CBD5E1;
 }
 
 .chat-search-bar {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.18);
-  border-radius: 999px;
-  padding: 6px 14px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 8px 14px;
   margin-bottom: 12px;
+  transition: all 0.15s ease;
+}
+.chat-search-bar:focus-within {
+  background: #FFFFFF;
+  border-color: #5B3DF5;
+  box-shadow: 0 0 0 3px rgba(91, 61, 245, 0.12);
 }
 .chat-search-bar input {
   background: transparent;
   border: none;
-  color: #FFFFFF;
+  color: #0F172A;
   font-size: 12.5px;
   width: 100%;
   outline: none;
   font-family: inherit;
 }
 .chat-search-bar input::placeholder {
-  color: rgba(255, 255, 255, 0.65);
+  color: #94A3B8;
 }
 
 .chat-inbox-tabs {
   display: flex;
-  gap: 6px;
+  gap: 4px;
+  background: #F1F5F9;
+  padding: 4px;
+  border-radius: 12px;
   overflow-x: auto;
   scrollbar-width: none;
 }
 .chat-inbox-tabs::-webkit-scrollbar { display: none; }
 .chat-tab-pill {
-  background: rgba(255, 255, 255, 0.16);
+  background: transparent;
   border: none;
-  color: #FFFFFF;
-  font-size: 11.5px;
+  color: #64748B;
+  font-size: 12px;
   font-weight: 600;
-  padding: 5px 12px;
-  border-radius: 999px;
+  padding: 6px 14px;
+  border-radius: 8px;
   cursor: pointer;
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 5px;
   transition: all 0.15s ease;
+  font-family: inherit;
+}
+.chat-tab-pill:hover:not(.active) {
+  color: #0F172A;
+  background: rgba(255, 255, 255, 0.6);
 }
 .chat-tab-pill.active {
   background: #FFFFFF;
   color: #5B3DF5;
   font-weight: 700;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 .chat-pill-badge {
   background: #EF4444;
@@ -429,6 +448,7 @@ $chatUserName = htmlspecialchars($chatUser['name'] ?? 'User');
   font-size: 9.5px;
   padding: 1px 5px;
   border-radius: 999px;
+  font-weight: 700;
 }
 
 /* Contacts horizontal avatar strip */
@@ -598,9 +618,10 @@ $chatUserName = htmlspecialchars($chatUser['name'] ?? 'User');
    ROOM CHAT CONVERSATION VIEW (GAMBAR 3 LAYAR 2)
    ========================================== */
 .chat-room-header {
-  background: linear-gradient(135deg, #5B3DF5 0%, #6D4AFF 100%);
+  background: #FFFFFF;
+  border-bottom: 1px solid #ECEEF5;
   padding: 13px 16px;
-  color: #FFFFFF;
+  color: #0F172A;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -621,9 +642,9 @@ $chatUserName = htmlspecialchars($chatUser['name'] ?? 'User');
   flex: 1;
 }
 .chat-back-btn {
-  background: rgba(255,255,255,0.18);
-  border: none;
-  color: #FFFFFF;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  color: #334155;
   width: 34px;
   height: 34px;
   border-radius: 50%;
@@ -632,6 +653,12 @@ $chatUserName = htmlspecialchars($chatUser['name'] ?? 'User');
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+.chat-back-btn:hover {
+  background: #F1F5F9;
+  color: #0F172A;
+  border-color: #CBD5E1;
 }
 .chat-header-info {
   min-width: 0;
@@ -640,7 +667,7 @@ $chatUserName = htmlspecialchars($chatUser['name'] ?? 'User');
 .chat-task-title {
   font-size: 14.5px;
   font-weight: 800;
-  color: #FFFFFF;
+  color: #0F172A;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -649,7 +676,7 @@ $chatUserName = htmlspecialchars($chatUser['name'] ?? 'User');
 }
 .chat-task-subtitle {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.85);
+  color: #64748B;
   margin-top: 2px;
   display: flex;
   align-items: center;
@@ -658,20 +685,24 @@ $chatUserName = htmlspecialchars($chatUser['name'] ?? 'User');
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.chat-dot-sep { opacity: 0.6; }
+.chat-dot-sep { color: #CBD5E1; }
 .chat-online-pill {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  color: #A7F3D0;
-  font-weight: 600;
+  background: #ECFDF5;
+  color: #059669;
+  font-weight: 700;
   font-size: 10.5px;
+  padding: 1px 7px;
+  border-radius: 999px;
   margin-left: 4px;
 }
 .chat-online-pill .chat-online-dot {
   position: static;
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
+  background: #059669;
 }
 
 .chat-header-actions {
@@ -681,42 +712,50 @@ $chatUserName = htmlspecialchars($chatUser['name'] ?? 'User');
   flex-shrink: 0;
 }
 .chat-preview-link {
-  height: 30px;
+  height: 32px;
   padding: 0 10px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.2);
-  color: #FFFFFF;
+  background: #EEF2FF;
+  border: 1px solid #E0E7FF;
+  color: #4F46E5;
   font-size: 11.5px;
   font-weight: 700;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  transition: background 0.15s;
+  transition: all 0.15s ease;
 }
 .chat-preview-link:hover {
-  background: rgba(255, 255, 255, 0.32);
+  background: #E0E7FF;
+  color: #4338CA;
 }
 .chat-header-close-btn {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.16);
-  border: none;
-  color: #FFFFFF;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  color: #334155;
   font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  transition: all 0.15s ease;
+}
+.chat-header-close-btn:hover {
+  background: #F1F5F9;
+  color: #0F172A;
+  border-color: #CBD5E1;
 }
 
 .chat-monitor-banner {
-  background: #F4F2FF;
-  border-bottom: 1px solid #ECE7FE;
-  padding: 6px 16px;
+  background: #F8FAFC;
+  border-bottom: 1px solid #ECEEF5;
+  padding: 7px 16px;
   font-size: 11.5px;
-  color: #5B3DF5;
+  color: #4F46E5;
   display: flex;
   align-items: center;
   gap: 7px;

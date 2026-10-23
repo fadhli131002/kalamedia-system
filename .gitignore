@@ -1,6 +1,12 @@
+database/kalamedia.sqlite
+database/*.sqlite
+database/*.sqlite3
+database/*.db
 database/.schema_*.lock
 database/*.sqlite-journal
 database/*.sqlite-wal
 database/*.sqlite-shm
+scratch/
 .DS_Store
 Thumbs.db
+

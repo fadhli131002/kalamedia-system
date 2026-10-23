@@ -268,6 +268,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     .report-tab-pill {
+      position: relative;
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -279,18 +280,26 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
       background: #FFFFFF;
       border: 1px solid #E5E7EB;
       text-decoration: none;
-      transition: all 0.2s ease;
+      transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+                  background-color 220ms ease,
+                  color 200ms ease,
+                  box-shadow 220ms ease;
       cursor: pointer;
     }
-    .report-tab-pill:hover {
-      background: #F9FAFB;
-      color: #111827;
+    .report-tab-pill:hover:not(.active) {
+      transform: translateY(-2px);
+      background: #EEF2FF;
+      color: #5B3DF5;
+      border-color: #C7D2FE;
+    }
+    .report-tab-pill:active {
+      transform: scale(0.96);
     }
     .report-tab-pill.active {
       background: #5B3DF5;
       color: #FFFFFF;
       border-color: #5B3DF5;
-      box-shadow: 0 4px 12px rgba(91, 61, 245, 0.25);
+      box-shadow: 0 4px 14px rgba(91, 61, 245, 0.28);
     }
     .metric-chip {
       display: inline-flex;
@@ -385,7 +394,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
               </h2>
               <?php if ($isAdsSpecialistUser): ?>
                 <span style="background: #EEF2FF; color: #4F46E5; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 1px solid #E0E7FF;">
-                  Mode Spesialis Periklanan
+                  Digital Ads Specialist
                 </span>
               <?php endif; ?>
             </div>
@@ -650,13 +659,13 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <input type="hidden" name="tab" value="<?= htmlspecialchars($activeTab) ?>">
 
               <div style="flex: 1; width: 100%;">
-                <input type="text" name="search" class="form-control" placeholder="Cari merek, tujuan, atau materi kampanye..." value="<?= htmlspecialchars($searchQuery) ?>" style="border-radius: 12px; border: 1px solid #F0F1F7; background: #F7F8FC; padding: 10px 14px; font-size: 13px;">
+                <input type="text" name="search" class="form-control" placeholder="Cari brand, objektif, atau materi kampanye..." value="<?= htmlspecialchars($searchQuery) ?>" style="border-radius: 12px; border: 1px solid #F0F1F7; background: #F7F8FC; padding: 10px 14px; font-size: 13px;">
               </div>
 
               <div class="report-filter-row-2col">
                 <div style="flex: 1; min-width: 0;">
                   <select name="client_id" class="form-select" onchange="this.form.submit()" style="border-radius: 12px; border: 1px solid #F0F1F7; background: #F7F8FC; padding: 9px 12px; font-size: 12.5px; width: 100%;">
-                    <option value="">Semua Klien PT</option>
+                    <option value="">Semua Klien</option>
                     <?php foreach ($allClients as $cl): ?>
                       <option value="<?= $cl['id'] ?>" <?= $selectedClient == $cl['id'] ? 'selected' : '' ?>>
                         <?= htmlspecialchars($cl['company']) ?>

@@ -70,6 +70,7 @@ $isAdmin = is_admin();
 
 <!-- Mobile Bottom Navigation Bar (Active on Mobile Screen <= 768px) -->
 <nav class="mobile-bottom-nav <?= $isWorker ? 'worker-slide2-nav' : '' ?>" id="mobile-bottom-nav" aria-label="Navigasi Bawah Mobile">
+  <div class="bottom-nav-sliding-pill" id="bottom-nav-sliding-pill" aria-hidden="true"></div>
   <?php if ($isClient): 
     $clientProfileId = (int)($currentUser['client_id'] ?? current_user_client_id());
     $clientHasSosmed = $clientProfileId > 0 ? client_has_sosmed_service($clientProfileId) : true;
@@ -259,6 +260,30 @@ $isAdmin = is_admin();
 
   window.addEventListener('appinstalled', function() {
     dismissPwaBanner();
+  });
+
+  // Mobile Bottom Nav Sliding Active Pill Manager
+  window.updateBottomNavPill = function(targetItem) {
+    const nav = document.getElementById('mobile-bottom-nav');
+    const pill = document.getElementById('bottom-nav-sliding-pill');
+    if (!nav || !pill) return;
+    const activeItem = targetItem || nav.querySelector('.mob-nav-item.active');
+    if (activeItem && activeItem.offsetParent !== null) {
+      const left = activeItem.offsetLeft + (activeItem.offsetWidth - 28) / 2;
+      pill.style.transform = 'translate3d(' + left + 'px, 0, 0)';
+      pill.style.width = '28px';
+      pill.style.opacity = '1';
+    } else if (!targetItem) {
+      pill.style.opacity = '0';
+    }
+  };
+
+  window.addEventListener('resize', function() {
+    if (window.updateBottomNavPill) window.updateBottomNavPill();
+  });
+
+  window.addEventListener('load', function() {
+    setTimeout(window.updateBottomNavPill, 100);
   });
 
   // Worker workspace seamless tab switching handlers

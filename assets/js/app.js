@@ -100,6 +100,9 @@ function toggleMobileSidebar() {
     sidebar.classList.toggle('open', isOpen);
   }
   if (overlay) overlay.classList.toggle('active', isOpen);
+  if (isOpen && window.updateSidebarSlidingPill) {
+    setTimeout(window.updateSidebarSlidingPill, 120);
+  }
 }
 
 function closeMobileSidebar() {
@@ -114,9 +117,12 @@ function closeMobileSidebar() {
   if (overlay) overlay.classList.remove('active');
 }
 
-// Smooth Page Transition Interceptor for Internal Links
+// Smooth Page Transition Interceptor for Internal Links (Fluid Exit-Before-Enter)
 (function() {
+  let isNavigating = false;
+
   document.addEventListener('click', function(e) {
+    if (isNavigating) return;
     const link = e.target.closest('a');
     if (!link) return;
     const href = link.getAttribute('href');
@@ -127,16 +133,61 @@ function closeMobileSidebar() {
     const isInternal = href.startsWith('/') || href.startsWith('?') || href.startsWith('./') || href.startsWith('../') || href.includes(window.location.hostname);
     if (!isInternal) return;
 
-    // If clicked inside modal or dropdown toggle, ignore
-    if (link.closest('.modal') || link.closest('.dropdown-menu')) return;
+    // If clicked inside modal or dropdown toggle or has custom onclick, let default or script handle
+    if (link.closest('.modal') || link.closest('.dropdown-menu') || link.hasAttribute('onclick') || link.classList.contains('no-transition')) return;
 
-    // Trigger leaving animation on main container
     const mainEl = document.querySelector('.main-content, main, .main-wrapper, .content-body');
-    if (mainEl && !link.classList.contains('no-transition') && !link.hasAttribute('onclick')) {
+    if (mainEl) {
+      e.preventDefault();
+      isNavigating = true;
+
+      // Close mobile drawer if navigating from inside mobile sidebar
+      if (document.body.classList.contains('sidebar-open')) {
+        closeMobileSidebar();
+      }
+
+      // Smooth slide pill to target link if in sidebar
+      if (link.closest('.sidebar-nav') && window.updateSidebarSlidingPill) {
+        window.updateSidebarSlidingPill(link);
+      }
+
+      // Smooth slide pill to target link if in bottom nav
+      if (link.closest('.mobile-bottom-nav') && window.updateBottomNavPill) {
+        window.updateBottomNavPill(link);
+      }
+
       mainEl.classList.add('kala-page-leaving');
+
+      setTimeout(function() {
+        window.location.href = link.href || href;
+      }, 130);
     }
   }, false);
+
+  // Restore on back/forward browser cache navigation (bfcache)
+  window.addEventListener('pageshow', function() {
+    isNavigating = false;
+    const mainEl = document.querySelector('.main-content, main, .main-wrapper, .content-body');
+    if (mainEl) {
+      mainEl.classList.remove('kala-page-leaving');
+      mainEl.classList.add('kala-page-view');
+    }
+    if (window.updateSidebarSlidingPill) window.updateSidebarSlidingPill();
+    if (window.updateBottomNavPill) window.updateBottomNavPill();
+    if (window.updateWorkspaceTabPill) window.updateWorkspaceTabPill();
+    if (window.updatePortalTabPill) window.updatePortalTabPill();
+  });
 })();
+
+// Global Sliding Active Pill Initializers
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    if (window.updateSidebarSlidingPill) window.updateSidebarSlidingPill();
+    if (window.updateBottomNavPill) window.updateBottomNavPill();
+    if (window.updateWorkspaceTabPill) window.updateWorkspaceTabPill();
+    if (window.updatePortalTabPill) window.updatePortalTabPill();
+  }, 70);
+});
 
 
 // Toast Notifications System

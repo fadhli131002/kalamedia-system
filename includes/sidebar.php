@@ -58,6 +58,56 @@ $badgeLabel = $sidebarBadge;
 ?>
 
 <style>
+/* 1. View Transition Otomatis Antar Halaman */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root) {
+  animation: kalaFadeOut 140ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+::view-transition-new(root) {
+  animation: kalaSlideUpIn 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 2. Keyframes Masuk & Keluar Halaman/Tab */
+@keyframes kalaFadeOut {
+  from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  to   { opacity: 0; transform: translate3d(0, -6px, 0) scale(0.99); }
+}
+
+@keyframes kalaSlideUpIn {
+  0%   { opacity: 0; transform: translate3d(0, 18px, 0) scale(0.985); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes kalaCardCascade {
+  0%   { opacity: 0; transform: translate3d(0, 16px, 0); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+/* 3. Terapkan Animasi pada Konten Utama & Setiap Tab Saat Aktif */
+.main-content, main, .tab-pane, .kala-page-view {
+  animation: kalaSlideUpIn 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
+}
+
+.kala-page-leaving {
+  animation: kalaFadeOut 150ms cubic-bezier(0.4, 0, 1, 1) forwards !important;
+  pointer-events: none;
+}
+
+/* 4. Efek Muncul Berurutan (Staggered Cascade) pada Kartu di Dalam Halaman */
+.main-content .card,
+.tab-pane .card,
+.kala-stagger-item {
+  animation: kalaCardCascade 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.main-content .card:nth-child(1), .tab-pane > *:nth-child(1) { animation-delay: 20ms; }
+.main-content .card:nth-child(2), .tab-pane > *:nth-child(2) { animation-delay: 65ms; }
+.main-content .card:nth-child(3), .tab-pane > *:nth-child(3) { animation-delay: 110ms; }
+.main-content .card:nth-child(4), .tab-pane > *:nth-child(4) { animation-delay: 155ms; }
+.main-content .card:nth-child(5), .tab-pane > *:nth-child(5) { animation-delay: 200ms; }
+
 /* 5. Animasi Item Menu Sidebar & Hover Elastis */
 .sidebar a, .sidebar .nav-item, .sidebar-link, .sidebar-nav .nav-link {
   position: relative;
@@ -104,6 +154,31 @@ $badgeLabel = $sidebarBadge;
                 visibility 0ms linear 0ms !important;
   }
 }
+
+/* 7. Sliding Active Pill Motion System */
+.sidebar-nav {
+  position: relative;
+}
+.sidebar-sliding-pill {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  height: 36px;
+  background: #5B3DF5;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(91, 61, 245, 0.28);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+              height 200ms cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 200ms ease;
+}
+.sidebar-nav .nav-link {
+  position: relative;
+  z-index: 2;
+}
 </style>
 
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
@@ -123,6 +198,7 @@ $badgeLabel = $sidebarBadge;
   </div>
 
   <nav class="sidebar-nav" id="app-sidebar-nav">
+    <div class="sidebar-sliding-pill" id="sidebar-sliding-pill" aria-hidden="true"></div>
 
     <?php if ($isClient): ?>
       <!-- CLIENT PORTAL NAVIGATION -->
@@ -309,17 +385,46 @@ $badgeLabel = $sidebarBadge;
   </div>
 
   <script>
+    window.updateSidebarSlidingPill = function(targetLink) {
+      var nav = document.getElementById('app-sidebar-nav');
+      var pill = document.getElementById('sidebar-sliding-pill');
+      if (!nav || !pill) return;
+      var activeLink = targetLink || nav.querySelector('.nav-link.active');
+      if (activeLink && activeLink.offsetParent !== null) {
+        var topPos = activeLink.offsetTop;
+        var h = activeLink.offsetHeight;
+        pill.style.transform = 'translate3d(0, ' + topPos + 'px, 0)';
+        pill.style.height = h + 'px';
+        pill.style.opacity = '1';
+      } else if (!targetLink) {
+        pill.style.opacity = '0';
+      }
+    };
+
     window.toggleMobileSidebar = function() {
       var sidebar = document.getElementById('app-sidebar') || document.querySelector('.sidebar');
       var overlay = document.getElementById('sidebar-overlay');
-      if (sidebar) sidebar.classList.toggle('open');
-      if (overlay) overlay.classList.toggle('active');
+      var isOpen = document.body.classList.toggle('sidebar-open');
+      if (sidebar) {
+        sidebar.classList.toggle('sidebar-open', isOpen);
+        sidebar.classList.toggle('active', isOpen);
+        sidebar.classList.toggle('open', isOpen);
+      }
+      if (overlay) overlay.classList.toggle('active', isOpen);
+      if (isOpen) {
+        setTimeout(window.updateSidebarSlidingPill, 120);
+      }
     };
 
     window.closeMobileSidebar = function() {
       var sidebar = document.getElementById('app-sidebar') || document.querySelector('.sidebar');
       var overlay = document.getElementById('sidebar-overlay');
-      if (sidebar) sidebar.classList.remove('open');
+      document.body.classList.remove('sidebar-open');
+      if (sidebar) {
+        sidebar.classList.remove('sidebar-open');
+        sidebar.classList.remove('active');
+        sidebar.classList.remove('open');
+      }
       if (overlay) overlay.classList.remove('active');
     };
 
@@ -335,6 +440,30 @@ $badgeLabel = $sidebarBadge;
         var savedPos = sessionStorage.getItem('kala_sidebar_scroll');
         if (nav && savedPos !== null) {
           nav.scrollTop = parseInt(savedPos, 10);
+        }
+
+        // Initialize Sliding Active Pill
+        requestAnimationFrame(function() {
+          setTimeout(window.updateSidebarSlidingPill, 60);
+        });
+
+        if (nav) {
+          nav.addEventListener('scroll', function() {
+            sessionStorage.setItem('kala_sidebar_scroll', nav.scrollTop);
+          }, { passive: true });
+
+          nav.addEventListener('mouseleave', function() {
+            window.updateSidebarSlidingPill();
+          });
+
+          nav.querySelectorAll('.nav-link').forEach(function(link) {
+            link.addEventListener('mouseenter', function() {
+              window.updateSidebarSlidingPill(link);
+            });
+            link.addEventListener('click', function(e) {
+              window.updateSidebarSlidingPill(link);
+            });
+          });
         }
       } catch(e) {}
     })();

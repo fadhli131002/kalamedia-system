@@ -167,14 +167,16 @@ if ($isWorkerUser) {
 
     .main-content .card,
     .tab-pane .card,
+    .bento-metric-card,
+    .stat-card,
     .kala-stagger-item {
       animation: kalaCardCascade 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
     }
-    .main-content .card:nth-child(1), .tab-pane > *:nth-child(1), .kala-stagger-item:nth-child(1) { animation-delay: 20ms; }
-    .main-content .card:nth-child(2), .tab-pane > *:nth-child(2), .kala-stagger-item:nth-child(2) { animation-delay: 65ms; }
-    .main-content .card:nth-child(3), .tab-pane > *:nth-child(3), .kala-stagger-item:nth-child(3) { animation-delay: 110ms; }
-    .main-content .card:nth-child(4), .tab-pane > *:nth-child(4), .kala-stagger-item:nth-child(4) { animation-delay: 155ms; }
-    .main-content .card:nth-child(5), .tab-pane > *:nth-child(5), .kala-stagger-item:nth-child(5) { animation-delay: 200ms; }
+    .main-content .card:nth-child(1), .tab-pane > *:nth-child(1), .tab-pane .card:nth-child(1), .kala-stagger-item:nth-child(1) { animation-delay: 20ms; }
+    .main-content .card:nth-child(2), .tab-pane > *:nth-child(2), .tab-pane .card:nth-child(2), .kala-stagger-item:nth-child(2) { animation-delay: 65ms; }
+    .main-content .card:nth-child(3), .tab-pane > *:nth-child(3), .tab-pane .card:nth-child(3), .kala-stagger-item:nth-child(3) { animation-delay: 110ms; }
+    .main-content .card:nth-child(4), .tab-pane > *:nth-child(4), .tab-pane .card:nth-child(4), .kala-stagger-item:nth-child(4) { animation-delay: 155ms; }
+    .main-content .card:nth-child(5), .tab-pane > *:nth-child(5), .tab-pane .card:nth-child(5), .kala-stagger-item:nth-child(5) { animation-delay: 200ms; }
 
     .sidebar a, .sidebar .nav-item, .sidebar-link, .sidebar-nav .nav-link {
       position: relative;
@@ -211,6 +213,49 @@ if ($isWorkerUser) {
         transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
                     visibility 0ms linear 0ms !important;
       }
+    }
+
+    /* 7. Sliding Active Pill Motion System */
+    .workspace-tabs-bar {
+      position: relative !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      background: #F1F5F9 !important;
+      padding: 4px !important;
+      border-radius: 14px !important;
+      border: 1px solid #E2E8F0 !important;
+      gap: 4px !important;
+      overflow-x: auto !important;
+      max-width: 100% !important;
+    }
+    .workspace-sliding-pill {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      background: #5B3DF5;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(91, 61, 245, 0.25);
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transform: translate3d(0, 0, 0);
+      transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+                  width 260ms cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 180ms ease;
+    }
+    .workspace-tab-btn {
+      position: relative !important;
+      z-index: 2 !important;
+      transition: color 200ms ease, background-color 200ms ease !important;
+    }
+    .workspace-tab-btn.active {
+      background: #5B3DF5 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 4px 12px rgba(91, 61, 245, 0.25) !important;
+    }
+    .workspace-tabs-bar.has-sliding-pill .workspace-tab-btn.active {
+      background: transparent !important;
+      box-shadow: none !important;
     }
 
     /* Task Management & Workspace Custom Styles - Bankio Minimal Finance */
@@ -852,13 +897,21 @@ if ($isWorkerUser) {
         box-shadow: 0 2px 8px rgba(91, 61, 245, 0.25) !important;
       }
 
-      /* Quick Action Buttons in Tab Saldo Ads (Round 38px circle anti-gepeng) */
+      /* Quick Action Buttons in Tab Saldo Ads (Strict 3-Column Equal Grid) */
       .appify-action-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
         gap: 8px !important;
+        width: 100% !important;
+        margin: 16px 0 !important;
+        box-sizing: border-box !important;
       }
       .appify-action-btn {
-        padding: 12px 6px !important;
-        height: auto !important;
+        padding: 12px 4px !important;
+        min-height: 88px !important;
+        height: 88px !important;
+        min-width: 0 !important;
+        width: 100% !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
@@ -869,12 +922,26 @@ if ($isWorkerUser) {
         background: #FFFFFF !important;
         box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
         box-sizing: border-box !important;
+        overflow: hidden !important;
+      }
+      .appify-action-btn span {
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        color: #1A162B !important;
+        text-align: center !important;
+        line-height: 1.2 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        width: 100% !important;
+        padding: 0 2px !important;
+        box-sizing: border-box !important;
       }
       .appify-action-icon-circle {
-        width: 38px !important;
-        height: 38px !important;
-        min-width: 38px !important;
-        min-height: 38px !important;
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
         border-radius: 50% !important;
         flex-shrink: 0 !important;
         display: inline-flex !important;
@@ -1043,39 +1110,68 @@ if ($isWorkerUser) {
     }
 
     .slide2-pastel-kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin: 18px 0;
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 10px !important;
+      width: 100% !important;
+      margin: 16px 0 !important;
+      box-sizing: border-box !important;
     }
 
     .slide2-pastel-card {
-      border-radius: 18px;
-      padding: 14px 12px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 80px;
-      box-sizing: border-box;
-      transition: transform 0.18s ease;
+      border-radius: 16px !important;
+      padding: 12px 10px !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between !important;
+      align-items: flex-start !important;
+      min-height: 84px !important;
+      height: 84px !important;
+      box-sizing: border-box !important;
+      transition: transform 0.18s ease !important;
+      overflow: hidden !important;
     }
 
     .slide2-pastel-card:hover {
-      transform: translateY(-2px);
+      transform: translateY(-2px) !important;
     }
 
     .slide2-pastel-label {
-      font-size: 11.5px;
-      font-weight: 500;
-      margin-bottom: 6px;
-      line-height: 1.2;
+      font-size: 11px !important;
+      font-weight: 600 !important;
+      letter-spacing: -0.1px !important;
+      line-height: 1.2 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      width: 100% !important;
+      opacity: 0.9 !important;
     }
 
     .slide2-pastel-value {
-      font-size: 17px;
-      font-weight: 800;
-      letter-spacing: -0.3px;
-      line-height: 1.1;
+      font-size: 18px !important;
+      font-weight: 800 !important;
+      letter-spacing: -0.3px !important;
+      line-height: 1.15 !important;
+      white-space: nowrap !important;
+      display: flex !important;
+      align-items: baseline !important;
+      gap: 4px !important;
+      width: 100% !important;
+    }
+
+    .slide2-pastel-num {
+      font-size: 20px !important;
+      font-weight: 800 !important;
+      line-height: 1 !important;
+    }
+
+    .slide2-pastel-unit {
+      font-size: 11.5px !important;
+      font-weight: 600 !important;
+      opacity: 0.85 !important;
+      letter-spacing: normal !important;
+      white-space: nowrap !important;
     }
 
     .pastel-green {
@@ -1228,7 +1324,8 @@ if ($isWorkerUser) {
         <?php endif; ?>
 
         <!-- Section Switcher Tabs (Desktop Only on Mobile for Workers) -->
-        <div class="workspace-tabs-bar <?= !$isAdminUser ? 'worker-tabs-bar' : '' ?>">
+        <div class="workspace-tabs-bar <?= !$isAdminUser ? 'worker-tabs-bar' : '' ?>" id="workspace-tabs-bar">
+          <div class="workspace-sliding-pill" id="workspace-sliding-pill" aria-hidden="true"></div>
           <button type="button" class="workspace-tab-btn active" id="tab-btn-tasks" onclick="switchTaskWorkspaceTab('tasks')">
             <span class="desktop-text">Deliverables &amp; Penugasan Tim</span>
             <span class="mobile-text">Deliverables Tim</span>
@@ -1357,7 +1454,7 @@ if ($isWorkerUser) {
             <!-- Row 2: Status Pekerjaan (Clean Segmented Control) -->
             <div class="bento-segmented-control task-status-grid" id="status-filter-group" style="background: #F1F5F9; padding: 3px; border-radius: 10px; display: flex; gap: 3px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; width: 100%; box-sizing: border-box;">
               <button type="button" class="filter-btn active" onclick="filterByStatus('all', this)" style="border: none; border-radius: 8px; padding: 6px 12px; font-size: 11.5px; font-weight: 500; color: #64748B; background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">Semua</button>
-              <button type="button" class="filter-btn" onclick="filterByStatus('in_progress', this)" style="border: none; border-radius: 8px; padding: 6px 12px; font-size: 11.5px; font-weight: 500; color: #64748B; background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">In Progress</button>
+              <button type="button" class="filter-btn" onclick="filterByStatus('in_progress', this)" style="border: none; border-radius: 8px; padding: 6px 12px; font-size: 11.5px; font-weight: 500; color: #64748B; background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">Proses</button>
               <button type="button" class="filter-btn" onclick="filterByStatus('client_review', this)" style="border: none; border-radius: 8px; padding: 6px 12px; font-size: 11.5px; font-weight: 500; color: #64748B; background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">Review</button>
               <button type="button" class="filter-btn" onclick="filterByStatus('revision', this)" style="border: none; border-radius: 8px; padding: 6px 12px; font-size: 11.5px; font-weight: 500; color: #64748B; background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">Revisi</button>
               <button type="button" class="filter-btn" onclick="filterByStatus('approved', this)" style="border: none; border-radius: 8px; padding: 6px 12px; font-size: 11.5px; font-weight: 500; color: #64748B; background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.15s ease;">Selesai</button>
@@ -1542,8 +1639,8 @@ if ($isWorkerUser) {
                   Rp <?= number_format($sisa_saldo, 0, ',', '.') ?>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 12.5px; color: rgba(255,255,255,0.9);">
-                  <span>Total Penggunaan</span>
-                  <span id="appify-hero-spend" style="font-weight: 700;">Pengeluaran Aktual: Rp <?= number_format($total_dibelanjakan_ads, 0, ',', '.') ?></span>
+                  <span>Total Pengeluaran</span>
+                  <span id="appify-hero-spend" style="font-weight: 700;">Rp <?= number_format($total_dibelanjakan_ads, 0, ',', '.') ?></span>
                 </div>
                 <!-- Progress bar putih transparan elegan -->
                 <div style="height: 8px; background: rgba(255, 255, 255, 0.25); border-radius: 999px; overflow: hidden;">
@@ -1553,40 +1650,40 @@ if ($isWorkerUser) {
               <div style="position: absolute; right: -20px; top: -20px; width: 130px; height: 130px; border-radius: 50%; background: rgba(255,255,255,0.08); pointer-events: none;"></div>
             </div>
 
-            <!-- 3. Baris 3 Tombol Aksi Cepat Sejajar (Isi Saldo & Pengeluaran | Pengajuan Penambahan Dana | Segarkan) -->
-            <div class="appify-action-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px 0;">
-              <!-- Tombol 1: Isi Saldo & Pengeluaran -->
-              <button type="button" class="appify-action-btn" onclick="openConfirmPlatformTopupModal()" style="background: #FFFFFF; border-radius: 16px; padding: 12px 6px; height: auto; border: 1px solid #F0F1F7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 180ms ease; box-shadow: 0 4px 14px rgba(26,22,43,0.03);">
-                <div class="appify-action-icon-circle" style="width: 38px !important; height: 38px !important; min-width: 38px !important; min-height: 38px !important; border-radius: 50% !important; flex-shrink: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: #F2EFFF; color: #5B3DF5;">
+            <!-- 3. Baris 3 Tombol Aksi Cepat Sejajar (Top-Up Saldo | Ajukan Limit | Segarkan) -->
+            <div class="appify-action-grid" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 8px !important; margin: 16px 0 !important; width: 100% !important; box-sizing: border-box !important;">
+              <!-- Tombol 1: Top-Up Saldo -->
+              <button type="button" class="appify-action-btn" onclick="openConfirmPlatformTopupModal()" title="Lapor Penyetoran Saldo ke Platform">
+                <div class="appify-action-icon-circle" style="width: 36px !important; height: 36px !important; min-width: 36px !important; min-height: 36px !important; border-radius: 50% !important; flex-shrink: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: #F2EFFF; color: #5B3DF5;">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="12" y1="19" x2="12" y2="5"></line>
                     <polyline points="5 12 12 5 19 12"></polyline>
                   </svg>
                 </div>
-                <span style="font-size: 11.5px; font-weight: 600; color: #1A162B; text-align: center; line-height: 1.2;">Isi Saldo &amp; Pengeluaran</span>
+                <span>Top-Up Saldo</span>
               </button>
 
-              <!-- Tombol 2: Pengajuan Penambahan Dana -->
-              <button type="button" class="appify-action-btn" onclick="openRequestBalanceWorkerModal()" style="background: #FFFFFF; border-radius: 16px; padding: 12px 6px; height: auto; border: 1px solid #F0F1F7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 180ms ease; box-shadow: 0 4px 14px rgba(26,22,43,0.03);">
-                <div class="appify-action-icon-circle" style="width: 38px !important; height: 38px !important; min-width: 38px !important; min-height: 38px !important; border-radius: 50% !important; flex-shrink: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: #FFF4E5; color: #F59E0B;">
+              <!-- Tombol 2: Ajukan Limit -->
+              <button type="button" class="appify-action-btn" onclick="openRequestBalanceWorkerModal()" title="Ajukan Penambahan Limit / Dana Saldo">
+                <div class="appify-action-icon-circle" style="width: 36px !important; height: 36px !important; min-width: 36px !important; min-height: 36px !important; border-radius: 50% !important; flex-shrink: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: #FFF4E5; color: #F59E0B;">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                     <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                   </svg>
                 </div>
-                <span style="font-size: 11.5px; font-weight: 600; color: #1A162B; text-align: center; line-height: 1.2;">Pengajuan Penambahan Dana</span>
+                <span>Ajukan Limit</span>
               </button>
 
               <!-- Tombol 3: Segarkan -->
-              <button type="button" class="appify-action-btn" onclick="loadAdsTrackerData()" style="background: #FFFFFF; border-radius: 16px; padding: 12px 6px; height: auto; border: 1px solid #F0F1F7; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: all 180ms ease; box-shadow: 0 4px 14px rgba(26,22,43,0.03);">
-                <div class="appify-action-icon-circle" style="width: 38px !important; height: 38px !important; min-width: 38px !important; min-height: 38px !important; border-radius: 50% !important; flex-shrink: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: #EEF2FF; color: #3B82F6;">
+              <button type="button" class="appify-action-btn" onclick="loadAdsTrackerData()" title="Segarkan Data Saldo">
+                <div class="appify-action-icon-circle" style="width: 36px !important; height: 36px !important; min-width: 36px !important; min-height: 36px !important; border-radius: 50% !important; flex-shrink: 0 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; background: #EEF2FF; color: #3B82F6;">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="23 4 23 10 17 10"></polyline>
                     <polyline points="1 20 1 14 7 14"></polyline>
                     <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
                   </svg>
                 </div>
-                <span style="font-size: 11.5px; font-weight: 600; color: #1A162B; text-align: center; line-height: 1.2;">Segarkan</span>
+                <span>Segarkan</span>
               </button>
             </div>
 
@@ -1750,7 +1847,7 @@ if ($isWorkerUser) {
               <div class="slide2-identity-info">
                 <h3 class="slide2-user-name"><?= htmlspecialchars($user['name'] ?? 'Tim Kalamedia') ?></h3>
                 <p class="slide2-user-role">
-                  <?= htmlspecialchars($workerProfile['position'] ?: 'Spesialis Periklanan') ?> &bull; <?= $user['role'] === 'freelancer' ? 'Mitra Kontrak (Freelance)' : 'Karyawan In-House' ?>
+                  <?= htmlspecialchars($workerProfile['position'] ?: 'Digital Ads Specialist') ?> &bull; <?= $user['role'] === 'freelancer' ? 'Mitra Kontrak (Freelance)' : 'Karyawan In-House' ?>
                 </p>
               </div>
             </div>
@@ -1777,22 +1874,31 @@ if ($isWorkerUser) {
               </div>
             </div>
 
-            <!-- 4. 3 Kartu Statistik Warna Pastel Sejajar (Hijau, Biru Muda, & Oranye Persis Slide 2!) -->
+            <!-- 4. 3 Kartu Statistik Warna Pastel Sejajar (Hijau, Biru Muda, & Oranye) -->
             <div class="slide2-pastel-kpi-grid">
               <!-- Kotak 1: Hijau Pastel (#C6F1D6, teks #143622) -->
               <div class="slide2-pastel-card pastel-green">
                 <span class="slide2-pastel-label">Total Tugas</span>
-                <span class="slide2-pastel-value"><?= $workerTotalTasks ?> Tugas</span>
+                <div class="slide2-pastel-value">
+                  <span class="slide2-pastel-num"><?= $workerTotalTasks ?></span>
+                  <span class="slide2-pastel-unit">Tugas</span>
+                </div>
               </div>
               <!-- Kotak 2: Biru Muda Pastel (#C7EEFF, teks #103245) -->
               <div class="slide2-pastel-card pastel-blue">
-                <span class="slide2-pastel-label">Klien Dikelola</span>
-                <span class="slide2-pastel-value"><?= $workerClientCount ?> Perusahaan</span>
+                <span class="slide2-pastel-label">Klien Aktif</span>
+                <div class="slide2-pastel-value">
+                  <span class="slide2-pastel-num"><?= $workerClientCount ?></span>
+                  <span class="slide2-pastel-unit">Klien</span>
+                </div>
               </div>
               <!-- Kotak 3: Oranye Pastel (#FFE0B2, teks #4A2C06) -->
               <div class="slide2-pastel-card pastel-orange">
                 <span class="slide2-pastel-label">Tugas Selesai</span>
-                <span class="slide2-pastel-value"><?= $workerDoneTasks ?> Selesai</span>
+                <div class="slide2-pastel-value">
+                  <span class="slide2-pastel-num"><?= $workerDoneTasks ?></span>
+                  <span class="slide2-pastel-unit">Selesai</span>
+                </div>
               </div>
             </div>
 
@@ -1830,7 +1936,7 @@ if ($isWorkerUser) {
                   </div>
                   <div class="slide2-menu-text">
                     <h4 class="slide2-menu-title">Jabatan &amp; Divisi</h4>
-                    <p class="slide2-menu-desc"><?= htmlspecialchars($workerProfile['position'] ?: 'Spesialis Periklanan') ?> &bull; Divisi Pemasaran Kalamedia</p>
+                    <p class="slide2-menu-desc"><?= htmlspecialchars($workerProfile['position'] ?: 'Digital Ads Specialist') ?> &bull; Divisi Pemasaran Kalamedia</p>
                   </div>
                 </div>
                 <div class="slide2-menu-chevron">
@@ -3751,6 +3857,31 @@ if ($isWorkerUser) {
     let allLoadedAdsData = null;
     let allLoadedRecapData = null;
 
+    window.updateWorkspaceTabPill = function(targetBtn) {
+      const bar = document.getElementById('workspace-tabs-bar');
+      const pill = document.getElementById('workspace-sliding-pill');
+      if (!bar || !pill) return;
+      bar.classList.add('has-sliding-pill');
+      const activeBtn = targetBtn || bar.querySelector('.workspace-tab-btn.active');
+      if (activeBtn && activeBtn.offsetParent !== null) {
+        const left = activeBtn.offsetLeft;
+        const width = activeBtn.offsetWidth;
+        pill.style.transform = `translate3d(${left}px, 0, 0)`;
+        pill.style.width = `${width}px`;
+        pill.style.opacity = '1';
+      } else if (!targetBtn) {
+        pill.style.opacity = '0';
+      }
+    };
+
+    window.addEventListener('resize', () => {
+      if (window.updateWorkspaceTabPill) window.updateWorkspaceTabPill();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      requestAnimationFrame(() => setTimeout(window.updateWorkspaceTabPill, 60));
+    });
+
     function switchTaskWorkspaceTab(tab) {
       const btnTasks = document.getElementById('tab-btn-tasks');
       const btnAds = document.getElementById('tab-btn-ads');
@@ -3761,84 +3892,70 @@ if ($isWorkerUser) {
       const secRecap = document.getElementById('section-recap-content');
       const secProfile = document.getElementById('section-profile-content');
 
-      const applyTabSwitch = () => {
-        // Reset active states
-        if (btnTasks) btnTasks.classList.remove('active');
-        if (btnAds) btnAds.classList.remove('active');
-        if (btnRecap) btnRecap.classList.remove('active');
-        if (btnProfile) btnProfile.classList.remove('active');
-
-        [secTasks, secAds, secRecap, secProfile].forEach(s => {
-          if (s) {
-            s.style.display = 'none';
-            s.classList.remove('kala-page-view');
-          }
-        });
-
-        // Sync mobile bottom navigation bar active state
-        const mobNav = document.getElementById('mobile-bottom-nav');
-        if (mobNav) {
-          mobNav.querySelectorAll('.mob-nav-item').forEach(el => el.classList.remove('active'));
-          if (tab === 'ads' || tab === 'ads_tracker') {
-            const adsNav = mobNav.querySelector('a[href*="tab=ads"]') || mobNav.querySelector('a[href*="ads_tracker"]');
-            if (adsNav) adsNav.classList.add('active');
-          } else if (tab === 'recap') {
-            const recapNav = mobNav.querySelector('a[href*="tab=recap"]');
-            if (recapNav) recapNav.classList.add('active');
-          } else if (tab === 'profile') {
-            const profNav = document.getElementById('mob-nav-profile-item') || mobNav.querySelector('a[href*="tab=profile"]');
-            if (profNav) profNav.classList.add('active');
-          } else {
-            const taskNav = mobNav.querySelector('a[href*="tasks"]') || mobNav.querySelector('a[href$="tasks"]');
-            if (taskNav) taskNav.classList.add('active');
-          }
-        }
-
-        if (tab === 'ads' || tab === 'ads_tracker') {
-          if (btnAds) btnAds.classList.add('active');
-          if (secAds) {
-            secAds.style.display = 'block';
-            void secAds.offsetWidth;
-            secAds.classList.add('kala-page-view');
-          }
-          loadAdsTrackerData();
-          history.replaceState(null, '', '?tab=ads_tracker&_slot=internal');
-        } else if (tab === 'recap') {
-          if (btnRecap) btnRecap.classList.add('active');
-          if (secRecap) {
-            secRecap.style.display = 'block';
-            void secRecap.offsetWidth;
-            secRecap.classList.add('kala-page-view');
-          }
-          loadWorkerRecapData();
-          history.replaceState(null, '', '?tab=recap&_slot=internal');
-        } else if (tab === 'profile') {
-          if (btnProfile) btnProfile.classList.add('active');
-          if (secProfile) {
-            secProfile.style.display = 'block';
-            void secProfile.offsetWidth;
-            secProfile.classList.add('kala-page-view');
-          }
-          history.replaceState(null, '', '?tab=profile&_slot=internal');
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-          if (btnTasks) btnTasks.classList.add('active');
-          if (secTasks) {
-            secTasks.style.display = 'block';
-            void secTasks.offsetWidth;
-            secTasks.classList.add('kala-page-view');
-          }
-          loadTasksData();
-          history.replaceState(null, '', '?_slot=internal');
-        }
+      const tabMap = {
+        'tasks': { btn: btnTasks, sec: secTasks, url: '?_slot=internal', load: loadTasksData },
+        'ads': { btn: btnAds, sec: secAds, url: '?tab=ads_tracker&_slot=internal', load: loadAdsTrackerData },
+        'ads_tracker': { btn: btnAds, sec: secAds, url: '?tab=ads_tracker&_slot=internal', load: loadAdsTrackerData },
+        'recap': { btn: btnRecap, sec: secRecap, url: '?tab=recap&_slot=internal', load: loadWorkerRecapData },
+        'profile': { btn: btnProfile, sec: secProfile, url: '?tab=profile&_slot=internal', load: () => window.scrollTo({ top: 0, behavior: 'smooth' }) }
       };
 
-      if (document.startViewTransition) {
-        document.startViewTransition(() => {
-          applyTabSwitch();
+      const selected = tabMap[tab] || tabMap['tasks'];
+      const targetSec = selected.sec;
+      const allSecs = [secTasks, secAds, secRecap, secProfile].filter(Boolean);
+
+      // 1. Instantly update button states and slide the active pill
+      [btnTasks, btnAds, btnRecap, btnProfile].forEach(b => { if (b) b.classList.remove('active'); });
+      if (selected.btn) selected.btn.classList.add('active');
+      if (window.updateWorkspaceTabPill) window.updateWorkspaceTabPill();
+
+      // 2. Sync mobile bottom navigation bar active state
+      const mobNav = document.getElementById('mobile-bottom-nav');
+      if (mobNav) {
+        mobNav.querySelectorAll('.mob-nav-item').forEach(el => el.classList.remove('active'));
+        if (tab === 'ads' || tab === 'ads_tracker') {
+          const adsNav = mobNav.querySelector('a[href*="tab=ads"]') || mobNav.querySelector('a[href*="ads_tracker"]');
+          if (adsNav) adsNav.classList.add('active');
+        } else if (tab === 'recap') {
+          const recapNav = mobNav.querySelector('a[href*="tab=recap"]');
+          if (recapNav) recapNav.classList.add('active');
+        } else if (tab === 'profile') {
+          const profNav = document.getElementById('mob-nav-profile-item') || mobNav.querySelector('a[href*="tab=profile"]');
+          if (profNav) profNav.classList.add('active');
+        } else {
+          const taskNav = mobNav.querySelector('a[href*="tasks"]') || mobNav.querySelector('a[href$="tasks"]');
+          if (taskNav) taskNav.classList.add('active');
+        }
+        if (window.updateBottomNavPill) window.updateBottomNavPill();
+      }
+
+      // 3. Find current visible section
+      const currentVisibleSec = allSecs.find(s => s.style.display !== 'none' && getComputedStyle(s).display !== 'none');
+
+      const activateTargetSection = () => {
+        allSecs.forEach(s => {
+          s.style.display = 'none';
+          s.classList.remove('kala-page-view', 'kala-page-leaving');
         });
+
+        if (targetSec) {
+          targetSec.style.display = 'block';
+          void targetSec.offsetWidth; // Trigger reflow for smooth animation restart
+          targetSec.classList.add('kala-page-view');
+        }
+
+        if (selected.load) selected.load();
+        if (selected.url) history.replaceState(null, '', selected.url);
+      };
+
+      // 4. Smooth Exit-Before-Enter Animation to eliminate jarring instant cuts
+      if (currentVisibleSec && currentVisibleSec !== targetSec) {
+        currentVisibleSec.classList.add('kala-page-leaving');
+        setTimeout(() => {
+          activateTargetSection();
+        }, 120);
       } else {
-        applyTabSwitch();
+        activateTargetSection();
       }
     }
 
@@ -4176,7 +4293,7 @@ if ($isWorkerUser) {
       if (elRem) elRem.innerText = 'Rp ' + sisa.toLocaleString('id-ID');
 
       const elSpend = document.getElementById('appify-hero-spend');
-      if (elSpend) elSpend.innerText = 'Pengeluaran Aktual: Rp ' + spend.toLocaleString('id-ID');
+      if (elSpend) elSpend.innerText = 'Rp ' + spend.toLocaleString('id-ID');
 
       const elProg = document.getElementById('appify-hero-progress');
       if (elProg) {
@@ -4395,16 +4512,16 @@ if ($isWorkerUser) {
             <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #F4F5F9; align-items: center;">
               ${t.transfer_proof_owner ? `
                 <button type="button" onclick="previewAdsProof('${escapeHtml(t.transfer_proof_owner)}')" style="height: 28px; padding: 0 10px; font-size: 11.5px; border-radius: 8px; font-weight: 600; border: 1px solid #E0DBFD; background: #F2EFFF; color: #5B3DF5; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                  <span>Bukti Transfer Manajemen</span>
+                  <span>Bukti Transfer</span>
                 </button>
               ` : ''}
               ${t.platform_topup_proof ? `
                 <button type="button" onclick="previewAdsProof('${escapeHtml(t.platform_topup_proof)}')" style="height: 28px; padding: 0 10px; font-size: 11.5px; border-radius: 8px; font-weight: 600; border: 1px solid #C4F1DE; background: #E8F8F2; color: #10B981; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                  <span>Bukti Penayangan Iklan</span>
+                  <span>Bukti Platform</span>
                 </button>
               ` : ''}
               <button type="button" onclick="openConfirmPlatformTopupModal(${t.id}, ${transferOwner})" style="height: 28px; padding: 0 10px; font-size: 11.5px; border-radius: 8px; font-weight: 600; border: 1px solid #E5E7EB; background: #FFFFFF; color: #1A162B; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
-                <span>Perbarui Pengeluaran</span>
+                <span>Catat Spend</span>
               </button>
             </div>
           </div>

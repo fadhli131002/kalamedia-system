@@ -2,6 +2,7 @@
 /**
  * Kalamedia Agency Financial & Project Management System
  * Front Controller & Router
+ * Motion System: View Transitions, Sliding Active Pill, & Staggered Page Transition
  */
 
 require_once __DIR__ . '/config/app.php';

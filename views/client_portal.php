@@ -403,6 +403,34 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
       }
     }
 
+    /* 7. Sliding Active Pill Motion System */
+    .portal-nav-tabs {
+      position: relative !important;
+    }
+    .portal-sliding-pill {
+      position: absolute;
+      top: 3px;
+      bottom: 3px;
+      background: #5B3DF5;
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(91, 61, 245, 0.25);
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transform: translate3d(0, 0, 0);
+      transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+                  width 260ms cubic-bezier(0.22, 1, 0.36, 1),
+                  opacity 180ms ease;
+    }
+    .portal-tab-btn {
+      position: relative !important;
+      z-index: 2 !important;
+    }
+    .portal-nav-tabs.has-sliding-pill .portal-tab-btn.active {
+      background: transparent !important;
+      box-shadow: none !important;
+    }
+
     /* Client Portal Custom Styles - Minimal Finance (Bankio) */
     .portal-hero {
       background: linear-gradient(135deg, #5D76F5 0%, #8932E0 100%);
@@ -1253,6 +1281,7 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
 
         <!-- 3. Navigation Tabs (Modern Segmented Boxed Bar) -->
         <div class="portal-nav-tabs">
+          <div class="portal-sliding-pill" id="portal-sliding-pill" aria-hidden="true"></div>
           <button class="portal-tab-btn active" onclick="switchPortalTab('deliverables', this)">
             <span>Progress & Deliverables</span>
           </button>
@@ -2415,39 +2444,74 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
       container.innerHTML = html;
     }
 
-    function switchPortalTab(tabName, btn) {
-      const applySwitch = () => {
-        document.querySelectorAll('.portal-tab-btn').forEach(b => b.classList.remove('active'));
-        if (btn) {
-          btn.classList.add('active');
-        } else {
-          const targetBtn = document.querySelector(`.portal-tab-btn[onclick*="'${tabName}'"]`);
-          if (targetBtn) targetBtn.classList.add('active');
-        }
+    window.updatePortalTabPill = function(targetBtn) {
+      const tabs = document.querySelector('.portal-nav-tabs');
+      const pill = document.getElementById('portal-sliding-pill');
+      if (!tabs || !pill) return;
+      tabs.classList.add('has-sliding-pill');
+      const activeBtn = targetBtn || tabs.querySelector('.portal-tab-btn.active');
+      if (activeBtn && activeBtn.offsetParent !== null) {
+        const left = activeBtn.offsetLeft;
+        const width = activeBtn.offsetWidth;
+        pill.style.transform = `translate3d(${left}px, 0, 0)`;
+        pill.style.width = `${width}px`;
+        pill.style.opacity = '1';
+      } else if (!targetBtn) {
+        pill.style.opacity = '0';
+      }
+    };
 
-        ['deliverables', 'calendar', 'invoices', 'reports', 'ads'].forEach(t => {
+    window.addEventListener('resize', () => {
+      if (window.updatePortalTabPill) window.updatePortalTabPill();
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      requestAnimationFrame(() => setTimeout(window.updatePortalTabPill, 60));
+    });
+
+    function switchPortalTab(tabName, btn) {
+      document.querySelectorAll('.portal-tab-btn').forEach(b => b.classList.remove('active'));
+      let activeBtn = btn;
+      if (btn) {
+        btn.classList.add('active');
+      } else {
+        activeBtn = document.querySelector(`.portal-tab-btn[onclick*="'${tabName}'"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+      }
+
+      if (window.updatePortalTabPill) {
+        window.updatePortalTabPill(activeBtn);
+      }
+
+      // Sync mobile bottom nav items if present
+      document.querySelectorAll('.mobile-bottom-nav .mob-nav-item').forEach(item => {
+        const href = item.getAttribute('href') || '';
+        if (href.includes('tab=' + tabName) || (tabName === 'deliverables' && !href.includes('tab='))) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+      if (window.updateBottomNavPill) window.updateBottomNavPill();
+
+      const allTabs = ['deliverables', 'calendar', 'invoices', 'reports', 'ads'];
+      const targetPane = document.getElementById('tab-pane-' + tabName);
+      const currentPane = allTabs.map(t => document.getElementById('tab-pane-' + t)).find(p => p && p.style.display !== 'none' && getComputedStyle(p).display !== 'none');
+
+      const applySwitch = () => {
+        allTabs.forEach(t => {
           const pane = document.getElementById('tab-pane-' + t);
           if (pane) {
-            if (t === tabName) {
-              pane.style.display = 'block';
-              void pane.offsetWidth;
-              pane.classList.add('kala-page-view');
-            } else {
-              pane.style.display = 'none';
-              pane.classList.remove('kala-page-view');
-            }
+            pane.style.display = 'none';
+            pane.classList.remove('kala-page-view', 'kala-page-leaving');
           }
         });
 
-        // Sync mobile bottom nav items if present
-        document.querySelectorAll('.mobile-bottom-nav .mob-nav-item').forEach(item => {
-          const href = item.getAttribute('href') || '';
-          if (href.includes('tab=' + tabName) || (tabName === 'deliverables' && !href.includes('tab='))) {
-            item.classList.add('active');
-          } else {
-            item.classList.remove('active');
-          }
-        });
+        if (targetPane) {
+          targetPane.style.display = 'block';
+          void targetPane.offsetWidth;
+          targetPane.classList.add('kala-page-view');
+        }
 
         if (tabName === 'ads') {
           requestAnimationFrame(() => setTimeout(loadClientAdsData, 90));
@@ -2456,10 +2520,9 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
         }
       };
 
-      if (document.startViewTransition) {
-        document.startViewTransition(() => {
-          applySwitch();
-        });
+      if (currentPane && currentPane !== targetPane) {
+        currentPane.classList.add('kala-page-leaving');
+        setTimeout(applySwitch, 120);
       } else {
         applySwitch();
       }
@@ -3195,7 +3258,7 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
           </div>
 
           <div style="font-size: 11px; color: #9CA3AF; text-align: right; border-top: 1px solid #F3F4F6; padding-top: 8px;">
-            Spesialis Pelaksana: <b id="client-ads-detail-author"></b> &bull; Kalamedia Official Report
+            Digital Ads Specialist: <b id="client-ads-detail-author"></b> &bull; Kalamedia Official Report
           </div>
         </div>
 

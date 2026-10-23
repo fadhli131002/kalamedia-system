@@ -152,14 +152,17 @@
 /* 4. Efek Muncul Berurutan (Staggered Cascade) pada Kartu di Dalam Halaman */
 .main-content .card,
 .tab-pane .card,
+.glass-panel,
+.bento-metric-card,
+.portal-stat-card,
 .kala-stagger-item {
   animation: kalaCardCascade 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-.main-content .card:nth-child(1), .tab-pane > *:nth-child(1), .kala-stagger-item:nth-child(1) { animation-delay: 20ms; }
-.main-content .card:nth-child(2), .tab-pane > *:nth-child(2), .kala-stagger-item:nth-child(2) { animation-delay: 65ms; }
-.main-content .card:nth-child(3), .tab-pane > *:nth-child(3), .kala-stagger-item:nth-child(3) { animation-delay: 110ms; }
-.main-content .card:nth-child(4), .tab-pane > *:nth-child(4), .kala-stagger-item:nth-child(4) { animation-delay: 155ms; }
-.main-content .card:nth-child(5), .tab-pane > *:nth-child(5), .kala-stagger-item:nth-child(5) { animation-delay: 200ms; }
+.main-content .card:nth-child(1), .tab-pane > *:nth-child(1), .tab-pane .card:nth-child(1), .kala-stagger-item:nth-child(1) { animation-delay: 20ms; }
+.main-content .card:nth-child(2), .tab-pane > *:nth-child(2), .tab-pane .card:nth-child(2), .kala-stagger-item:nth-child(2) { animation-delay: 65ms; }
+.main-content .card:nth-child(3), .tab-pane > *:nth-child(3), .tab-pane .card:nth-child(3), .kala-stagger-item:nth-child(3) { animation-delay: 110ms; }
+.main-content .card:nth-child(4), .tab-pane > *:nth-child(4), .tab-pane .card:nth-child(4), .kala-stagger-item:nth-child(4) { animation-delay: 155ms; }
+.main-content .card:nth-child(5), .tab-pane > *:nth-child(5), .tab-pane .card:nth-child(5), .kala-stagger-item:nth-child(5) { animation-delay: 200ms; }
 
 /* 5. Animasi Item Menu Sidebar & Hover Elastis */
 .sidebar a, .sidebar .nav-item, .sidebar-link, .sidebar-nav .nav-link {
@@ -176,6 +179,117 @@
 }
 .sidebar a:active, .sidebar .nav-item:active, .bottom-nav a:active, .bottom-nav button:active, .mobile-bottom-nav a:active, .mobile-bottom-nav button:active, .mob-nav-item:active {
   transform: scale(0.94) !important;
+}
+
+/* 6. Perbaiki Drawer Sidebar Mobile: JANGAN PAKAI display:none AGAR ANIMASI SLIDE JALAN! */
+@media (max-width: 1024px) {
+  aside.sidebar, #sidebar, #app-sidebar, .sidebar {
+    display: flex !important;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translate3d(-104%, 0, 0) !important;
+    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                visibility 0ms linear 320ms !important;
+  }
+  aside.sidebar.sidebar-open, aside.sidebar.active, aside.sidebar.open,
+  #sidebar.active, #sidebar.open, #app-sidebar.open, #app-sidebar.active, #app-sidebar.sidebar-open,
+  .sidebar.open, .sidebar.active, .sidebar.sidebar-open,
+  body.sidebar-open aside.sidebar, body.sidebar-open #app-sidebar, body.sidebar-open .sidebar {
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translate3d(0, 0, 0) !important;
+    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                visibility 0ms linear 0ms !important;
+  }
+}
+
+/* 7. Sliding Active Pill Motion System */
+.sidebar-nav {
+  position: relative;
+}
+.sidebar-sliding-pill {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  height: 36px;
+  background: #5B3DF5;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(91, 61, 245, 0.28);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+              height 200ms cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 200ms ease;
+}
+.sidebar-nav .nav-link {
+  position: relative;
+  z-index: 2;
+}
+
+.workspace-tabs-bar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.workspace-sliding-pill {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  background: #5B3DF5;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(91, 61, 245, 0.25);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+              width 260ms cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 180ms ease;
+}
+.workspace-tab-btn {
+  position: relative;
+  z-index: 2;
+  transition: color 200ms ease;
+}
+
+.portal-nav-tabs {
+  position: relative;
+}
+.portal-sliding-pill {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  background: #5B3DF5;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(91, 61, 245, 0.25);
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+              width 260ms cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 180ms ease;
+}
+.portal-tab-btn {
+  position: relative;
+  z-index: 2;
+}
+
+.bottom-nav-sliding-pill {
+  position: absolute;
+  bottom: 4px;
+  height: 3px;
+  background: #5B3DF5;
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transform: translate3d(0, 0, 0);
+  transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
+              width 280ms cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 200ms ease;
 }
 
 * {
@@ -3706,7 +3820,18 @@ button:active,
 
   /* Appify Quick Action Buttons Grid on Mobile */
   .appify-action-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .appify-action-btn {
+    min-height: 88px !important;
+    height: 88px !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 }
 

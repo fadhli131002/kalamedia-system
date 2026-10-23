@@ -1119,74 +1119,95 @@ if ($isWorkerUser) {
     }
 
     .slide2-pastel-card {
-      border-radius: 16px !important;
+      background: #FFFFFF !important;
+      border-radius: 18px !important;
+      border: 1px solid #F0F1F7 !important;
       padding: 12px 10px !important;
+      box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04) !important;
       display: flex !important;
       flex-direction: column !important;
       justify-content: space-between !important;
-      align-items: flex-start !important;
-      min-height: 84px !important;
-      height: 84px !important;
+      align-items: stretch !important;
+      min-height: 94px !important;
+      height: 94px !important;
       box-sizing: border-box !important;
-      transition: transform 0.18s ease !important;
+      transition: transform 0.18s ease, box-shadow 0.18s ease !important;
       overflow: hidden !important;
     }
 
     .slide2-pastel-card:hover {
       transform: translateY(-2px) !important;
+      box-shadow: 0 6px 24px rgba(26, 22, 43, 0.08) !important;
     }
 
-    .slide2-pastel-label {
+    .slide2-card-header {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      margin-bottom: 4px !important;
+      width: 100% !important;
+      gap: 4px !important;
+    }
+
+    .slide2-card-title {
       font-size: 11px !important;
-      font-weight: 600 !important;
-      letter-spacing: -0.1px !important;
+      font-weight: 700 !important;
+      color: #7B7890 !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      letter-spacing: -0.2px !important;
+      line-height: 1.2 !important;
+    }
+
+    .slide2-card-icon-badge {
+      width: 24px !important;
+      height: 24px !important;
+      min-width: 24px !important;
+      min-height: 24px !important;
+      border-radius: 8px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex-shrink: 0 !important;
+    }
+
+    .slide2-card-value {
+      font-size: 17px !important;
+      font-weight: 800 !important;
+      color: #1A162B !important;
       line-height: 1.2 !important;
       white-space: nowrap !important;
       overflow: hidden !important;
       text-overflow: ellipsis !important;
-      width: 100% !important;
-      opacity: 0.9 !important;
-    }
-
-    .slide2-pastel-value {
-      font-size: 18px !important;
-      font-weight: 800 !important;
-      letter-spacing: -0.3px !important;
-      line-height: 1.15 !important;
-      white-space: nowrap !important;
       display: flex !important;
       align-items: baseline !important;
-      gap: 4px !important;
-      width: 100% !important;
+      gap: 3px !important;
     }
 
-    .slide2-pastel-num {
-      font-size: 20px !important;
+    .slide2-card-num {
+      font-size: 18px !important;
       font-weight: 800 !important;
+      color: #1A162B !important;
       line-height: 1 !important;
     }
 
-    .slide2-pastel-unit {
+    .slide2-card-unit {
       font-size: 11.5px !important;
-      font-weight: 600 !important;
-      opacity: 0.85 !important;
-      letter-spacing: normal !important;
+      font-weight: 700 !important;
+      color: #7B7890 !important;
       white-space: nowrap !important;
     }
 
-    .pastel-green {
-      background: #C6F1D6 !important;
-      color: #143622 !important;
-    }
-
-    .pastel-blue {
-      background: #C7EEFF !important;
-      color: #103245 !important;
-    }
-
-    .pastel-orange {
-      background: #FFE0B2 !important;
-      color: #4A2C06 !important;
+    .slide2-card-subtext {
+      font-size: 10px !important;
+      font-weight: 500 !important;
+      color: #7B7890 !important;
+      margin-top: 2px !important;
+      white-space: nowrap !important;
+      overflow: hidden !important;
+      text-overflow: ellipsis !important;
+      line-height: 1.2 !important;
     }
 
     .slide2-menu-list {
@@ -1874,30 +1895,69 @@ if ($isWorkerUser) {
               </div>
             </div>
 
-            <!-- 4. 3 Kartu Statistik Warna Pastel Sejajar (Hijau, Biru Muda, & Oranye) -->
+            <!-- 4. 3 Kartu Statistik Executive (Persis Gaya Kartu Gambar 1!) -->
             <div class="slide2-pastel-kpi-grid">
-              <!-- Kotak 1: Hijau Pastel (#C6F1D6, teks #143622) -->
-              <div class="slide2-pastel-card pastel-green">
-                <span class="slide2-pastel-label">Total Tugas</span>
-                <div class="slide2-pastel-value">
-                  <span class="slide2-pastel-num"><?= $workerTotalTasks ?></span>
-                  <span class="slide2-pastel-unit">Tugas</span>
+              <!-- Kotak 1: Total Tugas (Badge Ungu Pastel #F2EFFF & Icon #5B3DF5) -->
+              <div class="slide2-pastel-card">
+                <div class="slide2-card-header">
+                  <span class="slide2-card-title">Total Tugas</span>
+                  <div class="slide2-card-icon-badge" style="background: #F2EFFF;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5B3DF5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                      <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                      <line x1="9" y1="12" x2="15" y2="12"></line>
+                      <line x1="9" y1="16" x2="13" y2="16"></line>
+                    </svg>
+                  </div>
+                </div>
+                <div class="slide2-card-value">
+                  <span class="slide2-card-num"><?= $workerTotalTasks ?></span>
+                  <span class="slide2-card-unit">Tugas</span>
+                </div>
+                <div class="slide2-card-subtext">
+                  Deliverables
                 </div>
               </div>
-              <!-- Kotak 2: Biru Muda Pastel (#C7EEFF, teks #103245) -->
-              <div class="slide2-pastel-card pastel-blue">
-                <span class="slide2-pastel-label">Klien Aktif</span>
-                <div class="slide2-pastel-value">
-                  <span class="slide2-pastel-num"><?= $workerClientCount ?></span>
-                  <span class="slide2-pastel-unit">Klien</span>
+
+              <!-- Kotak 2: Klien Aktif (Badge Biru Pastel #EEF2FF & Icon #3B82F6) -->
+              <div class="slide2-pastel-card">
+                <div class="slide2-card-header">
+                  <span class="slide2-card-title">Klien Aktif</span>
+                  <div class="slide2-card-icon-badge" style="background: #EEF2FF;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="9" cy="7" r="4"></circle>
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                  </div>
+                </div>
+                <div class="slide2-card-value">
+                  <span class="slide2-card-num"><?= $workerClientCount ?></span>
+                  <span class="slide2-card-unit">Klien</span>
+                </div>
+                <div class="slide2-card-subtext">
+                  Partner Brand
                 </div>
               </div>
-              <!-- Kotak 3: Oranye Pastel (#FFE0B2, teks #4A2C06) -->
-              <div class="slide2-pastel-card pastel-orange">
-                <span class="slide2-pastel-label">Tugas Selesai</span>
-                <div class="slide2-pastel-value">
-                  <span class="slide2-pastel-num"><?= $workerDoneTasks ?></span>
-                  <span class="slide2-pastel-unit">Selesai</span>
+
+              <!-- Kotak 3: Tugas Selesai (Badge Hijau Pastel #E8F8F2 & Icon #10B981) -->
+              <div class="slide2-pastel-card">
+                <div class="slide2-card-header">
+                  <span class="slide2-card-title">Tugas Selesai</span>
+                  <div class="slide2-card-icon-badge" style="background: #E8F8F2;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                  </div>
+                </div>
+                <div class="slide2-card-value">
+                  <span class="slide2-card-num"><?= $workerDoneTasks ?></span>
+                  <span class="slide2-card-unit">Selesai</span>
+                </div>
+                <div class="slide2-card-subtext">
+                  Telah Disetujui
                 </div>
               </div>
             </div>

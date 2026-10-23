@@ -57,6 +57,55 @@ if ($role === 'owner') {
 $badgeLabel = $sidebarBadge;
 ?>
 
+<style>
+/* 5. Animasi Item Menu Sidebar & Hover Elastis */
+.sidebar a, .sidebar .nav-item, .sidebar-link, .sidebar-nav .nav-link {
+  position: relative;
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+              background-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+              color 200ms ease,
+              box-shadow 240ms ease !important;
+}
+.sidebar a:hover:not(.active), .sidebar .nav-item:hover:not(.active), .sidebar-nav .nav-link:hover:not(.active) {
+  transform: translate3d(5px, 0, 0) !important;
+  background-color: #EEF2FF !important;
+  color: #5B3DF5 !important;
+}
+.sidebar a:active, .sidebar .nav-item:active, .bottom-nav a:active, .bottom-nav button:active, .mobile-bottom-nav a:active, .mobile-bottom-nav button:active, .mob-nav-item:active {
+  transform: scale(0.94) !important;
+}
+
+/* 6. Perbaiki Drawer Sidebar Mobile: JANGAN PAKAI display:none AGAR ANIMASI SLIDE JALAN! */
+@media (max-width: 1024px) {
+  aside.sidebar, #sidebar, #app-sidebar, .sidebar {
+    display: flex !important;
+    visibility: hidden;
+    pointer-events: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 280px !important;
+    max-width: 85vw !important;
+    height: 100dvh !important;
+    z-index: 99999 !important;
+    transform: translate3d(-104%, 0, 0) !important;
+    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                visibility 0ms linear 320ms !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25) !important;
+  }
+  aside.sidebar.sidebar-open, aside.sidebar.active, aside.sidebar.open,
+  #sidebar.active, #sidebar.open, #app-sidebar.open, #app-sidebar.active, #app-sidebar.sidebar-open,
+  .sidebar.open, .sidebar.active, .sidebar.sidebar-open,
+  body.sidebar-open aside.sidebar, body.sidebar-open #app-sidebar, body.sidebar-open .sidebar {
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translate3d(0, 0, 0) !important;
+    transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                visibility 0ms linear 0ms !important;
+  }
+}
+</style>
+
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
 
 <aside class="sidebar" id="app-sidebar">

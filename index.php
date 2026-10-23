@@ -30,6 +30,11 @@ if (empty($route)) {
     }
 }
 
+// Enable Cross-Document View Transitions (Chromium & Modern Browsers)
+if (!headers_sent()) {
+    header('View-Transition: same-origin');
+}
+
 // Expose current page globally
 $currentPage = $route;
 $GLOBALS['currentPage'] = $route;

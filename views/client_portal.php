@@ -317,6 +317,92 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
   <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
   <?php render_tab_uid_script(); ?>
   <style>
+    /* ==========================================================================
+       ANIMASI PERPINDAHAN HALAMAN, TAB & SIDEBAR (KALA MOTION SYSTEM)
+       ========================================================================== */
+    @view-transition {
+      navigation: auto;
+    }
+    ::view-transition-old(root) {
+      animation: kalaFadeOut 140ms cubic-bezier(0.4, 0, 1, 1) both;
+    }
+    ::view-transition-new(root) {
+      animation: kalaSlideUpIn 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes kalaFadeOut {
+      from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+      to   { opacity: 0; transform: translate3d(0, -6px, 0) scale(0.99); }
+    }
+
+    @keyframes kalaSlideUpIn {
+      0%   { opacity: 0; transform: translate3d(0, 18px, 0) scale(0.985); }
+      100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+    }
+
+    @keyframes kalaCardCascade {
+      0%   { opacity: 0; transform: translate3d(0, 16px, 0); }
+      100% { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+
+    .main-content, main, .main-wrapper, .tab-pane, .kala-page-view {
+      animation: kalaSlideUpIn 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      will-change: transform, opacity;
+    }
+
+    .kala-page-leaving {
+      animation: kalaFadeOut 150ms cubic-bezier(0.4, 0, 1, 1) forwards !important;
+      pointer-events: none;
+    }
+
+    .main-content .card,
+    .tab-pane .card,
+    .kala-stagger-item {
+      animation: kalaCardCascade 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .main-content .card:nth-child(1), .tab-pane > *:nth-child(1), .kala-stagger-item:nth-child(1) { animation-delay: 20ms; }
+    .main-content .card:nth-child(2), .tab-pane > *:nth-child(2), .kala-stagger-item:nth-child(2) { animation-delay: 65ms; }
+    .main-content .card:nth-child(3), .tab-pane > *:nth-child(3), .kala-stagger-item:nth-child(3) { animation-delay: 110ms; }
+    .main-content .card:nth-child(4), .tab-pane > *:nth-child(4), .kala-stagger-item:nth-child(4) { animation-delay: 155ms; }
+    .main-content .card:nth-child(5), .tab-pane > *:nth-child(5), .kala-stagger-item:nth-child(5) { animation-delay: 200ms; }
+
+    .sidebar a, .sidebar .nav-item, .sidebar-link, .sidebar-nav .nav-link {
+      position: relative;
+      transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+                  background-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+                  color 200ms ease,
+                  box-shadow 240ms ease !important;
+    }
+    .sidebar a:hover:not(.active), .sidebar .nav-item:hover:not(.active), .sidebar-nav .nav-link:hover:not(.active) {
+      transform: translate3d(5px, 0, 0) !important;
+      background-color: #EEF2FF !important;
+      color: #5B3DF5 !important;
+    }
+    .sidebar a:active, .sidebar .nav-item:active, .bottom-nav a:active, .bottom-nav button:active, .mobile-bottom-nav a:active, .mobile-bottom-nav button:active, .mob-nav-item:active {
+      transform: scale(0.94) !important;
+    }
+
+    @media (max-width: 1024px) {
+      aside.sidebar, #sidebar, #app-sidebar, .sidebar {
+        display: flex !important;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translate3d(-104%, 0, 0) !important;
+        transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                    visibility 0ms linear 320ms !important;
+      }
+      aside.sidebar.sidebar-open, aside.sidebar.active, aside.sidebar.open,
+      #sidebar.active, #sidebar.open, #app-sidebar.open, #app-sidebar.active, #app-sidebar.sidebar-open,
+      .sidebar.open, .sidebar.active, .sidebar.sidebar-open,
+      body.sidebar-open aside.sidebar, body.sidebar-open #app-sidebar, body.sidebar-open .sidebar {
+        visibility: visible !important;
+        pointer-events: auto !important;
+        transform: translate3d(0, 0, 0) !important;
+        transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                    visibility 0ms linear 0ms !important;
+      }
+    }
+
     /* Client Portal Custom Styles - Minimal Finance (Bankio) */
     .portal-hero {
       background: linear-gradient(135deg, #5D76F5 0%, #8932E0 100%);
@@ -1191,7 +1277,7 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
         </div>
 
         <!-- TAB 1: Deliverables & Team Tasks -->
-        <div id="tab-pane-deliverables">
+        <div id="tab-pane-deliverables" class="tab-pane kala-page-view">
           <!-- Filter Controls & Search Box (Modern Boxed Controls) -->
           <div class="portal-filter-toolbar">
             <div class="portal-filter-chips-track" id="task-filter-chips">
@@ -1476,7 +1562,7 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
 
         <?php if ($clientHasSosmed): ?>
         <!-- TAB 2: Content Calendar -->
-        <div id="tab-pane-calendar" style="display: none;">
+        <div id="tab-pane-calendar" class="tab-pane kala-page-view" style="display: none;">
           <div class="glass-panel">
             <div class="panel-header">
               <div>
@@ -1539,7 +1625,7 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
         <?php endif; ?>
 
         <!-- TAB 3: Client Invoices (Client Privacy Assured) -->
-        <div id="tab-pane-invoices" style="display: none;">
+        <div id="tab-pane-invoices" class="tab-pane kala-page-view" style="display: none;">
           <div class="glass-panel" style="overflow: visible; min-width: 0; max-width: 100%;">
             <div class="panel-header">
               <div>
@@ -1595,7 +1681,7 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
         </div>
 
         <!-- TAB 4: Performance Reports (Pitch Deck & Blended Economics) -->
-        <div id="tab-pane-reports" style="display: none;">
+        <div id="tab-pane-reports" class="tab-pane kala-page-view" style="display: none;">
           <!-- 1. Report Ads & Performance Deck Panel -->
           <div class="glass-panel" style="margin-bottom: 24px;">
             <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
@@ -1788,7 +1874,7 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
         </div>
 
         <!-- TAB 5: Client Live Ads Transparency (100% Dynamic Aggregation) -->
-        <div id="tab-pane-ads" style="display: none;">
+        <div id="tab-pane-ads" class="tab-pane kala-page-view" style="display: none;">
           <?php if (!empty($pendingLimitRequest)): ?>
             <!-- Prominent Banner Notifikasi Pengajuan Tambah Limit dari Owner -->
             <div id="client-banner-limit-request" style="background: linear-gradient(135deg, #FEF0C7 0%, #FEDF89 100%); border: 1.5px solid #FDB022; border-radius: 14px; padding: 18px 20px; margin-bottom: 22px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.18); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
@@ -2330,42 +2416,52 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
     }
 
     function switchPortalTab(tabName, btn) {
-      document.querySelectorAll('.portal-tab-btn').forEach(b => b.classList.remove('active'));
-      if (btn) {
-        btn.classList.add('active');
-      } else {
-        const targetBtn = document.querySelector(`.portal-tab-btn[onclick*="'${tabName}'"]`);
-        if (targetBtn) targetBtn.classList.add('active');
-      }
-
-      ['deliverables', 'calendar', 'invoices', 'reports', 'ads'].forEach(t => {
-        const pane = document.getElementById('tab-pane-' + t);
-        if (pane) {
-          if (t === tabName) {
-            pane.style.display = 'block';
-            pane.style.animation = 'none';
-            void pane.offsetWidth; // Trigger reflow for smooth re-animation
-            pane.style.animation = 'kalaPageEnter 260ms cubic-bezier(0.22, 1, 0.36, 1) both';
-          } else {
-            pane.style.display = 'none';
-          }
-        }
-      });
-
-      // Sync mobile bottom nav items if present
-      document.querySelectorAll('.mobile-bottom-nav .mob-nav-item').forEach(item => {
-        const href = item.getAttribute('href') || '';
-        if (href.includes('tab=' + tabName) || (tabName === 'deliverables' && !href.includes('tab='))) {
-          item.classList.add('active');
+      const applySwitch = () => {
+        document.querySelectorAll('.portal-tab-btn').forEach(b => b.classList.remove('active'));
+        if (btn) {
+          btn.classList.add('active');
         } else {
-          item.classList.remove('active');
+          const targetBtn = document.querySelector(`.portal-tab-btn[onclick*="'${tabName}'"]`);
+          if (targetBtn) targetBtn.classList.add('active');
         }
-      });
 
-      if (tabName === 'ads') {
-        requestAnimationFrame(() => setTimeout(loadClientAdsData, 90));
-      } else if (tabName === 'reports') {
-        requestAnimationFrame(() => setTimeout(loadClientWorkRecap, 90));
+        ['deliverables', 'calendar', 'invoices', 'reports', 'ads'].forEach(t => {
+          const pane = document.getElementById('tab-pane-' + t);
+          if (pane) {
+            if (t === tabName) {
+              pane.style.display = 'block';
+              void pane.offsetWidth;
+              pane.classList.add('kala-page-view');
+            } else {
+              pane.style.display = 'none';
+              pane.classList.remove('kala-page-view');
+            }
+          }
+        });
+
+        // Sync mobile bottom nav items if present
+        document.querySelectorAll('.mobile-bottom-nav .mob-nav-item').forEach(item => {
+          const href = item.getAttribute('href') || '';
+          if (href.includes('tab=' + tabName) || (tabName === 'deliverables' && !href.includes('tab='))) {
+            item.classList.add('active');
+          } else {
+            item.classList.remove('active');
+          }
+        });
+
+        if (tabName === 'ads') {
+          requestAnimationFrame(() => setTimeout(loadClientAdsData, 90));
+        } else if (tabName === 'reports') {
+          requestAnimationFrame(() => setTimeout(loadClientWorkRecap, 90));
+        }
+      };
+
+      if (document.startViewTransition) {
+        document.startViewTransition(() => {
+          applySwitch();
+        });
+      } else {
+        applySwitch();
       }
     }
 

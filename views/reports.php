@@ -179,6 +179,94 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
   <?php render_tab_uid_script(); ?>
   <style>
+    /* ==========================================================================
+       ANIMASI PERPINDAHAN HALAMAN, TAB & SIDEBAR (KALA MOTION SYSTEM)
+       ========================================================================== */
+    @view-transition {
+      navigation: auto;
+    }
+    ::view-transition-old(root) {
+      animation: kalaFadeOut 140ms cubic-bezier(0.4, 0, 1, 1) both;
+    }
+    ::view-transition-new(root) {
+      animation: kalaSlideUpIn 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes kalaFadeOut {
+      from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+      to   { opacity: 0; transform: translate3d(0, -6px, 0) scale(0.99); }
+    }
+
+    @keyframes kalaSlideUpIn {
+      0%   { opacity: 0; transform: translate3d(0, 18px, 0) scale(0.985); }
+      100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+    }
+
+    @keyframes kalaCardCascade {
+      0%   { opacity: 0; transform: translate3d(0, 16px, 0); }
+      100% { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+
+    .main-content, main, .main-wrapper, .tab-pane, .kala-page-view {
+      animation: kalaSlideUpIn 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      will-change: transform, opacity;
+    }
+
+    .kala-page-leaving {
+      animation: kalaFadeOut 150ms cubic-bezier(0.4, 0, 1, 1) forwards !important;
+      pointer-events: none;
+    }
+
+    .main-content .card,
+    .tab-pane .card,
+    .glass-panel,
+    .kpi-card,
+    .kala-stagger-item {
+      animation: kalaCardCascade 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .main-content .card:nth-child(1), .tab-pane > *:nth-child(1), .kala-stagger-item:nth-child(1) { animation-delay: 20ms; }
+    .main-content .card:nth-child(2), .tab-pane > *:nth-child(2), .kala-stagger-item:nth-child(2) { animation-delay: 65ms; }
+    .main-content .card:nth-child(3), .tab-pane > *:nth-child(3), .kala-stagger-item:nth-child(3) { animation-delay: 110ms; }
+    .main-content .card:nth-child(4), .tab-pane > *:nth-child(4), .kala-stagger-item:nth-child(4) { animation-delay: 155ms; }
+    .main-content .card:nth-child(5), .tab-pane > *:nth-child(5), .kala-stagger-item:nth-child(5) { animation-delay: 200ms; }
+
+    .sidebar a, .sidebar .nav-item, .sidebar-link, .sidebar-nav .nav-link {
+      position: relative;
+      transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+                  background-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+                  color 200ms ease,
+                  box-shadow 240ms ease !important;
+    }
+    .sidebar a:hover:not(.active), .sidebar .nav-item:hover:not(.active), .sidebar-nav .nav-link:hover:not(.active) {
+      transform: translate3d(5px, 0, 0) !important;
+      background-color: #EEF2FF !important;
+      color: #5B3DF5 !important;
+    }
+    .sidebar a:active, .sidebar .nav-item:active, .bottom-nav a:active, .bottom-nav button:active, .mobile-bottom-nav a:active, .mobile-bottom-nav button:active, .mob-nav-item:active {
+      transform: scale(0.94) !important;
+    }
+
+    @media (max-width: 1024px) {
+      aside.sidebar, #sidebar, #app-sidebar, .sidebar {
+        display: flex !important;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translate3d(-104%, 0, 0) !important;
+        transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                    visibility 0ms linear 320ms !important;
+      }
+      aside.sidebar.sidebar-open, aside.sidebar.active, aside.sidebar.open,
+      #sidebar.active, #sidebar.open, #app-sidebar.open, #app-sidebar.active, #app-sidebar.sidebar-open,
+      .sidebar.open, .sidebar.active, .sidebar.sidebar-open,
+      body.sidebar-open aside.sidebar, body.sidebar-open #app-sidebar, body.sidebar-open .sidebar {
+        visibility: visible !important;
+        pointer-events: auto !important;
+        transform: translate3d(0, 0, 0) !important;
+        transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                    visibility 0ms linear 0ms !important;
+      }
+    }
+
     .report-tab-pill {
       display: inline-flex;
       align-items: center;

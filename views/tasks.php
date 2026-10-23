@@ -127,6 +127,92 @@ if ($isWorkerUser) {
   <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
   <?php render_tab_uid_script(); ?>
   <style>
+    /* ==========================================================================
+       ANIMASI PERPINDAHAN HALAMAN, TAB & SIDEBAR (KALA MOTION SYSTEM)
+       ========================================================================== */
+    @view-transition {
+      navigation: auto;
+    }
+    ::view-transition-old(root) {
+      animation: kalaFadeOut 140ms cubic-bezier(0.4, 0, 1, 1) both;
+    }
+    ::view-transition-new(root) {
+      animation: kalaSlideUpIn 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes kalaFadeOut {
+      from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+      to   { opacity: 0; transform: translate3d(0, -6px, 0) scale(0.99); }
+    }
+
+    @keyframes kalaSlideUpIn {
+      0%   { opacity: 0; transform: translate3d(0, 18px, 0) scale(0.985); }
+      100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+    }
+
+    @keyframes kalaCardCascade {
+      0%   { opacity: 0; transform: translate3d(0, 16px, 0); }
+      100% { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+
+    .main-content, main, .main-wrapper, .tab-pane, .kala-page-view {
+      animation: kalaSlideUpIn 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      will-change: transform, opacity;
+    }
+
+    .kala-page-leaving {
+      animation: kalaFadeOut 150ms cubic-bezier(0.4, 0, 1, 1) forwards !important;
+      pointer-events: none;
+    }
+
+    .main-content .card,
+    .tab-pane .card,
+    .kala-stagger-item {
+      animation: kalaCardCascade 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    .main-content .card:nth-child(1), .tab-pane > *:nth-child(1), .kala-stagger-item:nth-child(1) { animation-delay: 20ms; }
+    .main-content .card:nth-child(2), .tab-pane > *:nth-child(2), .kala-stagger-item:nth-child(2) { animation-delay: 65ms; }
+    .main-content .card:nth-child(3), .tab-pane > *:nth-child(3), .kala-stagger-item:nth-child(3) { animation-delay: 110ms; }
+    .main-content .card:nth-child(4), .tab-pane > *:nth-child(4), .kala-stagger-item:nth-child(4) { animation-delay: 155ms; }
+    .main-content .card:nth-child(5), .tab-pane > *:nth-child(5), .kala-stagger-item:nth-child(5) { animation-delay: 200ms; }
+
+    .sidebar a, .sidebar .nav-item, .sidebar-link, .sidebar-nav .nav-link {
+      position: relative;
+      transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+                  background-color 240ms cubic-bezier(0.22, 1, 0.36, 1),
+                  color 200ms ease,
+                  box-shadow 240ms ease !important;
+    }
+    .sidebar a:hover:not(.active), .sidebar .nav-item:hover:not(.active), .sidebar-nav .nav-link:hover:not(.active) {
+      transform: translate3d(5px, 0, 0) !important;
+      background-color: #EEF2FF !important;
+      color: #5B3DF5 !important;
+    }
+    .sidebar a:active, .sidebar .nav-item:active, .bottom-nav a:active, .bottom-nav button:active, .mobile-bottom-nav a:active, .mobile-bottom-nav button:active, .mob-nav-item:active {
+      transform: scale(0.94) !important;
+    }
+
+    @media (max-width: 1024px) {
+      aside.sidebar, #sidebar, #app-sidebar, .sidebar {
+        display: flex !important;
+        visibility: hidden;
+        pointer-events: none;
+        transform: translate3d(-104%, 0, 0) !important;
+        transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                    visibility 0ms linear 320ms !important;
+      }
+      aside.sidebar.sidebar-open, aside.sidebar.active, aside.sidebar.open,
+      #sidebar.active, #sidebar.open, #app-sidebar.open, #app-sidebar.active, #app-sidebar.sidebar-open,
+      .sidebar.open, .sidebar.active, .sidebar.sidebar-open,
+      body.sidebar-open aside.sidebar, body.sidebar-open #app-sidebar, body.sidebar-open .sidebar {
+        visibility: visible !important;
+        pointer-events: auto !important;
+        transform: translate3d(0, 0, 0) !important;
+        transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+                    visibility 0ms linear 0ms !important;
+      }
+    }
+
     /* Task Management & Workspace Custom Styles - Bankio Minimal Finance */
     .mobile-text { display: none; }
     .desktop-text { display: inline; }
@@ -1162,7 +1248,7 @@ if ($isWorkerUser) {
         </div>
 
         <!-- SECTION 1: Tasks & Deliverables -->
-        <div id="section-tasks-content">
+        <div id="section-tasks-content" class="kala-page-view tab-pane">
           <!-- Alert Banner for Workers if Revision / Client Feedback Arrived -->
           <div id="revision-alert-container" style="display: none;"></div>
 
@@ -1302,7 +1388,7 @@ if ($isWorkerUser) {
         </div>
 
         <!-- SECTION 2: Ads Budget & Spend Tracker -->
-        <div id="section-ads-content" style="display: none;">
+        <div id="section-ads-content" class="kala-page-view tab-pane" style="display: none;">
           <!-- Active Hierarchical Notifications Container (Tim Ads <-> Owner <-> Client) -->
           <div id="ads-notifications-container" style="display: none; margin-bottom: 14px;"></div>
 
@@ -1531,7 +1617,7 @@ if ($isWorkerUser) {
         </div>
 
         <!-- SECTION 3: Report & Rekap Pekerjaan (Bulanan / Per Proyek) -->
-        <div id="section-recap-content" style="display: none;">
+        <div id="section-recap-content" class="kala-page-view tab-pane" style="display: none;">
           <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 22px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
               <div>
@@ -1651,7 +1737,7 @@ if ($isWorkerUser) {
         </div>
 
         <!-- SECTION 4: Profile Karyawan (100% Identical to Slide 2 "Sandra Glam") -->
-        <div id="section-profile-content" style="display: none;">
+        <div id="section-profile-content" class="kala-page-view tab-pane" style="display: none;">
           <div class="worker-slide2-profile-card" style="margin-top: 0 !important; border-radius: 18px !important; padding: 18px !important; background: #FFFFFF !important; border: 1px solid #ECEEF5 !important; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;">
             
             <!-- 1. Header Identitas: Avatar Kartun (72x72px) + Nama + Jabatan & Status -->
@@ -3675,55 +3761,84 @@ if ($isWorkerUser) {
       const secRecap = document.getElementById('section-recap-content');
       const secProfile = document.getElementById('section-profile-content');
 
-      // Reset active states
-      if (btnTasks) btnTasks.classList.remove('active');
-      if (btnAds) btnAds.classList.remove('active');
-      if (btnRecap) btnRecap.classList.remove('active');
-      if (btnProfile) btnProfile.classList.remove('active');
+      const applyTabSwitch = () => {
+        // Reset active states
+        if (btnTasks) btnTasks.classList.remove('active');
+        if (btnAds) btnAds.classList.remove('active');
+        if (btnRecap) btnRecap.classList.remove('active');
+        if (btnProfile) btnProfile.classList.remove('active');
 
-      if (secTasks) secTasks.style.display = 'none';
-      if (secAds) secAds.style.display = 'none';
-      if (secRecap) secRecap.style.display = 'none';
-      if (secProfile) secProfile.style.display = 'none';
+        [secTasks, secAds, secRecap, secProfile].forEach(s => {
+          if (s) {
+            s.style.display = 'none';
+            s.classList.remove('kala-page-view');
+          }
+        });
 
-      // Sync mobile bottom navigation bar active state
-      const mobNav = document.getElementById('mobile-bottom-nav');
-      if (mobNav) {
-        mobNav.querySelectorAll('.mob-nav-item').forEach(el => el.classList.remove('active'));
-        if (tab === 'ads') {
-          const adsNav = mobNav.querySelector('a[href*="tab=ads"]') || mobNav.querySelector('a[href*="ads_tracker"]');
-          if (adsNav) adsNav.classList.add('active');
-        } else if (tab === 'recap') {
-          const recapNav = mobNav.querySelector('a[href*="tab=recap"]');
-          if (recapNav) recapNav.classList.add('active');
-        } else if (tab === 'profile') {
-          const profNav = document.getElementById('mob-nav-profile-item') || mobNav.querySelector('a[href*="tab=profile"]');
-          if (profNav) profNav.classList.add('active');
-        } else {
-          const taskNav = mobNav.querySelector('a[href*="tasks"]') || mobNav.querySelector('a[href$="tasks"]');
-          if (taskNav) taskNav.classList.add('active');
+        // Sync mobile bottom navigation bar active state
+        const mobNav = document.getElementById('mobile-bottom-nav');
+        if (mobNav) {
+          mobNav.querySelectorAll('.mob-nav-item').forEach(el => el.classList.remove('active'));
+          if (tab === 'ads' || tab === 'ads_tracker') {
+            const adsNav = mobNav.querySelector('a[href*="tab=ads"]') || mobNav.querySelector('a[href*="ads_tracker"]');
+            if (adsNav) adsNav.classList.add('active');
+          } else if (tab === 'recap') {
+            const recapNav = mobNav.querySelector('a[href*="tab=recap"]');
+            if (recapNav) recapNav.classList.add('active');
+          } else if (tab === 'profile') {
+            const profNav = document.getElementById('mob-nav-profile-item') || mobNav.querySelector('a[href*="tab=profile"]');
+            if (profNav) profNav.classList.add('active');
+          } else {
+            const taskNav = mobNav.querySelector('a[href*="tasks"]') || mobNav.querySelector('a[href$="tasks"]');
+            if (taskNav) taskNav.classList.add('active');
+          }
         }
-      }
 
-      if (tab === 'ads') {
-        if (btnAds) btnAds.classList.add('active');
-        if (secAds) secAds.style.display = 'block';
-        loadAdsTrackerData();
-        history.replaceState(null, '', '?tab=ads_tracker&_slot=internal');
-      } else if (tab === 'recap') {
-        if (btnRecap) btnRecap.classList.add('active');
-        if (secRecap) secRecap.style.display = 'block';
-        loadWorkerRecapData();
-        history.replaceState(null, '', '?tab=recap&_slot=internal');
-      } else if (tab === 'profile') {
-        if (btnProfile) btnProfile.classList.add('active');
-        if (secProfile) secProfile.style.display = 'block';
-        history.replaceState(null, '', '?tab=profile&_slot=internal');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        if (tab === 'ads' || tab === 'ads_tracker') {
+          if (btnAds) btnAds.classList.add('active');
+          if (secAds) {
+            secAds.style.display = 'block';
+            void secAds.offsetWidth;
+            secAds.classList.add('kala-page-view');
+          }
+          loadAdsTrackerData();
+          history.replaceState(null, '', '?tab=ads_tracker&_slot=internal');
+        } else if (tab === 'recap') {
+          if (btnRecap) btnRecap.classList.add('active');
+          if (secRecap) {
+            secRecap.style.display = 'block';
+            void secRecap.offsetWidth;
+            secRecap.classList.add('kala-page-view');
+          }
+          loadWorkerRecapData();
+          history.replaceState(null, '', '?tab=recap&_slot=internal');
+        } else if (tab === 'profile') {
+          if (btnProfile) btnProfile.classList.add('active');
+          if (secProfile) {
+            secProfile.style.display = 'block';
+            void secProfile.offsetWidth;
+            secProfile.classList.add('kala-page-view');
+          }
+          history.replaceState(null, '', '?tab=profile&_slot=internal');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          if (btnTasks) btnTasks.classList.add('active');
+          if (secTasks) {
+            secTasks.style.display = 'block';
+            void secTasks.offsetWidth;
+            secTasks.classList.add('kala-page-view');
+          }
+          loadTasksData();
+          history.replaceState(null, '', '?_slot=internal');
+        }
+      };
+
+      if (document.startViewTransition) {
+        document.startViewTransition(() => {
+          applyTabSwitch();
+        });
       } else {
-        if (btnTasks) btnTasks.classList.add('active');
-        if (secTasks) secTasks.style.display = 'block';
-        history.replaceState(null, '', '?_slot=internal');
+        applyTabSwitch();
       }
     }
 

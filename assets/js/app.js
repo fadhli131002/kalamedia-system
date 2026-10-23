@@ -89,20 +89,54 @@
   };
 })();
 
-// Mobile Sidebar Drawer Navigation Helper
+// Mobile Sidebar Drawer Navigation Helper (60FPS Slide Transition)
 function toggleMobileSidebar() {
-  const sidebar = document.querySelector('.sidebar') || document.getElementById('app-sidebar');
+  const sidebar = document.querySelector('aside.sidebar') || document.getElementById('app-sidebar') || document.querySelector('.sidebar');
   const overlay = document.getElementById('sidebar-overlay');
-  if (sidebar) sidebar.classList.toggle('open');
-  if (overlay) overlay.classList.toggle('active');
+  const isOpen = document.body.classList.toggle('sidebar-open');
+  if (sidebar) {
+    sidebar.classList.toggle('sidebar-open', isOpen);
+    sidebar.classList.toggle('active', isOpen);
+    sidebar.classList.toggle('open', isOpen);
+  }
+  if (overlay) overlay.classList.toggle('active', isOpen);
 }
 
 function closeMobileSidebar() {
-  const sidebar = document.querySelector('.sidebar') || document.getElementById('app-sidebar');
+  const sidebar = document.querySelector('aside.sidebar') || document.getElementById('app-sidebar') || document.querySelector('.sidebar');
   const overlay = document.getElementById('sidebar-overlay');
-  if (sidebar) sidebar.classList.remove('open');
+  document.body.classList.remove('sidebar-open');
+  if (sidebar) {
+    sidebar.classList.remove('sidebar-open');
+    sidebar.classList.remove('active');
+    sidebar.classList.remove('open');
+  }
   if (overlay) overlay.classList.remove('active');
 }
+
+// Smooth Page Transition Interceptor for Internal Links
+(function() {
+  document.addEventListener('click', function(e) {
+    const link = e.target.closest('a');
+    if (!link) return;
+    const href = link.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('mailto:') || href.startsWith('tel:') || link.getAttribute('target') === '_blank' || link.hasAttribute('download')) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+    // Check if internal navigation link
+    const isInternal = href.startsWith('/') || href.startsWith('?') || href.startsWith('./') || href.startsWith('../') || href.includes(window.location.hostname);
+    if (!isInternal) return;
+
+    // If clicked inside modal or dropdown toggle, ignore
+    if (link.closest('.modal') || link.closest('.dropdown-menu')) return;
+
+    // Trigger leaving animation on main container
+    const mainEl = document.querySelector('.main-content, main, .main-wrapper, .content-body');
+    if (mainEl && !link.classList.contains('no-transition') && !link.hasAttribute('onclick')) {
+      mainEl.classList.add('kala-page-leaving');
+    }
+  }, false);
+})();
 
 
 // Toast Notifications System

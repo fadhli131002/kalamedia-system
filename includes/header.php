@@ -38,8 +38,12 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
   $isWorker = ($userRole === 'karyawan' || $userRole === 'freelancer');
 ?>
 
-<?php if ($isWorker): ?>
-<header class="topbar appify-topbar" style="background: #FFFFFF; border-bottom: 1px solid #F1F5F9; padding: 10px 16px; min-height: 56px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 1px 2px rgba(15,23,42,0.03); position: sticky; top: 0; z-index: 980;">
+<?php if ($isWorker): 
+  $workerAvatarSeed = urlencode($currentUser['name'] ?? 'Worker');
+  $workerAvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed={$workerAvatarSeed}&backgroundColor=ffd5dc,c0aede,d1d4f9,b6e3f4";
+  $fallbackSvgData = "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23FDE2E4%22/><circle cx=%2250%22 cy=%2244%22 r=%2222%22 fill=%22%23FFDFBA%22/><path d=%22M32 38 Q50 16 68 38 Q50 26 32 38 Z%22 fill=%22%233D2645%22/><circle cx=%2242%22 cy=%2242%22 r=%223%22 fill=%22%231F2937%22/><circle cx=%2258%22 cy=%2242%22 r=%223%22 fill=%22%231F2937%22/><circle cx=%2238%22 cy=%2247%22 r=%222.5%22 fill=%22%23FFB5A7%22 opacity=%220.6%22/><circle cx=%2262%22 cy=%2247%22 r=%222.5%22 fill=%22%23FFB5A7%22 opacity=%220.6%22/><path d=%22M45 50 Q50 54 55 50%22 stroke=%22%23D95D39%22 stroke-width=%222%22 fill=%22none%22 stroke-linecap=%22round%22/><path d=%22M25 94 C28 72 40 66 50 66 C60 66 72 72 75 94 Z%22 fill=%22%236C5CE7%22/><circle cx=%2250%22 cy=%2268%22 r=%225%22 fill=%22%23FFDFBA%22/></svg>";
+?>
+<header class="topbar appify-topbar" style="height: 64px !important; min-height: 64px !important; max-height: 64px !important; padding: 0 16px !important; margin: 0 !important; display: flex !important; align-items: center !important; justify-content: space-between !important; background: #FFFFFF !important; border-bottom: 1px solid #ECEEF5 !important; position: sticky !important; top: 0 !important; z-index: 100 !important; box-sizing: border-box !important;">
   <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
     <button class="sidebar-toggle-btn" id="sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Buka Menu Navigasi" title="Buka Menu" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #334155; flex-shrink: 0; transition: all 0.15s ease;">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -48,7 +52,16 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
         <line x1="3" y1="18" x2="21" y2="18"></line>
       </svg>
     </button>
-    <div style="min-width: 0;">
+
+    <!-- Cartoon Avatar Round 40x40px next to greeting, clicks to Profile Tab! -->
+    <div class="cartoon-avatar-wrapper size-40" onclick="navigateToWorkerProfile(event)" title="Buka Profil Saya" style="cursor: pointer; width: 40px; height: 40px; min-width: 40px; min-height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0; box-shadow: 0 1px 3px rgba(0,0,0,0.06);">
+      <img src="<?= $workerAvatarUrl ?>" 
+           alt="<?= htmlspecialchars($currentUser['name'] ?? 'Worker') ?>" 
+           onerror="this.onerror=null; this.src='<?= $fallbackSvgData ?>';"
+           style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: block;">
+    </div>
+
+    <div style="min-width: 0; cursor: pointer;" onclick="navigateToWorkerProfile(event)" title="Buka Profil">
       <h1 style="font-size: 15px; font-weight: 700; color: #0F172A; margin: 0; line-height: 1.25; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
         Halo, <?= htmlspecialchars($currentUser['name'] ?? 'Tim Kalamedia') ?>
       </h1>
@@ -59,13 +72,23 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
   </div>
 
   <div style="flex-shrink: 0;">
-    <span style="display: inline-flex; align-items: center; background: #EEF2FF; color: #4F46E5; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 999px; border: 1px solid #E0E7FF; letter-spacing: 0.1px;">
+    <span style="display: inline-flex; align-items: center; background: #EEF2FF; color: #5B3DF5; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 999px; border: 1px solid #E0E7FF; letter-spacing: 0.1px;">
       <?= $userRole === 'freelancer' ? 'Freelancer' : 'Staff' ?>
     </span>
   </div>
 </header>
+<script>
+  function navigateToWorkerProfile(e) {
+    if (e) e.preventDefault();
+    if (typeof switchTaskWorkspaceTab === 'function') {
+      switchTaskWorkspaceTab('profile');
+    } else {
+      window.location.href = '<?= url('tasks?tab=profile&_slot=internal') ?>';
+    }
+  }
+</script>
 <?php else: ?>
-<header class="topbar">
+<header class="topbar" style="height: 64px !important; min-height: 64px !important; max-height: 64px !important; padding: 0 16px !important; margin: 0 !important; display: flex !important; align-items: center !important; justify-content: space-between !important; background: #FFFFFF !important; border-bottom: 1px solid #ECEEF5 !important; position: sticky !important; top: 0 !important; z-index: 100 !important; box-sizing: border-box !important;">
   <div class="greeting-text">
     <button class="sidebar-toggle-btn" id="sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Buka Menu Navigasi" title="Buka Menu">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">

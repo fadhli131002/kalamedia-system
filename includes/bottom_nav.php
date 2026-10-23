@@ -69,7 +69,7 @@ $isAdmin = is_admin();
 </div>
 
 <!-- Mobile Bottom Navigation Bar (Active on Mobile Screen <= 768px) -->
-<nav class="mobile-bottom-nav" id="mobile-bottom-nav" aria-label="Navigasi Bawah Mobile">
+<nav class="mobile-bottom-nav <?= $isWorker ? 'worker-slide2-nav' : '' ?>" id="mobile-bottom-nav" aria-label="Navigasi Bawah Mobile">
   <?php if ($isClient): 
     $clientProfileId = (int)($currentUser['client_id'] ?? current_user_client_id());
     $clientHasSosmed = $clientProfileId > 0 ? client_has_sosmed_service($clientProfileId) : true;
@@ -115,9 +115,10 @@ $isAdmin = is_admin();
   <?php elseif ($isWorker): 
     $isAdsSpecialistUser = is_ads_specialist($currentUser);
     $workerHasSosmed = worker_has_sosmed_projects((int)($currentUser['id'] ?? 0));
+    $workerCurrentTab = $_GET['tab'] ?? '';
   ?>
-    <!-- TIM ADS / FREELANCER / KARYAWAN BOTTOM NAV -->
-    <a href="<?= url('tasks?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['tasks', 'team-workspace']) && (empty($_GET['tab']) || $_GET['tab'] === 'tasks') ? 'active' : '' ?>">
+    <!-- TIM ADS / FREELANCER / KARYAWAN BOTTOM NAV (SLIDE 2 DARK PILL STYLE) -->
+    <a href="<?= url('tasks?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['tasks', 'team-workspace']) && (empty($workerCurrentTab) || $workerCurrentTab === 'tasks') ? 'active' : '' ?>" id="mob-nav-tasks-item" onclick="handleWorkerBottomNavTasks(event)">
       <div class="mob-nav-icon">
         <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
       </div>
@@ -125,8 +126,8 @@ $isAdmin = is_admin();
     </a>
 
     <?php if ($isAdsSpecialistUser): ?>
-      <!-- ORANG ADS: Saldo Ads + Report Ads (Kalender Konten Dihapus) -->
-      <a href="<?= url('tasks?tab=ads_tracker&_slot=internal') ?>" class="mob-nav-item <?= ($currentPage === 'tasks' && in_array(($_GET['tab'] ?? ''), ['ads', 'ads_tracker'])) ? 'active' : '' ?>">
+      <!-- ORANG ADS: Saldo Ads + Report Ads -->
+      <a href="<?= url('tasks?tab=ads_tracker&_slot=internal') ?>" class="mob-nav-item <?= ($currentPage === 'tasks' && in_array($workerCurrentTab, ['ads', 'ads_tracker'])) ? 'active' : '' ?>" id="mob-nav-ads-item" onclick="handleWorkerBottomNavAds(event)">
         <div class="mob-nav-icon">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="12 6 12 12 16 14"/></svg>
         </div>
@@ -141,7 +142,7 @@ $isAdmin = is_admin();
       </a>
     <?php else: ?>
       <!-- TIM KREATIF: Rekap Kerja Bulanan / Per Proyek + Kalender (Jika ada Sosmed) -->
-      <a href="<?= url('tasks?tab=recap&_slot=internal') ?>" class="mob-nav-item <?= ($currentPage === 'tasks' && ($_GET['tab'] ?? '') === 'recap') ? 'active' : '' ?>">
+      <a href="<?= url('tasks?tab=recap&_slot=internal') ?>" class="mob-nav-item <?= ($currentPage === 'tasks' && $workerCurrentTab === 'recap') ? 'active' : '' ?>" id="mob-nav-recap-item" onclick="handleWorkerBottomNavRecap(event)">
         <div class="mob-nav-icon">
           <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
         </div>
@@ -158,12 +159,13 @@ $isAdmin = is_admin();
       <?php endif; ?>
     <?php endif; ?>
 
-    <button type="button" class="mob-nav-item" onclick="toggleMobileSidebar()" aria-label="Buka Menu Lainnya">
+    <!-- ITEM 4: PROFILE KARYAWAN (Menggantikan Menu) -->
+    <a href="<?= url('tasks?tab=profile&_slot=internal') ?>" class="mob-nav-item <?= ($currentPage === 'tasks' && $workerCurrentTab === 'profile') ? 'active' : '' ?>" id="mob-nav-profile-item" onclick="handleWorkerBottomNavProfile(event)" aria-label="Buka Profile Karyawan">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
-      <span class="mob-nav-label">Menu</span>
-    </button>
+      <span class="mob-nav-label">Profile</span>
+    </a>
 
   <?php else: ?>
     <!-- OWNER & ADMIN BOTTOM NAV -->
@@ -258,5 +260,31 @@ $isAdmin = is_admin();
   window.addEventListener('appinstalled', function() {
     dismissPwaBanner();
   });
+
+  // Worker workspace seamless tab switching handlers
+  window.handleWorkerBottomNavProfile = function(e) {
+    if (typeof switchTaskWorkspaceTab === 'function') {
+      if (e) e.preventDefault();
+      switchTaskWorkspaceTab('profile');
+    }
+  };
+  window.handleWorkerBottomNavTasks = function(e) {
+    if (typeof switchTaskWorkspaceTab === 'function') {
+      if (e) e.preventDefault();
+      switchTaskWorkspaceTab('tasks');
+    }
+  };
+  window.handleWorkerBottomNavAds = function(e) {
+    if (typeof switchTaskWorkspaceTab === 'function') {
+      if (e) e.preventDefault();
+      switchTaskWorkspaceTab('ads');
+    }
+  };
+  window.handleWorkerBottomNavRecap = function(e) {
+    if (typeof switchTaskWorkspaceTab === 'function') {
+      if (e) e.preventDefault();
+      switchTaskWorkspaceTab('recap');
+    }
+  };
 })();
 </script>

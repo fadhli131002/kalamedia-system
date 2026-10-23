@@ -1477,7 +1477,8 @@ window.togglePasswordVisibility = function(inputId, btn) {
 };
 
 // Register PWA Service Worker for Portal Kala
-let deferredPwaPrompt = null;
+window.deferredPwaPrompt = window.deferredPwaPrompt || null;
+var deferredPwaPrompt = window.deferredPwaPrompt;
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {

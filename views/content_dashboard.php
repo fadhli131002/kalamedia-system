@@ -688,7 +688,7 @@ unset($c);
     <main class="main-wrapper">
       <?php require_once BASE_PATH . '/includes/header.php'; ?>
 
-      <div class="content-body" style="padding: 24px;">
+      <div class="content-body">
 
         <!-- Supitar Calendar Frame (1:1 Match with Slide 3 Reference) -->
         <div class="supitar-calendar-card">

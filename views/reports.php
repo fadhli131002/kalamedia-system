@@ -261,10 +261,8 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     @media (max-width: 768px) {
       .content-body {
-        padding-top: 14px !important;
-        padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
-        padding-left: 16px !important;
-        padding-right: 16px !important;
+        padding: 16px 16px calc(96px + env(safe-area-inset-bottom, 0px)) 16px !important;
+        margin-top: 0 !important;
       }
       .glass-panel {
         padding: 14px !important;
@@ -290,8 +288,8 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
       <div class="content-body">
 
-        <!-- Role Badge Header -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <!-- Role Badge Header Card -->
+        <div style="border-radius: 18px; padding: 16px; background: #FFFFFF; border: 1px solid #ECEEF5; margin-top: 0 !important; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); box-sizing: border-box; width: 100%;">
           <div style="min-width: 0;">
             <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
               <h2 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0; line-height: 1.25;">
@@ -313,7 +311,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
             <button type="button" onclick="openNewAdsReportModal()" style="background: #5B3DF5; color: #FFFFFF; font-weight: 700; font-size: 12.5px; border-radius: 10px; height: 36px; padding: 0 14px; border: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(91, 61, 245, 0.25); cursor: pointer; transition: all 0.15s ease;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              <span>+ Buat Report Ads</span>
+              <span>Buat Report Ads</span>
             </button>
             <?php if ($isOwnerOrAdmin): ?>
               <a href="<?= url('reports-form') ?>" class="btn btn-secondary btn-sm" style="border-radius: 10px; height: 36px; display: inline-flex; align-items: center;">

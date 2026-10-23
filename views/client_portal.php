@@ -512,11 +512,11 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
       transform: scale(0.98);
     }
     .portal-tab-btn.active {
-      background: #FFFFFF !important;
-      color: #111827 !important;
+      background: #5B3DF5 !important;
+      color: #FFFFFF !important;
       border: none !important;
-      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08) !important;
-      font-weight: 600 !important;
+      box-shadow: 0 2px 8px rgba(91, 61, 245, 0.25) !important;
+      font-weight: 700 !important;
     }
     .portal-tab-badge {
       font-size: 11px;
@@ -528,8 +528,8 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
       line-height: 1.2;
     }
     .portal-tab-btn.active .portal-tab-badge {
-      background: #F3F4F6;
-      color: #111827;
+      background: rgba(255, 255, 255, 0.25) !important;
+      color: #FFFFFF !important;
     }
 
     /* Filter & Search Toolbar (SaaS Clean Controls) */
@@ -589,11 +589,11 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
     }
     .portal-chip-btn.active,
     #task-filter-chips .filter-btn.active {
-      background: #FFFFFF !important;
+      background: #5B3DF5 !important;
       border: none !important;
-      color: #111827 !important;
-      font-weight: 600 !important;
-      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08) !important;
+      color: #FFFFFF !important;
+      font-weight: 700 !important;
+      box-shadow: 0 2px 8px rgba(91, 61, 245, 0.25) !important;
     }
     .portal-chip-badge {
       font-size: 11px;
@@ -606,8 +606,8 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
     }
     .portal-chip-btn.active .portal-chip-badge,
     #task-filter-chips .filter-btn.active .portal-chip-badge {
-      background: #F3F4F6;
-      color: #111827;
+      background: rgba(255, 255, 255, 0.25) !important;
+      color: #FFFFFF !important;
     }
 
     /* Search Text Box */

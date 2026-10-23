@@ -262,7 +262,12 @@ $isAdmin = is_admin();
   <!-- Header Sheet -->
   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; padding: 0 4px;">
     <div>
-      <h3 style="font-size: 16px; font-weight: 700; color: #16141F; margin: 0; letter-spacing: -0.2px;">Pusat Menu Eksekutif Owner</h3>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: #16141F; margin: 0; letter-spacing: -0.2px;">Pusat Menu Eksekutif Owner</h3>
+        <span class="badge-version" style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 5px;">
+          <?= defined('APP_VERSION') ? APP_VERSION : 'v2.5' ?>
+        </span>
+      </div>
       <p style="font-size: 12px; color: #6E6D7A; margin: 2px 0 0 0;">Navigasi lengkap 12 menu divisi &amp; kontrol sistem agensi</p>
     </div>
     <button type="button" onclick="closeOwnerBottomSheet()" aria-label="Tutup" style="background: #F1F5F9; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #64748B; cursor: pointer; transition: all 0.15s ease;">

@@ -576,6 +576,30 @@ table td, .table td {
   border: 1px solid #DBEAFE;
 }
 
+.badge-version {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #F1F5F9;
+  color: #475569;
+  border: 1px solid #E2E8F0;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  vertical-align: middle;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: all 0.15s ease;
+}
+.badge-version:hover {
+  background: #E2E8F0;
+  color: #1E293B;
+}
+
 .brand-logo {
   width: 32px;
   height: 32px;

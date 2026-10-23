@@ -144,8 +144,13 @@ $users = $db->query("SELECT id, name, email, role, created_at FROM users ORDER B
               </table>
             </div>
 
-            <div style="margin-top: 18px; background: #F8FAFC; border: 1px solid var(--border-color); border-left: 4px solid #5D76F5; border-radius: var(--radius-sm); padding: 14px 16px; font-size: 12px; color: var(--text-secondary);">
-              <strong style="color: #000000;">Keamanan Sistem:</strong> Admin Finance tidak memiliki wewenang untuk mengubah pengaturan akun Owner atau menghapus arsip keuangan secara permanen.
+            <div style="margin-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #F8FAFC; border: 1px solid var(--border-color); border-left: 4px solid #5D76F5; border-radius: var(--radius-sm); padding: 14px 16px; font-size: 12px; color: var(--text-secondary);">
+              <div>
+                <strong style="color: #000000;">Keamanan Sistem:</strong> Admin Finance tidak memiliki wewenang untuk mengubah pengaturan akun Owner atau menghapus arsip keuangan secara permanen.
+              </div>
+              <span class="badge-version" style="flex-shrink: 0;" title="Versi Rilis Sistem">
+                <?= defined('APP_VERSION') ? APP_VERSION : 'v2.5' ?>
+              </span>
             </div>
           </div>
 

@@ -93,6 +93,7 @@ date_default_timezone_set('Asia/Jakarta');
 
 // App Info
 define('APP_NAME', 'PT Kala Kausa Prima');
+define('APP_VERSION', 'v2.5');
 define('AGENCY_NAME', 'PT Kala Kausa Prima');
 define('AGENCY_EMAIL', 'support@kalamediacreative.com');
 define('AGENCY_WEBSITE', 'kalamediacreative.com');

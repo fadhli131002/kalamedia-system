@@ -190,9 +190,12 @@ $badgeLabel = $sidebarBadge;
         <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" class="sidebar-brand-img" style="height: 32px; width: 32px; object-fit: contain; flex-shrink: 0;">
         <span style="font-weight: 800; font-size: 13.5px; color: #000000; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Kala Kausa Prima</span>
       </div>
-      <span class="role-badge-sidebar">
-        <?= $badgeLabel ?>
-      </span>
+      <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+        <span class="badge-version" style="font-size: 9.5px; padding: 2px 6px; font-weight: 700;"><?= defined('APP_VERSION') ? APP_VERSION : 'v2.5' ?></span>
+        <span class="role-badge-sidebar">
+          <?= $badgeLabel ?>
+        </span>
+      </div>
     </a>
     <button class="sidebar-close-btn" onclick="closeMobileSidebar()" aria-label="Close Sidebar">&times;</button>
   </div>

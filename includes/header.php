@@ -71,7 +71,8 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
     </div>
   </div>
 
-  <div style="flex-shrink: 0;">
+  <div style="flex-shrink: 0; display: flex; align-items: center; gap: 8px;">
+    <span class="badge-version" title="Versi Sistem"><?= defined('APP_VERSION') ? APP_VERSION : 'v2.5' ?></span>
     <span style="display: inline-flex; align-items: center; background: #EEF2FF; color: #5B3DF5; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 999px; border: 1px solid #E0E7FF; letter-spacing: 0.1px;">
       <?= $userRole === 'freelancer' ? 'Freelancer' : 'Staff' ?>
     </span>
@@ -120,7 +121,8 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
     </div>
   </div>
 
-  <div style="flex-shrink: 0;">
+  <div style="flex-shrink: 0; display: flex; align-items: center; gap: 8px;">
+    <span class="badge-version" title="Versi Sistem"><?= defined('APP_VERSION') ? APP_VERSION : 'v2.5' ?></span>
     <span style="background: #EEF2FF; color: #5B3DF5; border-radius: 999px; padding: 4px 12px; font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; border: 1px solid #E0E7FF; letter-spacing: 0.1px;">
       Executive
     </span>
@@ -157,6 +159,7 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
   </div>
 
   <div class="topbar-actions" style="display: flex; align-items: center; gap: 8px;">
+    <span class="badge-version" title="Versi Sistem"><?= defined('APP_VERSION') ? APP_VERSION : 'v2.5' ?></span>
     <!-- Role Context Actions -->
     <?php if ($userRole === 'admin' && !$isClientUser): ?>
       <button class="btn btn-primary btn-sm btn-create-invoice" onclick="openModal('modal-create-invoice')">

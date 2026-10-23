@@ -139,9 +139,14 @@ $activeContext = ($requestedContext === 'client') ? 'client' : 'internal';
     <div class="login-brand" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; margin-bottom: 22px;">
       <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" style="height: 48px; width: 48px; object-fit: contain; margin-bottom: 2px;">
       <div style="font-weight: 600; font-size: 16px; color: #111827; letter-spacing: -0.015em;">PT Kala Kausa Prima</div>
-      <span style="font-size: 11px; color: #2563EB; font-weight: 500; background: #EFF6FF; padding: 2px 8px; border-radius: 5px;">
-        Agency System
-      </span>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span style="font-size: 11px; color: #2563EB; font-weight: 500; background: #EFF6FF; padding: 2px 8px; border-radius: 5px;">
+          Agency System
+        </span>
+        <span class="badge-version" style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 5px;">
+          <?= defined('APP_VERSION') ? APP_VERSION : 'v2.5' ?>
+        </span>
+      </div>
     </div>
 
     <!-- Multi-Slot Context Switcher Tabs -->

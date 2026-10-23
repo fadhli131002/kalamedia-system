@@ -709,6 +709,7 @@ if ($isWorkerUser) {
       }
       .bento-segmented-control::-webkit-scrollbar,
       .task-services-track::-webkit-scrollbar,
+      .worker-client-scroll-track::-webkit-scrollbar,
       .task-status-grid::-webkit-scrollbar {
         display: none !important;
       }
@@ -886,27 +887,30 @@ if ($isWorkerUser) {
           <?php endif; ?>
 
           <?php if ($isWorkerUser): ?>
-            <!-- Worker Info: Jobdesk & Klien (Compact Single Card) -->
+            <!-- Worker Info: Jobdesk & Klien (Compact Single Card - Rata Kanan Kiri & Slide Klien) -->
             <div class="bento-worker-info-card" style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 16px; padding: 12px 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(15,23,42,0.03); display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box;">
-              <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px;">
-                <div style="display: flex; align-items: center; gap: 6px; min-width: 0; flex: 1;">
-                  <span style="font-size: 10px; font-weight: 700; color: #4F46E5; background: #EEF2FF; padding: 2px 7px; border-radius: 6px; flex-shrink: 0;">JOBDESK</span>
-                  <span style="font-weight: 600; color: #0F172A; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    <?= htmlspecialchars($workerProfile['position'] ?? 'Spesialis Tim') ?> &bull; <span style="font-weight: 400; color: #64748B;"><?= htmlspecialchars($workerProfile['jobdesk'] ?? 'Pengerjaan deliverables kreatif') ?></span>
-                  </span>
+              <!-- Row 1: Jobdesk (Rata Kanan Kiri) -->
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; box-sizing: border-box; font-size: 12px;">
+                <span style="font-size: 10px; font-weight: 700; color: #4F46E5; background: #EEF2FF; padding: 2.5px 8px; border-radius: 6px; flex-shrink: 0; letter-spacing: 0.3px;">JOBDESK</span>
+                <div style="font-weight: 600; color: #0F172A; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; font-size: 12px;" title="<?= htmlspecialchars(($workerProfile['position'] ?? 'Spesialis Tim') . ' • ' . ($workerProfile['jobdesk'] ?? 'Pengerjaan deliverables kreatif')) ?>">
+                  <?= htmlspecialchars($workerProfile['position'] ?? 'Spesialis Tim') ?> &bull; <span style="font-weight: 400; color: #64748B;"><?= htmlspecialchars($workerProfile['jobdesk'] ?? 'Pengerjaan deliverables kreatif') ?></span>
                 </div>
               </div>
-              <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 11.5px;">
-                <span style="font-size: 10px; font-weight: 700; color: #059669; background: #ECFDF5; padding: 2px 7px; border-radius: 6px; flex-shrink: 0;">KLIEN</span>
-                <?php if (empty($assignedClients)): ?>
-                  <span style="color: #94A3B8; font-style: italic; font-size: 11px;">Semua penugasan aktif</span>
-                <?php else: ?>
-                  <?php foreach ($assignedClients as $ac): ?>
-                    <span style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 2px 8px; border-radius: 6px; color: #334155; font-weight: 600; font-size: 11px;">
-                      <?= htmlspecialchars($ac['company']) ?>
-                    </span>
-                  <?php endforeach; ?>
-                <?php endif; ?>
+
+              <!-- Row 2: Klien (Rata Kanan Kiri & Horizontal Slide jika Banyak Klien) -->
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; box-sizing: border-box; font-size: 11.5px;">
+                <span style="font-size: 10px; font-weight: 700; color: #059669; background: #ECFDF5; padding: 2.5px 8px; border-radius: 6px; flex-shrink: 0; letter-spacing: 0.3px;">KLIEN</span>
+                <div class="worker-client-scroll-track" style="display: flex; align-items: center; gap: 6px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; -webkit-overflow-scrolling: touch; flex: 1; min-width: 0; padding: 2px 0;">
+                  <?php if (empty($assignedClients)): ?>
+                    <span style="color: #94A3B8; font-style: italic; font-size: 11px; margin-left: auto;">Semua penugasan aktif</span>
+                  <?php else: ?>
+                    <?php foreach ($assignedClients as $idx => $ac): ?>
+                      <span style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 2.5px 9px; border-radius: 6px; color: #334155; font-weight: 600; font-size: 11px; white-space: nowrap; flex-shrink: 0; <?= ($idx === 0 ? 'margin-left: auto;' : '') ?>">
+                        <?= htmlspecialchars($ac['company']) ?>
+                      </span>
+                    <?php endforeach; ?>
+                  <?php endif; ?>
+                </div>
               </div>
             </div>
           <?php endif; ?>

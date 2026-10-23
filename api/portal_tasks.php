@@ -1586,53 +1586,7 @@ if ($action === 'work_recap') {
     }
 }
 
-// -------------------------------------------------------------
-// 12. POST: Update Worker Profile (Phone/WA & Password)
-// -------------------------------------------------------------
-if ($action === 'update_my_profile') {
-    if (!$isWorkerUser && !$isOwnerOrAdmin) {
-        echo json_encode(['success' => false, 'message' => 'Akses ditolak']);
-        exit;
-    }
 
-    $targetUserId = $userId;
-    $phone_wa = trim($_POST['phone_wa'] ?? '');
-    $new_password = $_POST['new_password'] ?? '';
-    $confirm_password = $_POST['confirm_password'] ?? '';
-
-    try {
-        $updateFields = ['phone_wa = ?'];
-        $params = [$phone_wa];
-
-        if (!empty($new_password)) {
-            if (strlen($new_password) < 6) {
-                echo json_encode(['success' => false, 'message' => 'Password minimal 6 karakter']);
-                exit;
-            }
-            if ($new_password !== $confirm_password) {
-                echo json_encode(['success' => false, 'message' => 'Konfirmasi password baru tidak cocok']);
-                exit;
-            }
-            $updateFields[] = 'password = ?';
-            $params[] = password_hash($new_password, PASSWORD_DEFAULT);
-        }
-
-        $params[] = $targetUserId;
-        $sql = "UPDATE users SET " . implode(', ', $updateFields) . " WHERE id = ?";
-        $stmt = $db->prepare($sql);
-        $stmt->execute($params);
-
-        echo json_encode([
-            'success' => true, 
-            'message' => 'Profil berhasil diperbarui!', 
-            'phone_wa' => $phone_wa
-        ]);
-        exit;
-    } catch (Exception $e) {
-        echo json_encode(['success' => false, 'message' => 'Gagal memperbarui profil: ' . $e->getMessage()]);
-        exit;
-    }
-}
 
 if (!empty($action) && $action !== 'none') {
     echo json_encode(['success' => false, 'message' => 'Aksi API tidak valid']);

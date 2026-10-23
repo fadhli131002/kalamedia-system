@@ -1656,7 +1656,7 @@ if ($isWorkerUser) {
             
             <!-- 1. Header Identitas: Avatar Kartun (72x72px) + Nama + Jabatan & Status -->
             <div class="slide2-identity-header">
-              <div class="cartoon-avatar-wrapper size-72" onclick="openWorkerProfileEditModal()" title="Foto Profil Kartun Animasi">
+              <div class="cartoon-avatar-wrapper size-72" title="Foto Profil" style="cursor: default;">
                 <img src="<?= $workerAvatarUrl ?>" 
                      alt="Avatar <?= htmlspecialchars($user['name'] ?? 'Worker') ?>" 
                      onerror="this.onerror=null; this.src='<?= $fallbackSvgData ?>';">
@@ -1669,14 +1669,14 @@ if ($isWorkerUser) {
               </div>
             </div>
 
-            <!-- 2. Baris Info Ringkas & 2 Tombol Aksi (Persis Follow 72 | Followers 162 di Slide 2) -->
-            <div class="slide2-quick-info-row">
-              <div class="slide2-quick-cols">
+            <!-- 2. Baris Info Ringkas: No. Telepon & Status Kontrak (Read-Only) -->
+            <div class="slide2-quick-info-row" style="padding: 4px 4px 16px 4px;">
+              <div class="slide2-quick-cols" style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
                 <div class="slide2-quick-col">
                   <span class="slide2-quick-label">No. Telepon / WA</span>
                   <span class="slide2-quick-val" id="profile-display-phone"><?= htmlspecialchars($workerProfile['phone_wa'] ?: 'Belum diisi') ?></span>
                 </div>
-                <div class="slide2-quick-col">
+                <div class="slide2-quick-col" style="text-align: right;">
                   <span class="slide2-quick-label">Status Kontrak</span>
                   <span class="slide2-quick-val">
                     <?php 
@@ -1688,23 +1688,6 @@ if ($isWorkerUser) {
                     ?>
                   </span>
                 </div>
-              </div>
-              <div class="slide2-quick-actions">
-                <!-- Button 1: Share / Kontak WhatsApp -->
-                <button type="button" class="slide2-action-btn" onclick="shareWorkerContact()" title="Salin Kontak WhatsApp" aria-label="Bagikan Kontak WhatsApp" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                    <polyline points="16 6 12 2 8 6"></polyline>
-                    <line x1="12" y1="2" x2="12" y2="15"></line>
-                  </svg>
-                </button>
-                <!-- Button 2: Edit Pensil -->
-                <button type="button" class="slide2-action-btn" onclick="openWorkerProfileEditModal()" title="Edit Profil &amp; Password" aria-label="Edit Profil" style="width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 20h9"></path>
-                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                  </svg>
-                </button>
               </div>
             </div>
 
@@ -1771,8 +1754,8 @@ if ($isWorkerUser) {
                 </div>
               </div>
 
-              <!-- Baris 3: Nomor Telepon & WhatsApp -->
-              <div class="slide2-menu-item" onclick="openWorkerProfileEditModal()" role="button" tabindex="0">
+              <!-- Baris 3: Nomor Telepon & WhatsApp (Read-Only) -->
+              <div class="slide2-menu-item" style="cursor: default;">
                 <div class="slide2-menu-left">
                   <div class="slide2-menu-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1781,13 +1764,8 @@ if ($isWorkerUser) {
                   </div>
                   <div class="slide2-menu-text">
                     <h4 class="slide2-menu-title">Nomor Telepon &amp; WhatsApp</h4>
-                    <p class="slide2-menu-desc" id="profile-menu-phone"><?= htmlspecialchars($workerProfile['phone_wa'] ?: 'Belum diisi (Klik untuk tambah)') ?></p>
+                    <p class="slide2-menu-desc" id="profile-menu-phone"><?= htmlspecialchars($workerProfile['phone_wa'] ?: 'Belum diisi') ?></p>
                   </div>
-                </div>
-                <div class="slide2-menu-chevron">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
                 </div>
               </div>
 
@@ -1868,66 +1846,7 @@ if ($isWorkerUser) {
     </main>
   </div>
 
-  <!-- MODAL: Edit Worker Profile (Phone/WA & Password) -->
-  <div class="modal" id="modal-edit-worker-profile" style="display: none;">
-    <div class="modal-dialog" style="max-width: 440px;">
-      <div class="modal-content" style="border-radius: 20px; overflow: hidden; border: 1px solid #ECEEF5;">
-        <div class="modal-header" style="background: #F8FAFC; border-bottom: 1px solid #F1F5F9; padding: 16px 20px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 34px; height: 34px; border-radius: 10px; background: #EEF2FF; color: #4F46E5; display: flex; align-items: center; justify-content: center;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-            </div>
-            <div>
-              <h4 class="modal-title" style="font-size: 15px; font-weight: 700; color: #0F172A; margin: 0;">Edit Nomor WA &amp; Password</h4>
-              <span style="font-size: 11.5px; color: #64748B;">Perbarui kontak dan keamanan akun workspace Anda</span>
-            </div>
-          </div>
-          <button type="button" class="close-btn" onclick="closeWorkerProfileEditModal()">&times;</button>
-        </div>
 
-        <form id="form-edit-worker-profile" onsubmit="submitWorkerProfileEdit(event)">
-          <div class="modal-body" style="padding: 20px;">
-            <div class="form-group" style="margin-bottom: 14px;">
-              <label class="form-label" style="font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">
-                Nomor Telepon / WhatsApp <span style="color: #E11D48;">*</span>
-              </label>
-              <input type="text" name="phone_wa" id="edit-worker-phone" class="form-control" value="<?= htmlspecialchars($workerProfile['phone_wa'] ?? '') ?>" placeholder="Contoh: +62 812-3456-7890" required style="border-radius: 10px; border: 1px solid #CBD5E1; padding: 10px 14px; font-size: 13px; width: 100%;">
-              <span style="font-size: 11px; color: #64748B; margin-top: 4px; display: block;">Digunakan oleh Owner &amp; Klien untuk koordinasi tugas penting</span>
-            </div>
-
-            <div style="margin: 18px 0 14px 0; border-top: 1px dashed #E2E8F0; padding-top: 14px;">
-              <span style="font-size: 12px; font-weight: 700; color: #1E293B; display: flex; align-items: center; gap: 6px;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                Ganti Password (Opsional)
-              </span>
-              <span style="font-size: 11px; color: #64748B; display: block; margin-top: 2px;">Kosongkan jika tidak ingin mengubah password saat ini</span>
-            </div>
-
-            <div class="form-group" style="margin-bottom: 12px;">
-              <label class="form-label" style="font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">
-                Password Baru
-              </label>
-              <input type="password" name="new_password" id="edit-worker-new-password" class="form-control" placeholder="Minimal 6 karakter" style="border-radius: 10px; border: 1px solid #CBD5E1; padding: 10px 14px; font-size: 13px; width: 100%;">
-            </div>
-
-            <div class="form-group" style="margin-bottom: 6px;">
-              <label class="form-label" style="font-size: 12px; font-weight: 600; color: #334155; margin-bottom: 6px; display: block;">
-                Konfirmasi Password Baru
-              </label>
-              <input type="password" name="confirm_password" id="edit-worker-confirm-password" class="form-control" placeholder="Ulangi password baru" style="border-radius: 10px; border: 1px solid #CBD5E1; padding: 10px 14px; font-size: 13px; width: 100%;">
-            </div>
-          </div>
-
-          <div class="modal-footer" style="background: #F8FAFC; border-top: 1px solid #F1F5F9; padding: 12px 20px; display: flex; justify-content: flex-end; gap: 8px;">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="closeWorkerProfileEditModal()" style="border-radius: 8px; font-weight: 600;">Batal</button>
-            <button type="submit" class="btn btn-primary btn-sm" id="btn-save-worker-profile" style="border-radius: 8px; font-weight: 700; background: #4F46E5; border-color: #4F46E5;">
-              Simpan Perubahan
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
 
   <!-- MODAL: Jobdesk Detail Modal -->
   <div class="modal" id="modal-jobdesk-detail" style="display: none;">
@@ -3809,12 +3728,6 @@ if ($isWorkerUser) {
     }
 
     // Modal & Interactive Profile Handlers
-    function openWorkerProfileEditModal() {
-      openModal('modal-edit-worker-profile');
-    }
-    function closeWorkerProfileEditModal() {
-      closeModal('modal-edit-worker-profile');
-    }
     function openJobdeskDetailModal() {
       openModal('modal-jobdesk-detail');
     }
@@ -3826,68 +3739,6 @@ if ($isWorkerUser) {
     }
     function closeAssignedClientsModal() {
       closeModal('modal-assigned-clients');
-    }
-
-    function shareWorkerContact() {
-      const phoneEl = document.getElementById('profile-display-phone');
-      const phone = phoneEl ? phoneEl.textContent.trim() : '';
-      if (!phone || phone === 'Belum diisi') {
-        showToast('Nomor telepon belum diisi. Silakan edit profil untuk menambahkan nomor.', 'warning');
-        openWorkerProfileEditModal();
-        return;
-      }
-      const cleanPhone = phone.replace(/[^0-9]/g, '');
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(phone).then(() => {
-          showToast('Nomor WhatsApp ' + phone + ' berhasil disalin!', 'success');
-        }).catch(() => {
-          window.open('https://wa.me/' + cleanPhone, '_blank');
-        });
-      } else {
-        window.open('https://wa.me/' + cleanPhone, '_blank');
-      }
-    }
-
-    async function submitWorkerProfileEdit(e) {
-      e.preventDefault();
-      const form = document.getElementById('form-edit-worker-profile');
-      const btn = document.getElementById('btn-save-worker-profile');
-      const origText = btn ? btn.textContent : '';
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Menyimpan...';
-      }
-
-      const formData = new FormData(form);
-      try {
-        const res = await fetch('api/portal_tasks.php?action=update_my_profile', {
-          method: 'POST',
-          body: formData
-        });
-        const data = await res.json();
-        if (data.success) {
-          showToast(data.message || 'Profil berhasil diperbarui!', 'success');
-          const phoneVal = data.phone_wa || form.phone_wa.value;
-          const displayPhone = document.getElementById('profile-display-phone');
-          const menuPhone = document.getElementById('profile-menu-phone');
-          if (displayPhone) displayPhone.textContent = phoneVal;
-          if (menuPhone) menuPhone.textContent = phoneVal;
-          closeWorkerProfileEditModal();
-          const pass1 = document.getElementById('edit-worker-new-password');
-          const pass2 = document.getElementById('edit-worker-confirm-password');
-          if (pass1) pass1.value = '';
-          if (pass2) pass2.value = '';
-        } else {
-          showToast(data.message || 'Gagal memperbarui profil', 'danger');
-        }
-      } catch (err) {
-        showToast('Koneksi server gagal', 'danger');
-      } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = origText;
-        }
-      }
     }
 
     async function loadWorkerRecapData() {

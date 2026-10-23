@@ -641,8 +641,8 @@ $initialChartData = [
                             <?= format_rupiah($tfAmount) ?>
                           </div>
                           <?php if (!empty($tfOwnerProof)): ?>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($tfOwnerProof)) ?>', 'Bukti Transfer Owner ke Tim Ads - <?= htmlspecialchars(addslashes($rt['client_company'] ?? '')) ?>')" style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; margin-top: 3px; display: inline-flex; align-items: center; gap: 4px; color: #175CD3; border-color: #B2CCFF; background: #EFF8FF;">
-                              📄 Bukti TF Owner
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($tfOwnerProof)) ?>', 'Bukti Transfer Manajemen ke Tim Ads - <?= htmlspecialchars(addslashes($rt['client_company'] ?? '')) ?>')" style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; margin-top: 3px; display: inline-flex; align-items: center; gap: 4px; color: #175CD3; border-color: #B2CCFF; background: #EFF8FF;">
+                              📄 Bukti Transfer Manajemen
                             </button>
                           <?php else: ?>
                             <span style="font-size: 10.5px; color: var(--text-muted); font-style: italic;">Belum ada lampiran</span>

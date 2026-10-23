@@ -1416,8 +1416,8 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
                             Rp <?= number_format($tfOwnerAmount, 0, ',', '.') ?>
                           </div>
                           <?php if (!empty($tfOwnerProof)): ?>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($tfOwnerProof)) ?>', 'Bukti Transfer Owner ke Tim Ads - <?= htmlspecialchars(addslashes($topup['project_name'] ?? '')) ?>')" style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; color: #175CD3; border-color: #B2CCFF; background: #EFF8FF;">
-                              📄 Bukti TF Owner
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($tfOwnerProof)) ?>', 'Bukti Transfer Manajemen ke Tim Ads - <?= htmlspecialchars(addslashes($topup['project_name'] ?? '')) ?>')" style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; color: #175CD3; border-color: #B2CCFF; background: #EFF8FF;">
+                              📄 Bukti Transfer Manajemen
                             </button>
                           <?php else: ?>
                             <span style="font-size: 10.5px; color: var(--text-muted); font-style: italic; display: block; margin-top: 2px;">Belum ada lampiran</span>
@@ -2638,8 +2638,8 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
                     Rp ${tfOwnerAmount.toLocaleString('id-ID')}
                   </div>
                   ${tfOwnerProof ? `
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('${escapeHtml(tfOwnerProof)}', 'Bukti Transfer Owner ke Tim Ads - ${escapeHtml(t.project_name || '')}')" style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; color: #175CD3; border-color: #B2CCFF; background: #EFF8FF;">
-                      📄 Bukti TF Owner
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('${escapeHtml(tfOwnerProof)}', 'Bukti Transfer Manajemen ke Tim Ads - ${escapeHtml(t.project_name || '')}')" style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; color: #175CD3; border-color: #B2CCFF; background: #EFF8FF;">
+                      📄 Bukti Transfer Manajemen
                     </button>
                   ` : '<span style="font-size: 10.5px; color: var(--text-muted); font-style: italic; display: block; margin-top: 2px;">Belum ada lampiran</span>'}
                 </td>

@@ -293,17 +293,17 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <div style="min-width: 0;">
             <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
               <h2 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0; line-height: 1.25;">
-                <?= $isAdsSpecialistUser ? 'Workspace Report Ads Kalamedia' : 'Pusat Laporan & Performa Klien' ?>
+                <?= $isAdsSpecialistUser ? 'Pusat Laporan Kinerja Iklan Kalamedia' : 'Pusat Laporan & Performa Klien' ?>
               </h2>
               <?php if ($isAdsSpecialistUser): ?>
                 <span style="background: #EEF2FF; color: #4F46E5; font-weight: 700; font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 1px solid #E0E7FF;">
-                  Mode Spesialis Ads
+                  Mode Spesialis Periklanan
                 </span>
               <?php endif; ?>
             </div>
             <p style="font-size: 12.5px; color: #64748B; margin: 3px 0 0; line-height: 1.4;">
               <?= $isAdsSpecialistUser 
-                ? 'Template laporan iklan standar Kalamedia. Laporan otomatis terkirim ke Owner & Portal Klien.' 
+                ? 'Templat laporan standar Kalamedia. Laporan akan dikirimkan secara otomatis ke Manajemen dan Portal Klien.' 
                 : 'Pusat laporan performa iklan berbayar (Meta, Google, TikTok Ads) dan rekap pekerjaan tim kreatif.' ?>
             </p>
           </div>
@@ -311,7 +311,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
             <button type="button" onclick="openNewAdsReportModal()" style="background: #5B3DF5; color: #FFFFFF; font-weight: 700; font-size: 12.5px; border-radius: 10px; height: 36px; padding: 0 14px; border: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(91, 61, 245, 0.25); cursor: pointer; transition: all 0.15s ease;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              <span>Buat Report Ads</span>
+              <span>Buat Laporan Iklan</span>
             </button>
             <?php if ($isOwnerOrAdmin): ?>
               <a href="<?= url('reports-form') ?>" class="btn btn-secondary btn-sm" style="border-radius: 10px; height: 36px; display: inline-flex; align-items: center;">
@@ -490,10 +490,10 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
           <!-- 4 KPI Summary Cards for Performance Ads (Appify 2x2 Grid on Mobile, 4-Cols on Desktop) -->
           <div class="report-ads-kpi-grid">
-            <!-- 1. Total Spend -->
+            <!-- 1. Total Pengeluaran -->
             <div style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 14px 16px; box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-                <span style="font-size: 12px; font-weight: 700; color: #7B7890; white-space: nowrap;">Total Spend</span>
+                <span style="font-size: 12px; font-weight: 700; color: #7B7890; white-space: nowrap;">Total Pengeluaran</span>
                 <div style="width: 28px; height: 28px; border-radius: 8px; background: #F2EFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B3DF5" stroke-width="2.2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 </div>
@@ -502,7 +502,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 Rp <?= number_format($totalSpend, 0, ',', '.') ?>
               </div>
               <div style="font-size: 11px; color: #7B7890; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                <?= count($reports) ?> Dokumen Laporan Terbit
+                <?= count($reports) ?> Laporan Dipublikasikan
               </div>
             </div>
 
@@ -562,7 +562,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
               <input type="hidden" name="tab" value="<?= htmlspecialchars($activeTab) ?>">
 
               <div style="flex: 1; width: 100%;">
-                <input type="text" name="search" class="form-control" placeholder="Cari brand, objektif, atau ide materi..." value="<?= htmlspecialchars($searchQuery) ?>" style="border-radius: 12px; border: 1px solid #F0F1F7; background: #F7F8FC; padding: 10px 14px; font-size: 13px;">
+                <input type="text" name="search" class="form-control" placeholder="Cari merek, tujuan, atau materi kampanye..." value="<?= htmlspecialchars($searchQuery) ?>" style="border-radius: 12px; border: 1px solid #F0F1F7; background: #F7F8FC; padding: 10px 14px; font-size: 13px;">
               </div>
 
               <div class="report-filter-row-2col">

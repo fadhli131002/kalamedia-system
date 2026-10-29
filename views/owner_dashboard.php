@@ -62,7 +62,8 @@ foreach ($rawProjects as $p) {
     $profit = $serviceFee - $freelancerCost;
     $margin = $serviceFee > 0 ? ($profit / $serviceFee) * 100 : 0;
     $targetMargin = floatval($p['target_margin_percent']);
-    $isOverBudget = $margin < $targetMargin;
+    $hasFinancialActivity = ($totalContract > 0 || $serviceFee > 0 || $prodCost > 0);
+    $isOverBudget = $hasFinancialActivity && ($prodCost > 0) && ($margin < $targetMargin);
 
     $leaderboard[] = array_merge($p, [
         'service_fee' => $serviceFee,
@@ -72,6 +73,7 @@ foreach ($rawProjects as $p) {
         'profit' => $profit,
         'margin' => $margin,
         'target_margin' => $targetMargin,
+        'has_financial_activity' => $hasFinancialActivity,
         'is_over_budget' => $isOverBudget
     ]);
 }
@@ -238,7 +240,122 @@ $initialChartData = [
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-nebula-v7">
+  <style>
+    /* Base default for payroll tiles */
+    .payroll-stat-tile {
+      background: #F9FAFB;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    /* Executive Dashboard Local Dark Mode Enforcers */
+    html[data-theme="dark"] .payroll-stat-tile,
+    body.dark-mode .payroll-stat-tile,
+    html[data-theme="dark"] .payroll-cards-grid > div,
+    body.dark-mode .payroll-cards-grid > div {
+      background: #12151F !important;
+      background-color: #12151F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+    }
+    html[data-theme="dark"] .payroll-stat-tile div,
+    body.dark-mode .payroll-stat-tile div {
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .payroll-stat-tile div[style*="text-secondary"],
+    body.dark-mode .payroll-stat-tile div[style*="text-secondary"],
+    html[data-theme="dark"] .payroll-stat-tile div[style*="text-muted"],
+    body.dark-mode .payroll-stat-tile div[style*="text-muted"] {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .ads-project-stat-card,
+    body.dark-mode .ads-project-stat-card {
+      background: #12151F !important;
+      background-color: #12151F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .user-badge-karyawan,
+    body.dark-mode .user-badge-karyawan {
+      background: rgba(16, 185, 129, 0.16) !important;
+      color: #34D399 !important;
+      border: 1px solid rgba(16, 185, 129, 0.35) !important;
+    }
+    html[data-theme="dark"] .user-badge-freelancer,
+    body.dark-mode .user-badge-freelancer {
+      background: rgba(139, 92, 246, 0.16) !important;
+      color: #C084FC !important;
+      border: 1px solid rgba(139, 92, 246, 0.35) !important;
+    }
+    html[data-theme="dark"] .user-badge-client,
+    body.dark-mode .user-badge-client {
+      background: rgba(14, 165, 233, 0.16) !important;
+      color: #38BDF8 !important;
+      border: 1px solid rgba(14, 165, 233, 0.35) !important;
+    }
+    html[data-theme="dark"] .user-badge-admin,
+    body.dark-mode .user-badge-admin {
+      background: #161D2F !important;
+      color: #CBD5E1 !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    html[data-theme="dark"] .badge-campaign-transparency,
+    body.dark-mode .badge-campaign-transparency {
+      background: rgba(14, 165, 233, 0.16) !important;
+      color: #38BDF8 !important;
+      border: 1px solid rgba(14, 165, 233, 0.35) !important;
+    }
+    html[data-theme="dark"] .badge-status-active,
+    body.dark-mode .badge-status-active {
+      background: rgba(16, 185, 129, 0.16) !important;
+      color: #34D399 !important;
+      border: 1px solid rgba(16, 185, 129, 0.35) !important;
+    }
+    html[data-theme="dark"] .role-badge-owner,
+    body.dark-mode .role-badge-owner {
+      background: rgba(239, 68, 68, 0.16) !important;
+      color: #F87171 !important;
+      border: 1px solid rgba(239, 68, 68, 0.35) !important;
+    }
+
+    /* Dark Mode Custom Scrollbar (Zero White Scrollbar Track) */
+    html[data-theme="dark"],
+    body.dark-mode {
+      color-scheme: dark !important;
+      scrollbar-color: rgba(255, 255, 255, 0.22) #0B0E17 !important;
+      scrollbar-width: thin !important;
+    }
+    html[data-theme="dark"] ::-webkit-scrollbar,
+    body.dark-mode ::-webkit-scrollbar {
+      width: 6px !important;
+      height: 6px !important;
+      background-color: #0B0E17 !important;
+    }
+    html[data-theme="dark"] ::-webkit-scrollbar-track,
+    body.dark-mode ::-webkit-scrollbar-track {
+      background: #0B0E17 !important;
+      border-radius: 999px !important;
+    }
+    html[data-theme="dark"] ::-webkit-scrollbar-thumb,
+    body.dark-mode ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.22) !important;
+      border-radius: 999px !important;
+    }
+    html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover,
+    body.dark-mode ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.38) !important;
+    }
+    html[data-theme="dark"] ::-webkit-scrollbar-corner,
+    body.dark-mode ::-webkit-scrollbar-corner {
+      background: #0B0E17 !important;
+    }
+    html[data-theme="dark"] .kala-table-scroll,
+    html[data-theme="dark"] .table-responsive,
+    body.dark-mode .kala-table-scroll,
+    body.dark-mode .table-responsive {
+      scrollbar-color: rgba(255, 255, 255, 0.22) #0B0E17 !important;
+      scrollbar-width: thin !important;
+    }
+  </style>
   <?php render_tab_uid_script(); ?>
 </head>
 <body>
@@ -332,11 +449,11 @@ $initialChartData = [
             </div>
             <!-- Interactive Legend Indicators matching Slide 2 reference -->
             <div style="display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 600;">
-              <div onclick="toggleChartDataset(0, this)" style="display: flex; align-items: center; gap: 6px; color: #0284C7; cursor: pointer; padding: 4px 10px; background: #F0F9FF; border-radius: 6px; border: 1px solid #BAE6FD; transition: all 0.2s ease;" title="Klik untuk sembunyikan/tampilkan Inflow">
+              <div onclick="toggleChartDataset(0, this)" class="chart-legend-inflow" style="display: flex; align-items: center; gap: 6px; color: #0284C7; cursor: pointer; padding: 4px 10px; background: #F0F9FF; border-radius: 6px; border: 1px solid #BAE6FD; transition: all 0.2s ease;" title="Klik untuk sembunyikan/tampilkan Inflow">
                 <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #06B6D4; box-shadow: 0 0 0 2px rgba(6,182,212,0.25);"></span>
                 <span>Total Inflow (Revenue)</span>
               </div>
-              <div onclick="toggleChartDataset(1, this)" style="display: flex; align-items: center; gap: 6px; color: #7C3AED; cursor: pointer; padding: 4px 10px; background: #F5F3FF; border-radius: 6px; border: 1px solid #DDD6FE; transition: all 0.2s ease;" title="Klik untuk sembunyikan/tampilkan Outflow">
+              <div onclick="toggleChartDataset(1, this)" class="chart-legend-outflow" style="display: flex; align-items: center; gap: 6px; color: #7C3AED; cursor: pointer; padding: 4px 10px; background: #F5F3FF; border-radius: 6px; border: 1px solid #DDD6FE; transition: all 0.2s ease;" title="Klik untuk sembunyikan/tampilkan Outflow">
                 <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #8B5CF6; box-shadow: 0 0 0 2px rgba(139,92,246,0.25);"></span>
                 <span>Total Outflow (Expense)</span>
               </div>
@@ -366,11 +483,11 @@ $initialChartData = [
               <table class="table-custom" style="min-width: 640px; width: 100%;">
                 <thead>
                   <tr>
-                    <th>Rank & Nama Proyek</th>
+                    <th>Rank &amp; Nama Proyek</th>
                     <th>Nilai Kontrak</th>
                     <th>Biaya Produksi</th>
                     <th>Net Profit</th>
-                    <th>Margin (%)</th>
+                    <th style="text-align: right;">Margin (%)</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -387,31 +504,54 @@ $initialChartData = [
                             <span class="rank-badge <?= $rankClass ?>" title="Peringkat <?= $idx + 1 ?>">
                               #<?= $idx + 1 ?>
                             </span>
-                            <div>
-                              <div class="clickable-client-link" onclick="openProjectFinancialDetailModal(<?= $p['id'] ?>, <?= $p['client_id'] ?>)" title="Lihat Rincian Alokasi Keuangan">
-                                <span style="font-size: 13.5px;"><?= htmlspecialchars($p['name']) ?></span>
+                            <div style="min-width: 0;">
+                              <div class="clickable-client-link" onclick="openProjectFinancialDetailModal(<?= $p['id'] ?>, <?= $p['client_id'] ?>)" title="Lihat Rincian Alokasi Keuangan" style="font-size: 13.5px; font-weight: 700; color: var(--text-primary); line-height: 1.3;">
+                                <span><?= htmlspecialchars($p['name']) ?></span>
                               </div>
-                              <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 1px;">
-                                <span style="font-weight: 600;"><?= htmlspecialchars($p['client_company']) ?></span> &bull; 
-                                <span style="color: #2563EB; font-weight: 600; cursor: pointer;" onclick="openProjectFinancialDetailModal(<?= $p['id'] ?>, <?= $p['client_id'] ?>)">Rincian Biaya</span>
+                              <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 3px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                <span style="font-weight: 600;"><?= htmlspecialchars($p['client_company']) ?></span>
+                                <span style="opacity: 0.5;">&bull;</span>
+                                <span style="color: #60A5FA; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;" onclick="openProjectFinancialDetailModal(<?= $p['id'] ?>, <?= $p['client_id'] ?>)">
+                                  <span>Rincian Biaya</span>
+                                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="9 18 15 12 9 6"/></svg>
+                                </span>
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td style="font-weight: 600; color: #101828;"><?= format_rupiah($p['contract_value']) ?></td>
-                        <td>
-                          <div style="color: var(--danger-text); font-weight: 600;"><?= format_rupiah($p['prod_cost']) ?></div>
-                          <div style="font-size: 10.5px; color: var(--text-muted);">Fee: <?= format_rupiah($p['total_freelancer_cost']) ?> | Ads: <?= format_rupiah($p['total_ads_cost']) ?></div>
+                        <td style="font-weight: 700; color: var(--text-primary); white-space: nowrap;">
+                          <?= format_rupiah($p['total_contract'] > 0 ? $p['total_contract'] : $p['contract_value']) ?>
                         </td>
-                        <td style="font-weight: 700; color: <?= $p['profit'] >= 0 ? 'var(--success-text)' : 'var(--danger-text)' ?>;">
+                        <td style="white-space: nowrap;">
+                          <div style="color: <?= $p['prod_cost'] > 0 ? 'var(--danger-text)' : 'var(--text-primary)' ?>; font-weight: 700;">
+                            <?= format_rupiah($p['prod_cost']) ?>
+                          </div>
+                          <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                            Fee: <?= format_rupiah($p['total_freelancer_cost']) ?> &bull; Ads: <?= format_rupiah($p['total_ads_cost']) ?>
+                          </div>
+                        </td>
+                        <td style="font-weight: 700; white-space: nowrap; color: <?= $p['profit'] > 0 ? 'var(--success-text)' : ($p['profit'] < 0 ? 'var(--danger-text)' : 'var(--text-primary)') ?>;">
                           <?= format_rupiah($p['profit']) ?>
                         </td>
-                        <td>
-                          <span class="badge-margin <?= $p['margin'] >= $p['target_margin'] ? 'good' : ($p['margin'] >= 15 ? 'warning' : 'bad') ?>">
-                            <?= round($p['margin'], 1) ?>%
-                          </span>
-                          <?php if ($p['is_over_budget']): ?>
-                            <div style="font-size: 10px; color: var(--danger-text); font-weight: 700; margin-top: 2px;">Over-Budget!</div>
+                        <td style="text-align: right; white-space: nowrap;">
+                          <?php if (!$p['has_financial_activity']): ?>
+                            <div style="display: inline-flex; flex-direction: column; align-items: flex-end; gap: 3px;">
+                              <span style="display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 700; background: rgba(148, 163, 184, 0.14); color: var(--text-secondary); border: 1px solid rgba(148, 163, 184, 0.25);">
+                                0%
+                              </span>
+                              <span style="font-size: 10px; font-weight: 600; color: var(--text-muted);">Belum Ada Kontrak</span>
+                            </div>
+                          <?php else: ?>
+                            <div style="display: inline-flex; flex-direction: column; align-items: flex-end; gap: 3px;">
+                              <span class="badge-margin <?= $p['margin'] >= $p['target_margin'] ? 'good' : ($p['margin'] >= 15 ? 'warning' : 'bad') ?>">
+                                <?= round($p['margin'], 1) ?>%
+                              </span>
+                              <?php if ($p['is_over_budget']): ?>
+                                <span style="font-size: 10px; color: var(--danger-text); font-weight: 700;">Over-Budget!</span>
+                              <?php else: ?>
+                                <span style="font-size: 10px; color: var(--success-text); font-weight: 600;">Target &ge; <?= round($p['target_margin']) ?>%</span>
+                              <?php endif; ?>
+                            </div>
                           <?php endif; ?>
                         </td>
                       </tr>
@@ -442,7 +582,7 @@ $initialChartData = [
                 <?php foreach ($unpaidInvoicesList as $u):
                   $isOverdue = (strtotime($u['due_date']) < time() && $u['status'] !== 'Paid');
                 ?>
-                  <div style="background: #FFFFFF; border: 1px solid <?= $isOverdue ? 'var(--danger-border)' : 'var(--border-color)' ?>; border-radius: 8px; padding: 12px 14px; box-shadow: var(--shadow-xs);">
+                  <div style="background: var(--bg-card, #FFFFFF); border: 1px solid <?= $isOverdue ? 'var(--danger-border)' : 'var(--border-color)' ?>; border-radius: 8px; padding: 12px 14px; box-shadow: var(--shadow-xs);">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
                       <div>
                         <div class="clickable-client-link" onclick="openProjectFinancialDetailModal(<?= !empty($u['project_id']) ? $u['project_id'] : 0 ?>, <?= $u['client_id'] ?>)" title="Lihat Rincian Keuangan Klien">
@@ -458,7 +598,7 @@ $initialChartData = [
                       <div style="font-size: 11px; color: var(--text-muted);">
                         Tempo: <?= format_date($u['due_date']) ?>
                       </div>
-                      <div style="font-size: 13px; font-weight: 800; color: #101828;">
+                      <div style="font-size: 13px; font-weight: 800; color: var(--text-primary, #101828);">
                         <?= format_rupiah($u['total_amount']) ?>
                       </div>
                     </div>
@@ -483,21 +623,21 @@ $initialChartData = [
             </div>
 
             <div class="payroll-cards-grid">
-              <div style="background: #F9FAFB; padding: 14px 18px; border-radius: 14px; border: 1px solid var(--border-color); border-left: 4px solid #5D76F5;">
+              <div class="payroll-stat-tile" style="padding: 14px 18px; border-radius: 14px; border: 1px solid var(--border-color); border-left: 4px solid #5D76F5;">
                 <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Total Karyawan Aktif</div>
-                <div style="font-size: 20px; font-weight: 800; color: #000000; margin-top: 4px;"><?= $activeEmployeeCount ?> Orang</div>
+                <div style="font-size: 20px; font-weight: 800; color: var(--text-primary, #000000); margin-top: 4px;"><?= $activeEmployeeCount ?> Orang</div>
                 <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Tim internal creative & tech</div>
               </div>
 
-              <div style="background: #F9FAFB; padding: 14px 18px; border-radius: 8px; border: 1px solid var(--border-color); border-left: 4px solid var(--success);">
+              <div class="payroll-stat-tile" style="padding: 14px 18px; border-radius: 8px; border: 1px solid var(--border-color); border-left: 4px solid var(--success);">
                 <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Gaji Terbayar Bulan Ini</div>
                 <div style="font-size: 20px; font-weight: 800; color: var(--success-text); margin-top: 4px;"><?= format_rupiah($thisMonthSalaryPaid) ?></div>
                 <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Periode <?= date('F Y') ?></div>
               </div>
 
-              <div style="background: #F9FAFB; padding: 14px 18px; border-radius: 8px; border: 1px solid var(--border-color); border-left: 4px solid <?= $pendingSalaryCount > 0 ? 'var(--warning)' : '#D0D5DD' ?>;">
+              <div class="payroll-stat-tile" style="padding: 14px 18px; border-radius: 8px; border: 1px solid var(--border-color); border-left: 4px solid <?= $pendingSalaryCount > 0 ? 'var(--warning)' : '#D0D5DD' ?>;">
                 <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; font-weight: 700;">Antrean Gaji Pending</div>
-                <div style="font-size: 20px; font-weight: 800; color: <?= $pendingSalaryCount > 0 ? 'var(--warning-text)' : '#101828' ?>; margin-top: 4px;"><?= format_rupiah($pendingSalaryTotal) ?></div>
+                <div style="font-size: 20px; font-weight: 800; color: <?= $pendingSalaryCount > 0 ? 'var(--warning-text)' : 'var(--text-primary, #101828)' ?>; margin-top: 4px;"><?= format_rupiah($pendingSalaryTotal) ?></div>
                 <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;"><?= $pendingSalaryCount ?> slip menunggu transfer</div>
               </div>
             </div>
@@ -506,12 +646,12 @@ $initialChartData = [
               <div class="touch-swipe-x">
                 <div style="display: flex; gap: 12px; min-width: 500px;">
                   <?php foreach ($activeEmployees as $emp): ?>
-                    <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px; box-shadow: var(--shadow-xs);">
-                      <div style="width: 36px; height: 36px; border-radius: 50%; background: #F2F4F7; color: #101828; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; border: 1px solid var(--border-color);">
+                    <div style="background: var(--bg-card, #FFFFFF); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; flex: 1; min-width: 220px; box-shadow: var(--shadow-xs);">
+                      <div style="width: 36px; height: 36px; border-radius: 50%; background: var(--bg-surface, #F2F4F7); color: var(--text-primary, #101828); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 13px; border: 1px solid var(--border-color);">
                         <?= strtoupper(substr($emp['name'], 0, 2)) ?>
                       </div>
                       <div style="flex: 1; min-width: 0;">
-                        <div style="font-size: 13px; font-weight: 700; color: #101828; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($emp['name']) ?></div>
+                        <div style="font-size: 13px; font-weight: 700; color: var(--text-primary, #101828); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"><?= htmlspecialchars($emp['name']) ?></div>
                         <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($emp['position'] ?: 'Karyawan') ?> &bull; <span style="color: var(--success-text); font-weight: 600;"><?= format_rupiah($emp['base_salary']) ?></span></div>
                       </div>
                     </div>
@@ -556,7 +696,7 @@ $initialChartData = [
               <div>
                 <h3 class="panel-title" style="display: flex; align-items: center; flex-wrap: wrap; gap: 8px;">
                   <span>Monitoring Saldo Iklan &amp; Riwayat Top-Up Tim Ads</span>
-                  <span class="badge" style="background: #EFF8FF; color: #175CD3; font-weight: 700; font-size: 11px;">Transparansi Kampanye</span>
+                  <span class="badge badge-campaign-transparency" style="background: #EFF8FF; color: #175CD3; font-weight: 700; font-size: 11px;">Transparansi Kampanye</span>
                 </h3>
                 <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">
                   Pantau sisa pagu saldo iklan per proyek dan verifikasi struk transfer top-up yang di-upload tim Ads
@@ -579,10 +719,10 @@ $initialChartData = [
                   $pct = $alloc > 0 ? min(100, round(($spend / $alloc) * 100)) : 0;
                   $pctColor = ($pct >= 90) ? '#B42318' : (($pct >= 70) ? '#B54708' : '#027A48');
                 ?>
-                  <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow-xs);">
+                  <div class="ads-project-stat-card" style="background: var(--bg-card, #FFFFFF); border: 1px solid var(--border-color); border-radius: 10px; padding: 14px 16px; box-shadow: var(--shadow-xs);">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
                       <div>
-                        <div style="font-size: 13.5px; font-weight: 800; color: #101828; line-height: 1.3;"><?= htmlspecialchars($ap['project_name']) ?></div>
+                        <div style="font-size: 13.5px; font-weight: 800; color: var(--text-primary, #101828); line-height: 1.3;"><?= htmlspecialchars($ap['project_name']) ?></div>
                         <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($ap['client_company']) ?></div>
                       </div>
                       <span class="badge" style="background: <?= ($pct >= 90) ? '#FEF3F2' : '#F2F4F7' ?>; color: <?= $pctColor ?>; font-weight: 800; font-size: 11px;">
@@ -644,11 +784,11 @@ $initialChartData = [
                     ?>
                       <tr>
                         <td style="min-width: 180px; white-space: nowrap;">
-                          <div style="font-weight: 700; color: #101828;"><?= date('d M Y', strtotime($rt['transaction_date'])) ?></div>
+                          <div style="font-weight: 700; color: var(--text-primary, #101828);"><?= date('d M Y', strtotime($rt['transaction_date'])) ?></div>
                           <div style="font-size: 11px; color: var(--text-secondary);">Petugas: <b><?= htmlspecialchars($rt['assigned_user_name'] ?? 'Tim Ads') ?></b></div>
                         </td>
                         <td>
-                          <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($rt['client_company'] ?? '-') ?></div>
+                          <div style="font-weight: 700; color: var(--text-primary, #101828);"><?= htmlspecialchars($rt['client_company'] ?? '-') ?></div>
                           <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($rt['project_name'] ?? '-') ?></div>
                         </td>
                         <td>
@@ -684,7 +824,7 @@ $initialChartData = [
                           <?php endif; ?>
                         </td>
                         <td style="white-space: nowrap;">
-                          <div style="font-size: 12px; color: #101828;">Spend: <b><?= format_rupiah($spendAmount) ?></b></div>
+                          <div style="font-size: 12px; color: var(--text-primary, #101828);">Spend: <b><?= format_rupiah($spendAmount) ?></b></div>
                           <span class="badge" style="background: <?= ($rt['campaign_status'] === 'running' || empty($rt['campaign_status'])) ? '#ECFDF3' : '#F2F4F7' ?>; color: <?= ($rt['campaign_status'] === 'running' || empty($rt['campaign_status'])) ? '#027A48' : '#344054' ?>; font-size: 10px; font-weight: 700; margin-top: 2px;">
                             <?= ($rt['campaign_status'] === 'running' || empty($rt['campaign_status'])) ? '🟢 Iklan Jalan' : '⏸️ Dijeda' ?>
                           </span>
@@ -731,16 +871,16 @@ $initialChartData = [
 
             <!-- Role Summary Badges -->
             <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
-              <div style="background: #ECFDF3; border: 1px solid #A6F4C5; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #027A48;">
+              <div class="user-badge-karyawan" style="background: #ECFDF3; border: 1px solid #A6F4C5; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #027A48;">
                 Karyawan: <?= $userCounts['karyawan'] ?> Akun
               </div>
-              <div style="background: #F4F3FF; border: 1px solid #D9D6FE; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #5925DC;">
+              <div class="user-badge-freelancer" style="background: #F4F3FF; border: 1px solid #D9D6FE; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #5925DC;">
                 Freelancer: <?= $userCounts['freelancer'] ?> Akun
               </div>
-              <div style="background: #EFF8FF; border: 1px solid #B2DDFF; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #175CD3;">
+              <div class="user-badge-client" style="background: #EFF8FF; border: 1px solid #B2DDFF; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #175CD3;">
                 Client Portal: <?= $userCounts['client'] ?> Akun
               </div>
-              <div style="background: #F8F9FC; border: 1px solid #EAECF0; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #344054;">
+              <div class="user-badge-admin" style="background: #F8F9FC; border: 1px solid #EAECF0; padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #344054;">
                 Admin &amp; Owner: <?= $userCounts['admin'] + $userCounts['owner'] ?> Akun
               </div>
             </div>
@@ -762,11 +902,19 @@ $initialChartData = [
                   <?php foreach ($systemUsers as $u): ?>
                     <tr id="user-row-<?= $u['id'] ?>">
                       <td>
-                        <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($u['name']) ?></div>
+                        <div style="font-weight: 700; color: var(--text-primary, #101828);"><?= htmlspecialchars($u['name']) ?></div>
                         <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($u['email']) ?></div>
                       </td>
                       <td>
                         <?php
+                          $roleBadgeClass = [
+                            'owner' => 'role-badge-owner',
+                            'admin' => 'role-badge-admin',
+                            'karyawan' => 'role-badge-karyawan',
+                            'freelancer' => 'role-badge-freelancer',
+                            'client' => 'role-badge-client'
+                          ][$u['role']] ?? 'role-badge-client';
+
                           $roleBadgeStyle = [
                             'owner' => 'background: #FEF3F2; color: #B42318; border: 1px solid #FECDCA;',
                             'admin' => 'background: #EFF8FF; color: #175CD3; border: 1px solid #B2DDFF;',
@@ -783,18 +931,18 @@ $initialChartData = [
                             'client' => 'Client Portal'
                           ][$u['role']] ?? ucfirst($u['role']);
                         ?>
-                        <span style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; <?= $roleBadgeStyle ?>">
+                        <span class="<?= $roleBadgeClass ?>" style="font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; <?= $roleBadgeStyle ?>">
                           <?= $roleText ?>
                         </span>
                       </td>
                       <td>
                         <?php if ($u['role'] === 'client'): ?>
-                          <div style="font-size: 12px; font-weight: 600; color: #101828;">
+                          <div style="font-size: 12px; font-weight: 600; color: var(--text-primary, #101828);">
                             <?= htmlspecialchars($u['client_company'] ?: 'Belum terhubung') ?>
                           </div>
                           <div style="font-size: 10.5px; color: var(--text-secondary);">Portal Klien</div>
                         <?php else: ?>
-                          <div style="font-size: 12px; color: #101828;">
+                          <div style="font-size: 12px; color: var(--text-primary, #101828);">
                             <?= htmlspecialchars($u['phone_wa'] ?: '-') ?>
                           </div>
                           <div style="font-size: 10.5px; color: var(--text-secondary);">
@@ -803,7 +951,7 @@ $initialChartData = [
                         <?php endif; ?>
                       </td>
                       <td>
-                        <span style="font-size: 11px; font-weight: 700; color: #027A48; background: #ECFDF3; padding: 2px 8px; border-radius: 12px;">
+                        <span class="badge-status-active" style="font-size: 11px; font-weight: 700; color: #027A48; background: #ECFDF3; padding: 2px 8px; border-radius: 12px;">
                           Aktif
                         </span>
                       </td>

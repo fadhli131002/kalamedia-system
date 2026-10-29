@@ -42,8 +42,60 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-2.5">
   <?php render_tab_uid_script(); ?>
+  <style>
+    .invoices-search-wrap {
+      position: relative;
+      width: 300px;
+      max-width: 100%;
+    }
+    .invoices-search-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #667085;
+      pointer-events: none;
+    }
+    .invoices-search-wrap .form-control {
+      width: 100% !important;
+      padding-left: 36px !important;
+      height: 38px !important;
+      font-size: 13px !important;
+      border-radius: 10px !important;
+      box-sizing: border-box !important;
+    }
+    @media (max-width: 768px) {
+      .invoices-toolbar-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        margin-bottom: 14px !important;
+      }
+      .invoices-toolbar-row .date-filter-group {
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        width: 100% !important;
+        padding: 4px !important;
+        border-radius: 12px !important;
+        gap: 4px !important;
+      }
+      .invoices-toolbar-row .date-filter-group .filter-btn {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 8px 6px !important;
+        border-radius: 9px !important;
+        font-size: 12.5px !important;
+      }
+      .invoices-search-wrap {
+        width: 100% !important;
+      }
+    }
+  </style>
 </head>
 <body>
   <div class="app-container">
@@ -57,14 +109,14 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
         <?php if (!$isClientUser && (is_owner() || is_admin())): ?>
         <!-- Quick Sub-Tab Switcher: Invoice Klien | Pengeluaran | Penggajian -->
         <div class="quick-subtab-bar" style="margin-bottom: 14px;">
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
             <a href="<?= url('invoices?_slot=internal') ?>" class="quick-subtab-btn active" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; text-align: center; white-space: nowrap; background: #5B3DF5; color: #FFFFFF; box-shadow: 0 2px 6px rgba(91,61,245,0.25);">
               Invoice Klien
             </a>
-            <a href="<?= url('expenses?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
+            <a href="<?= url('expenses?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap;">
               Pengeluaran
             </a>
-            <a href="<?= url('salaries?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
+            <a href="<?= url('salaries?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap;">
               Penggajian
             </a>
           </div>
@@ -120,7 +172,7 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
           </div>
 
           <!-- Unified Toolbar Row -->
-          <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
+          <div class="invoices-toolbar-row" style="display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; flex-wrap: wrap;">
             <!-- Left Side: Status Filter Tabs -->
             <div class="date-filter-group">
               <a href="<?= url('invoices?status=all' . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" class="filter-btn <?= $filterStatus === 'all' ? 'active' : '' ?>">Semua</a>
@@ -129,13 +181,14 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
             </div>
 
             <!-- Right Side: Search Bar -->
-            <div style="position: relative; width: 300px; max-width: 100%;">
-              <input type="text" id="invoice-search-input" class="form-control" style="width: 100%; padding-left: 14px; height: 38px; font-size: 13px; border-color: #D0D5DD; border-radius: 8px;" placeholder="Cari invoice, klien, atau proyek...">
+            <div class="invoices-search-wrap">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input type="text" id="invoice-search-input" class="form-control" placeholder="Cari invoice, klien, atau proyek...">
             </div>
           </div>
 
           <!-- Invoices Data Table -->
-          <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 8px;">
+          <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 0;">
             <table class="table-custom" id="invoice-table" style="min-width: 980px !important; width: 100%;">
               <thead>
                 <tr>
@@ -191,7 +244,7 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
                       </td>
                       <td style="white-space: nowrap !important;">
                         <?php if ($isClientUser): ?>
-                          <div style="font-weight: 700; color: #101828;">
+                          <div style="font-weight: 700; color: var(--text-primary);">
                             <span><?= htmlspecialchars($inv['client_company']) ?></span>
                           </div>
                         <?php else: ?>
@@ -206,7 +259,7 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
                       </td>
                       <td style="color: var(--text-secondary); white-space: nowrap !important;"><?= format_date($inv['issue_date']) ?></td>
                       <td style="color: var(--text-secondary); white-space: nowrap !important;"><?= format_date($inv['due_date']) ?></td>
-                      <td style="font-weight: 800; color: #101828; white-space: nowrap !important; font-size: 13.5px;"><?= format_rupiah($inv['total_amount']) ?></td>
+                      <td style="font-weight: 800; color: var(--text-primary); white-space: nowrap !important; font-size: 13.5px;"><?= format_rupiah($inv['total_amount']) ?></td>
                       <td style="white-space: nowrap !important;">
                         <span class="badge-status badge-<?= strtolower($inv['status']) ?>">
                           <?= strtoupper($inv['status']) ?>

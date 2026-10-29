@@ -186,12 +186,11 @@ $badgeLabel = $sidebarBadge;
 <aside class="sidebar" id="app-sidebar">
   <div class="sidebar-header">
     <a href="<?= $homeUrl ?>" style="display: flex; align-items: center; justify-content: space-between; width: 100%; text-decoration: none; color: inherit; gap: 8px;">
-      <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+      <div style="display: flex; align-items: center; gap: 9px; min-width: 0; flex: 1;">
         <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" class="sidebar-brand-img" style="height: 32px; width: 32px; object-fit: contain; flex-shrink: 0;">
-        <span style="font-weight: 800; font-size: 13.5px; color: #000000; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Kala Kausa Prima</span>
+        <span class="sidebar-brand-name" style="font-weight: 800; font-size: 13.5px; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Kala Kausa Prima</span>
       </div>
-      <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-        <span class="badge-version" style="font-size: 9.5px; padding: 2px 6px; font-weight: 700;"><?= defined('APP_VERSION') ? APP_VERSION : 'v2.5' ?></span>
+      <div style="display: flex; align-items: center; gap: 4px; flex-shrink: 0;">
         <span class="role-badge-sidebar">
           <?= $badgeLabel ?>
         </span>
@@ -344,7 +343,7 @@ $badgeLabel = $sidebarBadge;
         <span>Kalender Konten</span>
       </a>
 
-      <?php if ($isOwner): ?>
+      <?php if ($isOwner || $isAdmin): ?>
         <div class="nav-section-title">Konfigurasi</div>
         <a href="<?= url('settings?_slot=internal') ?>" class="nav-link <?= $currentPage === 'settings' ? 'active' : '' ?>">
           <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -357,32 +356,189 @@ $badgeLabel = $sidebarBadge;
     <?php
       $sbLogoutContext = ($currentPage === 'client-portal' || is_client()) ? 'client' : 'internal';
     ?>
+    <div class="nav-section-title">Sesi Akun</div>
+    <a href="<?= url('logout') ?>?context=<?= $sbLogoutContext ?>" onclick="if(window.handleKalaLogout){handleKalaLogout(this.href);return false;}else{sessionStorage.removeItem('kala_tab_uid');}" class="nav-link nav-link-logout">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <span>Keluar (Logout)</span>
+    </a>
+    <!-- Dedicated App Version Display under Logout -->
+    <div class="sidebar-version-wrap" style="padding: 6px 12px 10px; margin-top: 2px; display: flex; align-items: center; justify-content: space-between;">
+      <span style="font-size: 11px; font-weight: 500; color: var(--text-muted, #94A3B8); letter-spacing: 0.1px;">Versi Aplikasi</span>
+      <span class="badge-version" title="Versi Rilis Sistem"><?= defined('APP_VERSION') ? APP_VERSION : 'v3.0' ?></span>
+    </div>
+  </nav>
+
+  <!-- Sidebar Footer: PWA Button + Nebula Theme Switcher + Profile Card in 1 Flex Column -->
+  <div class="sidebar-footer" id="app-sidebar-footer">
     <!-- PWA Install Action Button (Only visible on supporting mobile/desktop browsers) -->
-    <div style="padding: 0 12px; margin-top: 10px; margin-bottom: 8px;">
+    <div id="pwa-install-wrap" style="width: 100%;">
       <button type="button" id="btn-pwa-install" class="btn btn-secondary btn-sm" style="display: none; width: 100%; align-items: center; justify-content: center; gap: 6px; font-weight: 600; font-size: 11.5px; border-color: #2563EB; color: #2563EB; background: #EFF6FF; padding: 6px 10px; border-radius: 8px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         <span>Pasang Portal Kala</span>
       </button>
     </div>
 
-    <div class="nav-section-title">Sesi Akun</div>
-    <a href="<?= url('logout') ?>?context=<?= $sbLogoutContext ?>" onclick="if(window.handleKalaLogout){handleKalaLogout(this.href);return false;}else{sessionStorage.removeItem('kala_tab_uid');}" class="nav-link nav-link-logout">
-      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      <span>Keluar (Logout)</span>
-    </a>
+    <!-- Theme Toggle Switch (Neumorphic 3D Switch matching Image 2 - Full Sidebar Width) -->
+    <style>
+      .sidebar-theme-toggle-wrap { width: 100%; display: flex; padding: 4px 0; margin: 4px 0; box-sizing: border-box; }
+      .sidebar-theme-toggle { width: 100% !important; background: transparent !important; border: none !important; padding: 0 !important; box-shadow: none !important; cursor: pointer; display: block !important; outline: none !important; }
+      .sidebar-theme-toggle:hover { border-color: transparent !important; box-shadow: none !important; }
+      .theme-switch-pill {
+        width: 100% !important;
+        height: 40px !important;
+        border-radius: 9999px !important;
+        background: #E2E5EB !important;
+        position: relative !important;
+        box-sizing: border-box !important;
+        box-shadow: inset 0 3px 6px rgba(0,0,0,0.20), inset 0 1px 2px rgba(0,0,0,0.15), inset 0 -1px 2px rgba(255,255,255,0.9), 0 1px 1px rgba(255,255,255,0.6) !important;
+        border: 1px solid rgba(0,0,0,0.08) !important;
+        display: block !important;
+        cursor: pointer !important;
+        transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
+        overflow: hidden !important;
+      }
+      html[data-theme="dark"] .theme-switch-pill,
+      body.dark-mode .theme-switch-pill {
+        background: #252830 !important;
+        box-shadow: inset 0 4px 7px rgba(0,0,0,0.75), inset 0 1.5px 3px rgba(0,0,0,0.6), inset 0 -1px 1px rgba(255,255,255,0.08), 0 1px 2px rgba(0,0,0,0.35) !important;
+        border: 1px solid rgba(0,0,0,0.5) !important;
+      }
+      /* Ambient track destination indicators */
+      .track-icon-ambient {
+        position: absolute !important;
+        top: 11px !important;
+        width: 16px !important;
+        height: 16px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 1 !important;
+        pointer-events: none !important;
+        opacity: 0.65;
+        transition: opacity 0.25s ease;
+      }
+      .track-icon-ambient-left {
+        left: 12px !important;
+        color: #F59E0B !important;
+      }
+      .track-icon-ambient-right {
+        right: 12px !important;
+        color: #94A3B8 !important;
+      }
+      html[data-theme="dark"] .track-icon-ambient-left {
+        opacity: 0.75 !important;
+        color: #FBBF24 !important;
+      }
+      html[data-theme="dark"] .track-icon-ambient-right {
+        opacity: 0.35 !important;
+      }
+      /* 3D Tactile Circular Knob */
+      .theme-switch-knob {
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 50% !important;
+        position: absolute !important;
+        top: 3px !important;
+        left: 4px !important;
+        transform: none !important;
+        background: linear-gradient(180deg, #FFFFFF 0%, #F5F7FA 70%, #E3E7EE 100%) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.22), 0 1px 2px rgba(0,0,0,0.15), inset 0 1.5px 1.5px #FFFFFF, inset 0 -1.5px 1.5px rgba(0,0,0,0.12) !important;
+        border: 1px solid rgba(0,0,0,0.06) !important;
+        transition: left 0.34s cubic-bezier(0.34, 1.25, 0.64, 1), background 0.25s ease, box-shadow 0.25s ease !important;
+        pointer-events: none !important;
+        z-index: 2 !important;
+      }
+      html[data-theme="dark"] .theme-switch-knob,
+      body.dark-mode .theme-switch-knob {
+        left: calc(100% - 36px) !important;
+        transform: none !important;
+        background: linear-gradient(180deg, #FFFFFF 0%, #F3F4F8 70%, #DFE3EB 100%) !important;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.5), 0 1px 3px rgba(0,0,0,0.35), inset 0 1.5px 1.5px #FFFFFF, inset 0 -1.5px 1.5px rgba(0,0,0,0.15) !important;
+      }
+      .theme-switch-knob .knob-icon {
+        flex-shrink: 0;
+        display: block;
+      }
+      /* Light mode (default): show sun, hide moon */
+      .theme-switch-knob .knob-icon-sun {
+        display: block !important;
+        stroke: #EA580C !important;
+      }
+      .theme-switch-knob .knob-icon-moon {
+        display: none !important;
+      }
+      /* Dark mode: hide sun, show moon with stars */
+      html[data-theme="dark"] .theme-switch-knob .knob-icon-sun,
+      body.dark-mode .theme-switch-knob .knob-icon-sun {
+        display: none !important;
+      }
+      html[data-theme="dark"] .theme-switch-knob .knob-icon-moon,
+      body.dark-mode .theme-switch-knob .knob-icon-moon {
+        display: block !important;
+        stroke: #4B5563 !important;
+      }
+    </style>
+    <div class="sidebar-theme-toggle-wrap">
+      <button type="button" class="sidebar-theme-toggle" onclick="toggleTheme()" aria-label="Beralih Mode Tema (Terang / Gelap)" title="Beralih Mode Tema (Terang / Gelap)">
+        <div class="theme-switch-pill" aria-hidden="true">
+          <!-- Ambient Destination Indicator: Sun on Left -->
+          <div class="track-icon-ambient track-icon-ambient-left">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="4.3"></circle>
+              <line x1="12" y1="2" x2="12" y2="4.5"></line>
+              <line x1="12" y1="19.5" x2="12" y2="22"></line>
+              <line x1="2" y1="12" x2="4.5" y2="12"></line>
+              <line x1="19.5" y1="12" x2="22" y2="12"></line>
+            </svg>
+          </div>
+          <!-- Ambient Destination Indicator: Moon on Right -->
+          <div class="track-icon-ambient track-icon-ambient-right">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 3.5A8.5 8.5 0 1 0 20.5 14.5 7.2 7.2 0 0 1 14.5 3.5z"></path>
+              <path d="M18.5 3.5v3.2m-1.6-1.6h3.2" stroke-width="1.8"></path>
+            </svg>
+          </div>
+          <!-- Active 3D Porcelain Tactile Knob -->
+          <div class="theme-switch-knob">
+            <!-- Sun icon for light mode (Knob state: Left, warm amber rays) -->
+            <svg class="knob-icon knob-icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="4.3"></circle>
+              <line x1="12" y1="2" x2="12" y2="4.5"></line>
+              <line x1="12" y1="19.5" x2="12" y2="22"></line>
+              <line x1="2" y1="12" x2="4.5" y2="12"></line>
+              <line x1="19.5" y1="12" x2="22" y2="12"></line>
+              <line x1="4.93" y1="4.93" x2="6.7" y2="6.7"></line>
+              <line x1="17.3" y1="17.3" x2="19.07" y2="19.07"></line>
+              <line x1="4.93" y1="19.07" x2="6.7" y2="17.3"></line>
+              <line x1="17.3" y1="6.7" x2="19.07" y2="4.93"></line>
+            </svg>
+            <!-- Moon + stars icon for dark mode (Knob state: Right, charcoal moon with sparkle stars) -->
+            <svg class="knob-icon knob-icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4B5563" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.5 3.5A8.5 8.5 0 1 0 20.5 14.5 7.2 7.2 0 0 1 14.5 3.5z"></path>
+              <path d="M18.5 3.5v3.2m-1.6-1.6h3.2" stroke-width="2"></path>
+              <path d="M21 8.5v2.2m-1.1-1.1h2.2" stroke-width="1.8"></path>
+            </svg>
+          </div>
+        </div>
+      </button>
+    </div>
 
-  </nav>
-
-  <div class="sidebar-user">
-    <div class="user-profile">
-      <div class="avatar">
-        <?= $sidebarAvatar ?>
-      </div>
-      <div class="user-details">
-        <h4><?= $sidebarProfileName ?></h4>
-        <span class="role-badge">
-          <?= $sidebarBadge ?>
-        </span>
+    <!-- User Profile Card -->
+    <div class="sidebar-user">
+      <div class="user-profile">
+        <div class="avatar">
+          <?= $sidebarAvatar ?>
+        </div>
+        <div class="user-details">
+          <h4><?= $sidebarProfileName ?></h4>
+          <span class="role-badge">
+            <?= $sidebarBadge ?>
+          </span>
+        </div>
       </div>
     </div>
   </div>

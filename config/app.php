@@ -93,7 +93,7 @@ date_default_timezone_set('Asia/Jakarta');
 
 // App Info
 define('APP_NAME', 'PT Kala Kausa Prima');
-define('APP_VERSION', 'v2.5');
+define('APP_VERSION', 'v3.0');
 define('AGENCY_NAME', 'PT Kala Kausa Prima');
 define('AGENCY_EMAIL', 'support@kalamediacreative.com');
 define('AGENCY_WEBSITE', 'kalamediacreative.com');
@@ -137,6 +137,16 @@ function get_base_url() {
     // Remove /api or /scratch subfolder if current script is inside api or scratch folder
     $script_dir = preg_replace('#/(api|scratch)$#i', '', $script_dir);
     return rtrim($script_dir, '/');
+}
+
+if (!defined('BASE_URL')) {
+    define('BASE_URL', get_base_url());
+}
+
+if (!function_exists('e')) {
+    function e($str): string {
+        return htmlspecialchars((string)($str ?? ''), ENT_QUOTES, 'UTF-8');
+    }
 }
 
 function url($path = '', $preserveUid = true) {
@@ -427,5 +437,612 @@ function worker_has_sosmed_projects(int $userId): bool {
     } catch (Throwable $e) {}
     return false;
 }
+
+/**
+ * Retrieve a setting value from settings / agency_settings / system_meta
+ */
+function get_agency_setting(string $key, string $default = ''): string {
+    try {
+        $db = Database::getConnection();
+        $stmt = $db->prepare("SELECT setting_value FROM settings WHERE setting_key = ? LIMIT 1");
+        $stmt->execute([$key]);
+        $val = $stmt->fetchColumn();
+        if ($val !== false && $val !== null) {
+            return (string)$val;
+        }
+        $stmt2 = $db->prepare("SELECT setting_value FROM agency_settings WHERE setting_key = ? LIMIT 1");
+        $stmt2->execute([$key]);
+        $val2 = $stmt2->fetchColumn();
+        if ($val2 !== false && $val2 !== null) {
+            return (string)$val2;
+        }
+        $stmt3 = $db->prepare("SELECT `value` FROM system_meta WHERE `key` = ? LIMIT 1");
+        $stmt3->execute([$key]);
+        $val3 = $stmt3->fetchColumn();
+        if ($val3 !== false && $val3 !== null) {
+            return (string)$val3;
+        }
+    } catch (Throwable $e) {}
+    return $default;
+}
+
+/**
+ * Persist a setting value to settings, agency_settings, and system_meta
+ */
+function set_agency_setting(string $key, string $value): bool {
+    try {
+        $db = Database::getConnection();
+        $driver = Database::getDriver();
+        $now = date('Y-m-d H:i:s');
+        if ($driver === 'mysql') {
+            $stmt = $db->prepare("INSERT INTO settings (`setting_key`, `setting_value`, `updated_at`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `setting_value` = VALUES(`setting_value`), `updated_at` = VALUES(`updated_at`)");
+            $stmt->execute([$key, $value, $now]);
+            $stmt2 = $db->prepare("INSERT INTO agency_settings (`setting_key`, `setting_value`, `updated_at`) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE `setting_value` = VALUES(`setting_value`), `updated_at` = VALUES(`updated_at`)");
+            $stmt2->execute([$key, $value, $now]);
+            $stmt3 = $db->prepare("INSERT INTO system_meta (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)");
+            $stmt3->execute([$key, $value]);
+        } else {
+            $stmt = $db->prepare("INSERT INTO settings (setting_key, setting_value, updated_at) VALUES (?, ?, ?) ON CONFLICT(setting_key) DO UPDATE SET setting_value = excluded.setting_value, updated_at = excluded.updated_at");
+            $stmt->execute([$key, $value, $now]);
+            $stmt2 = $db->prepare("INSERT INTO agency_settings (setting_key, setting_value, updated_at) VALUES (?, ?, ?) ON CONFLICT(setting_key) DO UPDATE SET setting_value = excluded.setting_value, updated_at = excluded.updated_at");
+            $stmt2->execute([$key, $value, $now]);
+            $stmt3 = $db->prepare("INSERT INTO system_meta (`key`, `value`) VALUES (?, ?) ON CONFLICT(`key`) DO UPDATE SET `value` = excluded.`value`");
+            $stmt3->execute([$key, $value]);
+        }
+        return true;
+    } catch (Throwable $e) {
+        return false;
+    }
+}
+
+/**
+ * Rank Gemini model IDs according to Kala AI Pro Auto-Discovery priority:
+ * 1. gemini-3.1-pro / gemini-3-pro / gemini-3.0-pro
+ * 2. gemini-3.0-flash / gemini-3-flash / gemini-3.1-flash
+ * 3. gemini-2.5-pro
+ * 4. gemini-2.5-flash / gemini-flash-latest / gemini-pro-latest
+ * 5. Other active Gemini text generation models
+ */
+function kala_rank_gemini_model_priority(string $modelId): int {
+    $id = strtolower(preg_replace('#^models/#i', '', trim($modelId)));
+
+    // Exclude non-standard / specialized modalities from top auto-fallback priority
+    if (
+        strpos($id, 'tts') !== false ||
+        strpos($id, 'audio') !== false ||
+        strpos($id, 'image') !== false ||
+        strpos($id, 'imagen') !== false ||
+        strpos($id, 'veo') !== false ||
+        strpos($id, 'embedding') !== false ||
+        strpos($id, 'robotics') !== false ||
+        strpos($id, 'computer-use') !== false ||
+        strpos($id, 'thinking-exp') !== false
+    ) {
+        return 10;
+    }
+
+    // Priority 1: Gemini 3.1 Pro / 3.0 Pro / 3 Pro
+    if (
+        strpos($id, 'gemini-3.1-pro') !== false ||
+        strpos($id, 'gemini-3.0-pro') !== false ||
+        strpos($id, 'gemini-3-pro') !== false
+    ) {
+        // Prefer main preview/stable over customtools variants
+        if (strpos($id, 'customtools') !== false) {
+            return 950;
+        }
+        return 1000;
+    }
+
+    // Priority 2: Gemini 3.0 Flash / 3 Flash / 3.1 Flash
+    if (
+        strpos($id, 'gemini-3.0-flash') !== false ||
+        strpos($id, 'gemini-3-flash') !== false ||
+        strpos($id, 'gemini-3.1-flash') !== false
+    ) {
+        if (strpos($id, 'lite') !== false) {
+            return 880;
+        }
+        return 900;
+    }
+
+    // Priority 3: Gemini 2.5 Pro
+    if (strpos($id, 'gemini-2.5-pro') !== false) {
+        return 800;
+    }
+
+    // Priority 4: Gemini 2.5 Flash / gemini-pro-latest / gemini-flash-latest
+    if (strpos($id, 'gemini-pro-latest') !== false) {
+        return 760;
+    }
+    if (strpos($id, 'gemini-2.5-flash') !== false || strpos($id, 'gemini-flash-latest') !== false) {
+        if (strpos($id, 'lite') !== false) {
+            return 710;
+        }
+        return 740;
+    }
+
+    // Other Gemini models
+    if (strpos($id, 'gemini-') === 0) {
+        return 500;
+    }
+
+    return 100;
+}
+
+/**
+ * Live Auto-Discovery of active models on the user's API key via GET /v1beta/models
+ */
+function kala_discover_gemini_models(string $apiKey): array {
+    $apiKey = trim($apiKey);
+    if ($apiKey === '' || !function_exists('curl_init')) {
+        return [
+            'success' => false,
+            'models' => [],
+            'model_ids' => [],
+            'error' => 'API Key kosong atau cURL tidak tersedia.'
+        ];
+    }
+
+    $endpoint = "https://generativelanguage.googleapis.com/v1beta/models?pageSize=100&key=" . rawurlencode($apiKey);
+    $ch = curl_init($endpoint);
+    curl_setopt_array($ch, [
+        CURLOPT_HTTPGET => true,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 20,
+        CURLOPT_CONNECTTIMEOUT => 8,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => 0
+    ]);
+
+    $responseBody = curl_exec($ch);
+    $curlErr = curl_error($ch);
+    $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($responseBody === false || !empty($curlErr)) {
+        return [
+            'success' => false,
+            'models' => [],
+            'model_ids' => [],
+            'error' => 'Gagal menghubungi Google Gemini API: ' . ($curlErr ?: 'Network Error')
+        ];
+    }
+
+    $decoded = json_decode($responseBody, true);
+    if ($httpCode < 200 || $httpCode >= 300 || !isset($decoded['models']) || !is_array($decoded['models'])) {
+        $apiError = $decoded['error']['message'] ?? ('HTTP Error ' . $httpCode);
+        return [
+            'success' => false,
+            'models' => [],
+            'model_ids' => [],
+            'error' => $apiError
+        ];
+    }
+
+    $models = [];
+    foreach ($decoded['models'] as $m) {
+        $methods = $m['supportedGenerationMethods'] ?? [];
+        if (!in_array('generateContent', $methods, true)) {
+            continue;
+        }
+        $rawName = $m['name'] ?? '';
+        $id = preg_replace('#^models/#i', '', $rawName);
+        $lowerId = strtolower($id);
+        if (
+            $id === '' ||
+            strpos($lowerId, 'customtools') !== false ||
+            strpos($lowerId, 'embedding') !== false ||
+            strpos($lowerId, 'aqa') !== false ||
+            strpos($lowerId, 'imagen') !== false ||
+            strpos($lowerId, 'veo') !== false ||
+            strpos($lowerId, 'tts') !== false ||
+            strpos($lowerId, 'audio') !== false ||
+            strpos($lowerId, 'robotics') !== false ||
+            strpos($lowerId, 'computer-use') !== false ||
+            strpos($lowerId, 'learnlm') !== false ||
+            strpos($lowerId, 'bison') !== false
+        ) {
+            continue;
+        }
+
+        $priority = kala_rank_gemini_model_priority($id);
+        $isPro = (stripos($id, 'pro') !== false);
+        $models[] = [
+            'id' => $id,
+            'display_name' => $m['displayName'] ?? $id,
+            'is_pro' => $isPro,
+            'priority' => $priority,
+            'description' => $m['description'] ?? ''
+        ];
+    }
+
+    usort($models, function ($a, $b) {
+        if ($a['priority'] !== $b['priority']) {
+            return $b['priority'] <=> $a['priority'];
+        }
+        if ($a['is_pro'] !== $b['is_pro']) {
+            return $a['is_pro'] ? -1 : 1;
+        }
+        return strcmp($b['id'], $a['id']);
+    });
+
+    $modelIds = array_map(function ($item) {
+        return $item['id'];
+    }, $models);
+
+    return [
+        'success' => true,
+        'models' => $models,
+        'model_ids' => $modelIds,
+        'error' => null
+    ];
+}
+
+/**
+ * Summarize a verbose Google Gemini API error into a clear, honest status reason
+ */
+function kala_summarize_gemini_error(int $httpCode, string $rawError): string {
+    $firstLine = trim( strtok($rawError, "\n") ?: $rawError );
+    if ($httpCode === 429 || stripos($rawError, 'quota') !== false || stripos($rawError, 'rate limit') !== false || stripos($rawError, 'RESOURCE_EXHAUSTED') !== false) {
+        if (stripos($rawError, 'limit: 0') !== false) {
+            return "429 Kuota Model 0 pada Tier API Key Ini (Model membutuhkan Billing/Paid Tier atau gunakan Gemini 3 Flash)";
+        }
+        return "429 Kuota / Rate Limit Terlampaui ({$firstLine})";
+    }
+    if (stripos($rawError, 'no longer available') !== false || stripos($rawError, 'deprecated') !== false) {
+        return "Model Tidak Lagi Tersedia untuk Akun Baru ({$firstLine})";
+    }
+    if ($httpCode === 404 || stripos($rawError, 'not found') !== false || stripos($rawError, 'not supported') !== false) {
+        return "404 Model Tidak Ditemukan / Belum Tersedia ({$firstLine})";
+    }
+    if ($httpCode === 503 || stripos($rawError, 'overloaded') !== false || stripos($rawError, 'unavailable') !== false) {
+        return "503 Server Model Sedang Sibuk ({$firstLine})";
+    }
+    return "HTTP {$httpCode}: {$firstLine}";
+}
+
+/**
+ * Execute generateContent with automatic GET /v1beta/models live discovery fallback
+ * and automatic DB model update when a fallback model succeeds.
+ */
+function kala_call_gemini_with_autodiscovery(
+    string $apiKey,
+    string $preferredModel,
+    array $payload,
+    int $timeoutSec = 60,
+    $validator = null
+): array {
+    if (!is_callable($validator)) {
+        $validator = null;
+    }
+    $apiKey = trim($apiKey);
+    $preferredModel = preg_replace('#^models/#i', '', trim($preferredModel));
+    if ($preferredModel === '') {
+        $preferredModel = 'gemini-2.5-pro';
+    }
+
+    $startTime = microtime(true);
+    $attempts = [];
+    $discoveredModels = [];
+    $discoveryCalled = false;
+
+    // Helper closure to test a single model against :generateContent
+    $trySingleModel = function (string $candidateModel) use ($apiKey, $payload, $timeoutSec, $validator): array {
+        $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/" . rawurlencode($candidateModel) . ":generateContent?key=" . rawurlencode($apiKey);
+        $ch = curl_init($endpoint);
+        curl_setopt_array($ch, [
+            CURLOPT_POST => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_TIMEOUT => $timeoutSec,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => 0
+        ]);
+
+        $responseBody = curl_exec($ch);
+        $curlErr = curl_error($ch);
+        $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($responseBody === false || !empty($curlErr)) {
+            $errMsg = "Koneksi cURL gagal: " . ($curlErr ?: 'Timeout / Network Error');
+            return [
+                'ok' => false,
+                'http_code' => $httpCode,
+                'error' => $errMsg,
+                'summary' => $errMsg,
+                'fatal_key_error' => false
+            ];
+        }
+
+        $decoded = json_decode($responseBody, true);
+        if ($httpCode >= 200 && $httpCode < 300 && !empty($decoded['candidates'][0]['content']['parts'])) {
+            $replyText = '';
+            foreach ($decoded['candidates'][0]['content']['parts'] as $part) {
+                if (isset($part['text'])) {
+                    $replyText .= $part['text'];
+                }
+            }
+            $replyText = trim($replyText);
+
+            if ($validator !== null) {
+                $validationResult = $validator($replyText, $decoded, $candidateModel);
+                if (empty($validationResult['valid'])) {
+                    $valErr = $validationResult['error'] ?? "Format output dari {$candidateModel} tidak sesuai skema.";
+                    return [
+                        'ok' => false,
+                        'http_code' => $httpCode,
+                        'error' => $valErr,
+                        'summary' => $valErr,
+                        'fatal_key_error' => false
+                    ];
+                }
+                return [
+                    'ok' => true,
+                    'http_code' => $httpCode,
+                    'reply_text' => $replyText,
+                    'decoded' => $decoded,
+                    'validated_data' => $validationResult['data'] ?? null
+                ];
+            }
+
+            return [
+                'ok' => true,
+                'http_code' => $httpCode,
+                'reply_text' => $replyText,
+                'decoded' => $decoded,
+                'validated_data' => null
+            ];
+        }
+
+        $apiError = $decoded['error']['message'] ?? ('HTTP Error ' . $httpCode);
+        $isFatalKeyError = (
+            ($httpCode === 400 || $httpCode === 401 || $httpCode === 403) &&
+            (
+                stripos($apiError, 'API_KEY_INVALID') !== false ||
+                stripos($apiError, 'API key not valid') !== false ||
+                stripos($apiError, 'key not valid') !== false ||
+                stripos($apiError, 'API key expired') !== false
+            )
+        );
+
+        return [
+            'ok' => false,
+            'http_code' => $httpCode,
+            'error' => $apiError,
+            'summary' => kala_summarize_gemini_error($httpCode, $apiError),
+            'fatal_key_error' => $isFatalKeyError
+        ];
+    };
+
+    // 1. Try the user's selected/preferred model first
+    $firstRes = $trySingleModel($preferredModel);
+    if ($firstRes['ok']) {
+        $latencyMs = (int)round((microtime(true) - $startTime) * 1000);
+        $attempts[] = [
+            'model' => $preferredModel,
+            'http_code' => $firstRes['http_code'],
+            'status' => 'success',
+            'detail' => "Berhasil terhubung ({$latencyMs} ms)"
+        ];
+        set_agency_setting('gemini_api_key', $apiKey);
+        set_agency_setting('gemini_model', $preferredModel);
+
+        return [
+            'success' => true,
+            'model_requested' => $preferredModel,
+            'model_used' => $preferredModel,
+            'used_model' => $preferredModel,
+            'used_fallback' => false,
+            'latency_ms' => $latencyMs,
+            'reply_text' => $firstRes['reply_text'],
+            'raw_text' => $firstRes['reply_text'],
+            'decoded' => $firstRes['decoded'],
+            'validated_data' => $firstRes['validated_data'],
+            'attempts' => $attempts,
+            'discovered_models' => []
+        ];
+    }
+
+    // Record primary model failure honestly
+    $primaryError = $firstRes['error'];
+    $primarySummary = $firstRes['summary'];
+    $attempts[] = [
+        'model' => $preferredModel,
+        'http_code' => $firstRes['http_code'],
+        'status' => 'failed',
+        'detail' => $primarySummary
+    ];
+
+    // If the API key itself is invalid, stop immediately without trying fallbacks
+    if (!empty($firstRes['fatal_key_error'])) {
+        return [
+            'success' => false,
+            'http_code' => $firstRes['http_code'],
+            'model_requested' => $preferredModel,
+            'model_used' => null,
+            'used_model' => null,
+            'used_fallback' => false,
+            'primary_error' => $primaryError,
+            'message' => "API Key Tidak Valid: {$primaryError}",
+            'error_message' => "API Key Tidak Valid: {$primaryError}",
+            'attempts' => $attempts,
+            'discovered_models' => []
+        ];
+    }
+
+    // 2. Auto-Discovery via GET /v1beta/models to find active latest-generation models on this API key
+    $discovery = kala_discover_gemini_models($apiKey);
+    $discoveryCalled = true;
+    $discoveredModels = $discovery['models'] ?? [];
+    $discoveredIds = $discovery['model_ids'] ?? [];
+
+    // Check if Google's error message explicitly recommended a replacement model (e.g. "models/gemini-3.0-flash")
+    $suggestedModels = [];
+    if (preg_match_all('#models/([a-zA-Z0-9._-]+)#i', $primaryError, $matches)) {
+        foreach ($matches[1] as $mName) {
+            if (strcasecmp($mName, $preferredModel) !== 0) {
+                $suggestedModels[] = $mName;
+            }
+        }
+    }
+
+    // Build prioritized candidate list from live GET /v1beta/models discovery
+    // Priority order enforced by kala_discover_gemini_models:
+    // 1. gemini-3.1-pro / gemini-3-pro / gemini-3.0-pro
+    // 2. gemini-3.0-flash / gemini-3-flash
+    // 3. gemini-2.5-pro
+    // 4. gemini-2.5-flash / gemini-flash-latest / gemini-pro-latest
+    $fallbackQueue = [];
+    if (!empty($discoveredIds)) {
+        // Put discovered models first in exact priority order, plus any Google-suggested model that exists in discoveredIds
+        foreach ($discoveredIds as $dId) {
+            if (strcasecmp($dId, $preferredModel) !== 0) {
+                $fallbackQueue[] = $dId;
+            }
+        }
+        foreach ($suggestedModels as $sId) {
+            if (!in_array($sId, $fallbackQueue, true) && strcasecmp($sId, $preferredModel) !== 0) {
+                $fallbackQueue[] = $sId;
+            }
+        }
+    } else {
+        // If GET /v1beta/models failed, use modern priority order (never ending on deprecated 2.5-flash if 3.x is suggested)
+        $staticModernCandidates = array_merge(
+            $suggestedModels,
+            [
+                'gemini-3.1-pro-preview',
+                'gemini-3.0-pro',
+                'gemini-3-pro-preview',
+                'gemini-3.0-flash',
+                'gemini-3-flash-preview',
+                'gemini-2.5-pro',
+                'gemini-pro-latest',
+                'gemini-flash-latest'
+            ]
+        );
+        foreach ($staticModernCandidates as $cId) {
+            if (strcasecmp($cId, $preferredModel) !== 0 && !in_array($cId, $fallbackQueue, true)) {
+                $fallbackQueue[] = $cId;
+            }
+        }
+    }
+
+    // Try up to 5 discovered active models so we find a working model quickly
+    $maxFallbackTries = 5;
+    $triedCount = 0;
+
+    foreach ($fallbackQueue as $candidateModel) {
+        if ($triedCount >= $maxFallbackTries) {
+            break;
+        }
+        $triedCount++;
+
+        $res = $trySingleModel($candidateModel);
+        if ($res['ok']) {
+            $latencyMs = (int)round((microtime(true) - $startTime) * 1000);
+            $attempts[] = [
+                'model' => $candidateModel,
+                'http_code' => $res['http_code'],
+                'status' => 'success',
+                'detail' => "Berhasil terhubung via Auto-Discovery ({$latencyMs} ms)"
+            ];
+
+            // Automatically save working API key and auto-discovered model to DB
+            set_agency_setting('gemini_api_key', $apiKey);
+            set_agency_setting('gemini_model', $candidateModel);
+
+            return [
+                'success' => true,
+                'model_requested' => $preferredModel,
+                'model_used' => $candidateModel,
+                'used_model' => $candidateModel,
+                'used_fallback' => true,
+                'latency_ms' => $latencyMs,
+                'reply_text' => $res['reply_text'],
+                'raw_text' => $res['reply_text'],
+                'decoded' => $res['decoded'],
+                'validated_data' => $res['validated_data'],
+                'attempts' => $attempts,
+                'discovered_models' => $discoveredModels
+            ];
+        }
+
+        $attempts[] = [
+            'model' => $candidateModel,
+            'http_code' => $res['http_code'],
+            'status' => 'failed',
+            'detail' => $res['summary']
+        ];
+    }
+
+    // All attempts failed — report the primary model's error honestly along with the full attempt log
+    $attemptSummaryParts = [];
+    foreach ($attempts as $att) {
+        $attemptSummaryParts[] = "{$att['model']} ({$att['detail']})";
+    }
+
+    return [
+        'success' => false,
+        'http_code' => $firstRes['http_code'],
+        'model_requested' => $preferredModel,
+        'model_used' => null,
+        'used_model' => null,
+        'used_fallback' => true,
+        'primary_error' => $primaryError,
+        'message' => "Model {$preferredModel} gagal: {$primarySummary}",
+        'error_message' => "Model {$preferredModel} gagal: {$primarySummary}",
+        'attempts' => $attempts,
+        'attempts_summary' => implode(' | ', $attemptSummaryParts),
+        'discovered_models' => $discoveredModels
+    ];
+}
+
+// Compatibility aliases for camelCase callers
+if (!function_exists('getSystemSetting')) {
+    function getSystemSetting($dbOrKey, string $keyOrDefault = '', string $default = ''): string {
+        if ($dbOrKey instanceof PDO) {
+            return get_agency_setting($keyOrDefault, $default);
+        }
+        return get_agency_setting((string)$dbOrKey, $keyOrDefault);
+    }
+}
+
+if (!function_exists('isLoggedIn')) {
+    function isLoggedIn(?string $context = null): bool {
+        if (function_exists('is_logged_in')) {
+            return is_logged_in($context);
+        }
+        return !empty($_SESSION['user_id']) || !empty($_SESSION['kala_accounts']);
+    }
+}
+
+if (!function_exists('getUserRole')) {
+    function getUserRole(?string $context = null): string {
+        if (function_exists('current_user_role')) {
+            return current_user_role($context);
+        }
+        return $_SESSION['user_role'] ?? $_SESSION['role'] ?? '';
+    }
+}
+
+if (!function_exists('logActivity')) {
+    function logActivity($dbOrType, string $typeOrTitle = '', ?string $titleOrDesc = null, $descOrAmount = null): void {
+        if ($dbOrType instanceof PDO) {
+            if (function_exists('log_activity')) {
+                log_activity($typeOrTitle, (string)$titleOrDesc, is_string($descOrAmount) ? $descOrAmount : null);
+            }
+        } else {
+            if (function_exists('log_activity')) {
+                log_activity((string)$dbOrType, $typeOrTitle, $titleOrDesc, $descOrAmount);
+            }
+        }
+    }
+}
+
+
 
 

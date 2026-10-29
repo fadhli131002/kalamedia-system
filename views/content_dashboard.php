@@ -101,7 +101,7 @@ unset($c);
   <title>Content Calendar - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-nebula-v7">
   <?php render_tab_uid_script(); ?>
   <!-- FullCalendar 6.1.15 JS -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
@@ -679,6 +679,176 @@ unset($c);
       height: 100%;
       overflow: hidden;
     }
+
+    /* Content Calendar NebulaPay Dark Mode Overrides */
+    html[data-theme="dark"] .supitar-calendar-card,
+    body.dark-mode .supitar-calendar-card {
+      background: #0F1420 !important;
+      border: 1px solid rgba(255, 255, 255, 0.07) !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .supitar-sidebar,
+    body.dark-mode .supitar-sidebar {
+      background: #121726 !important;
+      border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .supitar-main-panel,
+    body.dark-mode .supitar-main-panel {
+      background: #0F1420 !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .supitar-title,
+    html[data-theme="dark"] .supitar-section-title,
+    html[data-theme="dark"] .supitar-month-heading,
+    body.dark-mode .supitar-title,
+    body.dark-mode .supitar-section-title,
+    body.dark-mode .supitar-month-heading {
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .supitar-search-wrap input,
+    body.dark-mode .supitar-search-wrap input,
+    html[data-theme="dark"] .supitar-search-input,
+    body.dark-mode .supitar-search-input {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .supitar-search-wrap svg path,
+    body.dark-mode .supitar-search-wrap svg path {
+      stroke: #64748B !important;
+    }
+    html[data-theme="dark"] .supitar-mini-month,
+    body.dark-mode .supitar-mini-month {
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .supitar-mini-nav,
+    body.dark-mode .supitar-mini-nav {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .supitar-mini-cell,
+    body.dark-mode .supitar-mini-cell {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .supitar-mini-cell:hover,
+    body.dark-mode .supitar-mini-cell:hover {
+      background: rgba(255, 255, 255, 0.06) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .supitar-mini-cell.is-today,
+    body.dark-mode .supitar-mini-cell.is-today {
+      background: rgba(37, 99, 235, 0.25) !important;
+      color: #60A5FA !important;
+      border: 1px solid rgba(37, 99, 235, 0.45) !important;
+    }
+    html[data-theme="dark"] .supitar-client-item,
+    body.dark-mode .supitar-client-item {
+      color: #F8FAFC !important;
+    }
+
+    /* Topbar Controls Dark Mode */
+    html[data-theme="dark"] .supitar-arrow-group,
+    body.dark-mode .supitar-arrow-group {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .supitar-arrow-btn,
+    body.dark-mode .supitar-arrow-btn {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .supitar-arrow-btn:hover,
+    body.dark-mode .supitar-arrow-btn:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
+      color: #FFFFFF !important;
+    }
+    html[data-theme="dark"] .supitar-btn-today,
+    body.dark-mode .supitar-btn-today {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      color: #E2E8F0 !important;
+    }
+    html[data-theme="dark"] .supitar-btn-today:hover,
+    body.dark-mode .supitar-btn-today:hover {
+      background: #1E293B !important;
+      color: #FFFFFF !important;
+      border-color: rgba(255, 255, 255, 0.15) !important;
+    }
+    html[data-theme="dark"] .supitar-view-switcher,
+    body.dark-mode .supitar-view-switcher {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .supitar-view-btn,
+    body.dark-mode .supitar-view-btn {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .supitar-view-btn:hover:not(.active),
+    body.dark-mode .supitar-view-btn:hover:not(.active) {
+      color: #FFFFFF !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+    }
+    html[data-theme="dark"] .supitar-view-btn.active,
+    body.dark-mode .supitar-view-btn.active {
+      background: #5B3DF5 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 2px 8px rgba(91, 61, 245, 0.35) !important;
+    }
+    html[data-theme="dark"] .supitar-btn-export,
+    body.dark-mode .supitar-btn-export {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      color: #E2E8F0 !important;
+    }
+    html[data-theme="dark"] .supitar-btn-export:hover,
+    body.dark-mode .supitar-btn-export:hover {
+      background: #1E293B !important;
+      color: #FFFFFF !important;
+      border-color: rgba(255, 255, 255, 0.15) !important;
+    }
+
+    /* FullCalendar Dark Grid Adaptation */
+    html[data-theme="dark"] .fc,
+    body.dark-mode .fc {
+      --fc-border-color: rgba(255, 255, 255, 0.07) !important;
+      --fc-page-bg-color: #0F1420 !important;
+    }
+    html[data-theme="dark"] .fc-theme-standard th,
+    body.dark-mode .fc-theme-standard th {
+      background: #161D2F !important;
+      border-color: rgba(255, 255, 255, 0.07) !important;
+    }
+    html[data-theme="dark"] .fc-theme-standard td,
+    body.dark-mode .fc-theme-standard td {
+      background: #0F1420 !important;
+      border-color: rgba(255, 255, 255, 0.07) !important;
+    }
+    html[data-theme="dark"] .fc-col-header-cell-cushion,
+    html[data-theme="dark"] .fc-daygrid-day-number,
+    body.dark-mode .fc-col-header-cell-cushion,
+    body.dark-mode .fc-daygrid-day-number {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .fc-day-other .fc-daygrid-day-number,
+    body.dark-mode .fc-day-other .fc-daygrid-day-number {
+      color: #475467 !important;
+    }
+    html[data-theme="dark"] .fc-timegrid-slot,
+    body.dark-mode .fc-timegrid-slot {
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .fc-timegrid-slot-label-cushion,
+    body.dark-mode .fc-timegrid-slot-label-cushion {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .fc-timegrid-col-header-cell,
+    body.dark-mode .fc-timegrid-col-header-cell {
+      background: #161D2F !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .fc-timegrid-col-header-cell .fc-col-header-cell-cushion,
+    body.dark-mode .fc-timegrid-col-header-cell .fc-col-header-cell-cushion {
+      color: #F8FAFC !important;
+    }
   </style>
 </head>
 <body>
@@ -734,9 +904,15 @@ unset($c);
 
             <!-- + Add Event Button (Slide 3 Blue CTA) -->
             <?php if (!$isClientUser && ($portal === 'owner' || $portal === 'admin' || is_admin())): ?>
-            <button type="button" class="supitar-btn-add-cal" onclick="openCreateContentModal()">
-              + Tambah Jadwal
-            </button>
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:auto;">
+              <button type="button" class="supitar-btn-add-cal" onclick="openKalaAiCalendarModal()" style="background:linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); box-shadow:0 4px 12px rgba(79,70,229,0.28); display:flex; align-items:center; justify-content:center; gap:7px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L14.8 8.5L22 9.3L16.5 14L18.2 21L12 17.3L5.8 21L7.5 14L2 9.3L9.2 8.5L12 2Z"/></svg>
+                <span>Generate Kalender (Kala AI)</span>
+              </button>
+              <button type="button" class="supitar-btn-add-cal" onclick="openCreateContentModal()">
+                + Tambah Jadwal
+              </button>
+            </div>
             <?php endif; ?>
           </div>
 
@@ -764,6 +940,13 @@ unset($c);
                   <button type="button" class="supitar-view-btn active" id="btn-view-month" onclick="calChangeView('dayGridMonth', this)">Bulanan</button>
                 </div>
 
+                <?php if (!$isClientUser && ($portal === 'owner' || $portal === 'admin' || is_admin())): ?>
+                <button type="button" class="supitar-btn-export" onclick="openKalaAiCalendarModal()" style="background:linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%) !important; color:#ffffff !important; border:none !important; box-shadow:0 3px 10px rgba(79,70,229,0.28);">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M12 14l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2z"/></svg>
+                  <span>Generate Rekomendasi Kalender Konten (Kala AI)</span>
+                </button>
+                <?php endif; ?>
+
                 <!-- Export PDF Action Button with Filter Modal -->
                 <button type="button" class="supitar-btn-export" onclick="openExportContentModal()" title="Ekspor Jadwal Konten ke PDF">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -787,6 +970,7 @@ unset($c);
 
   <?php require_once BASE_PATH . '/includes/bottom_nav.php'; ?>
   <?php require_once BASE_PATH . '/includes/modals.php'; ?>
+  <?php require_once BASE_PATH . '/includes/kala_ai_calendar_modal.php'; ?>
 
   <!-- Scripts -->
   <script src="assets/js/app.js?v=<?= time() ?>"></script>

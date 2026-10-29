@@ -150,8 +150,8 @@ $allCompanyNames = $db->query("
         </div>
 
         <!-- Inline New Client Box (Active if __new__ selected or when no clients exist) -->
-        <div id="box-new-client-fields" style="<?= empty($allClients) ? 'display:block;' : 'display:none;' ?> margin-bottom: 16px; padding: 14px; background: #F8F9FA; border-radius: var(--radius-sm); border: 1px dashed #D0D5DD;">
-          <div style="font-size: 12px; font-weight: 700; color: #344054; margin-bottom: 8px;">Informasi Klien Baru</div>
+        <div id="box-new-client-fields" style="<?= empty($allClients) ? 'display:block;' : 'display:none;' ?> margin-bottom: 16px; padding: 14px; background: var(--bg-tertiary, #F8F9FA); border-radius: var(--radius-sm); border: 1px dashed var(--border-color, #D0D5DD);">
+          <div style="font-size: 12px; font-weight: 700; color: var(--text-primary, #344054); margin-bottom: 8px;">Informasi Klien Baru</div>
           <div class="form-row">
             <div class="form-group" style="margin-bottom: 8px;">
               <label class="form-label" style="font-size: 11.5px;">Nama Perusahaan / Brand <span style="color:red;">*</span></label>
@@ -973,8 +973,8 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <!-- Inline New Client Box (Solves 0 clients empty dropdown issue) -->
-        <div id="inline-client-fields" style="<?= empty($allClients) ? 'display:block;' : 'display:none;' ?> background: #F8FAFC; border: 1.5px dashed #CBD5E1; border-radius: 10px; padding: 14px; margin-bottom: 16px;">
-          <div style="font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+        <div id="inline-client-fields" style="<?= empty($allClients) ? 'display:block;' : 'display:none;' ?> background: var(--bg-tertiary, #F8FAFC); border: 1.5px dashed var(--border-color, #CBD5E1); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+          <div style="font-size: 12px; font-weight: 700; color: var(--text-primary, #1E293B); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
             <span>🏢 Data Klien Baru (Otomatis dibuat & terhubung ke Proyek):</span>
           </div>
           <div class="form-row">
@@ -2766,8 +2766,8 @@ function openUniversalTransferProofModal(fileUrl, title, subtitle) {
         </div>
 
         <!-- Field Khusus Klien: Hubungkan ke Perusahaan Klien -->
-        <div class="form-group" id="group-client-select" style="display: none; background: #F8F9FC; border: 1px solid #D0D5DD; padding: 12px 14px; border-radius: 8px;">
-          <label class="form-label" style="font-weight: 700; color: #101828;">Pilih Perusahaan / Brand Klien *</label>
+        <div class="form-group" id="group-client-select" style="display: none; background: var(--bg-tertiary, #F8F9FC); border: 1px solid var(--border-color, #D0D5DD); padding: 12px 14px; border-radius: 8px;">
+          <label class="form-label" style="font-weight: 700; color: inherit;">Pilih Perusahaan / Brand Klien *</label>
           <select name="client_id" id="new-user-client-id" class="form-select">
             <option value="">-- Hubungkan ke Perusahaan Klien --</option>
             <?php foreach ($allClients as $cl): ?>

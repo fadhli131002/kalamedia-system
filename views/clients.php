@@ -7,7 +7,6 @@ require_admin();
 $db = Database::getConnection();
 
 // Fetch all active clients with project count and total invoiced
-// Fetch all active clients with project count and total invoiced
 $clients = $db->query("
     SELECT c.*,
            (SELECT COUNT(*) FROM projects WHERE client_id = c.id AND COALESCE(is_deleted, 0) = 0) as total_projects,
@@ -33,6 +32,24 @@ foreach ($assignedTeamRows as $r) {
     $teamByClient[(int)$r['client_id']][] = $r;
 }
 
+// Batch query: Fetch Kala AI Brand Audits per client
+$auditsByClient = [];
+try {
+    $auditRows = $db->query("
+        SELECT id, client_id, model_used, brand_stage, health_score, recommended_scheme_name, is_published_to_client,
+               CASE WHEN questionnaire_json IS NOT NULL AND questionnaire_json != '' AND questionnaire_json != '{}' THEN 1 ELSE 0 END as has_draft,
+               CASE WHEN ai_analysis_json IS NOT NULL AND ai_analysis_json != '' AND ai_analysis_json != '{}' THEN 1 ELSE 0 END as has_analysis,
+               updated_at
+        FROM brand_ai_audits
+        ORDER BY id ASC
+    ")->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($auditRows as $ar) {
+        $auditsByClient[(int)$ar['client_id']] = $ar;
+    }
+} catch (Throwable $e) {
+    // Table will be created automatically by Database::runMigrations()
+}
+
 // Fetch all active projects with calculated costs & margins and separated fees
 $projects = $db->query("
     SELECT p.*, c.company as client_company, c.name as client_pic,
@@ -54,12 +71,370 @@ $projects = $db->query("
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Database Klien & Proyek - PT Kala Kausa Prima</title>
+  <title>Database Klien &amp; Proyek - PT Kala Kausa Prima</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-2.7">
   <?php render_tab_uid_script(); ?>
+  <style>
+    /* Clean Client & Project Table Refinements (Light & NebulaPay Dark Mode) */
+    .kala-clients-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+    .kala-clients-toolbar-left {
+      min-width: 0;
+    }
+    .kala-clients-toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      min-width: 0;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+    .client-filter-scroll-track {
+      width: auto;
+      max-width: 100%;
+      min-width: 0;
+      overflow-x: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      touch-action: pan-x !important;
+      padding-bottom: 4px;
+      scrollbar-width: thin !important;
+      scrollbar-color: rgba(91, 61, 245, 0.35) transparent !important;
+    }
+    .client-filter-scroll-track::-webkit-scrollbar {
+      height: 4px !important;
+    }
+    .client-filter-scroll-track::-webkit-scrollbar-track {
+      background: transparent !important;
+    }
+    .client-filter-scroll-track::-webkit-scrollbar-thumb {
+      background: #CBD5E1 !important;
+      border-radius: 999px !important;
+    }
+    html[data-theme="dark"] .client-filter-scroll-track::-webkit-scrollbar-thumb,
+    body.dark-mode .client-filter-scroll-track::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.22) !important;
+    }
+    .client-filter-scroll-track .client-filter-pill-bar {
+      display: inline-flex !important;
+      width: max-content !important;
+      min-width: max-content !important;
+      background: #F3F4F6 !important;
+      padding: 4px !important;
+      border-radius: 10px !important;
+      gap: 4px !important;
+      box-sizing: border-box !important;
+      white-space: nowrap !important;
+    }
+    html[data-theme="dark"] .client-filter-scroll-track .client-filter-pill-bar,
+    body.dark-mode .client-filter-scroll-track .client-filter-pill-bar {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    .client-filter-scroll-track .client-filter-pill {
+      flex-shrink: 0 !important;
+      padding: 6px 14px !important;
+      border-radius: 7px !important;
+      font-size: 12px !important;
+      font-weight: 600 !important;
+      white-space: nowrap !important;
+      cursor: pointer !important;
+    }
+    @media (max-width: 768px) {
+      .kala-clients-toolbar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
+      .kala-clients-toolbar-left {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+      }
+      .kala-clients-toolbar-right {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        gap: 10px !important;
+      }
+      .client-filter-scroll-track {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        padding-bottom: 6px !important;
+      }
+      .kala-clients-toolbar-right > .btn,
+      .panel-header > .btn {
+        width: 100% !important;
+        height: 38px !important;
+        justify-content: center !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        font-size: 13px !important;
+      }
+    }
+    .kala-service-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 5px;
+    }
+    .kala-contract-meta {
+      font-size: 12px;
+      font-weight: 600;
+      color: #344054;
+      margin-bottom: 6px;
+      white-space: nowrap;
+    }
+    .kala-contract-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .kala-contract-pill {
+      display: inline-flex;
+      align-items: center;
+      height: 26px;
+      padding: 0 9px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      line-height: 1;
+    }
+    .kala-contract-pill.active {
+      background: #ECFDF3;
+      color: #027A48;
+      border: 1px solid #A6F4C5;
+    }
+    .kala-contract-pill.expired {
+      background: #FEF3F2;
+      color: #B42318;
+      border: 1px solid #FECDCA;
+    }
+    .kala-btn-renew {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 26px !important;
+      padding: 0 10px !important;
+      border-radius: 6px !important;
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      background: #F8FAFC;
+      color: #344054;
+      border: 1px solid #D0D5DD;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .kala-btn-renew:hover {
+      background: #EEF2FF;
+      color: #4F46E5;
+      border-color: #C7D2FE;
+    }
+    .kala-btn-renew.expired-cta {
+      background: #027A48;
+      color: #FFFFFF;
+      border-color: #027A48;
+    }
+    .kala-project-count-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #F2F4F7;
+      color: #101828;
+      border: 1px solid #E4E7EC;
+      margin-bottom: 4px;
+    }
+    .kala-comp-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 10.5px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .kala-comp-badge.jasa {
+      background: #EFF8FF;
+      color: #175CD3;
+      border: 1px solid #B2DDFF;
+    }
+    .kala-comp-badge.ads {
+      background: #ECFDF3;
+      color: #027A48;
+      border: 1px solid #A6F4C5;
+    }
+    .kala-client-actions-bar {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .kala-audit-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      line-height: 1;
+      box-sizing: border-box;
+    }
+    .kala-audit-pill .kala-audit-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .kala-audit-pill.unstarted {
+      background: #F2F4F7;
+      color: #475467;
+      border: 1px solid #E4E7EC;
+    }
+    .kala-audit-pill.unstarted .kala-audit-dot {
+      background: #98A2B3;
+    }
+    .kala-audit-pill.draft {
+      background: #FFFBEB;
+      color: #B45309;
+      border: 1px solid #FDE68A;
+    }
+    .kala-audit-pill.draft .kala-audit-dot {
+      background: #F59E0B;
+    }
+    .kala-audit-pill.published {
+      background: #ECFDF3;
+      color: #027A48;
+      border: 1px solid #A6F4C5;
+    }
+    .kala-audit-pill.published .kala-audit-dot {
+      background: #10B981;
+    }
+    .kala-btn-ai-audit {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 5px !important;
+      height: 32px !important;
+      padding: 0 12px !important;
+      border-radius: 8px !important;
+      font-size: 12px !important;
+      font-weight: 700 !important;
+      background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%) !important;
+      color: #FFFFFF !important;
+      border: 1px solid rgba(99, 102, 241, 0.4) !important;
+      cursor: pointer !important;
+      white-space: nowrap !important;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.25) !important;
+      transition: all 0.16s ease !important;
+    }
+    .kala-btn-ai-audit:hover {
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4) !important;
+    }
+
+    /* NebulaPay Dark Mode Overrides for Client & Project Tables */
+    html[data-theme="dark"] .kala-contract-meta,
+    body.dark-mode .kala-contract-meta {
+      color: #E2E8F0 !important;
+    }
+    html[data-theme="dark"] .kala-contract-pill.active,
+    body.dark-mode .kala-contract-pill.active {
+      background: rgba(16, 185, 129, 0.14) !important;
+      color: #34D399 !important;
+      border-color: rgba(52, 211, 153, 0.3) !important;
+    }
+    html[data-theme="dark"] .kala-contract-pill.expired,
+    body.dark-mode .kala-contract-pill.expired {
+      background: rgba(239, 68, 68, 0.14) !important;
+      color: #F87171 !important;
+      border-color: rgba(248, 113, 113, 0.3) !important;
+    }
+    html[data-theme="dark"] .kala-btn-renew,
+    body.dark-mode .kala-btn-renew {
+      background: #161F33 !important;
+      color: #CBD5E1 !important;
+      border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+    html[data-theme="dark"] .kala-btn-renew:hover,
+    body.dark-mode .kala-btn-renew:hover {
+      background: rgba(99, 102, 241, 0.18) !important;
+      color: #FFFFFF !important;
+      border-color: rgba(129, 140, 248, 0.45) !important;
+    }
+    html[data-theme="dark"] .kala-project-count-pill,
+    body.dark-mode .kala-project-count-pill {
+      background: #161F33 !important;
+      color: #F1F5F9 !important;
+      border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    html[data-theme="dark"] .kala-comp-badge.jasa,
+    body.dark-mode .kala-comp-badge.jasa {
+      background: rgba(59, 130, 246, 0.15) !important;
+      color: #60A5FA !important;
+      border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+    html[data-theme="dark"] .kala-comp-badge.ads,
+    body.dark-mode .kala-comp-badge.ads {
+      background: rgba(16, 185, 129, 0.15) !important;
+      color: #34D399 !important;
+      border-color: rgba(16, 185, 129, 0.3) !important;
+    }
+    html[data-theme="dark"] .kala-audit-pill.unstarted,
+    body.dark-mode .kala-audit-pill.unstarted {
+      background: rgba(148, 163, 184, 0.12) !important;
+      color: #94A3B8 !important;
+      border-color: rgba(148, 163, 184, 0.24) !important;
+    }
+    html[data-theme="dark"] .kala-audit-pill.unstarted .kala-audit-dot,
+    body.dark-mode .kala-audit-pill.unstarted .kala-audit-dot {
+      background: #64748B !important;
+    }
+    html[data-theme="dark"] .kala-audit-pill.draft,
+    body.dark-mode .kala-audit-pill.draft {
+      background: rgba(245, 158, 11, 0.14) !important;
+      color: #FBBF24 !important;
+      border-color: rgba(251, 191, 36, 0.32) !important;
+    }
+    html[data-theme="dark"] .kala-audit-pill.published,
+    body.dark-mode .kala-audit-pill.published {
+      background: rgba(16, 185, 129, 0.14) !important;
+      color: #34D399 !important;
+      border-color: rgba(52, 211, 153, 0.32) !important;
+    }
+  </style>
 </head>
 <body>
   <div class="app-container">
@@ -86,38 +461,35 @@ $projects = $db->query("
 
         <!-- 1. Clients Database Panel -->
         <div class="glass-panel" style="overflow: visible; min-width: 0; max-width: 100%;">
-          <div class="card-toolbar-saas">
-            <div class="card-toolbar-header-row">
-              <div>
-                <h2 class="panel-title" style="margin: 0; font-size: 15px; font-weight: 600; color: #111827; letter-spacing: -0.015em;">
-                  Database Klien &amp; Brand Agensi
-                </h2>
-                <p class="panel-subtitle" style="font-size: 12.5px; color: #6B7280; margin: 2px 0 0;">Daftar seluruh klien, masa kontrak layanan, dan alokasi tim PIC</p>
-              </div>
-
-              <button type="button" class="btn btn-primary btn-sm mobile-only-btn" onclick="openModal('modal-create-client')">
-                + Tambah Klien Baru
-              </button>
+          <div class="kala-clients-toolbar">
+            <div class="kala-clients-toolbar-left">
+              <h2 class="panel-title" style="margin: 0; font-size: 15.5px; font-weight: 700; color: #111827; letter-spacing: -0.015em;">
+                Database Klien &amp; Brand Agensi
+              </h2>
+              <p class="panel-subtitle" style="font-size: 12.5px; color: #6B7280; margin: 3px 0 0;">
+                Daftar seluruh klien, masa kontrak layanan, dan alokasi tim PIC
+              </p>
             </div>
 
-            <div class="card-toolbar-filter-row">
-              <!-- Filter Pills Berdasarkan 4 Jasa Kalamedia (Clean Segmented Control 1 Baris) -->
-              <div class="client-filter-pill-bar">
-                <button type="button" class="client-filter-pill active" onclick="filterClientService('all', this)">Semua Jasa</button>
-                <button type="button" class="client-filter-pill" onclick="filterClientService('Kelola Sosmed', this)">Kelola Sosmed</button>
-                <button type="button" class="client-filter-pill" onclick="filterClientService('Desain Eceran', this)">Desain Eceran / Satuan</button>
-                <button type="button" class="client-filter-pill" onclick="filterClientService('Jasa Buat Web', this)">Jasa Buat Web</button>
-                <button type="button" class="client-filter-pill" onclick="filterClientService('Jasa Iklan', this)">Jasa Iklan Meta &amp; Google</button>
+            <div class="kala-clients-toolbar-right">
+              <div class="client-filter-scroll-track" id="client-filter-scroll-track">
+                <div class="client-filter-pill-bar">
+                  <button type="button" class="client-filter-pill active" onclick="filterClientService('all', this)">Semua Jasa</button>
+                  <button type="button" class="client-filter-pill" onclick="filterClientService('Kelola Sosmed', this)">Kelola Sosmed</button>
+                  <button type="button" class="client-filter-pill" onclick="filterClientService('Desain Eceran', this)">Desain Eceran / Satuan</button>
+                  <button type="button" class="client-filter-pill" onclick="filterClientService('Jasa Buat Web', this)">Jasa Buat Web</button>
+                  <button type="button" class="client-filter-pill" onclick="filterClientService('Jasa Iklan', this)">Jasa Iklan Meta &amp; Google</button>
+                </div>
               </div>
 
-              <button type="button" class="btn btn-primary btn-sm desktop-only-btn" onclick="openModal('modal-create-client')">
+              <button type="button" class="btn btn-primary btn-sm" onclick="openModal('modal-create-client')" style="height: 36px; padding: 0 14px; font-weight: 700; white-space: nowrap;">
                 + Tambah Klien Baru
               </button>
             </div>
           </div>
 
           <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
-            <table class="table-custom" style="min-width: 920px !important; width: 100%;">
+            <table class="table-custom" style="min-width: 960px !important; width: 100%;">
               <thead>
                 <tr>
                   <th style="white-space: nowrap !important;">NAMA PERUSAHAAN &amp; PIC</th>
@@ -125,7 +497,7 @@ $projects = $db->query("
                   <th style="white-space: nowrap !important;">TIM PIC (PENANGGUNG JAWAB)</th>
                   <th style="white-space: nowrap !important;">MASA KONTRAK &amp; STATUS</th>
                   <th style="white-space: nowrap !important;">TOTAL PROYEK &amp; BIAYA</th>
-                  <th class="th-actions" style="text-align: right; white-space: nowrap !important; min-width: 160px;">AKSI</th>
+                  <th class="th-actions" style="text-align: right; white-space: nowrap !important; min-width: 280px;">STATUS AUDIT &amp; AKSI</th>
                 </tr>
               </thead>
               <tbody id="clients-table-body">
@@ -168,11 +540,11 @@ $projects = $db->query("
                         <div style="color: var(--text-secondary); font-size: 11px;"><?= htmlspecialchars($c['email'] ?: '') ?> <?= !empty($c['phone']) ? '• ' . htmlspecialchars($c['phone']) : '' ?></div>
                       </td>
 
-                      <td>
+                      <td style="white-space: nowrap;">
                         <?php if (empty($cServices)): ?>
                           <span style="font-size: 11px; color: var(--text-muted); font-style: italic;">Belum diatur</span>
                         <?php else: ?>
-                          <div style="display: flex; flex-wrap: wrap; gap: 4px; max-width: 220px;">
+                          <div class="kala-service-stack">
                             <?php foreach ($cServices as $s): 
                               $s = trim($s);
                               $tagClass = 'service-tag-default';
@@ -193,10 +565,10 @@ $projects = $db->query("
                         <?php else: ?>
                           <div style="display: flex; flex-direction: column; gap: 4px;">
                             <?php foreach ($assignedTeam as $atm): ?>
-                              <div style="font-size: 12px; font-weight: 700; color: #101828; display: inline-flex; align-items: center; gap: 4px;">
+                              <div style="font-size: 12px; font-weight: 700; color: #101828; display: inline-flex; align-items: center; gap: 5px;">
                                 <span style="width: 6px; height: 6px; border-radius: 50%; background: #5D76F5; display: inline-block;"></span>
                                 <?= htmlspecialchars($atm['name']) ?>
-                                <span style="font-size: 10px; color: #6E7485; font-weight: 500;">(<?= htmlspecialchars($atm['position'] ?: 'Staff') ?>)</span>
+                                <span style="font-size: 10.5px; color: #6E7485; font-weight: 500;">(<?= htmlspecialchars($atm['position'] ?: 'Staff') ?>)</span>
                               </div>
                             <?php endforeach; ?>
                           </div>
@@ -205,28 +577,28 @@ $projects = $db->query("
 
                       <td style="white-space: nowrap;">
                         <?php if ($startDate && $endDate): ?>
-                          <div style="font-size: 11.5px; color: #344054; font-weight: 600; margin-bottom: 4px;">
+                          <div class="kala-contract-meta">
                             <?= date('d M Y', strtotime($startDate)) ?> &ndash; <?= date('d M Y', strtotime($endDate)) ?>
                           </div>
                         <?php else: ?>
-                          <div style="font-size: 11px; color: var(--text-muted); font-style: italic; margin-bottom: 4px;">Tanggal belum diset</div>
+                          <div style="font-size: 11px; color: var(--text-muted); font-style: italic; margin-bottom: 6px;">Tanggal belum diset</div>
                         <?php endif; ?>
 
                         <?php if ($isExpired): ?>
-                          <div style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                            <span style="background: #FEF3F2; color: #B42318; border: none; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center;">
+                          <div class="kala-contract-row">
+                            <span class="kala-contract-pill expired">
                               <span class="status-dot dot-red"></span> Kontrak Berakhir
                             </span>
-                            <button type="button" class="btn btn-sm" onclick='openRenewClientModal(<?= json_encode($c, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' style="background: #027A48; color: #FFF; border: none; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; cursor: pointer;">
-                              + Perpanjang Kontrak
+                            <button type="button" class="kala-btn-renew expired-cta" onclick='openRenewClientModal(<?= json_encode($c, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)'>
+                              + Perpanjang
                             </button>
                           </div>
                         <?php else: ?>
-                          <div style="display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                            <span style="background: #ECFDF3; color: #027A48; border: none; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center;">
-                              <span class="status-dot dot-green"></span> Aktif <?= $daysRemaining !== null ? "• Sisa {$daysRemaining} Hari" : '' ?>
+                          <div class="kala-contract-row">
+                            <span class="kala-contract-pill active">
+                              <span class="status-dot dot-green"></span> Aktif <?= $daysRemaining !== null ? "&bull; Sisa {$daysRemaining} Hari" : '' ?>
                             </span>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick='openRenewClientModal(<?= json_encode($c, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' style="font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px;">
+                            <button type="button" class="kala-btn-renew" onclick='openRenewClientModal(<?= json_encode($c, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)'>
                               Perpanjang
                             </button>
                           </div>
@@ -234,21 +606,46 @@ $projects = $db->query("
                       </td>
 
                       <td style="white-space: nowrap;">
-                        <span style="font-weight: 700; color: #101828; background: #F2F4F7; padding: 2px 6px; border-radius: 4px; font-size: 11px;">
+                        <span class="kala-project-count-pill">
                           <?= $c['total_projects'] ?> Proyek
                         </span>
-                        <div style="font-weight: 700; color: #101828; font-size: 12px; margin-top: 3px;"><?= format_rupiah($c['total_invoiced']) ?></div>
-                        <div style="font-size: 10.5px; color: var(--success-text); font-weight: 700;">Lunas: <?= format_rupiah($c['total_paid']) ?></div>
+                        <div style="font-weight: 800; color: var(--text-primary); font-size: 12.5px;"><?= format_rupiah($c['total_invoiced']) ?></div>
+                        <div style="font-size: 11px; color: var(--success-text); font-weight: 700;">Lunas: <?= format_rupiah($c['total_paid']) ?></div>
                         <?php if (!empty($c['total_freelancer_paid']) && $c['total_freelancer_paid'] > 0): ?>
                           <div style="font-size: 10.5px; color: #027A48; font-weight: 700; margin-top: 2px;">Freelancer Terbayar: <?= format_rupiah($c['total_freelancer_paid']) ?></div>
                         <?php endif; ?>
                       </td>
 
                       <td class="td-actions" style="text-align: right; white-space: nowrap;">
-                        <div class="table-actions">
+                        <?php
+                          $cAudit = $auditsByClient[(int)$c['id']] ?? null;
+                          $auditBadgeText = 'Belum Dianalisis';
+                          $auditBadgeClass = 'unstarted';
+                          if ($cAudit) {
+                              if ((int)($cAudit['is_published_to_client'] ?? 0) === 1) {
+                                  $auditBadgeText = 'Terkirim ke Klien';
+                                  $auditBadgeClass = 'published';
+                              } elseif (!empty($cAudit['has_analysis']) || !empty($cAudit['has_draft'])) {
+                                  $auditBadgeText = 'Draft Analisis';
+                                  $auditBadgeClass = 'draft';
+                              }
+                          }
+                        ?>
+                        <div class="kala-client-actions-bar">
+                          <span id="client-audit-badge-<?= (int)$c['id'] ?>" class="kala-audit-pill <?= $auditBadgeClass ?>">
+                            <span class="kala-audit-dot"></span>
+                            <span><?= $auditBadgeText ?></span>
+                          </span>
+
+                          <button type="button" class="kala-btn-ai-audit" onclick="openBrandAiAuditModal(<?= (int)$c['id'] ?>, '<?= htmlspecialchars($c['company'], ENT_QUOTES) ?>')" title="Kala AI Brand Diagnostic &amp; Strategy Blueprint (Gemini Pro)">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>
+                            <span>AI Brand Audit</span>
+                          </button>
+
                           <button type="button" class="btn-action-edit" onclick='openEditClientModal(<?= json_encode($c, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Edit Data Klien">
                             Edit
                           </button>
+
                           <?php if (is_owner()): ?>
                             <button type="button" class="btn-action-delete btn-delete-ghost" onclick="confirmDeleteClient(<?= $c['id'] ?>, '<?= htmlspecialchars($c['company'], ENT_QUOTES) ?>')" title="Hapus Klien">
                               Hapus
@@ -318,37 +715,47 @@ $projects = $db->query("
                     <tr>
                       <td style="white-space: nowrap;">
                         <div class="clickable-client-link" onclick="openProjectFinancialDetailModal(<?= $p['id'] ?>, <?= $p['client_id'] ?>)" title="Lihat Rincian Alokasi Keuangan Proyek">
-                          <span style="font-weight: 700; color: #101828;"><?= htmlspecialchars($p['name']) ?></span>
+                          <span style="font-weight: 700; color: var(--text-primary);"><?= htmlspecialchars($p['name']) ?></span>
                         </div>
                         <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($p['client_company']) ?></div>
                       </td>
                       <td style="white-space: nowrap;">
-                        <div style="font-weight: 800; color: #101828; font-size: 13.5px;"><?= format_rupiah($totalContract) ?></div>
-                        <div style="display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap;">
-                          <span class="badge" style="background: #EFF8FF; color: #175CD3; font-weight: 700; font-size: 10px; padding: 2px 6px;">
+                        <div style="font-weight: 800; color: var(--text-primary); font-size: 13.5px;"><?= format_rupiah($totalContract) ?></div>
+                        <div style="display: flex; gap: 5px; margin-top: 4px; flex-wrap: wrap;">
+                          <span class="kala-comp-badge jasa">
                             Jasa: <?= format_rupiah($serviceFee) ?>
                           </span>
-                          <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 10px; padding: 2px 6px;">
+                          <span class="kala-comp-badge ads">
                             Ads: <?= format_rupiah($adsBudget) ?>
                           </span>
                         </div>
                       </td>
                       <td style="white-space: nowrap;">
-                        <div style="color: #027A48; font-weight: 800; font-size: 13px;"><?= format_rupiah($freelancerPaid) ?> <span style="font-size: 9.5px; background: #ECFDF3; color: #027A48; padding: 1px 5px; border-radius: 4px; font-weight: 700;">Lunas</span></div>
+                        <div style="color: #10B981; font-weight: 800; font-size: 13px; display: inline-flex; align-items: center; gap: 5px;">
+                          <span><?= format_rupiah($freelancerPaid) ?></span>
+                          <span class="kala-comp-badge ads" style="font-size: 9.5px; padding: 1px 6px;">Lunas</span>
+                        </div>
                         <?php if ($freelancerPending > 0): ?>
                           <div style="font-size: 10.5px; color: #B54708; font-weight: 600; margin-top: 2px;">Pending: <?= format_rupiah($freelancerPending) ?></div>
                         <?php endif; ?>
                         <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Biaya Talent Freelancer</div>
                       </td>
-                      <td style="font-weight: 700; color: <?= $profit >= 0 ? 'var(--success-text)' : 'var(--danger-text)' ?>; white-space: nowrap;">
+                      <td style="font-weight: 700; color: <?= $profit > 0 ? 'var(--success-text)' : ($profit < 0 ? 'var(--danger-text)' : 'var(--text-primary)') ?>; white-space: nowrap;">
                         <?= format_rupiah($profit) ?>
                         <div style="font-size: 10px; color: var(--text-muted);">(Laba Bersih Agensi)</div>
                       </td>
                       <td style="white-space: nowrap;">
-                        <span class="badge-margin <?= $margin >= $targetMargin ? 'good' : 'bad' ?>">
-                          <?= round($margin, 1) ?>%
-                        </span>
-                        <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Target: <?= $targetMargin ?>%</div>
+                        <?php if ($totalContract <= 0 && $freelancerCost <= 0): ?>
+                          <span style="display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; background: rgba(148, 163, 184, 0.14); color: var(--text-secondary); border: 1px solid rgba(148, 163, 184, 0.25);">
+                            0%
+                          </span>
+                          <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Target: <?= $targetMargin ?>%</div>
+                        <?php else: ?>
+                          <span class="badge-margin <?= $margin >= $targetMargin ? 'good' : 'bad' ?>">
+                            <?= round($margin, 1) ?>%
+                          </span>
+                          <div style="font-size: 10px; color: var(--text-muted); margin-top: 2px;">Target: <?= $targetMargin ?>%</div>
+                        <?php endif; ?>
                       </td>
                       <td style="white-space: nowrap;">
                         <span class="badge-status badge-<?= strtolower(str_replace(' ', '', $p['status'])) ?>">
@@ -361,13 +768,13 @@ $projects = $db->query("
                         <?php endif; ?>
                       </td>
                       <td class="td-actions" style="text-align: right; white-space: nowrap;">
-                        <div class="table-actions" style="justify-content: flex-end; gap: 4px;">
+                        <div class="table-actions" style="justify-content: flex-end; gap: 6px;">
                           <?php if (!$isContractExpired): ?>
-                            <button type="button" class="btn btn-sm" onclick='openTopupAdsModal(<?= json_encode($p, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' style="background: #ECFDF3; color: #027A48; border: 1px solid #A6F4C5; font-weight: 700; padding: 4px 8px; font-size: 11px;" title="Tambah / Top-Up Saldo Ads Klien">
+                            <button type="button" class="kala-btn-renew" onclick='openTopupAdsModal(<?= json_encode($p, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' style="height: 32px !important; padding: 0 10px !important;" title="Tambah / Top-Up Saldo Ads Klien">
                               + Saldo Ads
                             </button>
                           <?php else: ?>
-                            <button type="button" class="btn btn-sm" disabled style="background: #F2F4F7; color: #98A2B3; border: 1px solid #D0D5DD; padding: 4px 8px; font-size: 11px; cursor: not-allowed;" title="Masa kontrak habis — perpanjang kontrak terlebih dahulu">
+                            <button type="button" class="kala-btn-renew" disabled style="height: 32px !important; padding: 0 10px !important; opacity: 0.5; cursor: not-allowed;" title="Masa kontrak habis — perpanjang kontrak terlebih dahulu">
                               + Saldo Ads (Terkunci)
                             </button>
                           <?php endif; ?>
@@ -395,6 +802,7 @@ $projects = $db->query("
   </div>
 
   <?php require_once BASE_PATH . '/includes/modals.php'; ?>
+  <?php require_once BASE_PATH . '/includes/brand_ai_audit_modal.php'; ?>
   <?php require_once BASE_PATH . '/includes/footer.php'; ?>
 
   <script>
@@ -464,6 +872,30 @@ $projects = $db->query("
 
       openModal('modal-topup-project-ads');
     }
+
+    // Smooth drag-to-scroll for horizontal filter track
+    document.addEventListener('DOMContentLoaded', function() {
+      const slider = document.getElementById('client-filter-scroll-track');
+      if (!slider) return;
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+
+      slider.addEventListener('mousedown', (e) => {
+        isDown = true;
+        startX = e.pageX - slider.offsetLeft;
+        scrollLeft = slider.scrollLeft;
+      });
+      slider.addEventListener('mouseleave', () => { isDown = false; });
+      slider.addEventListener('mouseup', () => { isDown = false; });
+      slider.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - slider.offsetLeft;
+        const walk = (x - startX) * 1.5;
+        slider.scrollLeft = scrollLeft - walk;
+      });
+    });
   </script>
 </body>
 </html>

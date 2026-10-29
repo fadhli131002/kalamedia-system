@@ -43,9 +43,9 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
   $workerAvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed={$workerAvatarSeed}&backgroundColor=ffd5dc,c0aede,d1d4f9,b6e3f4";
   $fallbackSvgData = "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23FDE2E4%22/><circle cx=%2250%22 cy=%2244%22 r=%2222%22 fill=%22%23FFDFBA%22/><path d=%22M32 38 Q50 16 68 38 Q50 26 32 38 Z%22 fill=%22%233D2645%22/><circle cx=%2242%22 cy=%2242%22 r=%223%22 fill=%22%231F2937%22/><circle cx=%2258%22 cy=%2242%22 r=%223%22 fill=%22%231F2937%22/><circle cx=%2238%22 cy=%2247%22 r=%222.5%22 fill=%22%23FFB5A7%22 opacity=%220.6%22/><circle cx=%2262%22 cy=%2247%22 r=%222.5%22 fill=%22%23FFB5A7%22 opacity=%220.6%22/><path d=%22M45 50 Q50 54 55 50%22 stroke=%22%23D95D39%22 stroke-width=%222%22 fill=%22none%22 stroke-linecap=%22round%22/><path d=%22M25 94 C28 72 40 66 50 66 C60 66 72 72 75 94 Z%22 fill=%22%236C5CE7%22/><circle cx=%2250%22 cy=%2268%22 r=%225%22 fill=%22%23FFDFBA%22/></svg>";
 ?>
-<header class="topbar appify-topbar" style="height: 64px !important; min-height: 64px !important; max-height: 64px !important; padding: 0 16px !important; margin: 0 !important; display: flex !important; align-items: center !important; justify-content: space-between !important; background: #FFFFFF !important; border-bottom: 1px solid #ECEEF5 !important; position: sticky !important; top: 0 !important; z-index: 100 !important; box-sizing: border-box !important;">
+<header class="topbar appify-topbar" style="height: 64px !important; min-height: 64px !important; max-height: 64px !important; padding: 0 16px !important; margin: 0 !important; display: flex !important; align-items: center !important; justify-content: space-between !important; position: sticky !important; top: 0 !important; z-index: 100 !important; box-sizing: border-box !important;">
   <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
-    <button class="sidebar-toggle-btn" id="sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Buka Menu Navigasi" title="Buka Menu" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #334155; flex-shrink: 0; transition: all 0.15s ease;">
+    <button class="sidebar-toggle-btn" id="sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Buka Menu Navigasi" title="Buka Menu">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="3" y1="6" x2="21" y2="6"></line>
         <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -62,18 +62,22 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
     </div>
 
     <div style="min-width: 0; cursor: pointer;" onclick="navigateToWorkerProfile(event)" title="Buka Profil">
-      <h1 style="font-size: 15px; font-weight: 700; color: #0F172A; margin: 0; line-height: 1.25; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+      <h1 class="greeting-h1" style="font-size: 15px; font-weight: 700; margin: 0; line-height: 1.25; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
         Halo, <?= htmlspecialchars($currentUser['name'] ?? 'Tim Kalamedia') ?>
       </h1>
-      <div style="font-size: 11px; color: #64748B; font-weight: 500; margin-top: 2px;">
+      <div class="greeting-date-sub" style="font-size: 11px; font-weight: 500; margin-top: 2px;">
         <?= date('d M Y') ?>
       </div>
     </div>
   </div>
 
   <div style="flex-shrink: 0; display: flex; align-items: center; gap: 8px;">
-    <span class="badge-version" title="Versi Sistem"><?= defined('APP_VERSION') ? APP_VERSION : 'v2.5' ?></span>
-    <span style="display: inline-flex; align-items: center; background: #EEF2FF; color: #5B3DF5; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 999px; border: 1px solid #E0E7FF; letter-spacing: 0.1px;">
+    <!-- Nebula Dark/Light Mode Toggle -->
+    <button type="button" class="theme-toggle-compact" onclick="toggleTheme()" aria-label="Toggle Mode Nebula/Terang" title="Beralih Tema (Dark/Light)">
+      <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+      <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5A8.5 8.5 0 1 0 20.5 14.5 7.2 7.2 0 0 1 14.5 3.5z"></path><path d="M18.5 3.5v3.2m-1.6-1.6h3.2" stroke-width="2"></path><path d="M21 8.5v2.2m-1.1-1.1h2.2" stroke-width="1.8"></path></svg>
+    </button>
+    <span class="badge-role-pill" style="display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 999px; letter-spacing: 0.1px;">
       <?= $userRole === 'freelancer' ? 'Freelancer' : 'Staff' ?>
     </span>
   </div>
@@ -93,9 +97,9 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
   $ownerAvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed={$ownerAvatarSeed}&backgroundColor=d1d4f9,c0aede,b6e3f4";
   $ownerFallbackSvgData = "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23EEF2FF%22/><text x=%2250%22 y=%2258%22 font-size=%2234%22 font-weight=%22700%22 fill=%22%235B3DF5%22 text-anchor=%22middle%22 font-family=%22Inter, sans-serif%22>OW</text></svg>";
 ?>
-<header class="topbar appify-topbar owner-topbar" style="height: 64px !important; min-height: 64px !important; max-height: 64px !important; padding: 0 16px !important; margin: 0 !important; display: flex !important; align-items: center !important; justify-content: space-between !important; background: #FFFFFF !important; border-bottom: 1px solid #ECEEF5 !important; position: sticky !important; top: 0 !important; z-index: 100 !important; box-sizing: border-box !important;">
+<header class="topbar appify-topbar owner-topbar" style="height: 64px !important; min-height: 64px !important; max-height: 64px !important; padding: 0 16px !important; margin: 0 !important; display: flex !important; align-items: center !important; justify-content: space-between !important; position: sticky !important; top: 0 !important; z-index: 100 !important; box-sizing: border-box !important;">
   <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
-    <button class="sidebar-toggle-btn" id="sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Buka Menu Navigasi" title="Buka Menu" style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; width: 38px; height: 38px; align-items: center; justify-content: center; cursor: pointer; color: #334155; flex-shrink: 0; transition: all 0.15s ease;">
+    <button class="sidebar-toggle-btn" id="sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Buka Menu Navigasi" title="Buka Menu">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="3" y1="6" x2="21" y2="6"></line>
         <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -111,26 +115,36 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
            style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; display: block;">
     </div>
 
-    <div style="min-width: 0;">
-      <h1 style="font-size: 17px; font-weight: 700; color: #16141F; margin: 0; line-height: 1.25; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+    <div style="min-width: 0; flex: 1;">
+      <h1 class="greeting-h1" style="font-size: 16px; font-weight: 700; margin: 0; line-height: 1.25; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
         Halo, Owner
       </h1>
-      <div style="font-size: 12px; color: #6E6D7A; font-weight: 500; margin-top: 2px;">
+      <div class="greeting-date-sub" style="font-size: 11.5px; font-weight: 500; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
         <?= date('d M Y') ?>
       </div>
     </div>
   </div>
 
-  <div style="flex-shrink: 0; display: flex; align-items: center; gap: 8px;">
-    <span class="badge-version" title="Versi Sistem"><?= defined('APP_VERSION') ? APP_VERSION : 'v2.5' ?></span>
-    <span style="background: #EEF2FF; color: #5B3DF5; border-radius: 999px; padding: 4px 12px; font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; border: 1px solid #E0E7FF; letter-spacing: 0.1px;">
+  <div class="owner-topbar-right" style="flex-shrink: 0; display: flex; align-items: center; gap: 6px;">
+    <!-- Tanya Kala AI (Asisten Owner) -->
+    <button type="button" class="kala-topbar-ai-btn" onclick="openKalaOwnerCopilot()" title="Tanya Kala AI (Asisten Owner)">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="flex-shrink:0;"><path d="M12 2L14.8 8.5L22 9.3L16.5 14L18.2 21L12 17.3L5.8 21L7.5 14L2 9.3L9.2 8.5L12 2Z"/></svg>
+      <span class="kala-ai-label-full">Tanya Kala AI</span>
+      <span class="kala-ai-label-short">Kala AI</span>
+    </button>
+    <!-- Nebula Dark/Light Mode Toggle -->
+    <button type="button" class="theme-toggle-compact" onclick="toggleTheme()" aria-label="Toggle Mode Nebula/Terang" title="Beralih Tema (Dark/Light)">
+      <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+      <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5A8.5 8.5 0 1 0 20.5 14.5 7.2 7.2 0 0 1 14.5 3.5z"></path><path d="M18.5 3.5v3.2m-1.6-1.6h3.2" stroke-width="2"></path><path d="M21 8.5v2.2m-1.1-1.1h2.2" stroke-width="1.8"></path></svg>
+    </button>
+    <span class="badge-role-executive kala-exec-badge-top" style="border-radius: 999px; padding: 4px 12px; font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; letter-spacing: 0.1px;">
       Executive
     </span>
   </div>
 </header>
 <?php else: ?>
-<header class="topbar" style="height: 64px !important; min-height: 64px !important; max-height: 64px !important; padding: 0 16px !important; margin: 0 !important; display: flex !important; align-items: center !important; justify-content: space-between !important; background: #FFFFFF !important; border-bottom: 1px solid #ECEEF5 !important; position: sticky !important; top: 0 !important; z-index: 100 !important; box-sizing: border-box !important;">
-  <div class="greeting-text">
+<header class="topbar" style="height: 64px !important; min-height: 64px !important; max-height: 64px !important; padding: 0 16px !important; margin: 0 !important; display: flex !important; align-items: center !important; justify-content: space-between !important; position: sticky !important; top: 0 !important; z-index: 100 !important; box-sizing: border-box !important;">
+  <div class="greeting-text" style="min-width: 0; flex: 1;">
     <button class="sidebar-toggle-btn" id="sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Buka Menu Navigasi" title="Buka Menu">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -138,7 +152,7 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
         <line x1="3" y1="18" x2="21" y2="18"></line>
       </svg>
     </button>
-    <div class="greeting-info">
+    <div class="greeting-info" style="min-width: 0;">
       <div class="topbar-breadcrumb">
         <span class="breadcrumb-root"><?= htmlspecialchars($currentPageInfo['parent']) ?></span>
         <span class="breadcrumb-sep">/</span>
@@ -158,15 +172,26 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
     </div>
   </div>
 
-  <div class="topbar-actions" style="display: flex; align-items: center; gap: 8px;">
-    <span class="badge-version" title="Versi Sistem"><?= defined('APP_VERSION') ? APP_VERSION : 'v2.5' ?></span>
+  <div class="topbar-actions" style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+    <?php if (in_array($userRole, ['owner', 'admin'], true) && !$isClientUser): ?>
+      <button type="button" class="kala-topbar-ai-btn" onclick="openKalaOwnerCopilot()" title="Tanya Kala AI (Asisten Owner)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" style="flex-shrink:0;"><path d="M12 2L14.8 8.5L22 9.3L16.5 14L18.2 21L12 17.3L5.8 21L7.5 14L2 9.3L9.2 8.5L12 2Z"/></svg>
+        <span class="kala-ai-label-full">Tanya Kala AI</span>
+        <span class="kala-ai-label-short">Kala AI</span>
+      </button>
+    <?php endif; ?>
+    <!-- Nebula Dark/Light Mode Toggle -->
+    <button type="button" class="theme-toggle-compact" onclick="toggleTheme()" aria-label="Toggle Mode Nebula/Terang" title="Beralih Tema (Dark/Light)">
+      <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+      <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5A8.5 8.5 0 1 0 20.5 14.5 7.2 7.2 0 0 1 14.5 3.5z"></path><path d="M18.5 3.5v3.2m-1.6-1.6h3.2" stroke-width="2"></path><path d="M21 8.5v2.2m-1.1-1.1h2.2" stroke-width="1.8"></path></svg>
+    </button>
     <!-- Role Context Actions -->
     <?php if ($userRole === 'admin' && !$isClientUser): ?>
       <button class="btn btn-primary btn-sm btn-create-invoice" onclick="openModal('modal-create-invoice')">
         <span>+ Buat Invoice</span>
       </button>
     <?php elseif ($isClientUser): ?>
-      <span style="font-size: 11px; font-weight: 700; color: #101828; background: #F2F4F7; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-color);">
+      <span class="badge-portal-klien" style="font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-color);">
         Portal Klien Terverifikasi
       </span>
     <?php endif; ?>
@@ -174,3 +199,4 @@ $currentPageInfo = $pageMeta[$currentPage] ?? ['name' => ucwords(str_replace('-'
   </div>
 </header>
 <?php endif; ?>
+<?php require_once __DIR__ . '/kala_ai_copilot_drawer.php'; ?>

@@ -251,6 +251,21 @@ $totalClientsCount = count($allClients);
     }
 
     @media (max-width: 768px) {
+      .page-header-bar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+      }
+      .page-header-bar > div {
+        width: 100% !important;
+      }
+      .page-header-bar .btn {
+        width: 100% !important;
+        height: 38px !important;
+        justify-content: center !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+      }
       .bento-table-card {
         padding: 16px 14px !important;
         border-radius: 18px !important;
@@ -264,25 +279,26 @@ $totalClientsCount = count($allClients);
       }
       .bento-tabs-group {
         width: 100% !important;
-        display: flex !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        white-space: nowrap !important;
-        scrollbar-width: none !important;
-        gap: 2px !important;
-        padding: 3px !important;
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 4px !important;
+        padding: 4px !important;
         background: #F3F4F6 !important;
-        border-radius: 8px !important;
+        border-radius: 12px !important;
       }
       .bento-tabs-group::-webkit-scrollbar {
         display: none !important;
       }
       .bento-tab-btn {
-        flex-shrink: 0 !important;
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
         white-space: nowrap !important;
-        padding: 6px 12px !important;
+        padding: 8px 6px !important;
         font-size: 12px !important;
-        border-radius: 6px !important;
+        border-radius: 9px !important;
       }
       .bento-search-box {
         width: 100% !important;
@@ -291,7 +307,8 @@ $totalClientsCount = count($allClients);
       }
       .bento-search-input {
         width: 100% !important;
-        height: 36px !important;
+        height: 38px !important;
+        border-radius: 10px !important;
         font-size: 13px !important;
       }
     }
@@ -363,6 +380,60 @@ $totalClientsCount = count($allClients);
     }
     .bento-search-input::placeholder {
       color: #949AB1;
+    }
+
+    /* Team View NebulaPay Dark Mode Overrides */
+    html[data-theme="dark"] .bento-metric-card,
+    html[data-theme="dark"] .bento-table-card,
+    body.dark-mode .bento-metric-card,
+    body.dark-mode .bento-table-card {
+      background: linear-gradient(180deg, rgba(22, 29, 47, 0.85) 0%, rgba(15, 20, 32, 0.95) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.07) !important;
+      color: #F8FAFC !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+    }
+    html[data-theme="dark"] .metric-num,
+    body.dark-mode .metric-num {
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .metric-label,
+    body.dark-mode .metric-label {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .bento-tabs-group,
+    body.dark-mode .bento-tabs-group {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .bento-tab-btn,
+    body.dark-mode .bento-tab-btn {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .bento-tab-btn:hover:not(.active),
+    body.dark-mode .bento-tab-btn:hover:not(.active) {
+      color: #F8FAFC !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+    }
+    html[data-theme="dark"] .bento-tab-btn.active,
+    body.dark-mode .bento-tab-btn.active {
+      background: #6366F1 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35) !important;
+    }
+    html[data-theme="dark"] .bento-search-input,
+    body.dark-mode .bento-search-input {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .checkbox-clients-grid,
+    body.dark-mode .checkbox-clients-grid {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .checkbox-client-item,
+    body.dark-mode .checkbox-client-item {
+      color: #F8FAFC !important;
     }
   </style>
 </head>

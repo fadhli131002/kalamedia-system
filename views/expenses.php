@@ -44,7 +44,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-2.5">
   <?php render_tab_uid_script(); ?>
   <style>
     /* Bankio Minimal Finance Design System Extensions */
@@ -144,6 +144,9 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
       box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);
       overflow: visible;
     }
+    .expenses-select-row {
+      display: contents;
+    }
     @media (max-width: 768px) {
       .kpi-grid.expenses-kpi-grid {
         display: grid !important;
@@ -157,7 +160,27 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
       }
       .expenses-header-row .btn-solid-dark {
         width: 100% !important;
+        height: 38px !important;
         justify-content: center !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+      }
+      .segmented-control-container {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        width: 100% !important;
+        padding: 4px !important;
+        border-radius: 12px !important;
+        gap: 4px !important;
+        margin-bottom: 14px !important;
+      }
+      .segmented-control-container .segmented-tab-btn {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 8px 10px !important;
+        border-radius: 9px !important;
       }
       .table-toolbar-row {
         flex-direction: column !important;
@@ -171,12 +194,20 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
         gap: 10px !important;
         width: 100% !important;
       }
+      .expenses-select-row {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+        width: 100% !important;
+      }
       .search-input-wrapper {
         width: 100% !important;
         max-width: 100% !important;
       }
       .select-filter-control {
         width: 100% !important;
+        min-width: 0 !important;
+        font-size: 12px !important;
       }
       .btn-ghost-outlined {
         width: 100% !important;
@@ -453,6 +484,92 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
       transform: scale(0.96);
       transition-duration: 90ms;
     }
+
+    /* Expenses View NebulaPay Dark Mode Overrides */
+    html[data-theme="dark"] .untitled-card,
+    body.dark-mode .untitled-card {
+      background: linear-gradient(180deg, rgba(22, 29, 47, 0.85) 0%, rgba(15, 20, 32, 0.95) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.07) !important;
+      color: #F8FAFC !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+    }
+    html[data-theme="dark"] .table-toolbar-row,
+    body.dark-mode .table-toolbar-row {
+      background: transparent !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .expenses-page-title,
+    body.dark-mode .expenses-page-title {
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .expenses-page-subtitle,
+    body.dark-mode .expenses-page-subtitle {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .segmented-control-container,
+    body.dark-mode .segmented-control-container {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .segmented-tab-btn,
+    body.dark-mode .segmented-tab-btn {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .segmented-tab-btn:hover:not(.active),
+    body.dark-mode .segmented-tab-btn:hover:not(.active) {
+      color: #F8FAFC !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+    }
+    html[data-theme="dark"] .segmented-tab-btn.active,
+    body.dark-mode .segmented-tab-btn.active {
+      background: #6366F1 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35) !important;
+    }
+    html[data-theme="dark"] .search-input-control,
+    html[data-theme="dark"] .select-filter-control,
+    body.dark-mode .search-input-control,
+    body.dark-mode .select-filter-control {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .btn-ghost-outlined,
+    html[data-theme="dark"] .btn-action-outline,
+    html[data-theme="dark"] .btn-icon-square,
+    body.dark-mode .btn-ghost-outlined,
+    body.dark-mode .btn-action-outline,
+    body.dark-mode .btn-icon-square {
+      background: #161A26 !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .untitled-table th,
+    body.dark-mode .untitled-table th {
+      background: #0E121D !important;
+      color: #94A3B8 !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .untitled-table td,
+    body.dark-mode .untitled-table td {
+      background: transparent !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .untitled-table tbody tr:hover td,
+    body.dark-mode .untitled-table tbody tr:hover td {
+      background: rgba(255, 255, 255, 0.04) !important;
+    }
+    html[data-theme="dark"] #empty-row td,
+    body.dark-mode #empty-row td {
+      background: transparent !important;
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .kala-table-scroll,
+    body.dark-mode .kala-table-scroll {
+      background: #12151F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
   </style>
 </head>
 <body>
@@ -467,14 +584,14 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
         <?php if (is_owner() || is_admin()): ?>
         <!-- Quick Sub-Tab Switcher: Invoice Klien | Pengeluaran | Penggajian -->
         <div class="quick-subtab-bar" style="margin-bottom: 14px;">
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
-            <a href="<?= url('invoices?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
+            <a href="<?= url('invoices?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap;">
               Invoice Klien
             </a>
             <a href="<?= url('expenses?_slot=internal') ?>" class="quick-subtab-btn active" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; text-align: center; white-space: nowrap; background: #5B3DF5; color: #FFFFFF; box-shadow: 0 2px 6px rgba(91,61,245,0.25);">
               Pengeluaran
             </a>
-            <a href="<?= url('salaries?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
+            <a href="<?= url('salaries?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap;">
               Penggajian
             </a>
           </div>
@@ -552,6 +669,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
               
               <!-- Search Input -->
               <div class="search-input-wrapper">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 <input 
                   type="text" 
                   id="expenses-search-input" 
@@ -561,32 +679,34 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                 >
               </div>
 
-              <?php if ($tab === 'freelancers'): ?>
-                <!-- Status Filter Dropdown -->
-                <select id="filter-status" class="select-filter-control" onchange="applyExpensesFilters()">
-                  <option value="">Status: Semua Status</option>
-                  <option value="Paid">Status: Lunas (Paid)</option>
-                  <option value="Pending">Status: Pending</option>
-                </select>
-              <?php else: ?>
-                <!-- Platform Filter Dropdown for Ads -->
-                <select id="filter-platform" class="select-filter-control" onchange="applyExpensesFilters()">
-                  <option value="">Platform: Semua Platform</option>
-                  <option value="Meta Ads">Meta Ads</option>
-                  <option value="Google Ads">Google Ads</option>
-                  <option value="TikTok Ads">TikTok Ads</option>
-                  <option value="LinkedIn Ads">LinkedIn Ads</option>
-                  <option value="Twitter/X Ads">X (Twitter) Ads</option>
-                </select>
-              <?php endif; ?>
+              <div class="expenses-select-row">
+                <?php if ($tab === 'freelancers'): ?>
+                  <!-- Status Filter Dropdown -->
+                  <select id="filter-status" class="select-filter-control" onchange="applyExpensesFilters()">
+                    <option value="">Status: Semua Status</option>
+                    <option value="Paid">Status: Lunas (Paid)</option>
+                    <option value="Pending">Status: Pending</option>
+                  </select>
+                <?php else: ?>
+                  <!-- Platform Filter Dropdown for Ads -->
+                  <select id="filter-platform" class="select-filter-control" onchange="applyExpensesFilters()">
+                    <option value="">Platform: Semua Platform</option>
+                    <option value="Meta Ads">Meta Ads</option>
+                    <option value="Google Ads">Google Ads</option>
+                    <option value="TikTok Ads">TikTok Ads</option>
+                    <option value="LinkedIn Ads">LinkedIn Ads</option>
+                    <option value="Twitter/X Ads">X (Twitter) Ads</option>
+                  </select>
+                <?php endif; ?>
 
-              <!-- Period Filter Dropdown -->
-              <select id="filter-period" class="select-filter-control" onchange="applyExpensesFilters()">
-                <option value="all">Periode: Semua Waktu</option>
-                <option value="this_month">Periode: Bulan Ini</option>
-                <option value="this_quarter">Periode: Kuartal Ini</option>
-                <option value="this_year">Periode: Tahun Ini</option>
-              </select>
+                <!-- Period Filter Dropdown -->
+                <select id="filter-period" class="select-filter-control" onchange="applyExpensesFilters()">
+                  <option value="all">Periode: Semua Waktu</option>
+                  <option value="this_month">Periode: Bulan Ini</option>
+                  <option value="this_quarter">Periode: Kuartal Ini</option>
+                  <option value="this_year">Periode: Tahun Ini</option>
+                </select>
+              </div>
 
             </div>
 

@@ -147,7 +147,7 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-nebula-v7">
   <?php render_tab_uid_script(); ?>
 </head>
 <body>
@@ -162,8 +162,8 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
         <!-- Header Actions: Quick Actions + Excel/CSV/PDF Export -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
           <div>
-            <h2 style="font-size: 18px; font-weight: 600; color: #111827; margin: 0; letter-spacing: -0.02em;">Operational Reports & Antrean Transaksi</h2>
-            <p style="font-size: 12.5px; color: #6B7280; margin: 3px 0 0 0;">Kelola tagihan piutang, antrean hutang operasional, dan rekonsiliasi kas</p>
+            <h2 style="font-size: 18px; font-weight: 600; color: var(--text-primary); margin: 0; letter-spacing: -0.02em;">Operational Reports & Antrean Transaksi</h2>
+            <p style="font-size: 12.5px; color: var(--text-secondary); margin: 3px 0 0 0;">Kelola tagihan piutang, antrean hutang operasional, dan rekonsiliasi kas</p>
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <a href="api/analytics.php?action=export_excel" class="btn btn-secondary btn-sm" style="font-weight: 500; height: 34px; padding: 0 12px; border-radius: 8px;" title="Unduh spreadsheet Excel dengan format tabel & border rapi">
@@ -309,7 +309,7 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
                         </span>
                       </td>
                       <td>
-                        <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($t['title']) ?></div>
+                        <div style="font-weight: 700; color: var(--text-primary);"><?= htmlspecialchars($t['title']) ?></div>
                         <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($t['subtitle']) ?></div>
                       </td>
                       <td style="font-weight: 700; color: <?= $t['trans_type'] === 'Inflow' ? 'var(--success-text)' : 'var(--danger-text)' ?>;">
@@ -360,7 +360,7 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
                   ?>
                     <tr>
                       <td>
-                        <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($ar['title']) ?></div>
+                        <div style="font-weight: 700; color: var(--text-primary);"><?= htmlspecialchars($ar['title']) ?></div>
                         <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($ar['subtitle']) ?></div>
                       </td>
                       <td style="color: var(--text-secondary);"><?= format_date($ar['date']) ?></td>
@@ -370,7 +370,7 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
                           <span style="font-size: 10px; color: var(--danger-text); display: block;">Jatuh Tempo!</span>
                         <?php endif; ?>
                       </td>
-                      <td style="font-weight: 800; color: #101828;"><?= format_rupiah($ar['amount']) ?></td>
+                      <td style="font-weight: 800; color: var(--text-primary);"><?= format_rupiah($ar['amount']) ?></td>
                       <td>
                         <span class="badge-status badge-<?= $isOverdue ? 'overdue' : strtolower($ar['status']) ?>">
                           <?= $isOverdue ? 'Overdue' : $ar['status'] ?>
@@ -411,7 +411,7 @@ $missingReceiptItems = array_filter($transactions, fn($t) => empty($t['receipt_f
                   <?php foreach ($apOutflows as $ap): ?>
                     <tr>
                       <td>
-                        <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($ap['title']) ?></div>
+                        <div style="font-weight: 700; color: var(--text-primary);"><?= htmlspecialchars($ap['title']) ?></div>
                       </td>
                       <td>
                         <span class="badge-type-out"><?= htmlspecialchars($ap['target_type'] === 'payout' ? 'Fee Freelancer' : 'Gaji Karyawan') ?></span>

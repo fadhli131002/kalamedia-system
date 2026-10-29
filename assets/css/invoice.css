@@ -633,3 +633,22 @@
     min-width: 500px;
   }
 }
+
+/* NebulaPay Dark Mode for Invoice Action Bar & Wrapper */
+html[data-theme="dark"] .invoice-wrapper,
+body.dark-mode.invoice-wrapper {
+  background: #07090E !important;
+  color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] .invoice-actions-bar .btn-action-back {
+  background: #12151F !important;
+  color: #94A3B8 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+html[data-theme="dark"] .invoice-actions-bar .btn-action-back:hover {
+  background: #181C29 !important;
+  color: #FFFFFF !important;
+  border-color: rgba(56, 189, 248, 0.42) !important;
+}
+

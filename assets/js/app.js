@@ -203,8 +203,8 @@ function showToast(message, type = 'info') {
   const toast = document.createElement('div');
   toast.className = `toast toast-${type}`;
   toast.innerHTML = `
-    <div style="flex:1; font-size:13px; font-weight:500;">${message}</div>
-    <button onclick="this.parentElement.remove()" style="background:transparent;border:none;color:#FFF;cursor:pointer;opacity:0.6">&times;</button>
+    <div style="flex:1; font-size:13px; font-weight:600;">${message}</div>
+    <button onclick="this.parentElement.remove()" style="background:transparent;border:none;color:currentColor;cursor:pointer;opacity:0.65;font-size:18px;line-height:1;padding:0 2px;">&times;</button>
   `;
   container.appendChild(toast);
 
@@ -1560,6 +1560,126 @@ window.togglePasswordVisibility = function(inputId, btn) {
     if (btn) btn.textContent = 'Lihat';
   }
 };
+
+// =========================================================================
+// NEBULAPAY ENTERPRISE THEME SYSTEM (Dark / Light Mode Toggle & State Sync)
+// =========================================================================
+(function() {
+  window.getTheme = function() {
+    try {
+      var stored = localStorage.getItem('kala_theme');
+      if (stored) return stored;
+    } catch(e) {}
+    return 'dark'; // Default to NebulaPay dark mode
+  };
+
+  window.setTheme = function(theme, save) {
+    if (save === undefined) save = true;
+    if (theme !== 'dark' && theme !== 'light') theme = 'dark';
+
+    document.documentElement.setAttribute('data-theme', theme);
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark-mode');
+      if (document.body) document.body.classList.add('dark-mode');
+    } else {
+      document.documentElement.classList.remove('dark-mode');
+      if (document.body) document.body.classList.remove('dark-mode');
+    }
+
+    if (save) {
+      try {
+        localStorage.setItem('kala_theme', theme);
+      } catch(e) {}
+    }
+
+    // Update all toggle buttons text and title across DOM
+    var compactToggles = document.querySelectorAll('.theme-toggle-compact');
+    compactToggles.forEach(function(btn) {
+      btn.setAttribute('title', theme === 'dark' ? 'Beralih ke Mode Terang (Light Mode)' : 'Beralih ke Nebula Dark Mode');
+      btn.setAttribute('aria-label', theme === 'dark' ? 'Beralih ke Mode Terang' : 'Beralih ke Nebula Dark Mode');
+    });
+
+    var sidebarTitles = document.querySelectorAll('.theme-toggle-title');
+    sidebarTitles.forEach(function(el) {
+      el.textContent = theme === 'dark' ? 'Tema Nebula Dark' : 'Tema Light Clean';
+    });
+
+    var sidebarSubs = document.querySelectorAll('.theme-toggle-sub');
+    sidebarSubs.forEach(function(el) {
+      el.textContent = theme === 'dark' ? 'Mode Enterprise' : 'Mode Terang Aktif';
+    });
+
+    // Sync Settings Page Theme Option Cards & Active Badges
+    var cardDark = document.getElementById('theme-card-dark');
+    var cardLight = document.getElementById('theme-card-light');
+    var badgeDark = document.getElementById('theme-badge-dark');
+    var badgeLight = document.getElementById('theme-badge-light');
+    var btnToggleLabel = document.getElementById('label-settings-toggle-theme');
+    var btnToggleIcon = document.getElementById('icon-settings-toggle-theme');
+
+    var activeCheckHtml = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>Mode Aktif Saat Ini</span>';
+    var inactiveHtml = '<span>Klik untuk Aktifkan</span>';
+
+    if (cardDark && cardLight) {
+      if (theme === 'dark') {
+        cardDark.classList.add('is-active');
+        cardLight.classList.remove('is-active');
+      } else {
+        cardLight.classList.add('is-active');
+        cardDark.classList.remove('is-active');
+      }
+    }
+    if (badgeDark && badgeLight) {
+      if (theme === 'dark') {
+        badgeDark.className = 'kala-theme-status-badge active';
+        badgeDark.innerHTML = activeCheckHtml;
+        badgeLight.className = 'kala-theme-status-badge inactive';
+        badgeLight.innerHTML = inactiveHtml;
+      } else {
+        badgeLight.className = 'kala-theme-status-badge active';
+        badgeLight.innerHTML = activeCheckHtml;
+        badgeDark.className = 'kala-theme-status-badge inactive';
+        badgeDark.innerHTML = inactiveHtml;
+      }
+    }
+    if (btnToggleLabel) {
+      btnToggleLabel.textContent = theme === 'dark' ? 'Beralih ke Mode Terang' : 'Beralih ke Mode Gelap';
+    }
+    if (btnToggleIcon) {
+      btnToggleIcon.innerHTML = theme === 'dark'
+        ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+        : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+    }
+
+    // Notify listeners & charts
+    window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: theme } }));
+  };
+
+  window.selectThemeMode = function(theme) {
+    var target = (theme === 'light') ? 'light' : 'dark';
+    window.setTheme(target, true);
+    if (typeof showToast === 'function') {
+      showToast(target === 'dark' ? 'Mode Nebula Dark diaktifkan' : 'Mode Terang (Light Mode) diaktifkan', 'info');
+    }
+    return target;
+  };
+
+  window.toggleTheme = function() {
+    var current = window.getTheme();
+    var next = current === 'dark' ? 'light' : 'dark';
+    window.setTheme(next, true);
+    if (typeof showToast === 'function') {
+      showToast(next === 'dark' ? 'Mode Nebula Dark diaktifkan' : 'Mode Terang (Light Mode) diaktifkan', 'info');
+    }
+    return next;
+  };
+
+  // Immediate execution & sync on DOMContentLoaded
+  window.setTheme(window.getTheme(), false);
+  document.addEventListener('DOMContentLoaded', function() {
+    window.setTheme(window.getTheme(), false);
+  });
+})();
 
 // Register PWA Service Worker for Portal Kala
 window.deferredPwaPrompt = window.deferredPwaPrompt || null;

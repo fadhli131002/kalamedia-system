@@ -1,5 +1,5 @@
 // Portal Kala Progressive Web App (PWA) Service Worker
-const CACHE_NAME = 'portal-kala-pwa-v1.0';
+const CACHE_NAME = 'portal-kala-pwa-v3.0';
 const urlsToCache = [
   'assets/css/style.css',
   'assets/js/app.js',

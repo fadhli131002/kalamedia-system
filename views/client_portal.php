@@ -56,6 +56,7 @@ if ($role === 'client' && $client) {
   <title>Masa Kontrak Berakhir - <?= htmlspecialchars($client['company'] ?? 'Kalamedia') ?></title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
+  <?php render_tab_uid_script(); ?>
   <style>
     .expired-page {
       min-height: 100vh;
@@ -87,23 +88,23 @@ if ($role === 'client' && $client) {
     <span class="badge" style="background: #FEF3F2; color: #B42318; font-weight: 800; font-size: 11.5px; padding: 4px 12px; margin-bottom: 12px;">
       STATUS: KONTRAK SELESAI / EXPIRED
     </span>
-    <h2 style="font-size: 22px; font-weight: 800; color: #101828; margin: 8px 0 12px;">
+    <h2 style="font-size: 22px; font-weight: 800; color: var(--text-primary, #101828); margin: 8px 0 12px;">
       Akses Layanan Ditangguhkan
     </h2>
-    <p style="font-size: 14.5px; color: #475467; line-height: 1.6; margin-bottom: 24px;">
+    <p style="font-size: 14.5px; color: var(--text-secondary, #475467); line-height: 1.6; margin-bottom: 24px;">
       Masa kontrak layanan Anda telah berakhir pada <b><?= $formattedEndDate ?></b>. Silakan hubungi tim Kalamedia untuk perpanjangan kontrak.
     </p>
-    <div style="background: #F8F9FC; border: 1px solid #ECEEF5; border-radius: 12px; padding: 14px; margin-bottom: 24px; font-size: 13px; color: #344054; text-align: left;">
+    <div style="background: var(--bg-input, #F8F9FC); border: 1px solid var(--border-color, #ECEEF5); border-radius: 12px; padding: 14px; margin-bottom: 24px; font-size: 13px; color: var(--text-primary, #344054); text-align: left;">
       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-        <span style="color: #667085;">Klien / Perusahaan:</span>
+        <span style="color: var(--text-secondary, #667085);">Klien / Perusahaan:</span>
         <b><?= htmlspecialchars($client['company'] ?? '-') ?></b>
       </div>
       <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-        <span style="color: #667085;">Layanan Terdaftar:</span>
+        <span style="color: var(--text-secondary, #667085);">Layanan Terdaftar:</span>
         <b><?= htmlspecialchars($client['service_type'] ?? 'Kelola Sosmed') ?></b>
       </div>
       <div style="display: flex; justify-content: space-between;">
-        <span style="color: #667085;">Akhir Kontrak:</span>
+        <span style="color: var(--text-secondary, #667085);">Akhir Kontrak:</span>
         <span style="color: #B42318; font-weight: 700;"><?= $formattedEndDate ?></span>
       </div>
     </div>
@@ -133,6 +134,7 @@ if (!$client) {
   <title>Client Portal - Kalamedia</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
+  <?php render_tab_uid_script(); ?>
 </head>
 <body>
   <div class="app-container">
@@ -190,7 +192,7 @@ if ($clientHasSosmed) {
         SELECT * FROM content_planner 
         WHERE client_id = ? AND COALESCE(is_deleted,0)=0 
         ORDER BY publish_date ASC, publish_time ASC 
-        LIMIT 12
+        LIMIT 60
     ");
     $contentItems->execute([$clientId]);
     $contents = $contentItems->fetchAll();
@@ -306,6 +308,49 @@ foreach ($clientFreelancerPayouts as $fp) {
     }
 }
 $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
+
+// Fetch Published Kala AI Brand Audit & Strategy Blueprint for this client
+$publishedAiAudit = null;
+$publishedAiAnalysis = null;
+try {
+    $stmtAiAudit = $db->prepare("
+        SELECT * FROM brand_ai_audits
+        WHERE client_id = ? AND is_published_to_client = 1
+        ORDER BY id DESC LIMIT 1
+    ");
+    $stmtAiAudit->execute([$clientId]);
+    $rowAi = $stmtAiAudit->fetch(PDO::FETCH_ASSOC);
+    if ($rowAi && !empty($rowAi['ai_analysis_json'])) {
+        $decodedAi = json_decode($rowAi['ai_analysis_json'], true);
+        if (is_array($decodedAi) && !empty($decodedAi)) {
+            $publishedAiAudit = $rowAi;
+            $publishedAiAnalysis = $decodedAi;
+        }
+    }
+} catch (Throwable $e) {
+    // Table will be created automatically by Database::runMigrations()
+}
+
+// Fetch Published AI Monthly Client Reports (Approved by Owner)
+$publishedMonthlyAiReports = [];
+try {
+    $stmtMonthlyAi = $db->prepare("
+        SELECT r.*, c.company as client_company, c.name as client_name
+        FROM client_monthly_reports r
+        LEFT JOIN clients c ON r.client_id = c.id
+        WHERE r.client_id = ? AND r.status = 'published_client' AND COALESCE(r.is_deleted, 0) = 0
+        ORDER BY r.report_month DESC, r.id DESC
+    ");
+    $stmtMonthlyAi->execute([$clientId]);
+    $rowsMonthly = $stmtMonthlyAi->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($rowsMonthly as $rm) {
+        $rm['raw_metrics'] = !empty($rm['raw_metrics_json']) ? json_decode($rm['raw_metrics_json'], true) : [];
+        $rm['ai_report']   = !empty($rm['ai_report_json']) ? json_decode($rm['ai_report_json'], true) : [];
+        $publishedMonthlyAiReports[] = $rm;
+    }
+} catch (Throwable $e) {
+    $publishedMonthlyAiReports = [];
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -377,6 +422,15 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
       transform: translate3d(5px, 0, 0) !important;
       background-color: #EEF2FF !important;
       color: #5B3DF5 !important;
+    }
+    html[data-theme="dark"] .sidebar a:hover:not(.active),
+    html[data-theme="dark"] .sidebar .nav-item:hover:not(.active),
+    html[data-theme="dark"] .sidebar-nav .nav-link:hover:not(.active),
+    body.dark-mode .sidebar a:hover:not(.active),
+    body.dark-mode .sidebar .nav-item:hover:not(.active),
+    body.dark-mode .sidebar-nav .nav-link:hover:not(.active) {
+      background-color: rgba(255, 255, 255, 0.06) !important;
+      color: #38BDF8 !important;
     }
     .sidebar a:active, .sidebar .nav-item:active, .bottom-nav a:active, .bottom-nav button:active, .mobile-bottom-nav a:active, .mobile-bottom-nav button:active, .mob-nav-item:active {
       transform: scale(0.94) !important;
@@ -909,7 +963,7 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
         width: 280px !important;
         height: 100dvh !important;
         z-index: 9999 !important;
-        background: #FFFFFF !important;
+        background: var(--bg-sidebar, #FFFFFF) !important;
         transform: translate3d(-105%, 0, 0) !important;
         transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1) !important;
         display: flex !important;
@@ -1133,6 +1187,63 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
         box-sizing: border-box !important;
       }
     }
+
+    /* Client Portal NebulaPay Dark Mode Overrides */
+    html[data-theme="dark"] .portal-stat-card,
+    body.dark-mode .portal-stat-card {
+      background: linear-gradient(180deg, rgba(22, 29, 47, 0.85) 0%, rgba(15, 20, 32, 0.95) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.07) !important;
+      color: #F8FAFC !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+    }
+    html[data-theme="dark"] .portal-nav-tabs,
+    body.dark-mode .portal-nav-tabs {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .portal-tab-btn,
+    body.dark-mode .portal-tab-btn {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .portal-tab-btn:hover:not(.active),
+    body.dark-mode .portal-tab-btn:hover:not(.active) {
+      color: #F8FAFC !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+    }
+    html[data-theme="dark"] .portal-tab-btn.active,
+    body.dark-mode .portal-tab-btn.active {
+      color: #FFFFFF !important;
+    }
+    html[data-theme="dark"] .portal-sliding-pill,
+    body.dark-mode .portal-sliding-pill {
+      background: linear-gradient(135deg, rgba(67, 56, 202, 0.9) 0%, rgba(6, 182, 212, 0.9) 100%) !important;
+      box-shadow: 0 2px 12px rgba(6, 182, 212, 0.35) !important;
+    }
+    html[data-theme="dark"] .portal-filter-chips-track,
+    body.dark-mode .portal-filter-chips-track {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .portal-chip-btn,
+    body.dark-mode .portal-chip-btn {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .portal-chip-btn:hover:not(.active),
+    body.dark-mode .portal-chip-btn:hover:not(.active) {
+      color: #F8FAFC !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+    }
+    html[data-theme="dark"] .portal-chip-btn.active,
+    body.dark-mode .portal-chip-btn.active {
+      background: #6366F1 !important;
+      color: #FFFFFF !important;
+    }
+    html[data-theme="dark"] .portal-search-input,
+    body.dark-mode .portal-search-input {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      color: #F8FAFC !important;
+    }
   </style>
 </head>
 <body>
@@ -1280,8 +1391,46 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
         </div>
 
         <!-- 3. Navigation Tabs (Modern Segmented Boxed Bar) -->
+        <?php if ($publishedAiAudit): ?>
+        <div class="kala-ai-card" style="margin-bottom: 16px; padding: 16px 20px; border-radius: 16px; border: 1.5px solid #C7D2FE; display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; box-shadow: 0 6px 20px -6px rgba(79, 70, 229, 0.12);">
+          <div style="display: flex; align-items: center; gap: 14px; flex: 1; min-width: 260px;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #4F46E5 0%, #2563EB 100%); color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>
+            </div>
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="background: #ECFDF3; border: 1px solid #6CE9A6; color: #027A48; font-size: 10.5px; font-weight: 800; padding: 2px 9px; border-radius: 999px;">
+                  DOKUMEN STRATEGI RESMI KALAMEDIA
+                </span>
+                <span class="kala-ai-muted" style="font-size: 11.5px; font-weight: 700;">
+                  Skor Kesehatan Akun: <b><?= (int)($publishedAiAudit['health_score'] ?? 0) ?>/100</b>
+                </span>
+              </div>
+              <div style="font-size: 15px; font-weight: 800; margin-top: 4px;">
+                <?= htmlspecialchars($publishedAiAudit['recommended_scheme_name'] ?: 'Kala AI Brand Diagnostic & Strategy Blueprint') ?>
+              </div>
+              <div class="kala-ai-muted" style="font-size: 12px; margin-top: 2px;">
+                Fase Brand Saat Ini: <b><?= htmlspecialchars($publishedAiAudit['brand_stage'] ?: '-') ?></b>
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-primary btn-sm" onclick="switchPortalTab('ai_blueprint', document.getElementById('portal-tab-btn-ai-blueprint'))" style="background: #4F46E5; border-color: #4F46E5; color: #FFFFFF; font-weight: 800; font-size: 12px; padding: 8px 14px; border-radius: 10px; cursor: pointer;">
+              <span style="display:inline-flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg><span>Buka Analisis Brand &amp; Skema Strategi</span></span>
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="downloadClientPortalAiBlueprintPdf()" style="font-weight: 700; font-size: 12px; padding: 8px 14px; border-radius: 10px; cursor: pointer;">
+              <span style="display:inline-flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg><span>Download PDF Blueprint</span></span>
+            </button>
+          </div>
+        </div>
+        <?php endif; ?>
         <div class="portal-nav-tabs">
           <div class="portal-sliding-pill" id="portal-sliding-pill" aria-hidden="true"></div>
+          <?php if ($publishedAiAudit): ?>
+            <button class="portal-tab-btn" id="portal-tab-btn-ai-blueprint" onclick="switchPortalTab('ai_blueprint', this)">
+              <span style="display:inline-flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg><span>Analisis Brand &amp; Skema Strategi</span></span>
+            </button>
+          <?php endif; ?>
           <button class="portal-tab-btn active" onclick="switchPortalTab('deliverables', this)">
             <span>Progress & Deliverables</span>
           </button>
@@ -1304,6 +1453,63 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
             <span class="portal-tab-badge"><?= count($clientAdsTopups) ?></span>
           </button>
         </div>
+
+        <?php if ($publishedAiAudit): ?>
+        <?php require_once BASE_PATH . '/includes/brand_ai_blueprint_shared.php'; ?>
+        <!-- TAB 0: Kala AI Brand Diagnostic & Strategy Blueprint (Client View Only) -->
+        <div id="tab-pane-ai_blueprint" class="tab-pane kala-page-view" style="display: none;">
+          <div class="kala-ai-card" style="padding: 18px 22px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px;">
+                <span class="kala-ai-pill-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg><span>KALA AI STRATEGY BLUEPRINT</span></span>
+                <?php if (!empty($publishedAiAudit['published_at'])): ?>
+                  <span class="kala-ai-muted" style="font-size: 11.5px;">Dipublikasikan pada <?= date('d M Y H:i', strtotime($publishedAiAudit['published_at'])) ?> WIB</span>
+                <?php endif; ?>
+              </div>
+              <h3 style="margin: 0; font-size: 16.5px; font-weight: 800;">
+                Analisis Brand &amp; Skema Strategi 90 Hari — <?= htmlspecialchars($client['company'] ?? 'Brand Anda') ?>
+              </h3>
+              <p class="kala-ai-muted" style="margin: 3px 0 0; font-size: 12.5px;">
+                Dokumen hasil bedah menyeluruh akun Instagram Anda beserta rencana aksi strategis 90 hari ke depan oleh Tim Strategist Kalamedia.
+              </p>
+            </div>
+            <div>
+              <button type="button" class="btn btn-primary btn-sm" onclick="downloadClientPortalAiBlueprintPdf()" style="background: #4F46E5; border-color: #4F46E5; font-weight: 800; font-size: 12.5px; padding: 9px 16px; border-radius: 10px;">
+                <span style="display:inline-flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg><span>Download PDF Blueprint</span></span>
+              </button>
+            </div>
+          </div>
+
+          <div id="client-portal-ai-blueprint-container"></div>
+
+          <script>
+            window.clientPortalPublishedAiData = {
+              analysis: <?= json_encode($publishedAiAnalysis, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?>,
+              client: <?= json_encode(['id' => $client['id'] ?? 0, 'company' => $client['company'] ?? '', 'name' => $client['name'] ?? ''], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?>,
+              meta: <?= json_encode(['model_used' => $publishedAiAudit['model_used'] ?? 'gemini-2.5-pro', 'published_at' => $publishedAiAudit['published_at'] ?? ''], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?>
+            };
+            document.addEventListener('DOMContentLoaded', function() {
+              const targetEl = document.getElementById('client-portal-ai-blueprint-container');
+              if (targetEl && window.renderKalaAiBlueprintCards && window.clientPortalPublishedAiData) {
+                targetEl.innerHTML = window.renderKalaAiBlueprintCards(
+                  window.clientPortalPublishedAiData.analysis,
+                  window.clientPortalPublishedAiData.client,
+                  window.clientPortalPublishedAiData.meta
+                );
+              }
+            });
+            function downloadClientPortalAiBlueprintPdf() {
+              if (window.downloadKalaAiBlueprintPdf && window.clientPortalPublishedAiData) {
+                window.downloadKalaAiBlueprintPdf(
+                  window.clientPortalPublishedAiData.analysis,
+                  window.clientPortalPublishedAiData.client,
+                  window.clientPortalPublishedAiData.meta
+                );
+              }
+            }
+          </script>
+        </div>
+        <?php endif; ?>
 
         <!-- TAB 1: Deliverables & Team Tasks -->
         <div id="tab-pane-deliverables" class="tab-pane kala-page-view">
@@ -1593,55 +1799,91 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
         <!-- TAB 2: Content Calendar -->
         <div id="tab-pane-calendar" class="tab-pane kala-page-view" style="display: none;">
           <div class="glass-panel">
-            <div class="panel-header">
+            <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
               <div>
-                <h3 class="panel-title">Jadwal Penayangan Konten Klien</h3>
-                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Daftar jadwal konten media sosial yang telah direncanakan oleh tim kreatif Kalamedia.</p>
+                <h3 class="panel-title">Jadwal Penayangan &amp; Rencana Konten Klien</h3>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;">Daftar jadwal konten harian/mingguan beserta Pilar Strategi, Hook, Visual Brief, dan Draft Caption yang disusun untuk brand Anda.</p>
               </div>
+              <span style="font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:999px; background:rgba(79,70,229,0.12); color:#6366F1;">
+                Total Terjadwal: <?= count($contents) ?> Konten
+              </span>
             </div>
 
             <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
-              <table class="table-custom" style="min-width: 720px !important; width: 100%;">
+              <table class="table-custom" style="min-width: 860px !important; width: 100%;">
                 <thead>
                   <tr>
-                    <th>TANGGAL & WAKTU</th>
-                    <th>PLATFORM</th>
-                    <th>FORMAT KONTEN</th>
-                    <th>JUDUL KONTEN</th>
+                    <th>TANGGAL &amp; WAKTU</th>
+                    <th>PLATFORM &amp; FORMAT</th>
+                    <th>PILAR KONTEN</th>
+                    <th>TOPIK &amp; HOOK UTAMA</th>
                     <th>STATUS TAYANG</th>
-                    <th>PREVIEW LINK</th>
+                    <th>BRIEF &amp; ASET</th>
                   </tr>
                 </thead>
                 <tbody>
                   <?php if (empty($contents)): ?>
-                    <tr><td colspan="6" style="text-align: center; padding: 32px; color: var(--text-muted);">Belum ada jadwal konten untuk bulan ini.</td></tr>
+                    <tr><td colspan="6" style="text-align: center; padding: 32px; color: var(--text-muted);">Belum ada jadwal konten untuk periode ini.</td></tr>
                   <?php else: ?>
-                    <?php foreach ($contents as $c): ?>
+                    <?php foreach ($contents as $idxC => $c): ?>
                       <tr>
                         <td style="font-weight: 700; white-space: nowrap;">
                           <?= date('d M Y', strtotime($c['publish_date'])) ?>
                           <span style="font-size: 11px; color: var(--text-muted); display: block; font-weight: 500;"><?= substr($c['publish_time'] ?? '10:00', 0, 5) ?> WIB</span>
                         </td>
-                        <td>
-                          <span class="badge" style="background: #F2F4F7; color: #101828; font-weight: 700;">
+                        <td style="white-space: nowrap;">
+                          <span class="badge" style="background: rgba(79,70,229,0.12); color: #6366F1; font-weight: 700;">
                             <?= htmlspecialchars($c['platform']) ?>
                           </span>
+                          <div style="font-size: 12px; font-weight: 600; margin-top: 4px; color: var(--text-secondary);">
+                            <?= htmlspecialchars($c['content_type']) ?>
+                          </div>
                         </td>
-                        <td style="font-size: 12.5px;"><?= htmlspecialchars($c['content_type']) ?></td>
-                        <td style="font-weight: 700; color: #101828;"><?= htmlspecialchars($c['title']) ?></td>
                         <td>
+                          <?php if (!empty($c['content_pillar'])): ?>
+                            <span style="font-size:11.5px; font-weight:700; padding:3px 9px; border-radius:6px; background:rgba(16,185,129,0.12); color:#10B981; display:inline-block;">
+                              <?= htmlspecialchars($c['content_pillar']) ?>
+                            </span>
+                          <?php else: ?>
+                            <span style="font-size:12px; color:var(--text-muted);">Konten Reguler</span>
+                          <?php endif; ?>
+                        </td>
+                        <td style="max-width: 340px;">
+                          <div style="font-weight: 700; color: var(--text-primary);"><?= htmlspecialchars($c['title']) ?></div>
+                          <?php if (!empty($c['hook_text'])): ?>
+                            <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 3px; line-height: 1.4;">
+                              <strong>Hook:</strong> "<?= htmlspecialchars($c['hook_text']) ?>"
+                            </div>
+                          <?php endif; ?>
+                        </td>
+                        <td style="white-space: nowrap;">
                           <span class="badge" style="background: <?= $c['status'] === 'Published' ? '#ECFDF5' : '#F2F4F7' ?>; color: <?= $c['status'] === 'Published' ? '#027A48' : '#344054' ?>; font-weight: 700;">
                             <?= htmlspecialchars($c['status']) ?>
                           </span>
                         </td>
-                        <td>
-                          <?php if (!empty($c['asset_url'])): ?>
-                            <a href="<?= htmlspecialchars($c['asset_url']) ?>" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 4px 8px;">
-                              Lihat Aset
-                            </a>
-                          <?php else: ?>
-                            <span style="font-size: 11px; color: var(--text-tertiary);">-</span>
-                          <?php endif; ?>
+                        <td style="white-space: nowrap;">
+                          <div style="display:flex; align-items:center; gap:6px;">
+                            <?php if (!empty($c['hook_text']) || !empty($c['visual_brief']) || !empty($c['caption_draft']) || !empty($c['notes'])): ?>
+                              <button type="button" class="btn btn-secondary btn-sm" style="font-size: 11px; font-weight:700; padding: 5px 10px; display:inline-flex; align-items:center; gap:5px;"
+                                onclick='openClientContentBriefModal(<?= json_encode([
+                                  "title" => $c["title"] ?? "",
+                                  "date" => date("d M Y", strtotime($c["publish_date"])) . " • " . substr($c["publish_time"] ?? "10:00", 0, 5) . " WIB",
+                                  "format" => ($c["platform"] ?? "Instagram") . " — " . ($c["content_type"] ?? ""),
+                                  "pillar" => $c["content_pillar"] ?? "Strategi Konten Brand",
+                                  "hook" => $c["hook_text"] ?? "",
+                                  "visual_brief" => $c["visual_brief"] ?? "",
+                                  "caption_draft" => $c["caption_draft"] ?? ($c["notes"] ?? "")
+                                ], JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                <span>Detail Brief &amp; Caption</span>
+                              </button>
+                            <?php endif; ?>
+                            <?php if (!empty($c['asset_url'])): ?>
+                              <a href="<?= htmlspecialchars($c['asset_url']) ?>" target="_blank" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 5px 9px;">
+                                Lihat Aset
+                              </a>
+                            <?php endif; ?>
+                          </div>
                         </td>
                       </tr>
                     <?php endforeach; ?>
@@ -1711,6 +1953,88 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
 
         <!-- TAB 4: Performance Reports (Pitch Deck & Blended Economics) -->
         <div id="tab-pane-reports" class="tab-pane kala-page-view" style="display: none;">
+          <?php require_once BASE_PATH . '/includes/kala_ai_monthly_report_shared.php'; ?>
+
+          <!-- 0. Laporan Bulanan & Evaluasi AI (Approved by Owner) -->
+          <div class="glass-panel" style="margin-bottom: 24px; border: 1px solid rgba(99, 102, 241, 0.25);">
+            <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:40px; height:40px; border-radius:11px; background:linear-gradient(135deg, #4F46E5, #7C3AED); color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 12l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2z"/></svg>
+                </div>
+                <div>
+                  <h3 class="panel-title" style="margin:0;">Laporan Bulanan &amp; Evaluasi AI (Executive Monthly Report)</h3>
+                  <p style="font-size: 12.5px; color: var(--text-secondary); margin: 3px 0 0 0;">
+                    Ringkasan eksekutif capaian konten, deliverables tim, efisiensi anggaran iklan, dan rencana strategis bulan depan yang telah disetujui manajemen Kalamedia.
+                  </p>
+                </div>
+              </div>
+              <span style="font-size:11.5px; font-weight:800; padding:4px 10px; border-radius:999px; background:rgba(16,185,129,0.12); color:#10B981;">
+                <?= count($publishedMonthlyAiReports) ?> Laporan Tersedia
+              </span>
+            </div>
+
+            <div id="client-portal-monthly-ai-reports-root" style="padding-top: 8px;">
+              <?php if (empty($publishedMonthlyAiReports)): ?>
+                <div style="padding: 28px 20px; text-align: center; color: var(--text-muted); font-size: 13px; border: 1px dashed var(--border-light, rgba(148,163,184,0.25)); border-radius: 12px;">
+                  Laporan Bulanan &amp; Evaluasi AI untuk periode berjalan sedang disusun dan direview oleh manajemen Kalamedia.
+                </div>
+              <?php endif; ?>
+            </div>
+          </div>
+          <?php if (!empty($publishedMonthlyAiReports)): ?>
+          <script>
+          document.addEventListener('DOMContentLoaded', function() {
+              const root = document.getElementById('client-portal-monthly-ai-reports-root');
+              const reportsData = <?= json_encode($publishedMonthlyAiReports, JSON_UNESCAPED_UNICODE) ?>;
+              if (root && typeof window.renderKalaMonthlyAiReportHtml === 'function') {
+                  root.innerHTML = reportsData.map(r => window.renderKalaMonthlyAiReportHtml(r, { isOwnerView: false })).join('');
+              }
+          });
+          </script>
+          <?php endif; ?>
+
+          <!-- Modal Detail Brief & Caption Konten Klien -->
+          <div class="modal modal-backdrop" id="modal-client-content-brief" style="display: none; z-index: 100065;">
+            <div class="modal-content" style="max-width: 640px; width: 94vw; border-radius: 16px; padding: 22px;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid var(--border-light, #E2E8F0);">
+                <div>
+                  <span id="ccb-format-badge" style="font-size:11px; font-weight:800; padding:3px 9px; border-radius:6px; background:rgba(79,70,229,0.12); color:#6366F1;"></span>
+                  <h3 id="ccb-title" style="margin:6px 0 2px 0; font-size:16px; font-weight:800; color:var(--text-primary);"></h3>
+                  <div id="ccb-date" style="font-size:12px; color:var(--text-muted);"></div>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('modal-client-content-brief')">Tutup</button>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:12px;">
+                <div style="padding:12px 14px; border-radius:10px; background:rgba(79,70,229,0.06); border:1px solid rgba(79,70,229,0.2);">
+                  <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:#6366F1; margin-bottom:4px;">Hook 3 Detik Pertama / Headline Slide 1</div>
+                  <div id="ccb-hook" style="font-size:13px; font-weight:700; color:var(--text-primary);"></div>
+                </div>
+                <div style="padding:12px 14px; border-radius:10px; background:var(--bg-main, #F8FAFC); border:1px solid var(--border-light, #E2E8F0);">
+                  <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--text-muted); margin-bottom:4px;">Visual Brief (Arahan Video / Desain)</div>
+                  <div id="ccb-visual" style="font-size:12.5px; line-height:1.55; color:var(--text-secondary); white-space:pre-line;"></div>
+                </div>
+                <div style="padding:12px 14px; border-radius:10px; background:var(--bg-main, #F8FAFC); border:1px solid var(--border-light, #E2E8F0);">
+                  <div style="font-size:11px; font-weight:800; text-transform:uppercase; color:var(--text-muted); margin-bottom:4px;">Draft Caption Lengkap &amp; Hashtag</div>
+                  <div id="ccb-caption" style="font-size:12.5px; line-height:1.55; color:var(--text-secondary); white-space:pre-line;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <script>
+          function openClientContentBriefModal(data) {
+              if (!data) return;
+              document.getElementById('ccb-format-badge').textContent = (data.format || '') + (data.pillar ? ' • ' + data.pillar : '');
+              document.getElementById('ccb-title').textContent = data.title || '-';
+              document.getElementById('ccb-date').textContent = data.date || '';
+              document.getElementById('ccb-hook').textContent = data.hook || '-';
+              document.getElementById('ccb-visual').textContent = data.visual_brief || '-';
+              document.getElementById('ccb-caption').textContent = data.caption_draft || '-';
+              if (typeof openModal === 'function') openModal('modal-client-content-brief');
+              else document.getElementById('modal-client-content-brief')?.classList.add('active');
+          }
+          </script>
+
           <!-- 1. Report Ads & Performance Deck Panel -->
           <div class="glass-panel" style="margin-bottom: 24px;">
             <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
@@ -2111,7 +2435,7 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
 
       const urlParams = new URLSearchParams(window.location.search);
       const activeTab = urlParams.get('tab');
-      if (activeTab && ['deliverables', 'calendar', 'invoices', 'reports', 'ads'].includes(activeTab)) {
+      if (activeTab && ['deliverables', 'calendar', 'invoices', 'reports', 'ads', 'ai_blueprint'].includes(activeTab)) {
         const targetBtn = document.querySelector(`.portal-tab-btn[onclick*="'${activeTab}'"]`);
         if (targetBtn) {
           switchPortalTab(activeTab, targetBtn);
@@ -2494,7 +2818,7 @@ $clientFreelancerTotalCost = $clientFreelancerPaid + $clientFreelancerPending;
       });
       if (window.updateBottomNavPill) window.updateBottomNavPill();
 
-      const allTabs = ['deliverables', 'calendar', 'invoices', 'reports', 'ads'];
+      const allTabs = ['deliverables', 'calendar', 'invoices', 'reports', 'ads', 'ai_blueprint'];
       const targetPane = document.getElementById('tab-pane-' + tabName);
       const currentPane = allTabs.map(t => document.getElementById('tab-pane-' + t)).find(p => p && p.style.display !== 'none' && getComputedStyle(p).display !== 'none');
 

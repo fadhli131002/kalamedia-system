@@ -31,7 +31,7 @@ $activeContext = ($requestedContext === 'client') ? 'client' : 'internal';
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
-  <?php render_pwa_meta_tags(); ?>
+  <?php render_tab_uid_script(); ?>
   <style>
     .login-page {
       min-height: 100vh;
@@ -41,6 +41,11 @@ $activeContext = ($requestedContext === 'client') ? 'client' : 'internal';
       padding: 24px;
       background: #F8F9FA;
       font-family: var(--font-sans);
+      position: relative;
+    }
+    html[data-theme="dark"] .login-page,
+    body.dark-mode.login-page {
+      background: #07090E !important;
     }
     .login-card {
       width: 100%;
@@ -50,6 +55,13 @@ $activeContext = ($requestedContext === 'client') ? 'client' : 'internal';
       border-radius: 12px;
       padding: 36px 32px;
       box-shadow: 0 1px 3px rgba(16, 24, 40, 0.05);
+      position: relative;
+    }
+    html[data-theme="dark"] .login-card {
+      background: #12151F !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 1px 1px rgba(56, 189, 248, 0.25) !important;
+      color: #FFFFFF !important;
     }
     .login-tabs-wrapper {
       background: #F3F4F6;
@@ -58,6 +70,10 @@ $activeContext = ($requestedContext === 'client') ? 'client' : 'internal';
       display: flex;
       gap: 2px;
       margin-bottom: 24px;
+    }
+    html[data-theme="dark"] .login-tabs-wrapper {
+      background: #0E121D !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
     }
     .login-tab-btn {
       flex: 1;
@@ -73,14 +89,25 @@ $activeContext = ($requestedContext === 'client') ? 'client' : 'internal';
       text-align: center;
       font-family: inherit;
     }
+    html[data-theme="dark"] .login-tab-btn {
+      color: #94A3B8 !important;
+    }
     .login-tab-btn:hover:not(.active) {
       color: #111827;
+    }
+    html[data-theme="dark"] .login-tab-btn:hover:not(.active) {
+      color: #FFFFFF !important;
     }
     .login-tab-btn.active {
       background: #FFFFFF;
       color: #111827;
       box-shadow: 0 1px 2px rgba(16, 24, 40, 0.08);
       font-weight: 600;
+    }
+    html[data-theme="dark"] .login-tab-btn.active {
+      background: #6366F1 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.45) !important;
     }
     .login-card .form-control {
       border-radius: 8px;
@@ -94,10 +121,40 @@ $activeContext = ($requestedContext === 'client') ? 'client' : 'internal';
       width: 100%;
       box-sizing: border-box;
     }
-    .login-card .form-control:focus {
-      border-color: #2563EB;
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
-      outline: none;
+    html[data-theme="dark"] .login-card .form-control {
+      background: #0E121D !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      color: #FFFFFF !important;
+    }
+    html[data-theme="dark"] .login-card .form-control:focus {
+      border-color: #38BDF8 !important;
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.22) !important;
+    }
+    html[data-theme="dark"] .login-card .form-label {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .login-card #login-title {
+      color: #FFFFFF !important;
+    }
+    html[data-theme="dark"] .login-card #login-subtitle {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .login-brand img,
+    body.dark-mode .login-brand img,
+    html[data-theme="dark"] .login-brand-logo,
+    body.dark-mode .login-brand-logo {
+      filter: brightness(0) invert(1) drop-shadow(0 0 1px rgba(255, 255, 255, 0.4)) !important;
+      opacity: 0.95;
+    }
+    html[data-theme="dark"] .login-brand .login-brand-title,
+    body.dark-mode .login-brand .login-brand-title {
+      color: #FFFFFF !important;
+    }
+    .login-theme-floating-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 100;
     }
     .login-card .btn-primary {
       background: #2563EB;
@@ -118,6 +175,13 @@ $activeContext = ($requestedContext === 'client') ? 'client' : 'internal';
     .login-card .btn-primary:hover {
       background: #1D4ED8;
     }
+    html[data-theme="dark"] .login-card .btn-primary {
+      background: #6366F1 !important;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4) !important;
+    }
+    html[data-theme="dark"] .login-card .btn-primary:hover {
+      background: #4F46E5 !important;
+    }
     @media (max-width: 480px) {
       .login-page {
         padding: 16px 12px;
@@ -135,16 +199,24 @@ $activeContext = ($requestedContext === 'client') ? 'client' : 'internal';
 </head>
 <body class="login-page">
 
+  <!-- Floating Nebula Dark/Light Mode Toggle -->
+  <div class="login-theme-floating-toggle">
+    <button type="button" class="theme-toggle-compact" onclick="toggleTheme()" aria-label="Toggle Mode Nebula/Terang" title="Beralih Tema (Dark/Light)">
+      <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+      <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </button>
+  </div>
+
   <div class="login-card">
     <div class="login-brand" style="display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; margin-bottom: 22px;">
-      <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" style="height: 48px; width: 48px; object-fit: contain; margin-bottom: 2px;">
-      <div style="font-weight: 600; font-size: 16px; color: #111827; letter-spacing: -0.015em;">PT Kala Kausa Prima</div>
+      <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" class="login-brand-logo" style="height: 48px; width: 48px; object-fit: contain; margin-bottom: 2px;">
+      <div class="login-brand-title" style="font-weight: 600; font-size: 16px; letter-spacing: -0.015em;">PT Kala Kausa Prima</div>
       <div style="display: flex; align-items: center; gap: 6px;">
         <span style="font-size: 11px; color: #2563EB; font-weight: 500; background: #EFF6FF; padding: 2px 8px; border-radius: 5px;">
           Agency System
         </span>
         <span class="badge-version" style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 5px;">
-          <?= defined('APP_VERSION') ? APP_VERSION : 'v2.5' ?>
+          <?= defined('APP_VERSION') ? APP_VERSION : 'v3.0' ?>
         </span>
       </div>
     </div>

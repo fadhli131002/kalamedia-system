@@ -265,7 +265,7 @@ $isAdmin = is_admin();
       <div style="display: flex; align-items: center; gap: 8px;">
         <h3 style="font-size: 16px; font-weight: 700; color: #16141F; margin: 0; letter-spacing: -0.2px;">Pusat Menu Eksekutif Owner</h3>
         <span class="badge-version" style="font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 5px;">
-          <?= defined('APP_VERSION') ? APP_VERSION : 'v2.5' ?>
+          <?= defined('APP_VERSION') ? APP_VERSION : 'v3.0' ?>
         </span>
       </div>
       <p style="font-size: 12px; color: #6E6D7A; margin: 2px 0 0 0;">Navigasi lengkap 12 menu divisi &amp; kontrol sistem agensi</p>

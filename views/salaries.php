@@ -92,10 +92,71 @@ $totalSalarySelected = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-2.5">
   <?php render_tab_uid_script(); ?>
   <script src="assets/js/html2pdf.bundle.min.js"></script>
   <style>
+    .payroll-filter-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .payroll-filter-field label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      white-space: nowrap;
+      margin: 0;
+    }
+    .payroll-filter-bar .form-select {
+      height: 38px !important;
+      padding: 0 30px 0 12px !important;
+      border-radius: 10px !important;
+      font-size: 12.5px !important;
+      font-weight: 500 !important;
+      background-color: #FFFFFF !important;
+      border: 1px solid #D0D5DD !important;
+      color: #101828 !important;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04) !important;
+    }
+    .payroll-search-wrapper {
+      position: relative;
+      width: 260px;
+      max-width: 100%;
+    }
+    .payroll-search-wrapper svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #667085;
+      pointer-events: none;
+    }
+    .payroll-search-wrapper .form-control {
+      width: 100% !important;
+      height: 38px !important;
+      padding: 0 12px 0 36px !important;
+      border-radius: 10px !important;
+      font-size: 12.5px !important;
+      background-color: #FFFFFF !important;
+      border: 1px solid #D0D5DD !important;
+      color: #101828 !important;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04) !important;
+      box-sizing: border-box !important;
+    }
+    html[data-theme="dark"] .payroll-filter-bar .form-select,
+    html[data-theme="dark"] .payroll-search-wrapper .form-control,
+    body.dark-mode .payroll-filter-bar .form-select,
+    body.dark-mode .payroll-search-wrapper .form-control {
+      background-color: #0E121D !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .payroll-search-wrapper svg,
+    body.dark-mode .payroll-search-wrapper svg {
+      color: #94A3B8 !important;
+    }
+
     @media (max-width: 768px) {
       .kpi-grid.payroll-kpi-grid {
         display: grid !important;
@@ -114,25 +175,57 @@ $totalSalarySelected = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) 
         gap: 10px !important;
       }
       .payroll-header-actions .date-filter-group {
-        display: inline-flex !important;
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         width: 100% !important;
-        overflow-x: auto !important;
+        padding: 4px !important;
+        border-radius: 12px !important;
+        gap: 4px !important;
+        overflow: visible !important;
+      }
+      .payroll-header-actions .date-filter-group .filter-btn {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 8px 10px !important;
+        border-radius: 9px !important;
+        font-size: 12.5px !important;
       }
       .payroll-header-actions .btn {
-        width: auto !important;
-        align-self: flex-start !important;
+        width: 100% !important;
+        height: 38px !important;
+        align-self: stretch !important;
+        justify-content: center !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        font-size: 13px !important;
       }
       .payroll-filter-bar {
         flex-direction: column !important;
         align-items: stretch !important;
         gap: 10px !important;
         padding: 12px !important;
+        border-radius: 14px !important;
       }
       .payroll-filter-bar .payroll-filter-controls {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+        width: 100% !important;
+      }
+      .payroll-filter-field {
         flex-direction: column !important;
         align-items: stretch !important;
-        gap: 8px !important;
-        width: 100% !important;
+        gap: 5px !important;
+        min-width: 0 !important;
+      }
+      .payroll-filter-field label {
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.03em !important;
       }
       .payroll-filter-bar select,
       .payroll-filter-bar input {
@@ -141,6 +234,93 @@ $totalSalarySelected = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) 
       .payroll-search-wrapper {
         width: 100% !important;
       }
+    }
+
+    /* Salaries View NebulaPay Dark Mode Overrides */
+    html[data-theme="dark"] .quick-subtab-bar > div,
+    body.dark-mode .quick-subtab-bar > div {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .quick-subtab-btn,
+    body.dark-mode .quick-subtab-btn {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .quick-subtab-btn:hover:not(.active),
+    body.dark-mode .quick-subtab-btn:hover:not(.active) {
+      color: #F8FAFC !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+    }
+    html[data-theme="dark"] .quick-subtab-btn.active,
+    body.dark-mode .quick-subtab-btn.active {
+      background: #5B3DF5 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35) !important;
+    }
+    html[data-theme="dark"] .date-filter-group,
+    body.dark-mode .date-filter-group {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .date-filter-group .filter-btn,
+    body.dark-mode .date-filter-group .filter-btn {
+      color: #94A3B8 !important;
+      background: transparent !important;
+    }
+    html[data-theme="dark"] .date-filter-group .filter-btn:hover:not(.active),
+    body.dark-mode .date-filter-group .filter-btn:hover:not(.active) {
+      color: #F8FAFC !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+    }
+    html[data-theme="dark"] .date-filter-group .filter-btn.active,
+    body.dark-mode .date-filter-group .filter-btn.active {
+      background: #5B3DF5 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 2px 8px rgba(91, 61, 245, 0.35) !important;
+    }
+    html[data-theme="dark"] .payroll-filter-bar,
+    body.dark-mode .payroll-filter-bar {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .kala-table-scroll,
+    body.dark-mode .kala-table-scroll {
+      background: #12151F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .table-custom td,
+    body.dark-mode .table-custom td {
+      background: transparent !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .table-custom th,
+    body.dark-mode .table-custom th {
+      background: #0E121D !important;
+      color: #94A3B8 !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] #payroll-period-menu,
+    body.dark-mode #payroll-period-menu {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6) !important;
+    }
+    html[data-theme="dark"] #payroll-period-menu a,
+    body.dark-mode #payroll-period-menu a {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] #payroll-period-menu a:hover,
+    body.dark-mode #payroll-period-menu a:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
+      color: #FFFFFF !important;
+    }
+    html[data-theme="dark"] .btn-period-toggle,
+    body.dark-mode .btn-period-toggle {
+      background: #1E293B !important;
+      border-color: rgba(255, 255, 255, 0.15) !important;
+      color: #F8FAFC !important;
     }
   </style>
 </head>
@@ -156,11 +336,11 @@ $totalSalarySelected = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) 
         <?php if (is_owner() || is_admin()): ?>
         <!-- Quick Sub-Tab Switcher: Invoice Klien | Pengeluaran | Penggajian -->
         <div class="quick-subtab-bar" style="margin-bottom: 14px;">
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
-            <a href="<?= url('invoices?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
+            <a href="<?= url('invoices?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap;">
               Invoice Klien
             </a>
-            <a href="<?= url('expenses?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
+            <a href="<?= url('expenses?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap;">
               Pengeluaran
             </a>
             <a href="<?= url('salaries?_slot=internal') ?>" class="quick-subtab-btn active" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; text-align: center; white-space: nowrap; background: #5B3DF5; color: #FFFFFF; box-shadow: 0 2px 6px rgba(91,61,245,0.25);">
@@ -269,11 +449,13 @@ $totalSalarySelected = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) 
               </div>
 
               <?php if ($tab === 'payroll'): ?>
-                <button class="btn btn-primary btn-sm" onclick="openModal('modal-input-salary')">
+                <button class="btn btn-primary btn-sm" onclick="openModal('modal-input-salary')" style="display: inline-flex; align-items: center; gap: 6px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   <span>Input Gaji Karyawan</span>
                 </button>
               <?php else: ?>
-                <button class="btn btn-primary btn-sm" onclick="openModal('modal-create-employee')">
+                <button class="btn btn-primary btn-sm" onclick="openModal('modal-create-employee')" style="display: inline-flex; align-items: center; gap: 6px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                   <span>Tambah Karyawan</span>
                 </button>
               <?php endif; ?>
@@ -282,31 +464,36 @@ $totalSalarySelected = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) 
 
           <?php if ($tab === 'payroll'): ?>
             <!-- Filter & Search Bar for Payroll -->
-            <div class="payroll-filter-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; background: #F9FAFB; padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
-              <div class="payroll-filter-controls" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <label style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">Filter Periode:</label>
-                <select class="form-select" style="width: 150px; padding: 5px 8px; font-size: 12px;" onchange="location.href='<?= url('salaries?tab=payroll&status=' . urlencode($filterStatus)) ?>&period=' + this.value">
-                  <option value="">Semua Periode</option>
-                  <?php foreach ($availablePeriods as $p): ?>
-                    <option value="<?= $p ?>" <?= $filterPeriod === $p ? 'selected' : '' ?>><?= $p ?></option>
-                  <?php endforeach; ?>
-                </select>
+            <div class="payroll-filter-bar" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; background: #F9FAFB; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border-color);">
+              <div class="payroll-filter-controls" style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap;">
+                <div class="payroll-filter-field">
+                  <label>Filter Periode:</label>
+                  <select class="form-select" style="width: 160px;" onchange="location.href='<?= url('salaries?tab=payroll&status=' . urlencode($filterStatus)) ?>&period=' + this.value">
+                    <option value="">Semua Periode</option>
+                    <?php foreach ($availablePeriods as $p): ?>
+                      <option value="<?= $p ?>" <?= $filterPeriod === $p ? 'selected' : '' ?>><?= $p ?></option>
+                    <?php endforeach; ?>
+                  </select>
+                </div>
 
-                <label style="font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-left: 8px;">Status:</label>
-                <select class="form-select" style="width: 130px; padding: 5px 8px; font-size: 12px;" onchange="location.href='<?= url('salaries?tab=payroll&period=' . urlencode($filterPeriod)) ?>&status=' + this.value">
-                  <option value="">Semua Status</option>
-                  <option value="Paid" <?= $filterStatus === 'Paid' ? 'selected' : '' ?>>Paid (Lunas)</option>
-                  <option value="Pending" <?= $filterStatus === 'Pending' ? 'selected' : '' ?>>Pending</option>
-                </select>
+                <div class="payroll-filter-field">
+                  <label>Status:</label>
+                  <select class="form-select" style="width: 140px;" onchange="location.href='<?= url('salaries?tab=payroll&period=' . urlencode($filterPeriod)) ?>&status=' + this.value">
+                    <option value="">Semua Status</option>
+                    <option value="Paid" <?= $filterStatus === 'Paid' ? 'selected' : '' ?>>Paid (Lunas)</option>
+                    <option value="Pending" <?= $filterStatus === 'Pending' ? 'selected' : '' ?>>Pending</option>
+                  </select>
+                </div>
               </div>
 
               <div class="payroll-search-wrapper">
-                <input type="text" id="salary-search-input" class="form-control" style="width: 240px; padding: 6px 12px; font-size: 12px;" placeholder="Cari nama atau jabatan...">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                <input type="text" id="salary-search-input" class="form-control" placeholder="Cari nama atau jabatan...">
               </div>
             </div>
 
             <!-- Payroll Table -->
-            <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
+            <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 0;">
               <table class="table-custom" id="salaries-table" style="min-width: 950px !important; width: 100%;">
                 <thead>
                   <tr>
@@ -325,17 +512,17 @@ $totalSalarySelected = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) 
                     <?php foreach ($salariesList as $s): ?>
                       <tr>
                         <td style="white-space: nowrap;">
-                          <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($s['month_period']) ?></div>
+                          <div style="font-weight: 700; color: var(--text-primary);"><?= htmlspecialchars($s['month_period']) ?></div>
                           <div style="font-size: 11px; color: var(--text-secondary);">Bayar: <?= format_date($s['payment_date']) ?></div>
                         </td>
                         <td style="white-space: nowrap;">
-                          <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($s['employee_name']) ?></div>
+                          <div style="font-weight: 700; color: var(--text-primary);"><?= htmlspecialchars($s['employee_name']) ?></div>
                           <div style="font-size: 11px; color: var(--text-secondary);">
                             <?= htmlspecialchars($s['employee_position'] ?: 'Staff') ?> &bull; <?= htmlspecialchars($s['bank_name'] ?: 'BCA') ?> (<?= htmlspecialchars($s['bank_account'] ?: '-') ?>)
                           </div>
                         </td>
                         <td style="white-space: nowrap;">
-                          <div style="font-size: 12px; color: #101828;">
+                          <div style="font-size: 12px; color: var(--text-primary);">
                             Pokok: <span style="font-weight: 600;"><?= format_rupiah($s['base_salary']) ?></span>
                           </div>
                           <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">
@@ -344,7 +531,7 @@ $totalSalarySelected = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) 
                           </div>
                         </td>
                         <td style="white-space: nowrap;">
-                          <div style="font-size: 15px; font-weight: 800; color: #101828;">
+                          <div style="font-size: 15px; font-weight: 800; color: var(--text-primary);">
                             <?= format_rupiah($s['net_salary']) ?>
                           </div>
                           <?php if (!empty($s['notes'])): ?>
@@ -395,9 +582,9 @@ $totalSalarySelected = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) 
                 </tbody>
               </table>
             </div>
-
+          <?php elseif ($tab === 'employees'): ?>
             <!-- Master Karyawan Table -->
-            <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
+            <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 0;">
               <table class="table-custom" id="employees-table" style="min-width: 950px !important; width: 100%;">
                 <thead>
                   <tr>
@@ -417,29 +604,29 @@ $totalSalarySelected = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) 
                     <?php foreach ($employeesList as $emp): ?>
                       <tr>
                         <td style="white-space: nowrap;">
-                          <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($emp['name']) ?></div>
+                          <div style="font-weight: 700; color: var(--text-primary);"><?= htmlspecialchars($emp['name']) ?></div>
                           <span class="badge-status badge-<?= $emp['status'] === 'Active' ? 'paid' : 'draft' ?>" style="font-size: 10px; padding: 2px 6px; margin-top: 2px;">
                             <?= $emp['status'] ?>
                           </span>
                         </td>
                         <td style="white-space: nowrap;">
-                          <div style="font-weight: 600; color: #101828;"><?= htmlspecialchars($emp['position']) ?></div>
+                          <div style="font-weight: 600; color: var(--text-primary);"><?= htmlspecialchars($emp['position']) ?></div>
                           <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($emp['department'] ?: '-') ?></div>
                         </td>
                         <td style="white-space: nowrap;">
-                          <span style="font-size: 12px; color: var(--text-secondary); background: #F2F4F7; padding: 3px 8px; border-radius: 4px; font-weight: 500;">
+                          <span style="font-size: 12px; color: var(--text-secondary); background: var(--bg-surface-secondary, #F2F4F7); padding: 3px 8px; border-radius: 4px; font-weight: 500;">
                             <?= htmlspecialchars($emp['employment_type'] ?: 'Full-time') ?>
                           </span>
                         </td>
                         <td style="white-space: nowrap;">
-                          <div style="font-size: 12px; color: #101828;"><?= htmlspecialchars($emp['email'] ?: '-') ?></div>
+                          <div style="font-size: 12px; color: var(--text-primary);"><?= htmlspecialchars($emp['email'] ?: '-') ?></div>
                           <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($emp['phone'] ?: '-') ?></div>
                         </td>
                         <td style="white-space: nowrap;">
-                          <div style="font-weight: 600; color: #101828;"><?= htmlspecialchars($emp['bank_name'] ?: 'BCA') ?></div>
+                          <div style="font-weight: 600; color: var(--text-primary);"><?= htmlspecialchars($emp['bank_name'] ?: 'BCA') ?></div>
                           <div style="font-size: 11px; color: var(--text-secondary);"><?= htmlspecialchars($emp['bank_account'] ?: '-') ?></div>
                         </td>
-                        <td style="font-weight: 700; color: #101828; white-space: nowrap;">
+                        <td style="font-weight: 700; color: var(--text-primary); white-space: nowrap;">
                           <?= format_rupiah($emp['base_salary']) ?>
                         </td>
                         <td class="td-actions" style="text-align: right; white-space: nowrap;">

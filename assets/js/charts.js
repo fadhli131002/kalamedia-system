@@ -121,10 +121,10 @@ function initCashflowChart(chartData) {
             display: false // Use custom sleek HTML legend in panel header (no duplicate)
           },
           tooltip: {
-            backgroundColor: '#FFFFFF',
-            titleColor: '#101828',
-            bodyColor: '#475467',
-            borderColor: '#E4E7EC',
+            backgroundColor: (document.documentElement.getAttribute('data-theme') === 'dark') ? '#181C29' : '#FFFFFF',
+            titleColor: (document.documentElement.getAttribute('data-theme') === 'dark') ? '#FFFFFF' : '#101828',
+            bodyColor: (document.documentElement.getAttribute('data-theme') === 'dark') ? '#94A3B8' : '#475467',
+            borderColor: (document.documentElement.getAttribute('data-theme') === 'dark') ? 'rgba(255, 255, 255, 0.12)' : '#E4E7EC',
             borderWidth: 1,
             padding: 12,
             boxPadding: 6,
@@ -158,7 +158,7 @@ function initCashflowChart(chartData) {
               drawBorder: false
             },
             ticks: {
-              color: '#94A3B8',
+              color: (document.documentElement.getAttribute('data-theme') === 'dark') ? '#64748B' : '#94A3B8',
               font: {
                 family: "'Plus Jakarta Sans', -apple-system, sans-serif",
                 size: 11,
@@ -174,12 +174,12 @@ function initCashflowChart(chartData) {
             suggestedMin: 0,
             suggestedMax: suggestedMax,
             grid: {
-              color: 'rgba(226, 232, 240, 0.7)',
+              color: (document.documentElement.getAttribute('data-theme') === 'dark') ? 'rgba(255, 255, 255, 0.08)' : 'rgba(226, 232, 240, 0.7)',
               borderDash: [5, 5], // Dotted / dashed line matching Slide 2 reference
               drawBorder: false
             },
             ticks: {
-              color: '#94A3B8',
+              color: (document.documentElement.getAttribute('data-theme') === 'dark') ? '#64748B' : '#94A3B8',
               font: {
                 family: "'Plus Jakarta Sans', -apple-system, sans-serif",
                 size: 11,
@@ -253,3 +253,32 @@ async function changeTimeRange(range, btnElement) {
     console.error('Failed to update analytics', err);
   }
 }
+
+// Live theme listener for real-time chart updating
+window.addEventListener('themeChanged', function(e) {
+  if (window.cashflowChartInstance) {
+    var isDark = e.detail && e.detail.theme === 'dark';
+    var chart = window.cashflowChartInstance;
+    if (chart && chart.options) {
+      if (chart.options.scales && chart.options.scales.x && chart.options.scales.x.ticks) {
+        chart.options.scales.x.ticks.color = isDark ? '#64748B' : '#94A3B8';
+      }
+      if (chart.options.scales && chart.options.scales.y) {
+        if (chart.options.scales.y.grid) {
+          chart.options.scales.y.grid.color = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(226, 232, 240, 0.7)';
+        }
+        if (chart.options.scales.y.ticks) {
+          chart.options.scales.y.ticks.color = isDark ? '#64748B' : '#94A3B8';
+        }
+      }
+      if (chart.options.plugins && chart.options.plugins.tooltip) {
+        chart.options.plugins.tooltip.backgroundColor = isDark ? '#181C29' : '#FFFFFF';
+        chart.options.plugins.tooltip.titleColor = isDark ? '#FFFFFF' : '#101828';
+        chart.options.plugins.tooltip.bodyColor = isDark ? '#94A3B8' : '#475467';
+        chart.options.plugins.tooltip.borderColor = isDark ? 'rgba(255, 255, 255, 0.12)' : '#E4E7EC';
+      }
+      chart.update();
+    }
+  }
+});
+

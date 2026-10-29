@@ -79,6 +79,9 @@ switch ($route) {
         exit;
 
     case 'client-portal':
+    case 'portal':
+    case 'portal_klien':
+    case 'portal_klien.php':
         require_client();
         require_once __DIR__ . '/views/client_portal.php';
         break;
@@ -184,7 +187,7 @@ switch ($route) {
             header('Location: ' . url('reports?tab=ads_report&_slot=internal'));
             exit;
         }
-        require_once __DIR__ . '/views/content_dashboard.php';
+        require_once __DIR__ . '/views/calendar.php';
         break;
 
     case 'reports':
@@ -204,7 +207,7 @@ switch ($route) {
         break;
 
     case 'settings':
-        require_owner();
+        require_admin();
         require_once __DIR__ . '/views/settings.php';
         break;
 

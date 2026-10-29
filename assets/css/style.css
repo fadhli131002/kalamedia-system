@@ -17,6 +17,7 @@
   --bg-topbar: #FFFFFF;
   --bg-card: #FFFFFF;
   --bg-card-hover: #F8FAFC;
+  --bg-surface: #F9FAFB;
   --bg-input: #F9FAFB;
   --bg-table-header: #FFFFFF;
   --bg-pill-active: #2563EB;
@@ -91,6 +92,91 @@
   --transition-base: 200ms cubic-bezier(0.22, 1, 0.36, 1);
   --transition-smooth: 260ms cubic-bezier(0.22, 1, 0.36, 1);
   --transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, color 200ms ease, border-color 200ms ease, box-shadow 200ms ease, opacity 200ms ease;
+}
+
+/* ==========================================================================
+   NEBULAPAY ENTERPRISE DARK MODE DESIGN TOKENS ([data-theme="dark"])
+   ========================================================================== */
+html[data-theme="dark"], body.dark-mode {
+  color-scheme: dark;
+  scrollbar-color: rgba(255, 255, 255, 0.22) #0B0E17;
+  scrollbar-width: thin;
+  --bg-app: #07090E;
+  --bg-sidebar: rgba(16, 19, 28, 0.92);
+  --bg-card: #12151F;
+  --bg-card-elevated: #181C29;
+  --bg-surface: #12151F;
+  --bg-surface-secondary: #161D2F;
+  --bg-muted: #161A26;
+  --border-line: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(56, 189, 248, 0.42);
+  --text-primary: #FFFFFF;
+  --text-secondary: #94A3B8;
+  --text-muted: #64748B;
+
+  /* Aksen NebulaPay (Cyan-Indigo Aurora & Emerald Mint) */
+  --nebula-aurora: linear-gradient(135deg, #0F172A 0%, #1E1B4B 45%, #4338CA 78%, #06B6D4 100%);
+  --nebula-pill-glow: linear-gradient(180deg, #162032 0%, #0B111E 100%);
+  --monty-brand: #6366F1;
+  --monty-green: #34D399;
+  --monty-green-soft: rgba(52, 211, 153, 0.14);
+  --monty-yellow: #FBBF24;
+  --monty-yellow-soft: rgba(251, 191, 36, 0.14);
+  --monty-danger: #F87171;
+  --monty-danger-soft: rgba(248, 113, 113, 0.14);
+
+  /* Mapped Kala Surfaces */
+  --bg-main: #07090E;
+  --bg-topbar: #0B0E17;
+  --bg-card-hover: #181C29;
+  --bg-input: #0E121D;
+  --bg-table-header: #0E121D;
+  --bg-pill-active: #6366F1;
+
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-input: rgba(255, 255, 255, 0.12);
+  --border-focus: #38BDF8;
+  --border-light: rgba(255, 255, 255, 0.05);
+
+  --text-tertiary: #475569;
+  --text-white: #FFFFFF;
+
+  --primary: #6366F1;
+  --primary-hover: #4F46E5;
+  --primary-active: #4338CA;
+  --primary-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  --primary-tint: rgba(99, 102, 241, 0.16);
+
+  --secondary: #06B6D4;
+  --secondary-tint: rgba(6, 182, 212, 0.14);
+  --gradient-accent: linear-gradient(135deg, #4338CA 0%, #06B6D4 100%);
+  --gradient-bar: linear-gradient(90deg, #4338CA 0%, #06B6D4 100%);
+
+  --success: #34D399;
+  --success-bg: rgba(52, 211, 153, 0.14);
+  --success-text: #34D399;
+  --success-border: rgba(52, 211, 153, 0.28);
+
+  --warning: #FBBF24;
+  --warning-bg: rgba(251, 191, 36, 0.14);
+  --warning-text: #FBBF24;
+  --warning-border: rgba(251, 191, 36, 0.28);
+
+  --danger: #F87171;
+  --danger-bg: rgba(248, 113, 113, 0.14);
+  --danger-text: #F87171;
+  --danger-border: rgba(248, 113, 113, 0.28);
+
+  --info: #38BDF8;
+  --info-bg: rgba(56, 189, 248, 0.14);
+  --info-text: #38BDF8;
+  --info-border: rgba(56, 189, 248, 0.28);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 2px 6px -1px rgba(0, 0, 0, 0.65);
+  --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-lg: 0 16px 32px -8px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 
 /* ==========================================================================
@@ -762,13 +848,24 @@ table td, .table td {
   background: rgba(225, 29, 72, 0.14) !important;
 }
 
-/* Sidebar User Footer (Refined Bankio Minimal Profile Card) */
+/* Sidebar Footer Container & Profile Card */
+.sidebar-footer {
+  flex-shrink: 0;
+  position: static;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px 14px;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-sidebar);
+}
+
 .sidebar-user {
   flex-shrink: 0;
-  margin-top: auto;
-  padding: 8px 12px 10px;
-  border-top: 1px solid var(--border-color);
-  background: #FFFFFF;
+  margin-top: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
 }
 
 .user-profile {
@@ -1068,6 +1165,43 @@ table td, .table td {
 }
 .clickable-client-link:hover {
   color: #2563EB;
+}
+html[data-theme="dark"] .clickable-client-link,
+body.dark-mode .clickable-client-link,
+html[data-theme="dark"] .clickable-client-link span,
+body.dark-mode .clickable-client-link span {
+  color: #F8FAFC !important;
+}
+html[data-theme="dark"] .clickable-client-link:hover,
+body.dark-mode .clickable-client-link:hover,
+html[data-theme="dark"] .clickable-client-link:hover span,
+body.dark-mode .clickable-client-link:hover span {
+  color: #60A5FA !important;
+}
+html[data-theme="dark"] .rank-badge-1,
+body.dark-mode .rank-badge-1 {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(217, 119, 6, 0.32) 100%) !important;
+  color: #FBBF24 !important;
+  border: 1px solid rgba(251, 191, 36, 0.45) !important;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2) !important;
+}
+html[data-theme="dark"] .rank-badge-2,
+body.dark-mode .rank-badge-2 {
+  background: rgba(148, 163, 184, 0.16) !important;
+  color: #E2E8F0 !important;
+  border: 1px solid rgba(148, 163, 184, 0.35) !important;
+}
+html[data-theme="dark"] .rank-badge-3,
+body.dark-mode .rank-badge-3 {
+  background: rgba(249, 115, 22, 0.18) !important;
+  color: #FB923C !important;
+  border: 1px solid rgba(251, 146, 60, 0.38) !important;
+}
+html[data-theme="dark"] .rank-badge-other,
+body.dark-mode .rank-badge-other {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #94A3B8 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
 }
 .clickable-client-link .icon-open {
   opacity: 0;
@@ -1381,12 +1515,23 @@ button:active,
 .metric-num {
   font-size: 24px !important;
   font-weight: 700 !important;
-  color: #111827 !important;
+  color: #111827;
   letter-spacing: -0.03em !important;
   line-height: 1.2 !important;
   margin: 0 0 4px 0 !important;
   font-feature-settings: 'tnum' 1 !important;
   font-variant-numeric: tabular-nums !important;
+}
+
+html[data-theme="dark"] .kpi-value,
+html[data-theme="dark"] .metric-value,
+html[data-theme="dark"] .bento-metric-value,
+html[data-theme="dark"] .metric-num,
+body.dark-mode .kpi-value,
+body.dark-mode .metric-value,
+body.dark-mode .bento-metric-value,
+body.dark-mode .metric-num {
+  color: #F8FAFC !important;
 }
 
 .kpi-meta,
@@ -1423,8 +1568,8 @@ button:active,
 }
 
 .quick-action-card {
-  background: #FFFFFF;
-  border: 1px solid #EAECEF;
+  background: var(--bg-card, #FFFFFF);
+  border: 1px solid var(--border-color, #EAECEF);
   border-radius: 12px;
   padding: 16px 18px;
   display: flex;
@@ -1438,8 +1583,8 @@ button:active,
 }
 
 .quick-action-card:hover {
-  background: #F9FAFB;
-  border-color: #D1D5DB;
+  background: var(--bg-hover, #F9FAFB);
+  border-color: #38BDF8;
   box-shadow: 0 4px 12px rgba(16, 24, 40, 0.06);
   transform: translateY(-1px);
 }
@@ -1466,12 +1611,76 @@ button:active,
 .action-title {
   font-size: 13px;
   font-weight: 600;
-  color: #111827;
+  color: var(--text-primary, #111827);
 }
 
 .action-desc {
   font-size: 11.5px;
-  color: #6B7280;
+  color: var(--text-secondary, #6B7280);
+}
+
+/* Dark Mode Overrides for Quick Action Cards & Alert Cards */
+html[data-theme="dark"] .quick-action-card,
+body.dark-mode .quick-action-card {
+  background: linear-gradient(180deg, rgba(22, 29, 47, 0.85) 0%, rgba(15, 20, 32, 0.95) 100%) !important;
+  background-color: #0F1420 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #F8FAFC !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+}
+
+html[data-theme="dark"] .quick-action-card:hover,
+body.dark-mode .quick-action-card:hover {
+  background: #182033 !important;
+  border-color: rgba(56, 189, 248, 0.42) !important;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.8), 0 0 16px rgba(56, 189, 248, 0.16) !important;
+  transform: translateY(-2px);
+}
+
+html[data-theme="dark"] .quick-action-card .action-title,
+body.dark-mode .quick-action-card .action-title {
+  color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] .quick-action-card .action-desc,
+body.dark-mode .quick-action-card .action-desc {
+  color: #94A3B8 !important;
+}
+
+html[data-theme="dark"] .quick-action-card .action-icon,
+body.dark-mode .quick-action-card .action-icon {
+  background: rgba(56, 189, 248, 0.16) !important;
+  color: #38BDF8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+
+html[data-theme="dark"] .quick-action-card .action-icon svg,
+body.dark-mode .quick-action-card .action-icon svg {
+  stroke: #38BDF8 !important;
+}
+
+html[data-theme="dark"] .alert-card,
+body.dark-mode .alert-card {
+  background: linear-gradient(180deg, rgba(22, 29, 47, 0.85) 0%, rgba(15, 20, 32, 0.95) 100%) !important;
+  background-color: #0F1420 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #F8FAFC !important;
+}
+
+html[data-theme="dark"] .alert-card:hover,
+body.dark-mode .alert-card:hover {
+  border-color: rgba(56, 189, 248, 0.42) !important;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.8), 0 0 16px rgba(56, 189, 248, 0.16) !important;
+}
+
+html[data-theme="dark"] .alert-card-info h5,
+body.dark-mode .alert-card-info h5 {
+  color: #94A3B8 !important;
+}
+
+html[data-theme="dark"] .alert-card-info .count,
+body.dark-mode .alert-card-info .count {
+  color: #FFFFFF !important;
 }
 
 /* Alert Summary Cards (A/R, A/P, Missing Receipts) */
@@ -1557,6 +1766,16 @@ button:active,
 
 .panel-title svg {
   color: #2563EB !important;
+}
+
+html[data-theme="dark"] .panel-title,
+body.dark-mode .panel-title {
+  color: #F8FAFC !important;
+}
+
+html[data-theme="dark"] .panel-subtitle,
+body.dark-mode .panel-subtitle {
+  color: #94A3B8 !important;
 }
 
 /* Clean Segmented Control Bar 1 Baris ala SaaS */
@@ -1654,6 +1873,96 @@ button:active,
   stroke: #FFFFFF !important;
 }
 
+/* Dark Mode Adaptation for Segmented Control & Filter Pill Bars */
+html[data-theme="dark"] .segmented-control,
+body.dark-mode .segmented-control,
+html[data-theme="dark"] .client-filter-pill-bar,
+body.dark-mode .client-filter-pill-bar,
+html[data-theme="dark"] .bento-tabs-group,
+body.dark-mode .bento-tabs-group,
+html[data-theme="dark"] .date-filter-group,
+body.dark-mode .date-filter-group,
+html[data-theme="dark"] .workspace-tabs-bar,
+body.dark-mode .workspace-tabs-bar,
+html[data-theme="dark"] .task-services-track,
+body.dark-mode .task-services-track,
+html[data-theme="dark"] .touch-swipe-x,
+body.dark-mode .touch-swipe-x,
+html[data-theme="dark"] .segmented-control-container,
+body.dark-mode .segmented-control-container,
+html[data-theme="dark"] #status-filter-group,
+body.dark-mode #status-filter-group {
+  background: #161D2F !important;
+  background-color: #161D2F !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme="dark"] .segmented-control-item,
+body.dark-mode .segmented-control-item,
+html[data-theme="dark"] .client-filter-pill,
+body.dark-mode .client-filter-pill,
+html[data-theme="dark"] .bento-tab-btn,
+body.dark-mode .bento-tab-btn,
+html[data-theme="dark"] .workspace-tab-btn,
+body.dark-mode .workspace-tab-btn,
+html[data-theme="dark"] .task-service-pill,
+body.dark-mode .task-service-pill,
+html[data-theme="dark"] .tab-btn,
+body.dark-mode .tab-btn,
+html[data-theme="dark"] .filter-btn,
+body.dark-mode .filter-btn {
+  color: #94A3B8 !important;
+  background: transparent !important;
+}
+
+html[data-theme="dark"] .segmented-control-item:hover:not(.active),
+body.dark-mode .segmented-control-item:hover:not(.active),
+html[data-theme="dark"] .client-filter-pill:hover:not(.active),
+body.dark-mode .client-filter-pill:hover:not(.active),
+html[data-theme="dark"] .bento-tab-btn:hover:not(.active),
+body.dark-mode .bento-tab-btn:hover:not(.active),
+html[data-theme="dark"] .workspace-tab-btn:hover:not(.active),
+body.dark-mode .workspace-tab-btn:hover:not(.active),
+html[data-theme="dark"] .task-service-pill:hover:not(.active),
+body.dark-mode .task-service-pill:hover:not(.active),
+html[data-theme="dark"] .tab-btn:hover:not(.active),
+body.dark-mode .tab-btn:hover:not(.active),
+html[data-theme="dark"] .filter-btn:hover:not(.active),
+body.dark-mode .filter-btn:hover:not(.active) {
+  color: #FFFFFF !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme="dark"] .segmented-control-item.active,
+body.dark-mode .segmented-control-item.active,
+html[data-theme="dark"] .client-filter-pill.active,
+body.dark-mode .client-filter-pill.active,
+html[data-theme="dark"] .bento-tab-btn.active,
+body.dark-mode .bento-tab-btn.active,
+html[data-theme="dark"] .workspace-tab-btn.active,
+body.dark-mode .workspace-tab-btn.active,
+html[data-theme="dark"] .task-service-pill.active,
+body.dark-mode .task-service-pill.active,
+html[data-theme="dark"] .tab-btn.active,
+body.dark-mode .tab-btn.active,
+html[data-theme="dark"] .segmented-tab-btn.active,
+body.dark-mode .segmented-tab-btn.active,
+html[data-theme="dark"] .filter-btn.active,
+body.dark-mode .filter-btn.active {
+  background: #5B3DF5 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(91, 61, 245, 0.4) !important;
+}
+
+html[data-theme="dark"] .table-responsive,
+body.dark-mode .table-responsive,
+html[data-theme="dark"] .kala-table-scroll,
+body.dark-mode .kala-table-scroll {
+  background: #0E121D !important;
+  background-color: #0E121D !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
 /* Table Responsive & Custom Thin Scrollbar (4px, No Thick Grey Bar!) */
 .table-responsive,
 .kala-table-scroll {
@@ -1739,6 +2048,12 @@ button:active,
 .service-tag-web, .spec-tag-web { background: #F4F3FF !important; color: #5925DC !important; border: none !important; }
 .service-tag-ads, .spec-tag-ads { background: #ECFDF3 !important; color: #027A48 !important; border: none !important; }
 .service-tag-default, .spec-tag-default { background: #F3F4F6 !important; color: #4B5563 !important; border: none !important; }
+.service-tag, .spec-tag { white-space: nowrap !important; font-weight: 600 !important; font-size: 11.5px !important; padding: 4px 9px !important; }
+html[data-theme="dark"] .service-tag-sosmed, body.dark-mode .service-tag-sosmed, html[data-theme="dark"] .spec-tag-sosmed, body.dark-mode .spec-tag-sosmed { background: rgba(59, 130, 246, 0.15) !important; color: #60A5FA !important; border: 1px solid rgba(59, 130, 246, 0.3) !important; }
+html[data-theme="dark"] .service-tag-desain, body.dark-mode .service-tag-desain, html[data-theme="dark"] .spec-tag-desain, body.dark-mode .spec-tag-desain { background: rgba(236, 72, 153, 0.15) !important; color: #F472B6 !important; border: 1px solid rgba(236, 72, 153, 0.3) !important; }
+html[data-theme="dark"] .service-tag-web, body.dark-mode .service-tag-web, html[data-theme="dark"] .spec-tag-web, body.dark-mode .spec-tag-web { background: rgba(139, 92, 246, 0.15) !important; color: #A78BFA !important; border: 1px solid rgba(139, 92, 246, 0.3) !important; }
+html[data-theme="dark"] .service-tag-ads, body.dark-mode .service-tag-ads, html[data-theme="dark"] .spec-tag-ads, body.dark-mode .spec-tag-ads { background: rgba(16, 185, 129, 0.15) !important; color: #34D399 !important; border: 1px solid rgba(16, 185, 129, 0.3) !important; }
+html[data-theme="dark"] .service-tag-default, body.dark-mode .service-tag-default, html[data-theme="dark"] .spec-tag-default, body.dark-mode .spec-tag-default { background: rgba(148, 163, 184, 0.14) !important; color: #CBD5E1 !important; border: 1px solid rgba(148, 163, 184, 0.25) !important; }
 
 /* Card Toolbar SaaS Modern 1-Row Desktop / 2-Row Mobile */
 .card-toolbar-saas {
@@ -2338,6 +2653,36 @@ button:active,
 }
 
 .toast {
+  background: #FFFFFF;
+  color: #0F172A;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+  border-left: 4px solid #4F46E5;
+  box-shadow: 0 12px 28px -6px rgba(15, 23, 42, 0.14);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 280px;
+  font-size: 13px;
+  font-weight: 600;
+  animation: slideInRight 0.25s ease-out;
+}
+html[data-theme="dark"] .toast,
+body.dark-mode .toast {
+  background: #141B2D !important;
+  color: #F8FAFC !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-left: 4px solid #38BDF8 !important;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.65) !important;
+}
+html[data-theme="dark"] .toast.toast-success,
+body.dark-mode .toast.toast-success { border-left-color: #10B981 !important; }
+html[data-theme="dark"] .toast.toast-danger,
+body.dark-mode .toast.toast-danger { border-left-color: #EF4444 !important; }
+html[data-theme="dark"] .toast.toast-warning,
+body.dark-mode .toast.toast-warning { border-left-color: #F59E0B !important; }
+.toast-legacy-unused {
   background: #101828;
   color: #FFFFFF;
   padding: 12px 18px;
@@ -2614,17 +2959,42 @@ button:active,
     background: #F3F4F6 !important;
     padding: 3px !important;
     border-radius: 8px !important;
-    display: inline-flex !important;
+    display: flex !important;
     align-items: center !important;
     gap: 2px !important;
+    width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     overflow-x: auto !important;
     white-space: nowrap !important;
     scrollbar-width: none !important;
     -webkit-overflow-scrolling: touch !important;
     border: none !important;
     box-sizing: border-box !important;
-    flex-shrink: 0 !important;
+    flex-shrink: 1 !important;
+  }
+
+  html[data-theme="dark"] .date-filter-group,
+  body.dark-mode .date-filter-group,
+  html[data-theme="dark"] .workspace-tabs-bar,
+  body.dark-mode .workspace-tabs-bar,
+  html[data-theme="dark"] .client-filter-pill-bar,
+  body.dark-mode .client-filter-pill-bar,
+  html[data-theme="dark"] .bento-tabs-group,
+  body.dark-mode .bento-tabs-group,
+  html[data-theme="dark"] .task-services-track,
+  body.dark-mode .task-services-track,
+  html[data-theme="dark"] .touch-swipe-x,
+  body.dark-mode .touch-swipe-x,
+  html[data-theme="dark"] .segmented-control,
+  body.dark-mode .segmented-control,
+  html[data-theme="dark"] .segmented-control-container,
+  body.dark-mode .segmented-control-container,
+  html[data-theme="dark"] #status-filter-group,
+  body.dark-mode #status-filter-group {
+    background: #161D2F !important;
+    background-color: #161D2F !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
   }
 
   .date-filter-group::-webkit-scrollbar,
@@ -2807,7 +3177,7 @@ button:active,
   .untitled-card {
     min-width: 0 !important;
     max-width: 100% !important;
-    overflow: visible !important;
+    overflow-x: hidden !important;
     box-sizing: border-box !important;
   }
 
@@ -4218,5 +4588,1856 @@ button:active,
   }
 }
 
+/* ==========================================================================
+   NEBULAPAY ENTERPRISE DARK MODE SYSTEM (100% UNIFORM ACROSS ALL DASHBOARDS)
+   Aesthetic: Deep Space Black (#07090E), Glass Cards (#12151F), Aurora Mesh,
+   Cyan-Indigo Accents, Glowing Borders, Emerald Mint Highlights
+   ========================================================================== */
+
+/* 1. Global Shell & Canvas */
+html[data-theme="dark"],
+html[data-theme="dark"] body,
+body.dark-mode {
+  background-color: #07090E !important;
+  color: #FFFFFF !important;
+  color-scheme: dark;
+}
+
+html[data-theme="dark"] .app-container,
+html[data-theme="dark"] .main-wrapper,
+html[data-theme="dark"] .content-body,
+html[data-theme="dark"] main,
+html[data-theme="dark"] .kala-page-view,
+html[data-theme="dark"] .tab-pane {
+  background-color: #07090E !important;
+  color: #FFFFFF !important;
+}
+
+/* Custom Sleek Dark Scrollbars */
+html[data-theme="dark"] * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.16) #07090E;
+}
+html[data-theme="dark"] *::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+html[data-theme="dark"] *::-webkit-scrollbar-track {
+  background: #07090E;
+}
+html[data-theme="dark"] *::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+}
+html[data-theme="dark"] *::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.45);
+}
+
+/* 2. Global High-Contrast Typography */
+html[data-theme="dark"] h1, html[data-theme="dark"] .h1, html[data-theme="dark"] .page-title,
+html[data-theme="dark"] h2, html[data-theme="dark"] .h2, html[data-theme="dark"] h3, html[data-theme="dark"] .h3,
+html[data-theme="dark"] h4, html[data-theme="dark"] .h4, html[data-theme="dark"] h5, html[data-theme="dark"] .h5,
+html[data-theme="dark"] .panel-title, html[data-theme="dark"] .card-title, html[data-theme="dark"] .modal-title,
+html[data-theme="dark"] .kpi-value, html[data-theme="dark"] .stat-value,
+html[data-theme="dark"] strong, html[data-theme="dark"] b {
+  color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] p,
+html[data-theme="dark"] .panel-subtitle,
+html[data-theme="dark"] .card-desc,
+html[data-theme="dark"] .text-secondary,
+html[data-theme="dark"] .kpi-sub,
+html[data-theme="dark"] .user-details h4 {
+  color: #94A3B8 !important;
+}
+
+html[data-theme="dark"] small,
+html[data-theme="dark"] .text-muted,
+html[data-theme="dark"] .breadcrumb-root,
+html[data-theme="dark"] .breadcrumb-sep,
+html[data-theme="dark"] .kpi-title,
+html[data-theme="dark"] .nav-section-title {
+  color: #64748B !important;
+}
+
+html[data-theme="dark"] .breadcrumb-current {
+  color: #FFFFFF !important;
+}
+
+/* 3. Topbar Navigation (Worker, Owner, Admin, Client) */
+html[data-theme="dark"] .topbar,
+html[data-theme="dark"] .appify-topbar,
+html[data-theme="dark"] .owner-topbar,
+body.dark-mode .topbar,
+body.dark-mode .appify-topbar,
+body.dark-mode .owner-topbar {
+  background: #0B0E17 !important;
+  background-color: #0B0E17 !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+html[data-theme="dark"] .topbar h1,
+html[data-theme="dark"] .topbar .greeting-h1,
+html[data-theme="dark"] .greeting-name,
+html[data-theme="dark"] .greeting-heading,
+body.dark-mode .topbar h1,
+body.dark-mode .topbar .greeting-h1,
+body.dark-mode .greeting-name,
+body.dark-mode .greeting-heading {
+  color: #F8FAFC !important;
+}
+
+html[data-theme="dark"] .topbar .greeting-date,
+html[data-theme="dark"] .topbar .greeting-date-sub,
+body.dark-mode .topbar .greeting-date,
+body.dark-mode .topbar .greeting-date-sub {
+  color: #94A3B8 !important;
+}
+
+html[data-theme="dark"] .sidebar-toggle-btn,
+body.dark-mode .sidebar-toggle-btn {
+  background: #12151F !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #94A3B8 !important;
+}
+html[data-theme="dark"] .sidebar-toggle-btn:hover,
+body.dark-mode .sidebar-toggle-btn:hover {
+  background: #181C29 !important;
+  color: #FFFFFF !important;
+  border-color: rgba(56, 189, 248, 0.42) !important;
+}
+
+html[data-theme="dark"] .badge-version,
+body.dark-mode .badge-version {
+  background: #12151F !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #94A3B8 !important;
+}
+
+/* 4. Sidebar Navigation & Layout */
+html[data-theme="dark"] aside.sidebar,
+html[data-theme="dark"] .sidebar,
+body.dark-mode aside.sidebar,
+body.dark-mode .sidebar {
+  background: #0B0E17 !important;
+  background-color: #0B0E17 !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+html[data-theme="dark"] .sidebar-header,
+body.dark-mode .sidebar-header {
+  background: #0B0E17 !important;
+  background-color: #0B0E17 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+html[data-theme="dark"] .sidebar-brand-name,
+body.dark-mode .sidebar-brand-name {
+  color: #F8FAFC !important;
+}
+
+/* Dark Mode Logo Adaptation */
+html[data-theme="dark"] .sidebar-brand-img,
+body.dark-mode .sidebar-brand-img,
+html[data-theme="dark"] .sidebar-header img,
+body.dark-mode .sidebar-header img,
+html[data-theme="dark"] .login-brand img,
+body.dark-mode .login-brand img,
+html[data-theme="dark"] .login-brand-logo,
+body.dark-mode .login-brand-logo,
+html[data-theme="dark"] .brand-logo img,
+body.dark-mode .brand-logo img,
+html[data-theme="dark"] .app-brand-logo,
+body.dark-mode .app-brand-logo,
+html[data-theme="dark"] .logo-dark-invert,
+body.dark-mode .logo-dark-invert,
+html[data-theme="dark"] .topbar img[src*="Logo-"],
+body.dark-mode .topbar img[src*="Logo-"],
+html[data-theme="dark"] aside.sidebar img[src*="Logo-"],
+body.dark-mode aside.sidebar img[src*="Logo-"],
+html[data-theme="dark"] .bottom-nav img[src*="Logo-"],
+body.dark-mode .bottom-nav img[src*="Logo-"],
+html[data-theme="dark"] .bottom-sheet img[src*="Logo-"],
+body.dark-mode .bottom-sheet img[src*="Logo-"] {
+  filter: brightness(0) invert(1) drop-shadow(0 0 1px rgba(255, 255, 255, 0.35)) !important;
+  opacity: 0.95;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+html[data-theme="dark"] .sidebar-nav .nav-link,
+body.dark-mode .sidebar-nav .nav-link {
+  color: #94A3B8 !important;
+}
+html[data-theme="dark"] .sidebar-nav .nav-link svg,
+body.dark-mode .sidebar-nav .nav-link svg {
+  stroke: #94A3B8 !important;
+  color: #94A3B8 !important;
+}
+html[data-theme="dark"] .sidebar-nav .nav-link:hover,
+body.dark-mode .sidebar-nav .nav-link:hover {
+  color: #FFFFFF !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+html[data-theme="dark"] .sidebar-nav .nav-link:hover svg,
+body.dark-mode .sidebar-nav .nav-link:hover svg {
+  stroke: #FFFFFF !important;
+}
+
+html[data-theme="dark"] .sidebar-nav .nav-link.active,
+body.dark-mode .sidebar-nav .nav-link.active {
+  color: #FFFFFF !important;
+  background: rgba(99, 102, 241, 0.18) !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.25) !important;
+}
+html[data-theme="dark"] .sidebar-nav .nav-link.active svg,
+body.dark-mode .sidebar-nav .nav-link.active svg {
+  stroke: #38BDF8 !important;
+  color: #38BDF8 !important;
+}
+
+html[data-theme="dark"] .sidebar-sliding-pill,
+body.dark-mode .sidebar-sliding-pill {
+  background: linear-gradient(135deg, rgba(67, 56, 202, 0.8) 0%, rgba(6, 182, 212, 0.8) 100%) !important;
+  box-shadow: 0 2px 12px rgba(6, 182, 212, 0.35) !important;
+}
+
+/* Sidebar Footer & Profile Card in Dark Mode */
+html[data-theme="dark"] .sidebar-footer,
+body.dark-mode .sidebar-footer {
+  background: #0B0E17 !important;
+  background-color: #0B0E17 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.07) !important;
+}
+
+html[data-theme="dark"] .sidebar-user,
+body.dark-mode .sidebar-user {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+html[data-theme="dark"] .user-profile,
+body.dark-mode .user-profile {
+  background: #121726 !important;
+  background-color: #121726 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+html[data-theme="dark"] .user-profile:hover,
+body.dark-mode .user-profile:hover {
+  background: #161D2F !important;
+  border-color: rgba(56, 189, 248, 0.35) !important;
+}
+
+html[data-theme="dark"] .user-profile .avatar,
+body.dark-mode .user-profile .avatar {
+  background: linear-gradient(135deg, #1E1B4B 0%, #4338CA 100%) !important;
+  color: #38BDF8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+
+html[data-theme="dark"] .user-details h4,
+body.dark-mode .user-details h4 {
+  color: #F8FAFC !important;
+}
+
+html[data-theme="dark"] .role-badge,
+html[data-theme="dark"] .role-badge-sidebar,
+body.dark-mode .role-badge,
+body.dark-mode .role-badge-sidebar {
+  background: rgba(99, 102, 241, 0.2) !important;
+  color: #A5B4FC !important;
+  border: 1px solid rgba(99, 102, 241, 0.35) !important;
+}
+
+/* Executive, Staff & Role Badges */
+html[data-theme="dark"] .badge-role-executive,
+body.dark-mode .badge-role-executive {
+  background: rgba(99, 102, 241, 0.15) !important;
+  border: 1px solid rgba(99, 102, 241, 0.35) !important;
+  color: #818CF8 !important;
+}
+html[data-theme="dark"] .badge-role-pill,
+body.dark-mode .badge-role-pill {
+  background: rgba(99, 102, 241, 0.15) !important;
+  border: 1px solid rgba(99, 102, 241, 0.35) !important;
+  color: #818CF8 !important;
+}
+html[data-theme="dark"] .badge-portal-klien,
+body.dark-mode .badge-portal-klien {
+  background: rgba(99, 102, 241, 0.15) !important;
+  border: 1px solid rgba(99, 102, 241, 0.35) !important;
+  color: #818CF8 !important;
+}
+
+/* Interactive Legend Indicators for Cashflow Graph */
+html[data-theme="dark"] .chart-legend-inflow,
+body.dark-mode .chart-legend-inflow {
+  background: rgba(6, 182, 212, 0.12) !important;
+  border: 1px solid rgba(6, 182, 212, 0.35) !important;
+  color: #22D3EE !important;
+}
+html[data-theme="dark"] .chart-legend-outflow,
+body.dark-mode .chart-legend-outflow {
+  background: rgba(139, 92, 246, 0.12) !important;
+  border: 1px solid rgba(139, 92, 246, 0.35) !important;
+  color: #C084FC !important;
+}
+
+/* Margin badges */
+html[data-theme="dark"] .badge-margin.bad,
+body.dark-mode .badge-margin.bad {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  color: #F87171 !important;
+}
+html[data-theme="dark"] .badge-margin.good,
+body.dark-mode .badge-margin.good {
+  background: rgba(16, 185, 129, 0.15) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  color: #34D399 !important;
+}
+html[data-theme="dark"] .badge-margin.warning,
+body.dark-mode .badge-margin.warning {
+  background: rgba(245, 158, 11, 0.15) !important;
+  border: 1px solid rgba(245, 158, 11, 0.35) !important;
+  color: #FBBF24 !important;
+}
+
+/* ==========================================================================
+   5. GLOBAL CSS INTERCEPTOR: SWEEP ALL CARDS, PANELS & INLINE LIGHT BACKGROUNDS
+   ========================================================================== */
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .glass-panel,
+html[data-theme="dark"] .panel,
+html[data-theme="dark"] .box,
+html[data-theme="dark"] .kpi-card,
+html[data-theme="dark"] .metric-card,
+html[data-theme="dark"] .stat-card,
+html[data-theme="dark"] .task-summary-card,
+html[data-theme="dark"] .team-card,
+html[data-theme="dark"] .client-card,
+html[data-theme="dark"] .invoice-stat-card,
+html[data-theme="dark"] .expenses-summary-card,
+html[data-theme="dark"] .payroll-stat-card,
+html[data-theme="dark"] .report-deck-card,
+html[data-theme="dark"] .supitar-calendar-card,
+html[data-theme="dark"] .supitar-sidebar,
+html[data-theme="dark"] .supitar-main-panel,
+html[data-theme="dark"] .kanban-column,
+html[data-theme="dark"] .kanban-card,
+html[data-theme="dark"] .deliverables-card,
+html[data-theme="dark"] .task-card,
+html[data-theme="dark"] .task-item-card,
+html[data-theme="dark"] .tasks-header-card,
+html[data-theme="dark"] .page-header-bar,
+html[data-theme="dark"] .filter-panel,
+html[data-theme="dark"] .bento-filter-panel,
+html[data-theme="dark"] .bento-stat-strip,
+html[data-theme="dark"] .bento-metric-card,
+html[data-theme="dark"] .bento-worker-info-card,
+html[data-theme="dark"] .bento-table-card,
+html[data-theme="dark"] .untitled-card,
+html[data-theme="dark"] .empty-state,
+html[data-theme="dark"] .kala-empty-state-card,
+html[data-theme="dark"] .expired-card,
+html[data-theme="dark"] .login-card,
+html[data-theme="dark"] [style*="background:#fff"],
+html[data-theme="dark"] [style*="background: #fff"],
+html[data-theme="dark"] [style*="background:#ffffff"],
+html[data-theme="dark"] [style*="background: #ffffff"],
+html[data-theme="dark"] [style*="background:white"],
+html[data-theme="dark"] [style*="background: white"],
+html[data-theme="dark"] [style*="background:#f8fafc"],
+html[data-theme="dark"] [style*="background: #f8fafc"],
+html[data-theme="dark"] [style*="background:#f1f5f9"],
+html[data-theme="dark"] [style*="background: #f1f5f9"],
+html[data-theme="dark"] [style*="background:#F8F9FC"],
+html[data-theme="dark"] [style*="background: #F8F9FC"],
+html[data-theme="dark"] [style*="background:#F9FAFB"],
+html[data-theme="dark"] [style*="background: #F9FAFB"],
+body.dark-mode .card,
+body.dark-mode .glass-panel,
+body.dark-mode .panel,
+body.dark-mode .box,
+body.dark-mode .kpi-card,
+body.dark-mode .metric-card,
+body.dark-mode .stat-card,
+body.dark-mode .task-summary-card,
+body.dark-mode .team-card,
+body.dark-mode .client-card,
+body.dark-mode .invoice-stat-card,
+body.dark-mode .expenses-summary-card,
+body.dark-mode .payroll-stat-card,
+body.dark-mode .report-deck-card,
+body.dark-mode .supitar-calendar-card,
+body.dark-mode .supitar-sidebar,
+body.dark-mode .supitar-main-panel,
+body.dark-mode .kanban-column,
+body.dark-mode .kanban-card,
+body.dark-mode .deliverables-card,
+body.dark-mode .task-card,
+body.dark-mode .task-item-card,
+body.dark-mode .tasks-header-card,
+/* Global Dark Mode Interceptor for Light Cards & Containers */
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .panel,
+html[data-theme="dark"] .glass-panel,
+html[data-theme="dark"] .box,
+html[data-theme="dark"] .stat-card,
+html[data-theme="dark"] .kpi-card,
+html[data-theme="dark"] .tasks-header-card,
+html[data-theme="dark"] .page-header-bar,
+html[data-theme="dark"] .filter-panel,
+html[data-theme="dark"] .bento-filter-panel,
+html[data-theme="dark"] .bento-stat-strip,
+html[data-theme="dark"] .bento-metric-card,
+html[data-theme="dark"] .bento-worker-info-card,
+html[data-theme="dark"] .bento-saldo-owner-card,
+html[data-theme="dark"] .bento-table-card,
+html[data-theme="dark"] .payroll-stat-tile,
+html[data-theme="dark"] .payroll-cards-grid > div,
+html[data-theme="dark"] .ads-project-stat-card,
+html[data-theme="dark"] .untitled-card,
+html[data-theme="dark"] .empty-state,
+html[data-theme="dark"] .kala-empty-state-card,
+html[data-theme="dark"] .expired-card,
+html[data-theme="dark"] .login-card,
+html[data-theme="dark"] [style*="var(--bg-surface)"],
+html[data-theme="dark"] [style*="var(--bg-card)"],
+html[data-theme="dark"] [style*="background:#fff" i],
+html[data-theme="dark"] [style*="background: #fff" i],
+html[data-theme="dark"] [style*="background:#ffffff" i],
+html[data-theme="dark"] [style*="background: #ffffff" i],
+html[data-theme="dark"] [style*="background:#FFFFFF"],
+html[data-theme="dark"] [style*="background: #FFFFFF"],
+html[data-theme="dark"] [style*="background:#FFF"],
+html[data-theme="dark"] [style*="background: #FFF"],
+html[data-theme="dark"] [style*="background:white" i],
+html[data-theme="dark"] [style*="background: white" i],
+html[data-theme="dark"] [style*="background:#f8fafc" i],
+html[data-theme="dark"] [style*="background: #f8fafc" i],
+html[data-theme="dark"] [style*="background:#f1f5f9" i],
+html[data-theme="dark"] [style*="background: #f1f5f9" i],
+html[data-theme="dark"] [style*="background:#F8F9FC" i],
+html[data-theme="dark"] [style*="background: #F8F9FC" i],
+html[data-theme="dark"] [style*="background:#F9FAFB" i],
+html[data-theme="dark"] [style*="background: #F9FAFB" i],
+html[data-theme="dark"] [style*="background:#FCFCFD" i],
+html[data-theme="dark"] [style*="background: #FCFCFD" i],
+html[data-theme="dark"] [style*="background:#FAFAFA" i],
+html[data-theme="dark"] [style*="background: #FAFAFA" i],
+html[data-theme="dark"] [style*="background:#FDFDFD" i],
+html[data-theme="dark"] [style*="background: #FDFDFD" i],
+html[data-theme="dark"] [style*="background:#F7F7F8" i],
+html[data-theme="dark"] [style*="background: #F7F7F8" i],
+html[data-theme="dark"] [style*="background:#F5F5F7" i],
+html[data-theme="dark"] [style*="background: #F5F5F7" i],
+html[data-theme="dark"] [style*="background:#F4F5F9" i],
+html[data-theme="dark"] [style*="background: #F4F5F9" i],
+html[data-theme="dark"] [style*="background:#F0F1F7" i],
+html[data-theme="dark"] [style*="background: #F0F1F7" i],
+html[data-theme="dark"] [style*="background:#ECEEF5" i],
+html[data-theme="dark"] [style*="background: #ECEEF5" i],
+html[data-theme="dark"] td[style*="background"],
+html[data-theme="dark"] .ads-empty-cell,
+html[data-theme="dark"] .ads-empty-state-box,
+html[data-theme="dark"] .ads-log-card,
+html[data-theme="dark"] .appify-tx-card,
+html[data-theme="dark"] .worker-recap-card,
+html[data-theme="dark"] .worker-recap-filter-bar,
+html[data-theme="dark"] .team-dir-header-bar,
+html[data-theme="dark"] .worker-slide2-profile-card,
+html[data-theme="dark"] .slide2-pastel-card,
+html[data-theme="dark"] .slide2-menu-item,
+body.dark-mode .card,
+body.dark-mode .panel,
+body.dark-mode .glass-panel,
+body.dark-mode .box,
+body.dark-mode .stat-card,
+body.dark-mode .kpi-card,
+body.dark-mode .tasks-header-card,
+body.dark-mode .page-header-bar,
+body.dark-mode .filter-panel,
+body.dark-mode .bento-filter-panel,
+body.dark-mode .bento-stat-strip,
+body.dark-mode .bento-metric-card,
+body.dark-mode .bento-worker-info-card,
+body.dark-mode .bento-saldo-owner-card,
+body.dark-mode .bento-table-card,
+body.dark-mode .payroll-stat-tile,
+body.dark-mode .payroll-cards-grid > div,
+body.dark-mode .ads-project-stat-card,
+body.dark-mode .untitled-card,
+body.dark-mode .empty-state,
+body.dark-mode .kala-empty-state-card,
+body.dark-mode .expired-card,
+body.dark-mode .login-card,
+body.dark-mode .worker-recap-card,
+body.dark-mode .worker-recap-filter-bar,
+body.dark-mode .team-dir-header-bar,
+body.dark-mode .worker-slide2-profile-card,
+body.dark-mode .slide2-pastel-card,
+body.dark-mode .slide2-menu-item,
+body.dark-mode [style*="var(--bg-surface)"],
+body.dark-mode [style*="var(--bg-card)"],
+body.dark-mode [style*="background:#fff" i],
+body.dark-mode [style*="background: #fff" i],
+body.dark-mode [style*="background:#ffffff" i],
+body.dark-mode [style*="background: #ffffff" i],
+body.dark-mode [style*="background:#FFFFFF"],
+body.dark-mode [style*="background: #FFFFFF"],
+body.dark-mode [style*="background:#FFF"],
+body.dark-mode [style*="background: #FFF"],
+body.dark-mode [style*="background:white" i],
+body.dark-mode [style*="background: white" i],
+body.dark-mode [style*="background:#f8fafc" i],
+body.dark-mode [style*="background: #f8fafc" i],
+body.dark-mode [style*="background:#f1f5f9" i],
+body.dark-mode [style*="background: #f1f5f9" i],
+body.dark-mode [style*="background:#F8F9FC" i],
+body.dark-mode [style*="background: #F8F9FC" i],
+body.dark-mode [style*="background:#F9FAFB" i],
+body.dark-mode [style*="background: #F9FAFB" i],
+body.dark-mode [style*="background:#FCFCFD" i],
+body.dark-mode [style*="background: #FCFCFD" i],
+body.dark-mode [style*="background:#FAFAFA" i],
+body.dark-mode [style*="background: #FAFAFA" i],
+body.dark-mode [style*="background:#FDFDFD" i],
+body.dark-mode [style*="background: #FDFDFD" i],
+body.dark-mode [style*="background:#F7F7F8" i],
+body.dark-mode [style*="background: #F7F7F8" i],
+body.dark-mode [style*="background:#F5F5F7" i],
+body.dark-mode [style*="background: #F5F5F7" i],
+body.dark-mode [style*="background:#F4F5F9" i],
+body.dark-mode [style*="background: #F4F5F9" i],
+body.dark-mode [style*="background:#F0F1F7" i],
+body.dark-mode [style*="background: #F0F1F7" i],
+body.dark-mode [style*="background:#ECEEF5" i],
+body.dark-mode [style*="background: #ECEEF5" i],
+body.dark-mode td[style*="background"],
+body.dark-mode .ads-empty-cell,
+body.dark-mode .ads-empty-state-box,
+body.dark-mode .ads-log-card,
+body.dark-mode .appify-tx-card {
+  background: linear-gradient(180deg, rgba(22, 29, 47, 0.85) 0%, rgba(15, 20, 32, 0.95) 100%) !important;
+  background-color: #0F1420 !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+  color: #F8FAFC !important;
+}
+
+/* ==========================================================================
+   GLOBAL DARK MODE INTERCEPTOR: DARK TEXT COLORS (Zero Black-on-Dark Bugs)
+   ========================================================================== */
+html[data-theme="dark"] [style*="color: #101828"],
+html[data-theme="dark"] [style*="color:#101828"],
+html[data-theme="dark"] [style*="color: #000000"],
+html[data-theme="dark"] [style*="color:#000000"],
+html[data-theme="dark"] [style*="color: #0F172A"],
+html[data-theme="dark"] [style*="color:#0F172A"],
+html[data-theme="dark"] [style*="color: #16141F"],
+html[data-theme="dark"] [style*="color:#16141F"],
+html[data-theme="dark"] [style*="color: #111827"],
+html[data-theme="dark"] [style*="color:#111827"],
+html[data-theme="dark"] [style*="color: #1e293b"],
+html[data-theme="dark"] [style*="color:#1e293b"],
+html[data-theme="dark"] [style*="color: #334155"],
+html[data-theme="dark"] [style*="color:#334155"],
+html[data-theme="dark"] [style*="color: #344054"],
+html[data-theme="dark"] [style*="color:#344054"],
+html[data-theme="dark"] [style*="color: #475467"],
+html[data-theme="dark"] [style*="color:#475467"],
+html[data-theme="dark"] [style*="color: #1D2939"],
+html[data-theme="dark"] [style*="color:#1D2939"],
+html[data-theme="dark"] [style*="color: #1A162B"],
+html[data-theme="dark"] [style*="color:#1A162B"],
+body.dark-mode [style*="color: #101828"],
+body.dark-mode [style*="color:#101828"],
+body.dark-mode [style*="color: #000000"],
+body.dark-mode [style*="color:#000000"],
+body.dark-mode [style*="color: #0F172A"],
+body.dark-mode [style*="color:#0F172A"],
+body.dark-mode [style*="color: #16141F"],
+body.dark-mode [style*="color:#16141F"],
+body.dark-mode [style*="color: #111827"],
+body.dark-mode [style*="color:#111827"],
+body.dark-mode [style*="color: #1e293b"],
+body.dark-mode [style*="color:#1e293b"],
+body.dark-mode [style*="color: #334155"],
+body.dark-mode [style*="color:#334155"],
+body.dark-mode [style*="color: #344054"],
+body.dark-mode [style*="color:#344054"],
+body.dark-mode [style*="color: #475467"],
+body.dark-mode [style*="color:#475467"],
+body.dark-mode [style*="color: #1D2939"],
+body.dark-mode [style*="color:#1D2939"],
+body.dark-mode [style*="color: #1A162B"],
+body.dark-mode [style*="color:#1A162B"] {
+  color: #F8FAFC !important;
+}
+
+/* Secondary muted texts */
+html[data-theme="dark"] [style*="color: #64748B"],
+html[data-theme="dark"] [style*="color:#64748B"],
+html[data-theme="dark"] [style*="color: #6E6D7A"],
+html[data-theme="dark"] [style*="color:#6E6D7A"],
+html[data-theme="dark"] [style*="color: #6B7280"],
+html[data-theme="dark"] [style*="color:#6B7280"],
+html[data-theme="dark"] [style*="color: #7B7890"],
+html[data-theme="dark"] [style*="color:#7B7890"],
+body.dark-mode [style*="color: #64748B"],
+body.dark-mode [style*="color:#64748B"],
+body.dark-mode [style*="color: #6E6D7A"],
+body.dark-mode [style*="color:#6E6D7A"],
+body.dark-mode [style*="color: #6B7280"],
+body.dark-mode [style*="color:#6B7280"],
+body.dark-mode [style*="color: #7B7890"],
+body.dark-mode [style*="color:#7B7890"] {
+  color: #94A3B8 !important;
+}
+
+/* Vivid Metric Highlights in Dark Mode */
+html[data-theme="dark"] [style*="color: #059669"],
+html[data-theme="dark"] [style*="color:#059669"],
+html[data-theme="dark"] [style*="color: #027A48"],
+html[data-theme="dark"] [style*="color:#027A48"],
+body.dark-mode [style*="color: #059669"],
+body.dark-mode [style*="color:#059669"],
+body.dark-mode [style*="color: #027A48"],
+body.dark-mode [style*="color:#027A48"] {
+  color: #34D399 !important;
+}
+
+html[data-theme="dark"] [style*="color: #5925DC"],
+html[data-theme="dark"] [style*="color:#5925DC"],
+body.dark-mode [style*="color: #5925DC"],
+body.dark-mode [style*="color:#5925DC"] {
+  color: #A78BFA !important;
+}
+
+html[data-theme="dark"] [style*="color: #175CD3"],
+html[data-theme="dark"] [style*="color:#175CD3"],
+html[data-theme="dark"] [style*="color: #2563EB"],
+html[data-theme="dark"] [style*="color:#2563EB"],
+body.dark-mode [style*="color: #175CD3"],
+body.dark-mode [style*="color:#175CD3"],
+body.dark-mode [style*="color: #2563EB"],
+body.dark-mode [style*="color:#2563EB"] {
+  color: #60A5FA !important;
+}
+
+html[data-theme="dark"] [style*="color: #B42318"],
+html[data-theme="dark"] [style*="color:#B42318"],
+body.dark-mode [style*="color: #B42318"],
+body.dark-mode [style*="color:#B42318"] {
+  color: #F87171 !important;
+}
+
+html[data-theme="dark"] [style*="color: #B54708"],
+html[data-theme="dark"] [style*="color:#B54708"],
+body.dark-mode [style*="color: #B54708"],
+body.dark-mode [style*="color:#B54708"] {
+  color: #FBBF24 !important;
+}
+
+/* SVG Stroke Interceptors in Dark Mode */
+html[data-theme="dark"] svg[stroke="#2563EB"],
+html[data-theme="dark"] [style*="stroke: #2563EB"],
+html[data-theme="dark"] [style*="stroke:#2563EB"],
+body.dark-mode svg[stroke="#2563EB"],
+body.dark-mode [style*="stroke: #2563EB"],
+body.dark-mode [style*="stroke:#2563EB"] {
+  stroke: #60A5FA !important;
+}
+html[data-theme="dark"] svg[stroke="#059669"],
+html[data-theme="dark"] [style*="stroke: #059669"],
+html[data-theme="dark"] [style*="stroke:#059669"],
+html[data-theme="dark"] svg[stroke="#027A48"],
+html[data-theme="dark"] [style*="stroke: #027A48"],
+html[data-theme="dark"] [style*="stroke:#027A48"],
+body.dark-mode svg[stroke="#059669"],
+body.dark-mode [style*="stroke: #059669"],
+body.dark-mode [style*="stroke:#059669"],
+body.dark-mode svg[stroke="#027A48"],
+body.dark-mode [style*="stroke: #027A48"],
+body.dark-mode [style*="stroke:#027A48"] {
+  stroke: #34D399 !important;
+}
+html[data-theme="dark"] svg[stroke="#5925DC"],
+html[data-theme="dark"] [style*="stroke: #5925DC"],
+html[data-theme="dark"] [style*="stroke:#5925DC"],
+body.dark-mode svg[stroke="#5925DC"],
+body.dark-mode [style*="stroke: #5925DC"],
+body.dark-mode [style*="stroke:#5925DC"] {
+  stroke: #A78BFA !important;
+}
+html[data-theme="dark"] svg[stroke="#175CD3"],
+html[data-theme="dark"] [style*="stroke: #175CD3"],
+html[data-theme="dark"] [style*="stroke:#175CD3"],
+body.dark-mode svg[stroke="#175CD3"],
+body.dark-mode [style*="stroke: #175CD3"],
+body.dark-mode [style*="stroke:#175CD3"] {
+  stroke: #60A5FA !important;
+}
+html[data-theme="dark"] svg[stroke="#B42318"],
+html[data-theme="dark"] [style*="stroke: #B42318"],
+html[data-theme="dark"] [style*="stroke:#B42318"],
+body.dark-mode svg[stroke="#B42318"],
+body.dark-mode [style*="stroke: #B42318"],
+body.dark-mode [style*="stroke:#B42318"] {
+  stroke: #F87171 !important;
+}
+html[data-theme="dark"] svg[stroke="#9CA3AF"],
+html[data-theme="dark"] [style*="stroke: #9CA3AF"],
+html[data-theme="dark"] [style*="stroke:#9CA3AF"],
+body.dark-mode svg[stroke="#9CA3AF"],
+body.dark-mode [style*="stroke: #9CA3AF"],
+body.dark-mode [style*="stroke:#9CA3AF"] {
+  stroke: #94A3B8 !important;
+}
+
+/* ==========================================================================
+   GLOBAL DARK MODE INTERCEPTOR: PASTEL BADGES, PILLS & CHIPS (Translucent Glass)
+   ========================================================================== */
+/* Green Badges/Pills (Aktif, Lunas, Verified, Karyawan) */
+html[data-theme="dark"] [style*="background: #ECFDF3"],
+html[data-theme="dark"] [style*="background:#ECFDF3"],
+html[data-theme="dark"] [style*="background: #ECFDF5"],
+html[data-theme="dark"] [style*="background:#ECFDF5"],
+body.dark-mode [style*="background: #ECFDF3"],
+body.dark-mode [style*="background:#ECFDF3"],
+body.dark-mode [style*="background: #ECFDF5"],
+body.dark-mode [style*="background:#ECFDF5"],
+html[data-theme="dark"] .user-badge-karyawan,
+html[data-theme="dark"] .role-badge-karyawan,
+html[data-theme="dark"] .badge-status-active,
+body.dark-mode .user-badge-karyawan,
+body.dark-mode .role-badge-karyawan,
+body.dark-mode .badge-status-active {
+  background: rgba(16, 185, 129, 0.16) !important;
+  background-color: rgba(16, 185, 129, 0.16) !important;
+  color: #34D399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+}
+
+/* Blue / Cyan Badges/Pills (Admin, Client Portal, Transparansi, In Progress) */
+html[data-theme="dark"] [style*="background: #EFF8FF"],
+html[data-theme="dark"] [style*="background:#EFF8FF"],
+html[data-theme="dark"] [style*="background: #F0F9FF"],
+html[data-theme="dark"] [style*="background:#F0F9FF"],
+body.dark-mode [style*="background: #EFF8FF"],
+body.dark-mode [style*="background:#EFF8FF"],
+body.dark-mode [style*="background: #F0F9FF"],
+body.dark-mode [style*="background:#F0F9FF"],
+html[data-theme="dark"] .user-badge-client,
+html[data-theme="dark"] .role-badge-admin,
+html[data-theme="dark"] .badge-campaign-transparency,
+body.dark-mode .user-badge-client,
+body.dark-mode .role-badge-admin,
+body.dark-mode .badge-campaign-transparency {
+  background: rgba(14, 165, 233, 0.16) !important;
+  background-color: rgba(14, 165, 233, 0.16) !important;
+  color: #38BDF8 !important;
+  border: 1px solid rgba(14, 165, 233, 0.35) !important;
+}
+
+/* Purple / Indigo Badges/Pills (Freelancer, Meta Ads, Platform) */
+html[data-theme="dark"] [style*="background: #F4F3FF"],
+html[data-theme="dark"] [style*="background:#F4F3FF"],
+html[data-theme="dark"] [style*="background: #F5F3FF"],
+html[data-theme="dark"] [style*="background:#F5F3FF"],
+html[data-theme="dark"] [style*="background: #EEF2FF"],
+html[data-theme="dark"] [style*="background:#EEF2FF"],
+body.dark-mode [style*="background: #F4F3FF"],
+body.dark-mode [style*="background:#F4F3FF"],
+body.dark-mode [style*="background: #F5F3FF"],
+body.dark-mode [style*="background:#F5F3FF"],
+body.dark-mode [style*="background: #EEF2FF"],
+body.dark-mode [style*="background:#EEF2FF"],
+html[data-theme="dark"] .user-badge-freelancer,
+html[data-theme="dark"] .role-badge-freelancer,
+body.dark-mode .user-badge-freelancer,
+body.dark-mode .role-badge-freelancer {
+  background: rgba(139, 92, 246, 0.16) !important;
+  background-color: rgba(139, 92, 246, 0.16) !important;
+  color: #C084FC !important;
+  border: 1px solid rgba(139, 92, 246, 0.35) !important;
+}
+
+/* Red / Coral Badges/Pills (Owner, Danger, Overdue, Saldo Habis) */
+html[data-theme="dark"] [style*="background: #FEF3F2"],
+html[data-theme="dark"] [style*="background:#FEF3F2"],
+html[data-theme="dark"] [style*="background: #FEF2F2"],
+html[data-theme="dark"] [style*="background:#FEF2F2"],
+body.dark-mode [style*="background: #FEF3F2"],
+body.dark-mode [style*="background:#FEF3F2"],
+body.dark-mode [style*="background: #FEF2F2"],
+body.dark-mode [style*="background:#FEF2F2"],
+html[data-theme="dark"] .role-badge-owner,
+body.dark-mode .role-badge-owner {
+  background: rgba(239, 68, 68, 0.16) !important;
+  background-color: rgba(239, 68, 68, 0.16) !important;
+  color: #F87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+}
+
+/* Amber / Orange Badges/Pills/Alerts (Dalam Proses, Pending, Request) */
+html[data-theme="dark"] [style*="background: #FFFBEB"],
+html[data-theme="dark"] [style*="background:#FFFBEB"],
+html[data-theme="dark"] [style*="background: #FFF9F2"],
+html[data-theme="dark"] [style*="background:#FFF9F2"],
+body.dark-mode [style*="background: #FFFBEB"],
+body.dark-mode [style*="background:#FFFBEB"],
+body.dark-mode [style*="background: #FFF9F2"],
+body.dark-mode [style*="background:#FFF9F2"],
+html[data-theme="dark"] .ads-request-banner,
+body.dark-mode .ads-request-banner {
+  background: rgba(245, 158, 11, 0.14) !important;
+  background-color: rgba(245, 158, 11, 0.14) !important;
+  color: #FBBF24 !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.35) !important;
+}
+
+/* Neutral Gray / Slate Badges/Pills (Admin & Owner Count, Client Role) */
+html[data-theme="dark"] [style*="background: #F8F9FC"],
+html[data-theme="dark"] [style*="background:#F8F9FC"],
+html[data-theme="dark"] [style*="background: #F2F4F7"],
+html[data-theme="dark"] [style*="background:#F2F4F7"],
+body.dark-mode [style*="background: #F8F9FC"],
+body.dark-mode [style*="background:#F8F9FC"],
+body.dark-mode [style*="background: #F2F4F7"],
+body.dark-mode [style*="background:#F2F4F7"],
+html[data-theme="dark"] .user-badge-admin,
+html[data-theme="dark"] .role-badge-client,
+body.dark-mode .user-badge-admin,
+body.dark-mode .role-badge-client {
+  background: #161D2F !important;
+  background-color: #161D2F !important;
+  color: #CBD5E1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+html[data-theme="dark"] .card:hover,
+html[data-theme="dark"] .glass-panel:hover,
+html[data-theme="dark"] .kpi-card:hover,
+html[data-theme="dark"] .team-card:hover,
+html[data-theme="dark"] .client-card:hover,
+html[data-theme="dark"] .kanban-card:hover,
+html[data-theme="dark"] .task-item-card:hover,
+body.dark-mode .card:hover,
+body.dark-mode .glass-panel:hover,
+body.dark-mode .kpi-card:hover,
+body.dark-mode .team-card:hover,
+body.dark-mode .client-card:hover,
+body.dark-mode .kanban-card:hover,
+body.dark-mode .task-item-card:hover {
+  border-color: rgba(56, 189, 248, 0.42) !important;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.8), 0 0 16px rgba(56, 189, 248, 0.16) !important;
+}
+
+html[data-theme="dark"] .panel-header,
+body.dark-mode .panel-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Secondary Sub-Containers (Depth & Layering ala NebulaPay) */
+html[data-theme="dark"] .workspace-tabs-bar,
+html[data-theme="dark"] .bento-segmented-control,
+html[data-theme="dark"] .bento-tabs-group,
+html[data-theme="dark"] .segmented-control-container,
+html[data-theme="dark"] .task-status-grid,
+html[data-theme="dark"] .task-services-track,
+html[data-theme="dark"] .quick-subtab-bar > div,
+html[data-theme="dark"] .checkbox-clients-grid,
+body.dark-mode .workspace-tabs-bar,
+body.dark-mode .bento-segmented-control,
+body.dark-mode .bento-tabs-group,
+body.dark-mode .segmented-control-container,
+body.dark-mode .task-status-grid,
+body.dark-mode .task-services-track,
+body.dark-mode .quick-subtab-bar > div,
+body.dark-mode .checkbox-clients-grid {
+  background: #161D2F !important;
+  background-color: #161D2F !important;
+  color: #94A3B8 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Sub-Pills & Tabs Inside Secondary Containers */
+html[data-theme="dark"] .bento-tab-btn,
+html[data-theme="dark"] .segmented-tab-btn,
+html[data-theme="dark"] .quick-subtab-btn,
+body.dark-mode .bento-tab-btn,
+body.dark-mode .segmented-tab-btn,
+body.dark-mode .quick-subtab-btn {
+  color: #94A3B8 !important;
+}
+html[data-theme="dark"] .bento-tab-btn:hover:not(.active),
+html[data-theme="dark"] .segmented-tab-btn:hover:not(.active),
+html[data-theme="dark"] .quick-subtab-btn:hover:not(.active),
+body.dark-mode .bento-tab-btn:hover:not(.active),
+body.dark-mode .segmented-tab-btn:hover:not(.active),
+body.dark-mode .quick-subtab-btn:hover:not(.active) {
+  color: #F8FAFC !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+html[data-theme="dark"] .bento-tab-btn.active,
+html[data-theme="dark"] .segmented-tab-btn.active,
+html[data-theme="dark"] .quick-subtab-btn.active,
+body.dark-mode .bento-tab-btn.active,
+body.dark-mode .segmented-tab-btn.active,
+body.dark-mode .quick-subtab-btn.active {
+  background: #6366F1 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35) !important;
+}
+
+/* Nebula Aurora Accent Card (Referencing NebulaPay Card) */
+.nebula-aurora-card,
+html[data-theme="dark"] .hero-banner-card,
+html[data-theme="dark"] .featured-card {
+  background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 45%, #4338CA 78%, #06B6D4 100%) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  box-shadow: 0 14px 36px rgba(6, 182, 212, 0.22), 0 0 24px rgba(67, 56, 202, 0.32) !important;
+  color: #FFFFFF !important;
+}
+
+/* 6. Tables & Data Grids */
+html[data-theme="dark"] table,
+html[data-theme="dark"] .table,
+html[data-theme="dark"] .table-custom,
+html[data-theme="dark"] .untitled-table {
+  background: #12151F !important;
+  color: #FFFFFF !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme="dark"] thead th,
+html[data-theme="dark"] .table th,
+html[data-theme="dark"] .th-actions {
+  background: #0E121D !important;
+  color: #94A3B8 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-top: none !important;
+}
+
+html[data-theme="dark"] tbody tr,
+html[data-theme="dark"] .table tbody tr {
+  background: #12151F !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  color: #FFFFFF !important;
+  transition: background 0.15s ease;
+}
+
+html[data-theme="dark"] tbody td,
+html[data-theme="dark"] .table td,
+html[data-theme="dark"] .td-actions {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] tbody tr:hover,
+html[data-theme="dark"] .table tbody tr:hover {
+  background: #181C29 !important;
+}
+
+/* 7. Forms, Inputs & Selects */
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .form-select {
+  background: #0E121D !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #FFFFFF !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+}
+
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: #64748B !important;
+}
+
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] select:focus,
+html[data-theme="dark"] textarea:focus,
+html[data-theme="dark"] .form-control:focus,
+html[data-theme="dark"] .form-select:focus {
+  outline: none !important;
+  border-color: #38BDF8 !important;
+  background: #12151F !important;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.22), 0 0 10px rgba(56, 189, 248, 0.15) !important;
+}
+
+html[data-theme="dark"] label,
+html[data-theme="dark"] .form-label {
+  color: #94A3B8 !important;
+}
+
+html[data-theme="dark"] .currency-addon {
+  color: #64748B !important;
+}
+
+html[data-theme="dark"] .input-group-currency input.form-control,
+html[data-theme="dark"] .input-group-currency input.rupiah-input {
+  color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] .dropdown-menu {
+  background: #161A26 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8) !important;
+}
+html[data-theme="dark"] .dropdown-item {
+  color: #94A3B8 !important;
+}
+html[data-theme="dark"] .dropdown-item:hover {
+  background: #1E2435 !important;
+  color: #FFFFFF !important;
+}
+
+/* 8. Modals & Dialog Windows */
+html[data-theme="dark"] .modal,
+html[data-theme="dark"] .modal-backdrop {
+  background: rgba(3, 5, 8, 0.85) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+html[data-theme="dark"] .modal-dialog,
+html[data-theme="dark"] .modal-confirm-dialog {
+  background: #12151F !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.88), 0 0 1px 1px rgba(56, 189, 248, 0.25) !important;
+  color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] .modal-header {
+  background: #12151F !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme="dark"] .modal-close {
+  background: #181C29 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #94A3B8 !important;
+}
+html[data-theme="dark"] .modal-close:hover {
+  color: #FFFFFF !important;
+  background: #1E2435 !important;
+  border-color: rgba(56, 189, 248, 0.4) !important;
+}
+
+html[data-theme="dark"] .modal-body {
+  background: #12151F !important;
+  color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] .modal-footer {
+  background: #0E121D !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Modal Inner Cards & Dynamic Highlight Boxes Dark Mode */
+html[data-theme="dark"] #group-client-select,
+body.dark-mode #group-client-select,
+html[data-theme="dark"] #box-new-client-fields,
+body.dark-mode #box-new-client-fields,
+html[data-theme="dark"] #inline-client-fields,
+body.dark-mode #inline-client-fields,
+html[data-theme="dark"] #create-project-summary-box,
+body.dark-mode #create-project-summary-box,
+html[data-theme="dark"] #edit-project-summary-box,
+body.dark-mode #edit-project-summary-box,
+html[data-theme="dark"] #transfer-proof-media-container,
+body.dark-mode #transfer-proof-media-container {
+  background: #181E2E !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #F8FAFC !important;
+}
+
+html[data-theme="dark"] #group-client-select .form-label,
+body.dark-mode #group-client-select .form-label,
+html[data-theme="dark"] #box-new-client-fields div,
+body.dark-mode #box-new-client-fields div,
+html[data-theme="dark"] #inline-client-fields div,
+body.dark-mode #inline-client-fields div {
+  color: #F8FAFC !important;
+}
+
+html[data-theme="dark"] #group-client-select small,
+body.dark-mode #group-client-select small {
+  color: #94A3B8 !important;
+}
+
+/* Intercept ANY white/light box inside dark modals */
+html[data-theme="dark"] .modal-body div[style*="background: #F"],
+html[data-theme="dark"] .modal-body div[style*="background:#F"],
+html[data-theme="dark"] .modal-body div[style*="background: #f"],
+html[data-theme="dark"] .modal-body div[style*="background:#f"],
+html[data-theme="dark"] .modal-body div[style*="background: #FFF"],
+html[data-theme="dark"] .modal-body div[style*="background:#FFF"],
+html[data-theme="dark"] .modal-body div[style*="background: #fff"],
+html[data-theme="dark"] .modal-body div[style*="background:#fff"],
+body.dark-mode .modal-body div[style*="background: #F"],
+body.dark-mode .modal-body div[style*="background:#F"],
+body.dark-mode .modal-body div[style*="background: #f"],
+body.dark-mode .modal-body div[style*="background:#f"],
+body.dark-mode .modal-body div[style*="background: #FFF"],
+body.dark-mode .modal-body div[style*="background:#FFF"],
+body.dark-mode .modal-body div[style*="background: #fff"],
+body.dark-mode .modal-body div[style*="background:#fff"] {
+  background: #181E2E !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #F8FAFC !important;
+}
+
+html[data-theme="dark"] .modal-body label[style*="color: #101828"],
+html[data-theme="dark"] .modal-body div[style*="color: #101828"],
+body.dark-mode .modal-body label[style*="color: #101828"],
+body.dark-mode .modal-body div[style*="color: #101828"],
+html[data-theme="dark"] .modal-body label[style*="color: #1E293B"],
+html[data-theme="dark"] .modal-body div[style*="color: #1E293B"],
+body.dark-mode .modal-body label[style*="color: #1E293B"],
+body.dark-mode .modal-body div[style*="color: #1E293B"],
+html[data-theme="dark"] .modal-body div[style*="color: #344054"],
+body.dark-mode .modal-body div[style*="color: #344054"] {
+  color: #F8FAFC !important;
+}
+
+/* 9. Buttons & Micro-Actions */
+html[data-theme="dark"] .btn-secondary,
+html[data-theme="dark"] .btn-action-view,
+html[data-theme="dark"] .btn-action-outline,
+html[data-theme="dark"] .btn-cancel-modal {
+  background: #161A26 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #94A3B8 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+html[data-theme="dark"] .btn-secondary:hover,
+html[data-theme="dark"] .btn-action-view:hover,
+html[data-theme="dark"] .btn-action-outline:hover,
+html[data-theme="dark"] .btn-cancel-modal:hover {
+  background: #1E2435 !important;
+  color: #FFFFFF !important;
+  border-color: rgba(56, 189, 248, 0.4) !important;
+}
+
+html[data-theme="dark"] .btn-primary {
+  background: #6366F1 !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4) !important;
+}
+html[data-theme="dark"] .btn-primary:hover {
+  background: #4F46E5 !important;
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.5) !important;
+}
+
+html[data-theme="dark"] .btn-action-edit {
+  background: rgba(99, 102, 241, 0.16) !important;
+  border: 1px solid rgba(99, 102, 241, 0.35) !important;
+  color: #A5B4FC !important;
+}
+html[data-theme="dark"] .btn-action-edit:hover {
+  background: rgba(99, 102, 241, 0.28) !important;
+  color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] .btn-action-delete,
+html[data-theme="dark"] .btn-delete-ghost {
+  background: rgba(248, 113, 113, 0.14) !important;
+  border: 1px solid rgba(248, 113, 113, 0.3) !important;
+  color: #F87171 !important;
+}
+html[data-theme="dark"] .btn-action-delete:hover,
+html[data-theme="dark"] .btn-delete-ghost:hover {
+  background: rgba(248, 113, 113, 0.26) !important;
+  color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] .btn-action-pay,
+html[data-theme="dark"] .btn-action-success {
+  background: rgba(52, 211, 153, 0.14) !important;
+  border: 1px solid rgba(52, 211, 153, 0.3) !important;
+  color: #34D399 !important;
+}
+html[data-theme="dark"] .btn-action-pay:hover,
+html[data-theme="dark"] .btn-action-success:hover {
+  background: rgba(52, 211, 153, 0.26) !important;
+  color: #FFFFFF !important;
+}
+
+/* 10. Badges & Status Indicators (Emerald Mint, Amber, Coral, Cyan) */
+html[data-theme="dark"] .badge-success,
+html[data-theme="dark"] .inv-status-paid,
+html[data-theme="dark"] .status-active,
+html[data-theme="dark"] .status-paid {
+  background: rgba(52, 211, 153, 0.14) !important;
+  color: #34D399 !important;
+  border: 1px solid rgba(52, 211, 153, 0.3) !important;
+}
+
+html[data-theme="dark"] .badge-warning,
+html[data-theme="dark"] .inv-status-draft,
+html[data-theme="dark"] .status-pending {
+  background: rgba(251, 191, 36, 0.14) !important;
+  color: #FBBF24 !important;
+  border: 1px solid rgba(251, 191, 36, 0.3) !important;
+}
+
+html[data-theme="dark"] .badge-danger,
+html[data-theme="dark"] .inv-status-overdue,
+html[data-theme="dark"] .status-danger,
+html[data-theme="dark"] .status-overdue {
+  background: rgba(248, 113, 113, 0.14) !important;
+  color: #F87171 !important;
+  border: 1px solid rgba(248, 113, 113, 0.3) !important;
+}
+
+html[data-theme="dark"] .badge-info,
+html[data-theme="dark"] .status-info {
+  background: rgba(56, 189, 248, 0.14) !important;
+  color: #38BDF8 !important;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+
+/* 11. Segmented Control Bars & Filter Tabs */
+html[data-theme="dark"] .owner-period-filter-segmented,
+html[data-theme="dark"] .quick-subtab-bar > div,
+html[data-theme="dark"] .login-tabs-wrapper,
+html[data-theme="dark"] .tab-navigation-bar,
+html[data-theme="dark"] .portal-nav-tabs,
+html[data-theme="dark"] .workspace-tab-bar,
+html[data-theme="dark"] .worker-tabs-bar,
+body.dark-mode .worker-tabs-bar {
+  background: #0E121D !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme="dark"] .filter-btn,
+html[data-theme="dark"] .tab-btn,
+html[data-theme="dark"] .login-tab-btn,
+html[data-theme="dark"] .quick-subtab-btn,
+html[data-theme="dark"] .workspace-tab-btn,
+html[data-theme="dark"] .portal-tab-btn,
+html[data-theme="dark"] .report-tab-pill,
+body.dark-mode .report-tab-pill {
+  color: #94A3B8 !important;
+  background: #121726 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme="dark"] .report-tab-pill:hover:not(.active),
+body.dark-mode .report-tab-pill:hover:not(.active) {
+  background: #182033 !important;
+  color: #FFFFFF !important;
+  border-color: rgba(99, 102, 241, 0.4) !important;
+}
+
+html[data-theme="dark"] .filter-btn.active,
+html[data-theme="dark"] .tab-btn.active,
+html[data-theme="dark"] .login-tab-btn.active,
+html[data-theme="dark"] .quick-subtab-btn.active,
+html[data-theme="dark"] .workspace-tab-btn.active,
+html[data-theme="dark"] .portal-tab-btn.active,
+html[data-theme="dark"] .report-tab-pill.active,
+body.dark-mode .report-tab-pill.active {
+  background: #5B3DF5 !important;
+  color: #FFFFFF !important;
+  border-color: #5B3DF5 !important;
+  box-shadow: 0 4px 14px rgba(91, 61, 245, 0.35) !important;
+}
+
+/* 12. Mobile Bottom Navigation & Sheets */
+html[data-theme="dark"] .mobile-bottom-nav {
+  background: rgba(16, 19, 28, 0.96) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6) !important;
+}
+
+html[data-theme="dark"] .mob-nav-item {
+  color: #94A3B8 !important;
+}
+html[data-theme="dark"] .mob-nav-item svg {
+  stroke: #94A3B8 !important;
+}
+html[data-theme="dark"] .mob-nav-item.active {
+  color: #38BDF8 !important;
+}
+html[data-theme="dark"] .mob-nav-item.active svg {
+  stroke: #38BDF8 !important;
+}
+
+html[data-theme="dark"] .owner-bottom-sheet,
+html[data-theme="dark"] .bottom-sheet {
+  background: #12151F !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 -15px 40px rgba(0, 0, 0, 0.85) !important;
+  color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] .owner-menu-grid-card {
+  background: #181C29 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #FFFFFF !important;
+}
+html[data-theme="dark"] .owner-menu-grid-card:hover {
+  border-color: rgba(56, 189, 248, 0.42) !important;
+  transform: translateY(-2px) !important;
+}
+html[data-theme="dark"] .owner-menu-grid-card span {
+  color: #FFFFFF !important;
+}
+
+/* 13. FullCalendar (Content Calendar & Planner) */
+html[data-theme="dark"] .fc {
+  background: transparent !important;
+  color: #FFFFFF !important;
+}
+html[data-theme="dark"] .fc-theme-standard th {
+  background: #0E121D !important;
+  color: #94A3B8 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+html[data-theme="dark"] .fc-theme-standard td {
+  border-color: rgba(255, 255, 255, 0.05) !important;
+}
+html[data-theme="dark"] .fc .fc-daygrid-day-number {
+  color: #94A3B8 !important;
+}
+html[data-theme="dark"] .fc .fc-day-today {
+  background: rgba(99, 102, 241, 0.12) !important;
+}
+html[data-theme="dark"] .fc .fc-button {
+  background: #181C29 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #FFFFFF !important;
+}
+html[data-theme="dark"] .fc .fc-button-primary:not(:disabled).fc-button-active,
+html[data-theme="dark"] .fc .fc-button-primary:not(:disabled):active {
+  background: #6366F1 !important;
+  border-color: #6366F1 !important;
+}
+html[data-theme="dark"] .fc .fc-toolbar-title {
+  color: #FFFFFF !important;
+}
+html[data-theme="dark"] .fc-event {
+  background: linear-gradient(135deg, #1E1B4B 0%, #4338CA 100%) !important;
+  border: 1px solid rgba(56, 189, 248, 0.35) !important;
+  color: #FFFFFF !important;
+}
+
+/* 14. Chat & Room Modal */
+html[data-theme="dark"] #room-chat-modal .room-chat-container,
+html[data-theme="dark"] .room-chat-dialog {
+  background: #12151F !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+html[data-theme="dark"] .chat-messages-wrap {
+  background: #07090E !important;
+}
+html[data-theme="dark"] .chat-bubble.other {
+  background: #181C29 !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+html[data-theme="dark"] .chat-bubble.mine {
+  background: linear-gradient(135deg, #4338CA 0%, #6366F1 100%) !important;
+  color: #FFFFFF !important;
+}
+
+/* 15. Settings & Profile Bank Card */
+html[data-theme="dark"] .settings-grid .form-group div[style*="background: #F9FAFB"] {
+  background: #0E121D !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+html[data-theme="dark"] .settings-grid .form-group div[style*="background: #F9FAFB"] div {
+  color: #FFFFFF !important;
+}
+
+/* 16. Client Portal Details */
+html[data-theme="dark"] .portal-preview-notice {
+  background: #12151F !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
+  color: #FFFFFF !important;
+}
+html[data-theme="dark"] .preview-mode-label {
+  color: #94A3B8 !important;
+}
+html[data-theme="dark"] .deliverable-item {
+  background: #181C29 !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  color: #FFFFFF !important;
+}
+
+/* 17. Document Viewers (Invoice, Salary Slip, Voucher) */
+html[data-theme="dark"] .invoice-wrapper,
+html[data-theme="dark"] .invoice-actions-bar {
+  background: #07090E !important;
+  color: #FFFFFF !important;
+}
+html[data-theme="dark"] .invoice-actions-bar .btn-action-back {
+  background: #12151F !important;
+  color: #94A3B8 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+html[data-theme="dark"] .invoice-actions-bar .btn-action-back:hover {
+  background: #181C29 !important;
+  color: #FFFFFF !important;
+  border-color: rgba(56, 189, 248, 0.42) !important;
+}
+
+/* ==========================================================================
+   NEBULAPAY THEME TOGGLE BUTTON COMPONENT
+   ========================================================================== */
+.theme-toggle-compact {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F5F7FA 100%);
+  border: 1px solid #E2E8F0;
+  color: #4B5563;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 2px 4px rgba(16, 24, 40, 0.06), inset 0 1px 1px #FFFFFF;
+  flex-shrink: 0;
+  position: relative;
+  outline: none;
+  box-sizing: border-box;
+}
+.theme-toggle-compact:hover {
+  color: #111827;
+  border-color: #38BDF8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(56, 189, 248, 0.2), inset 0 1px 1px #FFFFFF;
+}
+.theme-toggle-compact:active {
+  transform: translateY(0);
+}
+.theme-toggle-compact .icon-sun {
+  display: none;
+}
+.theme-toggle-compact .icon-moon {
+  display: block;
+}
+html[data-theme="dark"] .theme-toggle-compact {
+  background: linear-gradient(180deg, #181C29 0%, #12151F 100%) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #94A3B8 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.08) !important;
+}
+html[data-theme="dark"] .theme-toggle-compact:hover {
+  background: linear-gradient(180deg, #1E2333 0%, #151824 100%) !important;
+  color: #FFFFFF !important;
+  border-color: rgba(56, 189, 248, 0.42) !important;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.12) !important;
+}
+html[data-theme="dark"] .theme-toggle-compact .icon-sun {
+  display: block !important;
+  color: #FBBF24 !important;
+}
+html[data-theme="dark"] .theme-toggle-compact .icon-moon {
+  display: none !important;
+}
+
+/* Sidebar Theme Toggle Switch */
+.sidebar-theme-toggle-wrap {
+  padding: 4px 0;
+  margin: 4px 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+.sidebar-theme-toggle {
+  width: 100%;
+  display: block;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  outline: none;
+  box-shadow: none;
+}
+.sidebar-theme-toggle:hover {
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* ==========================================================================
+   NEUMORPHIC 3D TACTILE THEME SWITCH (Full Sidebar Width Stadium Track)
+   ========================================================================== */
+.theme-switch-pill {
+  width: 100% !important;
+  height: 40px !important;
+  border-radius: 9999px !important;
+  background: #E2E5EB !important;
+  position: relative !important;
+  box-sizing: border-box !important;
+  box-shadow: 
+    inset 0 3px 6px rgba(0, 0, 0, 0.20),
+    inset 0 1px 2px rgba(0, 0, 0, 0.15),
+    inset 0 -1px 2px rgba(255, 255, 255, 0.9),
+    0 1px 1px rgba(255, 255, 255, 0.6) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  display: block !important;
+  cursor: pointer !important;
+  transition: background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
+  overflow: hidden !important;
+}
+
+html[data-theme="dark"] .theme-switch-pill,
+body.dark-mode .theme-switch-pill {
+  background: #252830 !important;
+  box-shadow: 
+    inset 0 4px 7px rgba(0, 0, 0, 0.75),
+    inset 0 1.5px 3px rgba(0, 0, 0, 0.6),
+    inset 0 -1px 1px rgba(255, 255, 255, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.35) !important;
+  border: 1px solid rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Ambient track destination indicators */
+.track-icon-ambient {
+  position: absolute !important;
+  top: 11px !important;
+  width: 16px !important;
+  height: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 1 !important;
+  pointer-events: none !important;
+  opacity: 0.65;
+  transition: opacity 0.25s ease;
+}
+.track-icon-ambient-left {
+  left: 12px !important;
+  color: #F59E0B !important;
+}
+.track-icon-ambient-right {
+  right: 12px !important;
+  color: #94A3B8 !important;
+}
+html[data-theme="dark"] .track-icon-ambient-left {
+  opacity: 0.75 !important;
+  color: #FBBF24 !important;
+}
+html[data-theme="dark"] .track-icon-ambient-right {
+  opacity: 0.35 !important;
+}
+
+/* 3D Tactile Circular Knob */
+.theme-switch-knob {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  position: absolute !important;
+  top: 3px !important;
+  left: 4px !important;
+  transform: none !important;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F5F7FA 70%, #E3E7EE 100%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  box-shadow: 
+    0 3px 6px rgba(0, 0, 0, 0.22),
+    0 1px 2px rgba(0, 0, 0, 0.15),
+    inset 0 1.5px 1.5px #FFFFFF,
+    inset 0 -1.5px 1.5px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  transition: left 0.34s cubic-bezier(0.34, 1.25, 0.64, 1), background 0.25s ease, box-shadow 0.25s ease !important;
+  user-select: none !important;
+  pointer-events: none !important;
+  z-index: 2 !important;
+}
+
+/* When dark mode active: translate knob to the right edge */
+html[data-theme="dark"] .theme-switch-knob,
+body.dark-mode .theme-switch-knob {
+  left: calc(100% - 36px) !important;
+  transform: none !important;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F3F4F8 70%, #DFE3EB 100%) !important;
+  box-shadow: 
+    0 3px 8px rgba(0, 0, 0, 0.5),
+    0 1px 3px rgba(0, 0, 0, 0.35),
+    inset 0 1.5px 1.5px #FFFFFF,
+    inset 0 -1.5px 1.5px rgba(0, 0, 0, 0.15) !important;
+  border-color: rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Hover & Active subtle micro-animations */
+.sidebar-theme-toggle:hover .theme-switch-knob {
+  box-shadow: 
+    0 4px 8px rgba(0, 0, 0, 0.28),
+    0 1px 3px rgba(0, 0, 0, 0.18),
+    inset 0 1.5px 1.5px #FFFFFF,
+    inset 0 -1.5px 1.5px rgba(0, 0, 0, 0.12) !important;
+}
+html[data-theme="dark"] .sidebar-theme-toggle:hover .theme-switch-knob {
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.6),
+    0 1px 4px rgba(0, 0, 0, 0.4),
+    inset 0 1.5px 1.5px #FFFFFF,
+    inset 0 -1.5px 1.5px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Icon visibility inside knob */
+.theme-switch-knob .knob-icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Light mode (default): show sun, hide moon */
+.theme-switch-knob .knob-icon-sun {
+  display: block !important;
+  stroke: #EA580C !important;
+}
+.theme-switch-knob .knob-icon-moon {
+  display: none !important;
+}
+
+/* Dark mode: hide sun, show moon with sparkle stars */
+html[data-theme="dark"] .theme-switch-knob .knob-icon-sun,
+body.dark-mode .theme-switch-knob .knob-icon-sun {
+  display: none !important;
+}
+html[data-theme="dark"] .theme-switch-knob .knob-icon-moon,
+body.dark-mode .theme-switch-knob .knob-icon-moon {
+  display: block !important;
+  stroke: #4B5563 !important;
+}
+
+/* ==========================================================================
+   NEBULAPAY DARK MODE CUSTOM SCROLLBARS (Zero Native White Scrollbars)
+   ========================================================================== */
+html[data-theme="dark"] ::-webkit-scrollbar,
+body.dark-mode ::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+  background-color: #0B0E17 !important;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-track,
+body.dark-mode ::-webkit-scrollbar-track {
+  background: #0B0E17 !important;
+  border-radius: 999px !important;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb,
+body.dark-mode ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22) !important;
+  border-radius: 999px !important;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover,
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.38) !important;
+}
+
+html[data-theme="dark"] ::-webkit-scrollbar-corner,
+body.dark-mode ::-webkit-scrollbar-corner {
+  background: #0B0E17 !important;
+}
+
+html[data-theme="dark"] .kala-table-scroll,
+html[data-theme="dark"] .table-responsive,
+body.dark-mode .kala-table-scroll,
+body.dark-mode .table-responsive {
+  background: #12151F !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  scrollbar-color: rgba(255, 255, 255, 0.22) #0B0E17 !important;
+  scrollbar-width: thin !important;
+}
+
+html[data-theme="dark"] .kala-table-scroll::-webkit-scrollbar,
+html[data-theme="dark"] .table-responsive::-webkit-scrollbar,
+body.dark-mode .kala-table-scroll::-webkit-scrollbar,
+body.dark-mode .table-responsive::-webkit-scrollbar {
+  height: 6px !important;
+  width: 6px !important;
+}
+
+html[data-theme="dark"] .kala-table-scroll::-webkit-scrollbar-track,
+html[data-theme="dark"] .table-responsive::-webkit-scrollbar-track,
+body.dark-mode .kala-table-scroll::-webkit-scrollbar-track,
+body.dark-mode .table-responsive::-webkit-scrollbar-track {
+  background: #0B0E17 !important;
+  border-radius: 999px !important;
+}
+
+html[data-theme="dark"] .kala-table-scroll::-webkit-scrollbar-thumb,
+html[data-theme="dark"] .table-responsive::-webkit-scrollbar-thumb,
+body.dark-mode .kala-table-scroll::-webkit-scrollbar-thumb,
+body.dark-mode .table-responsive::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22) !important;
+  border-radius: 999px !important;
+}
+
+html[data-theme="dark"] .kala-table-scroll::-webkit-scrollbar-thumb:hover,
+html[data-theme="dark"] .table-responsive::-webkit-scrollbar-thumb:hover,
+body.dark-mode .kala-table-scroll::-webkit-scrollbar-thumb:hover,
+body.dark-mode .table-responsive::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.38) !important;
+}
+
+/* Date Filter Group (Segmented Pill Capsule) Dark Mode */
+html[data-theme="dark"] .date-filter-group,
+body.dark-mode .date-filter-group {
+  background: #161D2F !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme="dark"] .date-filter-group .filter-btn,
+body.dark-mode .date-filter-group .filter-btn {
+  color: #94A3B8 !important;
+  background: transparent !important;
+}
+
+html[data-theme="dark"] .date-filter-group .filter-btn:hover:not(.active),
+body.dark-mode .date-filter-group .filter-btn:hover:not(.active) {
+  color: #FFFFFF !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+html[data-theme="dark"] .date-filter-group .filter-btn.active,
+body.dark-mode .date-filter-group .filter-btn.active {
+  background: #5B3DF5 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(91, 61, 245, 0.35) !important;
+}
+
+/* Quick Subtab Bar Dark Mode */
+html[data-theme="dark"] .quick-subtab-bar > div,
+body.dark-mode .quick-subtab-bar > div {
+  background: #161D2F !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme="dark"] .quick-subtab-btn,
+body.dark-mode .quick-subtab-btn {
+  color: #94A3B8 !important;
+}
+
+html[data-theme="dark"] .quick-subtab-btn:hover:not(.active),
+body.dark-mode .quick-subtab-btn:hover:not(.active) {
+  color: #F8FAFC !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+html[data-theme="dark"] .quick-subtab-btn.active,
+body.dark-mode .quick-subtab-btn.active {
+  background: #5B3DF5 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(91, 61, 245, 0.35) !important;
+}
+
+/* Untitled UI Cards, Tables, and Toolbars Dark Mode */
+html[data-theme="dark"] .untitled-card,
+body.dark-mode .untitled-card {
+  background: linear-gradient(180deg, rgba(22, 29, 47, 0.85) 0%, rgba(15, 20, 32, 0.95) 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.07) !important;
+  color: #F8FAFC !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+}
+
+html[data-theme="dark"] .table-toolbar-row,
+body.dark-mode .table-toolbar-row {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme="dark"] .table-custom td,
+html[data-theme="dark"] .untitled-table td,
+body.dark-mode .table-custom td,
+body.dark-mode .untitled-table td {
+  background: transparent !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+  color: #F8FAFC !important;
+}
+
+html[data-theme="dark"] .table-custom th,
+html[data-theme="dark"] .untitled-table th,
+body.dark-mode .table-custom th,
+body.dark-mode .untitled-table th {
+  background: #0E121D !important;
+  color: #94A3B8 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+html[data-theme="dark"] .table-custom tr:hover td,
+html[data-theme="dark"] .untitled-table tbody tr:hover td,
+body.dark-mode .table-custom tr:hover td,
+body.dark-mode .untitled-table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Payroll Filter Bar & Dropdown Dark Mode */
+html[data-theme="dark"] .payroll-filter-bar,
+body.dark-mode .payroll-filter-bar {
+  background: #161D2F !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #F8FAFC !important;
+}
+
+html[data-theme="dark"] #payroll-period-menu,
+body.dark-mode #payroll-period-menu {
+  background: #161D2F !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6) !important;
+}
+
+html[data-theme="dark"] #payroll-period-menu a,
+body.dark-mode #payroll-period-menu a {
+  color: #94A3B8 !important;
+}
+
+html[data-theme="dark"] #payroll-period-menu a:hover,
+body.dark-mode #payroll-period-menu a:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #FFFFFF !important;
+}
 
 
+
+/* Ensure Modal Overlays are completely hidden by default */
+.modal-overlay {
+  display: none;
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(18, 24, 48, 0.55) !important;
+  backdrop-filter: blur(4px) !important;
+  -webkit-backdrop-filter: blur(4px) !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 100060 !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 180ms ease, visibility 180ms ease !important;
+}
+.modal-overlay.show,
+.modal-overlay.active {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}

@@ -43,6 +43,7 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
+  <?php render_tab_uid_script(); ?>
   <style>
     /* Tabbed Interface Layout - Bankio Minimal Finance */
     .tab-navigation-bar {
@@ -256,6 +257,72 @@ $defaultPeriod = date('F Y'); // e.g. August 2026
     @media (max-width: 768px) {
       .live-calc-box { grid-template-columns: 1fr; }
       .creative-upload-grid { grid-template-columns: 1fr; }
+    }
+
+    /* NebulaPay Dark Mode overrides for Report Form */
+    html[data-theme="dark"] .form-section-card,
+    body.dark-mode .form-section-card {
+      background: #12151F !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4) !important;
+    }
+    html[data-theme="dark"] .form-section-header,
+    body.dark-mode .form-section-header {
+      border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .section-icon-badge,
+    body.dark-mode .section-icon-badge {
+      background: #181C29 !important;
+      color: #38BDF8 !important;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    html[data-theme="dark"] .tab-navigation-bar,
+    body.dark-mode .tab-navigation-bar {
+      border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .tab-nav-btn,
+    body.dark-mode .tab-nav-btn {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .tab-nav-btn:hover,
+    body.dark-mode .tab-nav-btn:hover {
+      color: #FFFFFF !important;
+      background: rgba(255, 255, 255, 0.04) !important;
+    }
+    html[data-theme="dark"] .tab-nav-btn.active,
+    body.dark-mode .tab-nav-btn.active {
+      color: #38BDF8 !important;
+      border-bottom-color: #38BDF8 !important;
+      background: rgba(56, 189, 248, 0.08) !important;
+    }
+    html[data-theme="dark"] .tab-nav-btn .tab-step-badge,
+    body.dark-mode .tab-nav-btn .tab-step-badge {
+      background: #181C29 !important;
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .tab-nav-btn.active .tab-step-badge,
+    body.dark-mode .tab-nav-btn.active .tab-step-badge {
+      background: #38BDF8 !important;
+      color: #07090E !important;
+    }
+    html[data-theme="dark"] .live-calc-box,
+    body.dark-mode .live-calc-box {
+      background: #181C29 !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .live-calc-value,
+    body.dark-mode .live-calc-value {
+      color: #FFFFFF !important;
+    }
+    html[data-theme="dark"] .creative-upload-card,
+    body.dark-mode .creative-upload-card {
+      background: #181C29 !important;
+      border-color: rgba(255, 255, 255, 0.12) !important;
+    }
+    html[data-theme="dark"] .creative-thumb-preview,
+    body.dark-mode .creative-thumb-preview {
+      background: #12151F !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
     }
   </style>
 </head>

@@ -80,10 +80,10 @@ class Database {
             }
 
             // High Performance: Only run migrations if lock file does not exist (0ms overhead on requests)
-            $lockFile = BASE_PATH . '/database/.schema_v12.lock';
+            $lockFile = BASE_PATH . '/database/.schema_v15.lock';
             if (!file_exists($lockFile)) {
                 self::runMigrations(self::$instance, self::$driver);
-                @file_put_contents($lockFile, "Schema v12 initialized at " . date('Y-m-d H:i:s'));
+                @file_put_contents($lockFile, "Schema v15 initialized at " . date('Y-m-d H:i:s'));
             }
 
             // Ensure core system accounts (Owner & Admin) always exist
@@ -396,6 +396,67 @@ class Database {
                 `key` VARCHAR(50) PRIMARY KEY,
                 `value` TEXT
             );
+
+            CREATE TABLE IF NOT EXISTS settings (
+                `setting_key` VARCHAR(100) PRIMARY KEY,
+                `setting_value` TEXT,
+                `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS agency_settings (
+                `setting_key` VARCHAR(100) PRIMARY KEY,
+                `setting_value` TEXT,
+                `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS brand_ai_audits (
+                id {$pkDef},
+                client_id INT NOT NULL,
+                created_by INT DEFAULT NULL,
+                model_used VARCHAR(100) DEFAULT 'gemini-2.5-pro',
+                questionnaire_json LONGTEXT DEFAULT NULL,
+                ai_analysis_json LONGTEXT DEFAULT NULL,
+                brand_stage VARCHAR(150) DEFAULT NULL,
+                health_score INT DEFAULT 0,
+                recommended_scheme_name VARCHAR(200) DEFAULT NULL,
+                is_published_to_client TINYINT DEFAULT 0,
+                published_at DATETIME DEFAULT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS client_monthly_reports (
+                id {$pkDef},
+                client_id INT NOT NULL,
+                report_month VARCHAR(20) NOT NULL,
+                created_by INT DEFAULT NULL,
+                model_used VARCHAR(100) DEFAULT 'gemini-2.5-pro',
+                raw_metrics_json LONGTEXT DEFAULT NULL,
+                ai_report_json LONGTEXT DEFAULT NULL,
+                status VARCHAR(30) DEFAULT 'draft_owner',
+                published_at DATETIME DEFAULT NULL,
+                is_deleted INT DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS content_calendar (
+                id {$pkDef},
+                client_id INT NOT NULL,
+                project_id INT DEFAULT NULL,
+                scheduled_date DATE NOT NULL,
+                best_time VARCHAR(20) DEFAULT '19:00',
+                platform VARCHAR(50) NOT NULL DEFAULT 'Instagram',
+                content_format VARCHAR(80) NOT NULL DEFAULT 'Instagram Reels',
+                content_pillar VARCHAR(150) DEFAULT NULL,
+                title VARCHAR(255) NOT NULL,
+                hook_text TEXT DEFAULT NULL,
+                visual_brief TEXT DEFAULT NULL,
+                caption_draft TEXT DEFAULT NULL,
+                status VARCHAR(30) NOT NULL DEFAULT 'Scheduled',
+                is_deleted INT DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
         ");
 
         // Helper to check existing columns for migration
@@ -701,6 +762,33 @@ class Database {
             }
         }
 
+        // 3h. Migrate `brand_ai_audits` columns
+        $auditCols = $getTableCols('brand_ai_audits');
+        if (!empty($auditCols) && !in_array('model_used', $auditCols)) {
+            try {
+                $db->exec("ALTER TABLE brand_ai_audits ADD COLUMN model_used VARCHAR(100) DEFAULT 'gemini-2.5-pro'");
+            } catch (Throwable $e) {}
+        }
+
+        // 3i. Migrate `content_planner` columns for AI Content Calendar integration
+        $cpCols = $getTableCols('content_planner');
+        if (!empty($cpCols)) {
+            $neededCpCols = [
+                'content_pillar'  => 'VARCHAR(150) DEFAULT NULL',
+                'hook_text'       => 'TEXT DEFAULT NULL',
+                'visual_brief'    => 'TEXT DEFAULT NULL',
+                'caption_draft'   => 'TEXT DEFAULT NULL',
+                'is_ai_generated' => 'INT DEFAULT 0'
+            ];
+            foreach ($neededCpCols as $cName => $cDef) {
+                if (!in_array($cName, $cpCols)) {
+                    try {
+                        $db->exec("ALTER TABLE content_planner ADD COLUMN {$cName} {$cDef}");
+                    } catch (Throwable $e) {}
+                }
+            }
+        }
+
         // Populate sensible default contract dates for existing active clients, team & tasks
         try {
             $db->exec("
@@ -768,7 +856,10 @@ class Database {
             'idx_ads_logs_client' => ['ads_budget_logs', 'client_id, is_deleted'],
             'idx_ads_topup_client' => ['ads_topup_transactions', 'client_id, is_deleted'],
             'idx_ads_topup_project' => ['ads_topup_transactions', 'project_id, is_deleted'],
-            'idx_ads_topup_user' => ['ads_topup_transactions', 'uploaded_by_user_id']
+            'idx_ads_topup_user' => ['ads_topup_transactions', 'uploaded_by_user_id'],
+            'idx_brand_ai_client' => ['brand_ai_audits', 'client_id, is_published_to_client'],
+            'idx_monthly_rep_client' => ['client_monthly_reports', 'client_id, report_month, status'],
+            'idx_content_cal_client' => ['content_calendar', 'client_id, scheduled_date']
         ];
 
         foreach ($indexes as $idxName => [$tbl, $cols]) {

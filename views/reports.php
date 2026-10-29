@@ -176,7 +176,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-nebula-v7">
   <?php render_tab_uid_script(); ?>
   <style>
     /* ==========================================================================
@@ -314,6 +314,209 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
     .chip-platform-google { background: #FEF08A; color: #854D0E; border: 1px solid #FDE047; }
     .chip-platform-tiktok { background: #F3E8FF; color: #6B21A8; border: 1px solid #E9D5FF; }
 
+    /* ==========================================================================
+       NEBULA DARK MODE SPECIFIC OVERRIDES FOR REPORTS & PERFORMANCE DASHBOARD
+       ========================================================================== */
+    html[data-theme="dark"] .report-tab-pill,
+    body.dark-mode .report-tab-pill {
+      background: #121726 !important;
+      color: #94A3B8 !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: none !important;
+    }
+    html[data-theme="dark"] .report-tab-pill:hover:not(.active),
+    body.dark-mode .report-tab-pill:hover:not(.active) {
+      background: #182033 !important;
+      color: #F8FAFC !important;
+      border-color: rgba(99, 102, 241, 0.4) !important;
+    }
+    html[data-theme="dark"] .report-tab-pill.active,
+    body.dark-mode .report-tab-pill.active {
+      background: #5B3DF5 !important;
+      color: #FFFFFF !important;
+      border-color: #5B3DF5 !important;
+      box-shadow: 0 4px 14px rgba(91, 61, 245, 0.38) !important;
+    }
+    html[data-theme="dark"] .report-tab-pill span,
+    body.dark-mode .report-tab-pill span {
+      background: transparent !important;
+    }
+    html[data-theme="dark"] .report-tab-pill .report-pill-badge,
+    body.dark-mode .report-tab-pill .report-pill-badge {
+      background: rgba(255, 255, 255, 0.12) !important;
+      color: #E2E8F0 !important;
+    }
+    html[data-theme="dark"] .report-tab-pill.active .report-pill-badge,
+    body.dark-mode .report-tab-pill.active .report-pill-badge {
+      background: rgba(255, 255, 255, 0.22) !important;
+      color: #FFFFFF !important;
+    }
+
+    /* KPI Cards Dark Mode Overrides */
+    html[data-theme="dark"] .reports-header-card,
+    body.dark-mode .reports-header-card,
+    html[data-theme="dark"] .report-ads-kpi-card,
+    body.dark-mode .report-ads-kpi-card {
+      background: #12151F !important;
+      background-color: #12151F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+    }
+    html[data-theme="dark"] .reports-header-card h2,
+    body.dark-mode .reports-header-card h2,
+    html[data-theme="dark"] .report-ads-kpi-card div[style*="color: #1A162B"],
+    body.dark-mode .report-ads-kpi-card div[style*="color: #1A162B"] {
+      color: #FFFFFF !important;
+    }
+
+    /* Icon Badges within KPI Cards (No More White Boxes in Dark Mode!) */
+    html[data-theme="dark"] .report-kpi-icon-spend,
+    body.dark-mode .report-kpi-icon-spend {
+      background: rgba(91, 61, 245, 0.2) !important;
+      border: 1px solid rgba(91, 61, 245, 0.35) !important;
+    }
+    html[data-theme="dark"] .report-kpi-icon-spend svg,
+    body.dark-mode .report-kpi-icon-spend svg {
+      stroke: #A5B4FC !important;
+    }
+
+    html[data-theme="dark"] .report-kpi-icon-impressions,
+    body.dark-mode .report-kpi-icon-impressions {
+      background: rgba(59, 130, 246, 0.2) !important;
+      border: 1px solid rgba(59, 130, 246, 0.35) !important;
+    }
+    html[data-theme="dark"] .report-kpi-icon-impressions svg,
+    body.dark-mode .report-kpi-icon-impressions svg {
+      stroke: #60A5FA !important;
+    }
+
+    html[data-theme="dark"] .report-kpi-icon-clicks,
+    body.dark-mode .report-kpi-icon-clicks {
+      background: rgba(16, 185, 129, 0.2) !important;
+      border: 1px solid rgba(16, 185, 129, 0.35) !important;
+    }
+    html[data-theme="dark"] .report-kpi-icon-clicks svg,
+    body.dark-mode .report-kpi-icon-clicks svg {
+      stroke: #34D399 !important;
+    }
+
+    html[data-theme="dark"] .report-kpi-icon-leads,
+    body.dark-mode .report-kpi-icon-leads {
+      background: rgba(245, 158, 11, 0.2) !important;
+      border: 1px solid rgba(245, 158, 11, 0.35) !important;
+    }
+    html[data-theme="dark"] .report-kpi-icon-leads svg,
+    body.dark-mode .report-kpi-icon-leads svg {
+      stroke: #FBBF24 !important;
+    }
+
+    /* Metric & Platform Chips Dark Mode */
+    html[data-theme="dark"] .chip-platform-meta,
+    body.dark-mode .chip-platform-meta {
+      background: rgba(37, 99, 235, 0.18) !important;
+      color: #60A5FA !important;
+      border-color: rgba(37, 99, 235, 0.35) !important;
+    }
+    html[data-theme="dark"] .chip-platform-google,
+    body.dark-mode .chip-platform-google {
+      background: rgba(245, 158, 11, 0.18) !important;
+      color: #FBBF24 !important;
+      border-color: rgba(245, 158, 11, 0.35) !important;
+    }
+    html[data-theme="dark"] .chip-platform-tiktok,
+    body.dark-mode .chip-platform-tiktok {
+      background: rgba(168, 85, 247, 0.18) !important;
+      color: #C084FC !important;
+      border-color: rgba(168, 85, 247, 0.35) !important;
+    }
+
+    /* Subtab 3 Work Recap & Table Dark Mode Overrides */
+    html[data-theme="dark"] .work-recap-filter-bar,
+    body.dark-mode .work-recap-filter-bar {
+      background: #12151F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .work-recap-filter-bar label,
+    body.dark-mode .work-recap-filter-bar label {
+      color: #94A3B8 !important;
+    }
+
+    /* Modals & Dialogs Dark Mode Overrides */
+    html[data-theme="dark"] .kala-modal-dialog,
+    body.dark-mode .kala-modal-dialog {
+      background: #12151F !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      color: #F8FAFC !important;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85) !important;
+    }
+    html[data-theme="dark"] .kala-modal-header,
+    body.dark-mode .kala-modal-header {
+      background: #12151F !important;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .kala-modal-header h3,
+    body.dark-mode .kala-modal-header h3 {
+      color: #FFFFFF !important;
+    }
+    html[data-theme="dark"] .kala-modal-body,
+    body.dark-mode .kala-modal-body {
+      background: #12151F !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .kala-modal-footer,
+    body.dark-mode .kala-modal-footer {
+      background: #12151F !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4) !important;
+    }
+    html[data-theme="dark"] .kala-modal-dialog label,
+    body.dark-mode .kala-modal-dialog label {
+      color: #CBD5E1 !important;
+    }
+    html[data-theme="dark"] .kala-modal-dialog input.form-control,
+    html[data-theme="dark"] .kala-modal-dialog textarea.form-control,
+    html[data-theme="dark"] .kala-modal-dialog select.form-select,
+    body.dark-mode .kala-modal-dialog input.form-control,
+    body.dark-mode .kala-modal-dialog textarea.form-control,
+    body.dark-mode .kala-modal-dialog select.form-select {
+      background: #182033 !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .kala-modal-dialog input.form-control:focus,
+    html[data-theme="dark"] .kala-modal-dialog textarea.form-control:focus,
+    html[data-theme="dark"] .kala-modal-dialog select.form-select:focus,
+    body.dark-mode .kala-modal-dialog input.form-control:focus,
+    body.dark-mode .kala-modal-dialog textarea.form-control:focus,
+    body.dark-mode .kala-modal-dialog select.form-select:focus {
+      border-color: #6366F1 !important;
+      background: #1A2338 !important;
+      color: #FFFFFF !important;
+    }
+    html[data-theme="dark"] .kala-modal-dialog div[style*="background:"],
+    body.dark-mode .kala-modal-dialog div[style*="background:"] {
+      background: #161D2F !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] #printable-report-area,
+    body.dark-mode #printable-report-area {
+      background: #12151F !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] #printable-report-area div[style*="background:"],
+    body.dark-mode #printable-report-area div[style*="background:"] {
+      background: #161D2F !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] #printable-report-area h2,
+    html[data-theme="dark"] #printable-report-area [id^="view-detail-"],
+    body.dark-mode #printable-report-area h2,
+    body.dark-mode #printable-report-area [id^="view-detail-"] {
+      color: #FFFFFF !important;
+    }
+
     /* Form Modal Styles */
     .kala-modal-backdrop {
       position: fixed;
@@ -419,7 +622,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
       <div class="content-body">
 
         <!-- Role Badge Header Card -->
-        <div style="border-radius: 18px; padding: 16px; background: #FFFFFF; border: 1px solid #ECEEF5; margin-top: 0 !important; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); box-sizing: border-box; width: 100%;">
+        <div class="reports-header-card" style="border-radius: 18px; padding: 16px; background: #FFFFFF; border: 1px solid #ECEEF5; margin-top: 0 !important; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); box-sizing: border-box; width: 100%;">
           <div style="min-width: 0;">
             <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
               <h2 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0; line-height: 1.25;">
@@ -439,6 +642,12 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
           </div>
 
           <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <?php if ($isOwnerOrAdmin): ?>
+              <button type="button" onclick="document.getElementById('kala-monthly-ai-panel')?.scrollIntoView({behavior:'smooth'})" style="background: linear-gradient(135deg, #059669 0%, #10B981 100%); color: #FFFFFF; font-weight: 700; font-size: 12.5px; border-radius: 10px; height: 36px; padding: 0 14px; border: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 10px rgba(16, 185, 129, 0.28); cursor: pointer;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M12 2L14.8 8.5L22 9.3L16.5 14L18.2 21L12 17.3L5.8 21L7.5 14L2 9.3L9.2 8.5L12 2Z"/></svg>
+                <span>Laporan Bulanan AI (Approval Owner)</span>
+              </button>
+            <?php endif; ?>
             <button type="button" onclick="openNewAdsReportModal()" style="background: #5B3DF5; color: #FFFFFF; font-weight: 700; font-size: 12.5px; border-radius: 10px; height: 36px; padding: 0 14px; border: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 8px rgba(91, 61, 245, 0.25); cursor: pointer; transition: all 0.15s ease;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               <span>Buat Laporan Iklan</span>
@@ -451,13 +660,293 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
           </div>
         </div>
 
+        <?php if ($isOwnerOrAdmin): ?>
+        <?php require_once BASE_PATH . '/includes/kala_ai_monthly_report_shared.php'; ?>
+        <!-- =========================================================================
+             KALA AI MONTHLY CLIENT REPORT GENERATOR DENGAN APPROVAL OWNER
+             ========================================================================= -->
+        <div id="kala-monthly-ai-panel" class="glass-panel" style="padding: 22px 24px; margin-bottom: 24px; border: 1px solid rgba(99, 102, 241, 0.28); border-radius: 18px;">
+          <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:14px; margin-bottom:16px;">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div style="width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg, #4F46E5, #7C3AED); color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 6px 16px rgba(79,70,229,0.28);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 12l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2z"/></svg>
+              </div>
+              <div>
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <h3 style="margin:0; font-size:16px; font-weight:800; color:var(--text-primary);">AI Monthly Client Report Generator (Review &amp; Approval Owner)</h3>
+                  <span style="font-size:10.5px; font-weight:800; padding:3px 9px; border-radius:999px; background:rgba(16,185,129,0.14); color:#10B981; border:1px solid rgba(16,185,129,0.3);">OWNER APPROVAL GATE</span>
+                </div>
+                <p style="margin:3px 0 0 0; font-size:12px; color:var(--text-muted);">
+                  Menarik otomatis data Tugas Selesai, Kalender Konten, Sisa Pagu Ads Klien (tanpa margin agensi), dan Target 90 Hari. Selalu berstatus <strong>Draft Review Owner</strong> sebelum dikirim ke Portal Klien.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Generator Controls -->
+          <div class="kamr-generator-grid">
+            <div>
+              <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:5px;">Pilih Nama Klien / Brand</label>
+              <select id="kamr-client-select" class="form-select" onchange="loadMonthlyAiReportsList()" style="height:38px; font-weight:600;">
+                <option value="">-- Semua Klien / Pilih Klien --</option>
+                <?php foreach ($allClients as $cl): ?>
+                  <option value="<?= (int)$cl['id'] ?>" <?= ((int)($filterClient ?? $_GET['client_id'] ?? 0) === (int)$cl['id']) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($cl['company'] ?: $cl['name']) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:5px;">Periode Bulan / Tahun</label>
+              <input type="month" id="kamr-month-input" class="form-control" value="<?= date('Y-m') ?>" style="height:38px; font-weight:600;">
+            </div>
+            <div>
+              <label style="display:block; font-size:11px; font-weight:700; text-transform:uppercase; color:var(--text-muted); margin-bottom:5px;">Catatan Fokus Tambahan Owner (Opsional)</label>
+              <input type="text" id="kamr-owner-notes" class="form-control" placeholder="Misal: Highlight peningkatan leads WhatsApp & efisiensi Reels..." style="height:38px;">
+            </div>
+            <div>
+              <button type="button" id="btn-kamr-generate" onclick="generateMonthlyAiClientReport()" class="btn btn-primary" style="height:38px; padding:0 18px; font-size:12.5px; font-weight:700; border-radius:10px; background:linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%); border:none; display:inline-flex; align-items:center; gap:7px; white-space:nowrap; box-shadow:0 4px 14px rgba(79,70,229,0.32);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L14.8 8.5L22 9.3L16.5 14L18.2 21L12 17.3L5.8 21L7.5 14L2 9.3L9.2 8.5L12 2Z"/></svg>
+                <span>Susun Laporan Bulanan dengan Kala AI</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading Spinner -->
+          <div id="kamr-loading-box" style="display:none; text-align:center; padding:32px 16px;">
+            <div style="width:44px; height:44px; border-radius:12px; background:rgba(79,70,229,0.12); color:#6366F1; display:inline-flex; align-items:center; justify-content:center; margin-bottom:10px;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            </div>
+            <div style="font-size:14px; font-weight:800; color:var(--text-primary);">Kala AI Sedang Mengagregasi Data Tugas, Konten, Sisa Pagu Ads &amp; Menyusun Laporan Bulanan...</div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:4px;">Laporan akan disimpan sebagai <strong>Draft Review Owner</strong> terlebih dahulu sebelum dipublikasikan ke Portal Klien.</div>
+          </div>
+
+          <!-- Rendered Reports List -->
+          <div id="kamr-reports-container"></div>
+        </div>
+
+        <!-- Modal Edit Narasi Laporan Bulanan AI -->
+        <div class="modal modal-backdrop" id="modal-edit-monthly-ai-report" style="display: none; z-index: 100070;">
+          <div class="kala-modal-dialog" style="max-width:860px; width:95vw;">
+            <div class="kala-modal-header">
+              <h3 style="margin:0; font-size:16px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                <span>Edit Isi Laporan Bulanan AI Sebelum Approval</span>
+              </h3>
+              <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal('modal-edit-monthly-ai-report')">Tutup</button>
+            </div>
+            <div class="kala-modal-body" style="display:flex; flex-direction:column; gap:12px;">
+              <input type="hidden" id="edit-kamr-id">
+              <div class="kamr-edit-grid-2-1">
+                <div>
+                  <label class="form-label" style="font-size:11.5px; font-weight:700;">Judul Laporan Bulanan</label>
+                  <input type="text" id="edit-kamr-title" class="form-control">
+                </div>
+                <div>
+                  <label class="form-label" style="font-size:11.5px; font-weight:700;">Rating Performa</label>
+                  <input type="text" id="edit-kamr-rating" class="form-control">
+                </div>
+              </div>
+              <div>
+                <label class="form-label" style="font-size:11.5px; font-weight:700;">1. Ringkasan Eksekutif Perkembangan Brand Bulan Ini</label>
+                <input type="text" id="edit-kamr-exec-headline" class="form-control" style="margin-bottom:6px;" placeholder="Headline Ringkasan Eksekutif">
+                <textarea id="edit-kamr-exec-narrative" class="form-control" rows="3"></textarea>
+              </div>
+              <div class="kamr-edit-grid-1-1">
+                <div>
+                  <label class="form-label" style="font-size:11.5px; font-weight:700;">2. Capaian Produksi Konten &amp; Deliverables</label>
+                  <textarea id="edit-kamr-content-narrative" class="form-control" rows="3"></textarea>
+                </div>
+                <div>
+                  <label class="form-label" style="font-size:11.5px; font-weight:700;">3. Evaluasi Performa Ads &amp; Efisiensi Pagu Klien</label>
+                  <textarea id="edit-kamr-ads-budget" class="form-control" rows="3"></textarea>
+                </div>
+              </div>
+              <div class="kamr-edit-grid-1-1">
+                <div>
+                  <label class="form-label" style="font-size:11.5px; font-weight:700;">4. Key Wins Bulan Ini (1 baris per poin)</label>
+                  <textarea id="edit-kamr-wins" class="form-control" rows="3"></textarea>
+                </div>
+                <div>
+                  <label class="form-label" style="font-size:11.5px; font-weight:700;">5. Rencana Fokus Bulan Depan (1 baris per poin)</label>
+                  <textarea id="edit-kamr-roadmap" class="form-control" rows="3"></textarea>
+                </div>
+              </div>
+            </div>
+            <div class="kala-modal-footer" style="padding:14px 22px; display:flex; justify-content:flex-end; gap:10px;">
+              <button type="button" class="btn btn-secondary" onclick="closeModal('modal-edit-monthly-ai-report')">Batal</button>
+              <button type="button" class="btn btn-primary" onclick="saveEditedMonthlyAiReport()" style="background:#4F46E5; border:none; font-weight:700;">Simpan Perubahan Laporan</button>
+            </div>
+          </div>
+        </div>
+
+        <script>
+        window.kamrLoadedReports = {};
+
+        async function loadMonthlyAiReportsList() {
+            const container = document.getElementById('kamr-reports-container');
+            if (!container) return;
+            const clientId = document.getElementById('kamr-client-select')?.value || '';
+
+            try {
+                const res = await fetch(`<?= BASE_URL ?>/api/gemini_monthly_report.php?action=list_reports&client_id=${encodeURIComponent(clientId)}`);
+                const json = await res.json();
+                if (!json.success) return;
+
+                const reports = json.reports || [];
+                window.kamrLoadedReports = {};
+                reports.forEach(r => { window.kamrLoadedReports[r.id] = r; });
+
+                if (!reports.length) {
+                    container.innerHTML = `
+                        <div style="padding:24px; text-align:center; border:1px dashed var(--border-light, rgba(148,163,184,0.25)); border-radius:12px; color:var(--text-muted); font-size:12.5px;">
+                            Belum ada Laporan Bulanan AI untuk filter klien ini. Pilih Klien &amp; Periode Bulan di atas lalu klik <strong>"Susun Laporan Bulanan dengan Kala AI"</strong>.
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = reports.map(r => window.renderKalaMonthlyAiReportHtml(r, { isOwnerView: true })).join('');
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function generateMonthlyAiClientReport() {
+            const clientId = document.getElementById('kamr-client-select')?.value;
+            const reportMonth = document.getElementById('kamr-month-input')?.value;
+            const ownerNotes = document.getElementById('kamr-owner-notes')?.value || '';
+
+            if (!clientId) {
+                if (typeof showToast === 'function') showToast('Silakan pilih Nama Klien terlebih dahulu.', 'error');
+                else alert('Silakan pilih Nama Klien terlebih dahulu.');
+                return;
+            }
+
+            const btn = document.getElementById('btn-kamr-generate');
+            const loadingBox = document.getElementById('kamr-loading-box');
+            btn.disabled = true;
+            loadingBox.style.display = 'block';
+
+            try {
+                const res = await fetch('<?= BASE_URL ?>/api/gemini_monthly_report.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generate_report',
+                        client_id: clientId,
+                        report_month: reportMonth,
+                        owner_notes: ownerNotes
+                    })
+                });
+                const json = await res.json();
+                btn.disabled = false;
+                loadingBox.style.display = 'none';
+
+                if (!json.success) {
+                    if (typeof showToast === 'function') showToast(json.message || 'Gagal menyusun laporan.', 'error');
+                    else alert(json.message || 'Gagal menyusun laporan.');
+                    return;
+                }
+
+                if (typeof showToast === 'function') showToast(json.message || 'Draft laporan bulanan siap direview Owner!', 'success');
+                await loadMonthlyAiReportsList();
+            } catch (err) {
+                btn.disabled = false;
+                loadingBox.style.display = 'none';
+                if (typeof showToast === 'function') showToast('Gagal menghubungi server Gemini AI.', 'error');
+            }
+        }
+
+        function openEditMonthlyAiReportModal(reportId) {
+            const row = window.kamrLoadedReports[reportId];
+            if (!row) return;
+            const ai = row.ai_report || {};
+            document.getElementById('edit-kamr-id').value = reportId;
+            document.getElementById('edit-kamr-title').value = ai.report_title || '';
+            document.getElementById('edit-kamr-rating').value = ai.overall_performance_rating || 'Optimal';
+            document.getElementById('edit-kamr-exec-headline').value = ai.executive_summary?.headline || '';
+            document.getElementById('edit-kamr-exec-narrative').value = ai.executive_summary?.narrative || '';
+            document.getElementById('edit-kamr-content-narrative').value = ai.content_and_task_achievements?.summary_narrative || '';
+            document.getElementById('edit-kamr-ads-budget').value = ai.ads_performance_review?.budget_efficiency_summary || '';
+            document.getElementById('edit-kamr-wins').value = (ai.key_wins_and_insights?.key_wins || []).join('\n');
+            document.getElementById('edit-kamr-roadmap').value = (ai.next_month_roadmap?.action_plan_items || []).join('\n');
+
+            if (typeof openModal === 'function') openModal('modal-edit-monthly-ai-report');
+            else document.getElementById('modal-edit-monthly-ai-report').classList.add('active');
+        }
+
+        async function saveEditedMonthlyAiReport() {
+            const reportId = parseInt(document.getElementById('edit-kamr-id').value, 10);
+            const row = window.kamrLoadedReports[reportId];
+            if (!row) return;
+
+            const ai = JSON.parse(JSON.stringify(row.ai_report || {}));
+            ai.report_title = document.getElementById('edit-kamr-title').value;
+            ai.overall_performance_rating = document.getElementById('edit-kamr-rating').value;
+            if (!ai.executive_summary) ai.executive_summary = {};
+            ai.executive_summary.headline = document.getElementById('edit-kamr-exec-headline').value;
+            ai.executive_summary.narrative = document.getElementById('edit-kamr-exec-narrative').value;
+            if (!ai.content_and_task_achievements) ai.content_and_task_achievements = {};
+            ai.content_and_task_achievements.summary_narrative = document.getElementById('edit-kamr-content-narrative').value;
+            if (!ai.ads_performance_review) ai.ads_performance_review = {};
+            ai.ads_performance_review.budget_efficiency_summary = document.getElementById('edit-kamr-ads-budget').value;
+            if (!ai.key_wins_and_insights) ai.key_wins_and_insights = {};
+            ai.key_wins_and_insights.key_wins = document.getElementById('edit-kamr-wins').value.split('\n').map(s => s.trim()).filter(Boolean);
+            if (!ai.next_month_roadmap) ai.next_month_roadmap = {};
+            ai.next_month_roadmap.action_plan_items = document.getElementById('edit-kamr-roadmap').value.split('\n').map(s => s.trim()).filter(Boolean);
+
+            const res = await fetch('<?= BASE_URL ?>/api/gemini_monthly_report.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'save_edits',
+                    report_id: reportId,
+                    ai_report: ai
+                })
+            });
+            const json = await res.json();
+            if (json.success) {
+                if (typeof showToast === 'function') showToast(json.message, 'success');
+                closeModal('modal-edit-monthly-ai-report');
+                loadMonthlyAiReportsList();
+            } else {
+                if (typeof showToast === 'function') showToast(json.message || 'Gagal menyimpan perubahan.', 'error');
+            }
+        }
+
+        async function togglePublishMonthlyAiReport(reportId, publish) {
+            const actionName = publish ? 'publish_report' : 'unpublish_report';
+            const res = await fetch('<?= BASE_URL ?>/api/gemini_monthly_report.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: actionName,
+                    report_id: reportId
+                })
+            });
+            const json = await res.json();
+            if (json.success) {
+                if (typeof showToast === 'function') showToast(json.message, 'success');
+                loadMonthlyAiReportsList();
+            } else {
+                if (typeof showToast === 'function') showToast(json.message || 'Gagal mengubah status laporan.', 'error');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMonthlyAiReportsList();
+        });
+        </script>
+        <?php endif; ?>
+
         <?php if ($isOwnerOrAdmin || $isCreativeSpecialistUser): ?>
         <!-- Modern Segmented Tabs Bar (Only when multiple views exist, hidden on mobile for workers) -->
         <div class="worker-tabs-bar" style="display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap;">
           <a href="<?= url('reports?tab=ads_report') ?>" class="report-tab-pill <?= $activeTab === 'ads_report' ? 'active' : '' ?>">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
             <span>Report Ads (Standar Kalamedia)</span>
-            <span style="font-size: 11px; padding: 2px 7px; border-radius: 10px; background: <?= $activeTab === 'ads_report' ? 'rgba(255,255,255,0.2)' : '#F3F4F6' ?>;"><?= count($reports) ?></span>
+            <span class="report-pill-badge" style="font-size: 11px; padding: 2px 7px; border-radius: 10px; background: <?= $activeTab === 'ads_report' ? 'rgba(255,255,255,0.2)' : '#F3F4F6' ?>;"><?= count($reports) ?></span>
           </a>
 
           <?php if (!$isAdsSpecialistUser || $isOwnerOrAdmin): ?>
@@ -498,7 +987,7 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <!-- Filter Controls for Work Recap -->
-            <div style="background: #F9FAFB; border: 1px solid #ECEEF5; border-radius: 14px; padding: 14px 16px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+            <div class="work-recap-filter-bar" style="background: #F9FAFB; border: 1px solid #ECEEF5; border-radius: 14px; padding: 14px 16px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
               <!-- Month Filter -->
               <div style="min-width: 150px;">
                 <label style="font-size: 11px; font-weight: 700; color: #4B5563; text-transform: uppercase; display: block; margin-bottom: 4px;">Bulan</label>
@@ -621,10 +1110,10 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
           <!-- 4 KPI Summary Cards for Performance Ads (Appify 2x2 Grid on Mobile, 4-Cols on Desktop) -->
           <div class="report-ads-kpi-grid">
             <!-- 1. Total Pengeluaran -->
-            <div style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 14px 16px; box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="report-ads-kpi-card" style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 14px 16px; box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
                 <span style="font-size: 12px; font-weight: 700; color: #7B7890; white-space: nowrap;">Total Pengeluaran</span>
-                <div style="width: 28px; height: 28px; border-radius: 8px; background: #F2EFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <div class="report-kpi-icon-spend" style="width: 28px; height: 28px; border-radius: 8px; background: #F2EFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5B3DF5" stroke-width="2.2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
                 </div>
               </div>
@@ -637,10 +1126,10 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <!-- 2. Impressions -->
-            <div style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 14px 16px; box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="report-ads-kpi-card" style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 14px 16px; box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
                 <span style="font-size: 12px; font-weight: 700; color: #7B7890; white-space: nowrap;">Impressions</span>
-                <div style="width: 28px; height: 28px; border-radius: 8px; background: #EEF2FF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <div class="report-kpi-icon-impressions" style="width: 28px; height: 28px; border-radius: 8px; background: #EEF2FF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                 </div>
               </div>
@@ -653,10 +1142,10 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <!-- 3. Total Klik -->
-            <div style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 14px 16px; box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="report-ads-kpi-card" style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 14px 16px; box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
                 <span style="font-size: 12px; font-weight: 700; color: #7B7890; white-space: nowrap;">Total Klik</span>
-                <div style="width: 28px; height: 28px; border-radius: 8px; background: #E8F8F2; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <div class="report-kpi-icon-clicks" style="width: 28px; height: 28px; border-radius: 8px; background: #E8F8F2; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
                 </div>
               </div>
@@ -669,10 +1158,10 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
 
             <!-- 4. Total Leads -->
-            <div style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 14px 16px; box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="report-ads-kpi-card" style="background: #FFFFFF; border-radius: 18px; border: 1px solid #F0F1F7; padding: 14px 16px; box-shadow: 0 4px 20px rgba(26, 22, 43, 0.04); display: flex; flex-direction: column; justify-content: space-between;">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
                 <span style="font-size: 12px; font-weight: 700; color: #7B7890; white-space: nowrap;">Total Leads</span>
-                <div style="width: 28px; height: 28px; border-radius: 8px; background: #FFF4E5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <div class="report-kpi-icon-leads" style="width: 28px; height: 28px; border-radius: 8px; background: #FFF4E5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                 </div>
               </div>

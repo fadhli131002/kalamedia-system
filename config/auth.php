@@ -174,6 +174,18 @@ function render_tab_uid_script(): void {
     ?>
     <script>
       (function() {
+        // Immediate Zero-Flicker Nebula Theme Resolver
+        try {
+          var savedTheme = localStorage.getItem('kala_theme');
+          var theme = savedTheme ? savedTheme : 'dark';
+          document.documentElement.setAttribute('data-theme', theme);
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+          } else {
+            document.documentElement.classList.remove('dark-mode');
+          }
+        } catch(e) {}
+
         var serverUid = '<?= htmlspecialchars($currentUid, ENT_QUOTES, 'UTF-8') ?>';
         var urlParams = new URLSearchParams(window.location.search);
         var urlUid = urlParams.get('_u');

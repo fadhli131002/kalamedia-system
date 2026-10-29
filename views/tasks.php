@@ -200,7 +200,7 @@ if ($isWorkerUser) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
+  <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-nebula-v7">
   <?php render_tab_uid_script(); ?>
   <style>
     /* ==========================================================================
@@ -1488,6 +1488,432 @@ if ($isWorkerUser) {
         color: #4B4958 !important;
       }
     }
+
+    /* ==========================================================================
+       NEBULAPAY DARK MODE SPECIFIC OVERRIDES FOR TASKS & WORKSPACE VIEW
+       ========================================================================== */
+    html[data-theme="dark"] .tasks-header-card,
+    body.dark-mode .tasks-header-card {
+      background: linear-gradient(180deg, rgba(22, 29, 47, 0.85) 0%, rgba(15, 20, 32, 0.95) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.07) !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .tasks-header-card h2,
+    html[data-theme="dark"] .workspace-main-title,
+    body.dark-mode .tasks-header-card h2,
+    body.dark-mode .workspace-main-title {
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .tasks-header-card p,
+    html[data-theme="dark"] .workspace-sub-title,
+    body.dark-mode .tasks-header-card p,
+    body.dark-mode .workspace-sub-title {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .badge-workspace-role,
+    body.dark-mode .badge-workspace-role {
+      background: rgba(99, 102, 241, 0.18) !important;
+      color: #A5B4FC !important;
+      border: 1px solid rgba(99, 102, 241, 0.35) !important;
+    }
+    html[data-theme="dark"] .workspace-user-meta,
+    body.dark-mode .workspace-user-meta {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .workspace-user-meta b,
+    body.dark-mode .workspace-user-meta b {
+      color: #F8FAFC !important;
+    }
+
+    /* Workspace Tabs Bar */
+    html[data-theme="dark"] .workspace-tabs-bar,
+    body.dark-mode .workspace-tabs-bar {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .workspace-sliding-pill,
+    body.dark-mode .workspace-sliding-pill {
+      background: linear-gradient(135deg, rgba(67, 56, 202, 0.9) 0%, rgba(6, 182, 212, 0.9) 100%) !important;
+      box-shadow: 0 2px 12px rgba(6, 182, 212, 0.35) !important;
+    }
+    html[data-theme="dark"] .workspace-tab-btn,
+    body.dark-mode .workspace-tab-btn {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .workspace-tab-btn:hover:not(.active),
+    body.dark-mode .workspace-tab-btn:hover:not(.active) {
+      color: #F8FAFC !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+    }
+    html[data-theme="dark"] .workspace-tab-btn.active,
+    body.dark-mode .workspace-tab-btn.active {
+      color: #FFFFFF !important;
+    }
+
+    /* Bento Stat Strip */
+    html[data-theme="dark"] .bento-stat-strip,
+    body.dark-mode .bento-stat-strip {
+      background: linear-gradient(180deg, rgba(22, 29, 47, 0.85) 0%, rgba(15, 20, 32, 0.95) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.07) !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+    }
+    html[data-theme="dark"] .bento-stat-strip > div,
+    body.dark-mode .bento-stat-strip > div {
+      border-color: rgba(255, 255, 255, 0.07) !important;
+    }
+    html[data-theme="dark"] #kpi-total,
+    body.dark-mode #kpi-total {
+      color: #F8FAFC !important;
+    }
+
+    /* Bento Filter Panel & Sub-Controls */
+    html[data-theme="dark"] .bento-filter-panel,
+    body.dark-mode .bento-filter-panel {
+      background: linear-gradient(180deg, rgba(22, 29, 47, 0.85) 0%, rgba(15, 20, 32, 0.95) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.07) !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+    }
+    html[data-theme="dark"] #task-search-input,
+    html[data-theme="dark"] #filter-worker-type,
+    body.dark-mode #task-search-input,
+    body.dark-mode #filter-worker-type {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] #task-search-input::placeholder,
+    body.dark-mode #task-search-input::placeholder {
+      color: #64748B !important;
+    }
+    html[data-theme="dark"] .bento-segmented-control,
+    html[data-theme="dark"] .task-status-grid,
+    body.dark-mode .bento-segmented-control,
+    body.dark-mode .task-status-grid {
+      background: #161D2F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .bento-segmented-control .filter-btn:not(.active),
+    html[data-theme="dark"] .task-status-grid .filter-btn:not(.active),
+    body.dark-mode .bento-segmented-control .filter-btn:not(.active),
+    body.dark-mode .task-status-grid .filter-btn:not(.active) {
+      color: #94A3B8 !important;
+      background: transparent !important;
+    }
+    html[data-theme="dark"] .bento-segmented-control .filter-btn:hover:not(.active),
+    html[data-theme="dark"] .task-status-grid .filter-btn:hover:not(.active),
+    body.dark-mode .bento-segmented-control .filter-btn:hover:not(.active),
+    body.dark-mode .task-status-grid .filter-btn:hover:not(.active) {
+      color: #F8FAFC !important;
+      background: rgba(255, 255, 255, 0.06) !important;
+    }
+    html[data-theme="dark"] .bento-segmented-control .filter-btn.active,
+    html[data-theme="dark"] .task-status-grid .filter-btn.active,
+    body.dark-mode .bento-segmented-control .filter-btn.active,
+    body.dark-mode .task-status-grid .filter-btn.active {
+      background: #6366F1 !important;
+      color: #FFFFFF !important;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35) !important;
+    }
+
+    /* Bento Metric Cards & Worker Info */
+    html[data-theme="dark"] .bento-metric-card,
+    html[data-theme="dark"] .bento-worker-info-card,
+    html[data-theme="dark"] .kpi-tile,
+    body.dark-mode .bento-metric-card,
+    body.dark-mode .bento-worker-info-card,
+    body.dark-mode .kpi-tile {
+      background: linear-gradient(180deg, rgba(22, 29, 47, 0.85) 0%, rgba(15, 20, 32, 0.95) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .kpi-tile .metric-label,
+    body.dark-mode .kpi-tile .metric-label {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .kpi-tile .metric-subtitle,
+    body.dark-mode .kpi-tile .metric-subtitle {
+      color: #64748B !important;
+    }
+    html[data-theme="dark"] .kpi-tile .metric-num,
+    body.dark-mode .kpi-tile .metric-num {
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .kpi-num-contract,
+    body.dark-mode .kpi-num-contract {
+      color: #38BDF8 !important;
+    }
+    html[data-theme="dark"] .kpi-num-margin,
+    body.dark-mode .kpi-num-margin {
+      color: #34D399 !important;
+    }
+    html[data-theme="dark"] .kpi-num-pagu,
+    body.dark-mode .kpi-num-pagu {
+      color: #A78BFA !important;
+    }
+    html[data-theme="dark"] .kpi-num-transferred,
+    body.dark-mode .kpi-num-transferred {
+      color: #60A5FA !important;
+    }
+    html[data-theme="dark"] .kpi-num-success,
+    body.dark-mode .kpi-num-success {
+      color: #34D399 !important;
+    }
+    html[data-theme="dark"] .kpi-num-danger,
+    body.dark-mode .kpi-num-danger {
+      color: #F87171 !important;
+    }
+    html[data-theme="dark"] .kpi-label-success,
+    body.dark-mode .kpi-label-success {
+      color: #34D399 !important;
+    }
+    html[data-theme="dark"] .kpi-label-urgent,
+    body.dark-mode .kpi-label-urgent {
+      color: #F87171 !important;
+    }
+    html[data-theme="dark"] .kpi-icon-success,
+    body.dark-mode .kpi-icon-success {
+      stroke: #34D399 !important;
+    }
+    html[data-theme="dark"] .kpi-icon-urgent,
+    body.dark-mode .kpi-icon-urgent {
+      stroke: #F87171 !important;
+    }
+
+    /* Ads Tracker Empty States & Logs */
+    html[data-theme="dark"] .ads-empty-cell,
+    html[data-theme="dark"] .ads-empty-state-box,
+    html[data-theme="dark"] .ads-log-card,
+    body.dark-mode .ads-empty-cell,
+    body.dark-mode .ads-empty-state-box,
+    body.dark-mode .ads-log-card {
+      background: #12151F !important;
+      background-color: #12151F !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .ads-empty-title,
+    body.dark-mode .ads-empty-title {
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .ads-empty-desc,
+    body.dark-mode .ads-empty-desc {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .ads-log-notes,
+    body.dark-mode .ads-log-notes {
+      background: #0E121D !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+      color: #CBD5E1 !important;
+    }
+    html[data-theme="dark"] .appify-tx-card,
+    body.dark-mode .appify-tx-card {
+      background: #12151F !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+      color: #F8FAFC !important;
+    }
+
+    /* Recap & Profile Directory Components in Dark Mode */
+    html[data-theme="dark"] .worker-recap-card,
+    html[data-theme="dark"] .team-dir-header-bar,
+    html[data-theme="dark"] .worker-slide2-profile-card,
+    body.dark-mode .worker-recap-card,
+    body.dark-mode .team-dir-header-bar,
+    body.dark-mode .worker-slide2-profile-card {
+      background: linear-gradient(180deg, rgba(22, 29, 47, 0.85) 0%, rgba(15, 20, 32, 0.95) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+      color: #F8FAFC !important;
+    }
+
+    html[data-theme="dark"] .worker-recap-filter-bar,
+    html[data-theme="dark"] .team-dir-filter-bar,
+    body.dark-mode .worker-recap-filter-bar,
+    body.dark-mode .team-dir-filter-bar {
+      background: #161D2F !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    html[data-theme="dark"] .worker-recap-card h3,
+    html[data-theme="dark"] .team-dir-header-bar h3,
+    html[data-theme="dark"] .slide2-user-name,
+    html[data-theme="dark"] .slide2-page-title,
+    html[data-theme="dark"] .slide2-card-value,
+    html[data-theme="dark"] .slide2-card-num,
+    html[data-theme="dark"] .slide2-menu-title,
+    body.dark-mode .worker-recap-card h3,
+    body.dark-mode .team-dir-header-bar h3,
+    body.dark-mode .slide2-user-name,
+    body.dark-mode .slide2-page-title,
+    body.dark-mode .slide2-card-value,
+    body.dark-mode .slide2-card-num,
+    body.dark-mode .slide2-menu-title {
+      color: #F8FAFC !important;
+    }
+
+    html[data-theme="dark"] .worker-recap-card p,
+    html[data-theme="dark"] .team-dir-header-bar p,
+    html[data-theme="dark"] .slide2-user-role,
+    html[data-theme="dark"] .slide2-card-title,
+    html[data-theme="dark"] .slide2-card-unit,
+    html[data-theme="dark"] .slide2-card-subtext,
+    html[data-theme="dark"] .slide2-quick-label,
+    html[data-theme="dark"] .slide2-menu-desc,
+    body.dark-mode .worker-recap-card p,
+    body.dark-mode .team-dir-header-bar p,
+    body.dark-mode .slide2-user-role,
+    body.dark-mode .slide2-card-title,
+    body.dark-mode .slide2-card-unit,
+    body.dark-mode .slide2-card-subtext,
+    body.dark-mode .slide2-quick-label,
+    body.dark-mode .slide2-menu-desc {
+      color: #94A3B8 !important;
+    }
+
+    html[data-theme="dark"] .slide2-header-container,
+    body.dark-mode .slide2-header-container {
+      border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    html[data-theme="dark"] .slide2-action-btn,
+    body.dark-mode .slide2-action-btn {
+      background: #181C29 !important;
+      border-color: rgba(255, 255, 255, 0.1) !important;
+      color: #F8FAFC !important;
+    }
+
+    html[data-theme="dark"] .slide2-pastel-card,
+    html[data-theme="dark"] .slide2-menu-item,
+    body.dark-mode .slide2-pastel-card,
+    body.dark-mode .slide2-menu-item {
+      background: #12151F !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+      color: #F8FAFC !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    html[data-theme="dark"] .slide2-menu-item:hover,
+    body.dark-mode .slide2-menu-item:hover {
+      background: #181C29 !important;
+      border-color: rgba(56, 189, 248, 0.4) !important;
+    }
+
+    html[data-theme="dark"] .slide2-menu-item.slide2-logout-item,
+    body.dark-mode .slide2-menu-item.slide2-logout-item {
+      background: rgba(239, 68, 68, 0.1) !important;
+      border-color: rgba(239, 68, 68, 0.3) !important;
+    }
+
+    html[data-theme="dark"] .team-filter-pill,
+    body.dark-mode .team-filter-pill {
+      background: #161D2F !important;
+      border-color: rgba(255, 255, 255, 0.1) !important;
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .team-filter-pill.active,
+    body.dark-mode .team-filter-pill.active {
+      background: #6366F1 !important;
+      border-color: #6366F1 !important;
+      color: #FFFFFF !important;
+    }
+
+    /* Empty State Card */
+    html[data-theme="dark"] .kala-empty-state-card,
+    body.dark-mode .kala-empty-state-card {
+      background: linear-gradient(180deg, rgba(22, 29, 47, 0.85) 0%, rgba(15, 20, 32, 0.95) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.07) !important;
+      color: #F8FAFC !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+    }
+    html[data-theme="dark"] .kala-empty-state-card h4,
+    html[data-theme="dark"] .empty-state-title,
+    body.dark-mode .kala-empty-state-card h4,
+    body.dark-mode .empty-state-title {
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .kala-empty-state-card p,
+    html[data-theme="dark"] .empty-state-desc,
+    body.dark-mode .kala-empty-state-card p,
+    body.dark-mode .empty-state-desc {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .kala-empty-state-card svg,
+    html[data-theme="dark"] .empty-state-icon,
+    body.dark-mode .kala-empty-state-card svg,
+    body.dark-mode .empty-state-icon {
+      stroke: #94A3B8 !important;
+    }
+
+    /* Task Item Cards */
+    html[data-theme="dark"] .task-item-card,
+    body.dark-mode .task-item-card {
+      background: linear-gradient(180deg, rgba(22, 29, 47, 0.85) 0%, rgba(15, 20, 32, 0.95) 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.07) !important;
+      color: #F8FAFC !important;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.6) !important;
+    }
+    html[data-theme="dark"] .task-item-card:hover,
+    body.dark-mode .task-item-card:hover {
+      border-color: rgba(56, 189, 248, 0.42) !important;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.8), 0 0 16px rgba(56, 189, 248, 0.16) !important;
+    }
+
+    /* Slide 2 Menu Mobile in Dark Mode */
+    html[data-theme="dark"] .slide2-menu-list,
+    body.dark-mode .slide2-menu-list {
+      background: #121726 !important;
+      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .slide2-menu-item,
+    body.dark-mode .slide2-menu-item {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .slide2-menu-icon,
+    body.dark-mode .slide2-menu-icon {
+      background: #181C29 !important;
+      color: #38BDF8 !important;
+    }
+
+    /* Dark Mode Custom Scrollbars (Zero White Scrollbars) */
+    html[data-theme="dark"],
+    body.dark-mode {
+      color-scheme: dark !important;
+      scrollbar-color: rgba(255, 255, 255, 0.22) #0B0E17 !important;
+      scrollbar-width: thin !important;
+    }
+    html[data-theme="dark"] ::-webkit-scrollbar,
+    body.dark-mode ::-webkit-scrollbar {
+      width: 6px !important;
+      height: 6px !important;
+      background-color: #0B0E17 !important;
+    }
+    html[data-theme="dark"] ::-webkit-scrollbar-track,
+    body.dark-mode ::-webkit-scrollbar-track {
+      background: #0B0E17 !important;
+      border-radius: 999px !important;
+    }
+    html[data-theme="dark"] ::-webkit-scrollbar-thumb,
+    body.dark-mode ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.22) !important;
+      border-radius: 999px !important;
+    }
+    html[data-theme="dark"] ::-webkit-scrollbar-thumb:hover,
+    body.dark-mode ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.38) !important;
+    }
+    html[data-theme="dark"] ::-webkit-scrollbar-corner,
+    body.dark-mode ::-webkit-scrollbar-corner {
+      background: #0B0E17 !important;
+    }
+    html[data-theme="dark"] .kala-table-scroll,
+    html[data-theme="dark"] .table-responsive,
+    body.dark-mode .kala-table-scroll,
+    body.dark-mode .table-responsive {
+      scrollbar-color: rgba(255, 255, 255, 0.22) #0B0E17 !important;
+      scrollbar-width: thin !important;
+    }
   </style>
 </head>
 <body>
@@ -1506,18 +1932,18 @@ if ($isWorkerUser) {
         <div class="tasks-header-card">
           <div>
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-              <span class="badge" style="background: #F2F4F7; color: #101828; font-weight: 800; font-size: 11px;">
+              <span class="badge badge-workspace-role">
                 ADMIN &amp; PM WORKSPACE
               </span>
               <span style="font-size: 12px; color: var(--text-muted);">&bull;</span>
-              <span style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">
+              <span class="workspace-user-meta" style="font-size: 12px; color: var(--text-secondary); font-weight: 600;">
                 Login sebagai: <b><?= htmlspecialchars($user['name']) ?></b> (Admin)
               </span>
             </div>
-            <h2 style="font-size: 20px; font-weight: 800; color: #101828; margin: 0; letter-spacing: -0.3px;">
+            <h2 class="workspace-main-title" style="font-size: 20px; font-weight: 800; margin: 0; letter-spacing: -0.3px;">
               Manajemen Tugas &amp; Pembagian Kerja SDM
             </h2>
-            <p style="font-size: 13px; color: var(--text-secondary); margin: 4px 0 0;">
+            <p class="workspace-sub-title" style="font-size: 13px; color: var(--text-secondary); margin: 4px 0 0;">
               Distribusikan deliverables proyek ke Karyawan In-House dan Freelancer, serta pantau progres dan revisi klien.
             </p>
           </div>
@@ -1571,13 +1997,13 @@ if ($isWorkerUser) {
             <!-- Freelancer Saldo & Honorarium Payouts (Clean 2-Column Bento Grid) -->
             <div class="freelancer-bento-fee-grid" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 0 !important; margin-bottom: 12px;">
               <!-- Card 1: Pendapatan Diterima -->
-              <div class="bento-metric-card" style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 16px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); display: flex; flex-direction: column; justify-content: space-between;">
+              <div class="bento-metric-card" style="background: var(--bg-card, #FFFFFF); border: 1px solid var(--border-color, #F1F5F9); border-radius: 16px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <span style="font-size: 11.5px; font-weight: 600; color: #64748B;">Pendapatan Diterima</span>
+                    <span style="font-size: 11.5px; font-weight: 600; color: var(--text-secondary, #64748B);">Pendapatan Diterima</span>
                     <span style="background: #ECFDF5; color: #059669; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px;">Lunas</span>
                   </div>
-                  <div style="font-size: 17px; font-weight: 800; color: #0F172A; line-height: 1.2; letter-spacing: -0.3px;">
+                  <div style="font-size: 17px; font-weight: 800; color: var(--text-primary, #0F172A); line-height: 1.2; letter-spacing: -0.3px;">
                     <span id="kpi-freelancer-paid"><?= format_rupiah($freelancerPaid) ?></span>
                   </div>
                 </div>
@@ -1587,13 +2013,13 @@ if ($isWorkerUser) {
               </div>
 
               <!-- Card 2: Menunggu Transfer -->
-              <div class="bento-metric-card" style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 16px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); display: flex; flex-direction: column; justify-content: space-between;">
+              <div class="bento-metric-card" style="background: var(--bg-card, #FFFFFF); border: 1px solid var(--border-color, #F1F5F9); border-radius: 16px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03); display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                    <span style="font-size: 11.5px; font-weight: 600; color: #64748B;">Menunggu Transfer</span>
+                    <span style="font-size: 11.5px; font-weight: 600; color: var(--text-secondary, #64748B);">Menunggu Transfer</span>
                     <span style="background: #FFFBEB; color: #D97706; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px;">Dalam Proses</span>
                   </div>
-                  <div style="font-size: 17px; font-weight: 800; color: #0F172A; line-height: 1.2; letter-spacing: -0.3px;">
+                  <div style="font-size: 17px; font-weight: 800; color: var(--text-primary, #0F172A); line-height: 1.2; letter-spacing: -0.3px;">
                     <span id="kpi-freelancer-pending"><?= format_rupiah($freelancerPending) ?></span>
                   </div>
                 </div>
@@ -1609,12 +2035,12 @@ if ($isWorkerUser) {
 
           <?php if ($isWorkerUser): ?>
             <!-- Worker Info: Uraian Tugas & Klien (Compact Single Card - Rata Kanan Kiri & Slide Klien) -->
-            <div class="bento-worker-info-card" style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 16px; padding: 12px 14px; margin-top: 0 !important; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(15,23,42,0.03); display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box;">
+            <div class="bento-worker-info-card" style="background: var(--bg-card, #FFFFFF); border: 1px solid var(--border-color, #F1F5F9); border-radius: 16px; padding: 12px 14px; margin-top: 0 !important; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(15,23,42,0.03); display: flex; flex-direction: column; gap: 8px; width: 100%; box-sizing: border-box;">
               <!-- Row 1: Uraian Tugas (Rata Kanan Kiri) -->
               <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; box-sizing: border-box; font-size: 12px;">
                 <span style="font-size: 10px; font-weight: 700; color: #4F46E5; background: #EEF2FF; padding: 2.5px 8px; border-radius: 6px; flex-shrink: 0; letter-spacing: 0.3px;">URAIAN TUGAS</span>
-                <div style="font-weight: 600; color: #0F172A; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; font-size: 12px;" title="<?= htmlspecialchars(($workerProfile['position'] ?? 'Spesialis Tim') . ' • ' . ($workerProfile['jobdesk'] ?? 'Pengerjaan deliverables')) ?>">
-                  <?= htmlspecialchars($workerProfile['position'] ?? 'Spesialis Tim') ?> &bull; <span style="font-weight: 400; color: #64748B;"><?= htmlspecialchars($workerProfile['jobdesk'] ?? 'Pengerjaan deliverables') ?></span>
+                <div style="font-weight: 600; color: var(--text-primary, #0F172A); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; font-size: 12px;" title="<?= htmlspecialchars(($workerProfile['position'] ?? 'Spesialis Tim') . ' • ' . ($workerProfile['jobdesk'] ?? 'Pengerjaan deliverables')) ?>">
+                  <?= htmlspecialchars($workerProfile['position'] ?? 'Spesialis Tim') ?> &bull; <span style="font-weight: 400; color: var(--text-secondary, #64748B);"><?= htmlspecialchars($workerProfile['jobdesk'] ?? 'Pengerjaan deliverables') ?></span>
                 </div>
               </div>
 
@@ -1740,11 +2166,11 @@ if ($isWorkerUser) {
           </div>
 
           <!-- Top-Up Transactions & Proof Table Card (Owner & Admin) -->
-          <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05); min-width: 0; max-width: 100%; overflow: visible;">
+          <div style="background: var(--bg-card, #FFFFFF); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05); min-width: 0; max-width: 100%; overflow: visible;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
               <div>
                 <div style="display: flex; align-items: center; gap: 8px;">
-                  <h4 style="font-size: 15px; font-weight: 800; color: #101828; margin: 0;">
+                  <h4 style="font-size: 15px; font-weight: 800; color: var(--text-primary, #101828); margin: 0;">
                     Riwayat &amp; Bukti Transaksi Saldo Iklan (Alur 2 Tahap)
                   </h4>
                   <span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700; font-size: 10.5px;">Tampil di Portal Klien</span>
@@ -1779,10 +2205,10 @@ if ($isWorkerUser) {
           </div>
 
           <!-- Projects Ads Budget Table Card (Owner & Admin) -->
-          <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+          <div style="background: var(--bg-card, #FFFFFF); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: gap: 8px;">
               <div>
-                <h4 style="font-size: 15px; font-weight: 800; color: #101828; margin: 0;">Status Alokasi &amp; Anggaran Terpasang per Proyek</h4>
+                <h4 style="font-size: 15px; font-weight: 800; color: var(--text-primary, #101828); margin: 0;">Status Alokasi &amp; Anggaran Terpasang per Proyek</h4>
                 <span style="font-size: 12px; color: var(--text-secondary);">
                   Sinkronisasi Kontrak, Margin Agensi, Pagu Saldo Ads Klien, Pencairan ke Tim Ads, dan Sisa Pagu di Tangan Owner
                 </span>
@@ -1811,10 +2237,10 @@ if ($isWorkerUser) {
           </div>
 
           <!-- Coordination Logs & Screenshot Proof Feed (Owner & Admin) -->
-          <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+          <div style="background: var(--bg-card, #FFFFFF); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
               <div>
-                <h4 style="font-size: 15px; font-weight: 800; color: #101828; margin: 0;">Riwayat Update &amp; Bukti Screenshot Dashboard Ads</h4>
+                <h4 style="font-size: 15px; font-weight: 800; color: var(--text-primary, #101828); margin: 0;">Riwayat Update &amp; Bukti Screenshot Dashboard Ads</h4>
                 <span style="font-size: 12px; color: var(--text-secondary);">Catatan koordinasi langsung antara Tim Ads dan Owner beserta screenshot dashboard</span>
               </div>
             </div>
@@ -1828,12 +2254,12 @@ if ($isWorkerUser) {
           <!-- WORKER / FREELANCER (TIM ADS): APPIFY "MY WALLET" WORKSPACE -->
           <div class="appify-wallet-container" style="max-width: 100%; margin: 0 auto 24px; margin-top: 0 !important;">
             <!-- 1. Bento Card: Alokasi Dana dari Manajemen -->
-            <div class="bento-saldo-owner-card" style="background: #FFFFFF; border: 1px solid #F1F5F9; border-radius: 20px; padding: 16px 18px; margin-top: 0 !important; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(15,23,42,0.03); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+            <div class="bento-saldo-owner-card" style="background: var(--bg-card, #FFFFFF); border: 1px solid var(--border-color, #F1F5F9); border-radius: 20px; padding: 16px 18px; margin-top: 0 !important; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(15,23,42,0.03); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
               <div>
-                <div style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                <div style="font-size: 11px; font-weight: 700; color: var(--text-secondary, #64748B); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
                   ALOKASI DANA DARI MANAJEMEN
                 </div>
-                <div id="appify-hero-transferred" style="font-size: 24px; font-weight: 800; color: #0F172A; letter-spacing: -0.5px; line-height: 1.2;">
+                <div id="appify-hero-transferred" style="font-size: 24px; font-weight: 800; color: var(--text-primary, #0F172A); letter-spacing: -0.5px; line-height: 1.2;">
                   Rp <?= number_format($total_ditransfer_owner, 0, ',', '.') ?>
                 </div>
               </div>
@@ -1933,13 +2359,13 @@ if ($isWorkerUser) {
 
         <!-- SECTION 3: Report & Rekap Pekerjaan (Bulanan / Per Proyek) -->
         <div id="section-recap-content" class="kala-page-view tab-pane" style="display: none;">
-          <div style="background: #FFFFFF; border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 22px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+          <div class="worker-recap-card" style="background: var(--bg-surface-secondary, #FFFFFF); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 22px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px;">
               <div>
-                <h3 style="font-size: 16px; font-weight: 800; color: #101828; margin: 0;">
+                <h3 style="font-size: 16px; font-weight: 800; color: var(--text-primary, #101828); margin: 0;">
                   Report &amp; Rekap Pekerjaan Saya (Bulanan &amp; Per Proyek)
                 </h3>
-                <p style="font-size: 12.5px; color: var(--text-secondary); margin: 4px 0 0;">
+                <p style="font-size: 12.5px; color: var(--text-secondary, #64748B); margin: 4px 0 0;">
                   Ringkasan kuantitatif dan daftar seluruh output pekerjaan yang Anda kerjakan beserta status approval klien.
                 </p>
               </div>
@@ -1951,10 +2377,10 @@ if ($isWorkerUser) {
             </div>
 
             <!-- Filter Controls -->
-            <div style="background: #F9FAFB; border: 1px solid #ECEEF5; border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+            <div class="worker-recap-filter-bar" style="background: var(--bg-surface, #F9FAFB); border: 1px solid var(--border-color, #ECEEF5); border-radius: 12px; padding: 14px 16px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
               <!-- Month Filter -->
               <div style="min-width: 150px;">
-                <label style="font-size: 11px; font-weight: 700; color: #4B5563; text-transform: uppercase; display: block; margin-bottom: 4px;">Bulan</label>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-secondary, #4B5563); text-transform: uppercase; display: block; margin-bottom: 4px;">Bulan</label>
                 <select id="worker-recap-filter-month" class="form-select" onchange="loadWorkerRecapData()">
                   <option value="">Semua Periode</option>
                   <option value="<?= date('Y-m') ?>" selected>Bulan Ini (<?= date('M Y') ?>)</option>
@@ -1964,7 +2390,7 @@ if ($isWorkerUser) {
 
               <!-- Project Filter -->
               <div style="min-width: 200px;">
-                <label style="font-size: 11px; font-weight: 700; color: #4B5563; text-transform: uppercase; display: block; margin-bottom: 4px;">Klien / Proyek</label>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-secondary, #4B5563); text-transform: uppercase; display: block; margin-bottom: 4px;">Klien / Proyek</label>
                 <select id="worker-recap-filter-project" class="form-select" onchange="loadWorkerRecapData()">
                   <option value="">Semua Proyek PT</option>
                 </select>
@@ -1972,7 +2398,7 @@ if ($isWorkerUser) {
 
               <!-- Service Type Filter -->
               <div style="min-width: 170px;">
-                <label style="font-size: 11px; font-weight: 700; color: #4B5563; text-transform: uppercase; display: block; margin-bottom: 4px;">Jenis Layanan</label>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-secondary, #4B5563); text-transform: uppercase; display: block; margin-bottom: 4px;">Jenis Layanan</label>
                 <select id="worker-recap-filter-service" class="form-select" onchange="loadWorkerRecapData()">
                   <option value="all">Semua Layanan</option>
                   <option value="sosmed">Kelola Sosmed (Reguler)</option>
@@ -1994,7 +2420,7 @@ if ($isWorkerUser) {
                   <span class="kpi-title" style="color: #2563EB; font-weight: 700;">Total Pekerjaan</span>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
                 </div>
-                <div class="kpi-value" id="worker-recap-stat-total" style="font-size: 24px; color: #111827;">0</div>
+                <div class="kpi-value kpi-num-contract" id="worker-recap-stat-total" style="font-size: 24px;">0</div>
                 <div class="kpi-meta">Seluruh item kerjaan Anda</div>
               </div>
 
@@ -2003,7 +2429,7 @@ if ($isWorkerUser) {
                   <span class="kpi-title" style="color: #059669; font-weight: 700;">Selesai Disetujui (Approved)</span>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </div>
-                <div class="kpi-value" id="worker-recap-stat-approved" style="font-size: 24px; color: #059669;">0</div>
+                <div class="kpi-value kpi-num-margin" id="worker-recap-stat-approved" style="font-size: 24px; color: #059669;">0</div>
                 <div class="kpi-meta">Disetujui klien tanpa revisi</div>
               </div>
 
@@ -2012,7 +2438,7 @@ if ($isWorkerUser) {
                   <span class="kpi-title" style="color: #D97706; font-weight: 700;">In Progress / Review</span>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 </div>
-                <div class="kpi-value" id="worker-recap-stat-progress" style="font-size: 24px; color: #D97706;">0</div>
+                <div class="kpi-value kpi-num-warning" id="worker-recap-stat-progress" style="font-size: 24px; color: #D97706;">0</div>
                 <div class="kpi-meta">Dalam pengerjaan / review</div>
               </div>
 
@@ -2021,7 +2447,7 @@ if ($isWorkerUser) {
                   <span class="kpi-title" style="color: #DC2626; font-weight: 700;">Revisi (Revision)</span>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 </div>
-                <div class="kpi-value" id="worker-recap-stat-revision" style="font-size: 24px; color: #DC2626;">0</div>
+                <div class="kpi-value kpi-num-danger" id="worker-recap-stat-revision" style="font-size: 24px; color: #DC2626;">0</div>
                 <div class="kpi-meta">Catatan revisi dari klien</div>
               </div>
             </div>
@@ -2057,15 +2483,15 @@ if ($isWorkerUser) {
             <!-- ============================================================== -->
             <!-- OWNER / ADMIN VIEW: DIREKTORI PROFIL LENGKAP SELURUH KARYAWAN -->
             <!-- ============================================================== -->
-            <div class="team-dir-header-bar" style="background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 20px; padding: 20px 24px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(15,23,42,0.03); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px;">
+            <div class="team-dir-header-bar" style="background: var(--bg-surface-secondary, #FFFFFF); border: 1px solid var(--border-color, #ECEEF5); border-radius: 20px; padding: 20px 24px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(15,23,42,0.03); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px;">
               <div>
                 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                  <h3 style="font-size: 18px; font-weight: 800; color: #0F172A; margin: 0; letter-spacing: -0.3px;">Direktori Profil Tim &amp; Karyawan</h3>
+                  <h3 style="font-size: 18px; font-weight: 800; color: var(--text-primary, #0F172A); margin: 0; letter-spacing: -0.3px;">Direktori Profil Tim &amp; Karyawan</h3>
                   <span class="badge" style="background: #EEF2FF; color: #4F46E5; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 999px;">
                     <?= count($teamDirectory) ?> Anggota Terdaftar
                   </span>
                 </div>
-                <p style="font-size: 12.5px; color: #64748B; margin: 4px 0 0 0;">
+                <p style="font-size: 12.5px; color: var(--text-secondary, #64748B); margin: 4px 0 0 0;">
                   Pantau profil lengkap, lingkup jobdesk instruksi Owner, beban kerja tugas, dan kontak WhatsApp seluruh staf &amp; mitra freelance.
                 </p>
               </div>
@@ -2083,7 +2509,7 @@ if ($isWorkerUser) {
                 Semua Anggota Tim (<?= count($teamDirectory) ?>)
               </button>
               <?php foreach ($teamDirectory as $tm): ?>
-                <button type="button" class="team-filter-pill" onclick="filterTeamDirectory(<?= $tm['id'] ?>, this)" style="padding: 7px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid #E2E8F0; background: #FFFFFF; color: #475569; cursor: pointer; white-space: nowrap; transition: all 0.15s ease; display: inline-flex; align-items: center; gap: 6px;">
+                <button type="button" class="team-filter-pill" onclick="filterTeamDirectory(<?= $tm['id'] ?>, this)" style="padding: 7px 14px; border-radius: 999px; font-size: 12px; font-weight: 600; border: 1px solid var(--border-color, #E2E8F0); background: var(--bg-surface, #FFFFFF); color: var(--text-secondary, #475569); cursor: pointer; white-space: nowrap; transition: all 0.15s ease; display: inline-flex; align-items: center; gap: 6px;">
                   <span><?= htmlspecialchars($tm['name']) ?></span>
                   <span style="font-size: 10px; padding: 1px 6px; border-radius: 6px; font-weight: 700; <?= $tm['role'] === 'freelancer' ? 'background: #F3E8FF; color: #7E22CE;' : 'background: #EFF6FF; color: #1D4ED8;' ?>">
                     <?= $tm['role'] === 'freelancer' ? 'Freelance' : 'In-House' ?>
@@ -2094,9 +2520,9 @@ if ($isWorkerUser) {
 
             <!-- List of Employee Profile Cards -->
             <?php if (empty($teamDirectory)): ?>
-              <div style="background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 20px; padding: 48px 24px; text-align: center; color: #64748B;">
+              <div class="kala-empty-state-card" style="background: var(--bg-surface-secondary, #FFFFFF); border: 1px solid var(--border-color, #ECEEF5); border-radius: 20px; padding: 48px 24px; text-align: center; color: var(--text-secondary, #64748B);">
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" stroke-width="1.75" style="margin: 0 auto 12px auto; display: block;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-                <h4 style="font-size: 16px; font-weight: 700; color: #0F172A; margin: 0 0 6px 0;">Belum Ada Karyawan / Freelancer</h4>
+                <h4 style="font-size: 16px; font-weight: 700; color: var(--text-primary, #0F172A); margin: 0 0 6px 0;">Belum Ada Karyawan / Freelancer</h4>
                 <p style="font-size: 13px; margin: 0 0 16px 0;">Daftarkan anggota tim dan tetapkan jobdesk dari Manajemen Agensi.</p>
                 <a href="team" class="btn btn-primary btn-sm" style="border-radius: 10px; font-weight: 600;">+ Tambah Karyawan Baru</a>
               </div>
@@ -3676,10 +4102,10 @@ if ($isWorkerUser) {
       const container = document.getElementById('tasks-list-container');
       if (!tasks || tasks.length === 0) {
         container.innerHTML = `
-          <div style="text-align: center; padding: 48px; background: #FFF; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 8px; display: block;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            <h4 style="font-size: 15px; font-weight: 600; color: #111827; margin: 0 0 2px;">Tidak Ada Tugas Sesuai Filter</h4>
-            <p style="font-size: 12.5px; color: #6B7280; margin: 0;">Silakan ubah filter atau tambahkan tugas baru.</p>
+          <div class="kala-empty-state-card" style="text-align: center; padding: 48px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <svg class="empty-state-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 8px; display: block;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <h4 class="empty-state-title" style="font-size: 15px; font-weight: 600; margin: 0 0 2px;">Tidak Ada Tugas Sesuai Filter</h4>
+            <p class="empty-state-desc" style="font-size: 12.5px; margin: 0;">Silakan ubah filter atau tambahkan tugas baru.</p>
           </div>
         `;
         return;
@@ -4862,7 +5288,7 @@ if ($isWorkerUser) {
               </span>
             </div>
             <div class="metric-value">
-              <span class="metric-num">Rp ${Number(s.total_contract_value || 0).toLocaleString('id-ID')}</span>
+              <span class="metric-num kpi-num-contract">Rp ${Number(s.total_contract_value || 0).toLocaleString('id-ID')}</span>
             </div>
             <div class="metric-subtitle">
               <span>Rahasia internal Owner</span>
@@ -4877,7 +5303,7 @@ if ($isWorkerUser) {
               </span>
             </div>
             <div class="metric-value">
-              <span class="metric-num" style="color: #059669;">Rp ${Number(s.total_agency_retained || 0).toLocaleString('id-ID')}</span>
+              <span class="metric-num kpi-num-margin" style="color: #059669;">Rp ${Number(s.total_agency_retained || 0).toLocaleString('id-ID')}</span>
             </div>
             <div class="metric-subtitle">
               <span>Pendapatan jasa murni agensi</span>
@@ -4892,7 +5318,7 @@ if ($isWorkerUser) {
               </span>
             </div>
             <div class="metric-value">
-              <span class="metric-num" style="color: #5925DC;">Rp ${Number(s.total_allocated_ads || 0).toLocaleString('id-ID')}</span>
+              <span class="metric-num kpi-num-pagu" style="color: #5925DC;">Rp ${Number(s.total_allocated_ads || 0).toLocaleString('id-ID')}</span>
             </div>
             <div class="metric-subtitle">
               <span>Pagu belanja iklan klien</span>
@@ -4907,7 +5333,7 @@ if ($isWorkerUser) {
               </span>
             </div>
             <div class="metric-value">
-              <span class="metric-num" style="color: #175CD3;">Rp ${Number(s.total_transferred_to_ads || 0).toLocaleString('id-ID')}</span>
+              <span class="metric-num kpi-num-transferred" style="color: #175CD3;">Rp ${Number(s.total_transferred_to_ads || 0).toLocaleString('id-ID')}</span>
             </div>
             <div class="metric-subtitle">
               <span>Top-Up: Rp ${Number(s.total_spend_installed || 0).toLocaleString('id-ID')}</span>
@@ -4916,13 +5342,13 @@ if ($isWorkerUser) {
 
           <div class="kpi-tile ${Number(s.total_remaining_ads || 0) <= 0 ? 'urgent' : ''}">
             <div class="metric-header">
-              <span class="metric-label" style="color: ${Number(s.total_remaining_ads || 0) <= 0 ? '#B42318' : '#027A48'};">Sisa Pagu di Owner</span>
+              <span class="metric-label ${Number(s.total_remaining_ads || 0) <= 0 ? 'kpi-label-urgent' : 'kpi-label-success'}" style="color: ${Number(s.total_remaining_ads || 0) <= 0 ? '#B42318' : '#027A48'};">Sisa Pagu di Owner</span>
               <span class="metric-icon">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="${Number(s.total_remaining_ads || 0) <= 0 ? '#B42318' : '#027A48'}" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <svg viewBox="0 0 24 24" width="16" height="16" class="${Number(s.total_remaining_ads || 0) <= 0 ? 'kpi-icon-urgent' : 'kpi-icon-success'}" stroke="${Number(s.total_remaining_ads || 0) <= 0 ? '#B42318' : '#027A48'}" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               </span>
             </div>
             <div class="metric-value">
-              <span class="metric-num" style="color: ${Number(s.total_remaining_ads || 0) <= 0 ? '#B42318' : '#027A48'};">Rp ${Number(s.total_remaining_ads || 0).toLocaleString('id-ID')}</span>
+              <span class="metric-num ${Number(s.total_remaining_ads || 0) <= 0 ? 'kpi-num-danger' : 'kpi-num-success'}" style="color: ${Number(s.total_remaining_ads || 0) <= 0 ? '#B42318' : '#027A48'};">Rp ${Number(s.total_remaining_ads || 0).toLocaleString('id-ID')}</span>
             </div>
             <div class="metric-subtitle">
               <span>Belum dicairkan ke Tim Ads</span>
@@ -4980,7 +5406,7 @@ if ($isWorkerUser) {
               </span>
             </div>
             <div class="metric-value">
-              <span class="metric-num" style="color: #175CD3;">Rp ${transferred.toLocaleString('id-ID')}</span>
+              <span class="metric-num kpi-num-transferred" style="color: #175CD3;">Rp ${transferred.toLocaleString('id-ID')}</span>
             </div>
             <div class="metric-subtitle">
               <span>Nominal saldo yang ditransfer oleh Owner</span>
@@ -4989,13 +5415,13 @@ if ($isWorkerUser) {
 
           <div class="kpi-tile ${sisa <= 0 ? 'urgent' : ''}">
             <div class="metric-header">
-              <span class="metric-label" style="color: ${sisa <= 0 ? '#B42318' : '#027A48'};">Sisa Saldo</span>
+              <span class="metric-label ${sisa <= 0 ? 'kpi-label-urgent' : 'kpi-label-success'}" style="color: ${sisa <= 0 ? '#B42318' : '#027A48'};">Sisa Saldo</span>
               <span class="metric-icon">
-                <svg viewBox="0 0 24 24" width="16" height="16" stroke="${sisa <= 0 ? '#B42318' : '#027A48'}" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <svg viewBox="0 0 24 24" width="16" height="16" class="${sisa <= 0 ? 'kpi-icon-urgent' : 'kpi-icon-success'}" stroke="${sisa <= 0 ? '#B42318' : '#027A48'}" stroke-width="1.75" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               </span>
             </div>
             <div class="metric-value">
-              <span class="metric-num" style="color: ${sisa <= 0 ? '#B42318' : '#027A48'};">Rp ${sisa.toLocaleString('id-ID')}</span>
+              <span class="metric-num ${sisa <= 0 ? 'kpi-num-danger' : 'kpi-num-success'}" style="color: ${sisa <= 0 ? '#B42318' : '#027A48'};">Rp ${sisa.toLocaleString('id-ID')}</span>
             </div>
             <div class="metric-subtitle">
               <span>Sudah dibelanjakan: Rp ${spend.toLocaleString('id-ID')} &bull; Status: ${statusText}</span>
@@ -5095,10 +5521,10 @@ if ($isWorkerUser) {
         if (tbody) {
           tbody.innerHTML = `
             <tr>
-              <td colspan="7" style="text-align: center; padding: 36px 20px; color: var(--text-muted); background: #FCFCFD;">
+              <td colspan="7" class="ads-empty-cell" style="text-align: center; padding: 36px 20px; color: var(--text-muted); background: var(--bg-surface-secondary, #FCFCFD);">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 8px; display: block;"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                <div style="font-weight: 600; color: #111827; margin-bottom: 2px; font-size: 14px;">Belum Ada Riwayat Alur Transaksi Saldo Iklan</div>
-                <div style="font-size: 12px; color: #6B7280; margin-bottom: 12px;">
+                <div class="ads-empty-title" style="font-weight: 600; color: var(--text-primary, #111827); margin-bottom: 2px; font-size: 14px;">Belum Ada Riwayat Alur Transaksi Saldo Iklan</div>
+                <div class="ads-empty-desc" style="font-size: 12px; color: var(--text-secondary, #6B7280); margin-bottom: 12px;">
                   ${isPrivileged ? 'Owner dapat mencairkan saldo dengan menekan tombol <b>+ Transfer Saldo ke Tim Ads</b>.' : 'Owner belum mencairkan saldo iklan untuk tugas/proyek Anda.'}
                 </div>
                 ${isPrivileged ? `
@@ -5112,9 +5538,9 @@ if ($isWorkerUser) {
         }
         if (appifyEl) {
           appifyEl.innerHTML = `
-            <div style="text-align: center; padding: 36px 16px; background: #FFFFFF; border-radius: 16px; border: 1px solid #F0F1F7; color: #7B7890;">
-              <div style="font-size: 14px; font-weight: 700; color: #1A162B; margin-bottom: 4px;">Belum Ada Riwayat Transaksi</div>
-              <div style="font-size: 12px; color: #7B7890;">Owner belum mencairkan saldo iklan untuk tugas/proyek Anda.</div>
+            <div class="kala-empty-state-card" style="text-align: center; padding: 36px 16px; background: var(--bg-surface-secondary, #FFFFFF); border-radius: 16px; border: 1px solid var(--border-color, #F0F1F7); color: var(--text-secondary, #7B7890);">
+              <div style="font-size: 14px; font-weight: 700; color: var(--text-primary, #1A162B); margin-bottom: 4px;">Belum Ada Riwayat Transaksi</div>
+              <div style="font-size: 12px; color: var(--text-secondary, #7B7890);">Owner belum mencairkan saldo iklan untuk tugas/proyek Anda.</div>
             </div>
           `;
         }
@@ -5371,10 +5797,10 @@ if ($isWorkerUser) {
 
       if (logs.length === 0) {
         container.innerHTML = `
-          <div style="text-align: center; padding: 32px 20px; color: var(--text-muted); background: #FCFCFD; border-radius: 8px;">
+          <div class="ads-empty-state-box" style="text-align: center; padding: 32px 20px; color: var(--text-muted); background: var(--bg-surface-secondary, #FCFCFD); border-radius: 8px; border: 1px solid var(--border-color, rgba(255,255,255,0.06));">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 6px; display: block;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            <div style="font-weight: 600; color: #111827; font-size: 13.5px;">Belum Ada Riwayat Update atau Screenshot</div>
-            <div style="font-size: 12px; color: #6B7280; margin-top: 2px;">
+            <div class="ads-empty-title" style="font-weight: 600; color: var(--text-primary, #111827); font-size: 13.5px;">Belum Ada Riwayat Update atau Screenshot</div>
+            <div class="ads-empty-desc" style="font-size: 12px; color: var(--text-secondary, #6B7280); margin-top: 2px;">
               Setiap kali Tim Ads atau Owner mengunggah bukti transfer, top-up platform, atau memperbarui spend iklan, riwayatnya akan otomatis tercatat di sini.
             </div>
           </div>
@@ -5389,10 +5815,10 @@ if ($isWorkerUser) {
         const tfOwner = Number(item.transfer_amount_owner || item.topup_amount || 0);
 
         html += `
-          <div style="background: #FAFAFA; border: 1px solid #EAECF0; border-radius: 10px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
+          <div class="ads-log-card" style="background: var(--bg-surface-secondary, #FAFAFA); border: 1px solid var(--border-color, #EAECF0); border-radius: 10px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
             <div style="flex: 1; min-width: 260px;">
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <span style="font-weight: 800; font-size: 13.5px; color: #101828;">${escapeHtml(item.client_company || 'Klien')} &bull; ${escapeHtml(item.project_name || 'Proyek')}</span>
+                <span style="font-weight: 800; font-size: 13.5px; color: var(--text-primary, #101828);">${escapeHtml(item.client_company || 'Klien')} &bull; ${escapeHtml(item.project_name || 'Proyek')}</span>
                 <span class="badge" style="background: #F4F3FF; color: #5925DC; font-weight: 800; font-size: 10px;">${escapeHtml(item.platform || 'Meta Ads')}</span>
                 <span class="badge" style="background: #F2F4F7; color: #344054; font-size: 10px;">${escapeHtml(item.stage_label || 'Tahap 1')}</span>
               </div>
@@ -5400,11 +5826,11 @@ if ($isWorkerUser) {
                 Tanggal: <b>${dateStr}</b> &bull; Dicatat oleh: <b>${escapeHtml(item.assigned_user_name || item.uploader_name || 'Tim Ads')}</b>
               </div>
               ${item.notes ? `
-                <div style="margin-top: 8px; font-size: 12.5px; color: #344054; background: #FFFFFF; border: 1px solid #E4E7EC; border-radius: 6px; padding: 8px 12px; line-height: 1.4;">
+                <div class="ads-log-notes" style="margin-top: 8px; font-size: 12.5px; color: var(--text-secondary, #344054); background: var(--bg-surface, #FFFFFF); border: 1px solid var(--border-color, #E4E7EC); border-radius: 6px; padding: 8px 12px; line-height: 1.4;">
                   ${escapeHtml(item.notes)}
                 </div>
               ` : ''}
-              <div style="margin-top: 8px; display: flex; gap: 12px; font-size: 12px; color: #475467; flex-wrap: wrap;">
+              <div style="margin-top: 8px; display: flex; gap: 12px; font-size: 12px; color: var(--text-secondary, #475467); flex-wrap: wrap;">
                 ${tfOwner > 0 ? `<span>Saldo Masuk: <b style="color: #175CD3;">Rp ${tfOwner.toLocaleString('id-ID')}</b></span>` : ''}
                 ${spend > 0 ? `<span>Realisasi Spend: <b style="color: #027A48;">Rp ${spend.toLocaleString('id-ID')}</b></span>` : ''}
               </div>

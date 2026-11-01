@@ -41,6 +41,23 @@ $itemsStmt = $db->prepare("SELECT * FROM invoice_items WHERE invoice_id = ?");
 $itemsStmt->execute([$invoiceId]);
 $items = $itemsStmt->fetchAll();
 
+// Fetch installment payments
+$payStmt = $db->prepare("
+    SELECT * FROM invoice_payments 
+    WHERE invoice_id = ? AND COALESCE(is_deleted, 0) = 0 
+    ORDER BY payment_date ASC, id ASC
+");
+$payStmt->execute([$invoiceId]);
+$payments = $payStmt->fetchAll();
+
+$totalPaid = 0;
+foreach ($payments as $p) {
+    $totalPaid += floatval($p['amount']);
+}
+$remainingBalance = max(0, floatval($invoice['total_amount']) - $totalPaid);
+$isFullyPaid = ($invoice['status'] === 'Paid') || ($totalPaid >= floatval($invoice['total_amount']));
+$isPartiallyPaid = (!$isFullyPaid && $totalPaid > 0);
+
 // Date formatting for template (d/m/Y or j/n/Y like in sample 16/8/2026)
 $issueDateFormatted = date('j/n/Y', strtotime($invoice['issue_date']));
 $dueDateFormatted = date('j/n/Y', strtotime($invoice['due_date']));
@@ -268,8 +285,57 @@ $waUrl = !empty($waPhone)
           <span>GRAND TOTAL</span>
           <span><?= format_rupiah($invoice['total_amount']) ?></span>
         </div>
+
+        <?php if (!empty($payments)): ?>
+          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #E5E7EB;">
+            <div class="km-total-line" style="font-weight: 600; color: #027A48;">
+              <span>Telah Dibayar (<?= count($payments) ?>x)</span>
+              <span><?= format_rupiah($totalPaid) ?></span>
+            </div>
+            <div class="km-total-line" style="font-weight: 800; font-size: 14px; color: <?= $remainingBalance <= 0 ? '#027A48' : '#B42318' ?>;">
+              <span>Sisa Tagihan</span>
+              <span><?= format_rupiah($remainingBalance) ?></span>
+            </div>
+          </div>
+        <?php endif; ?>
       </div>
     </div>
+
+    <!-- Riwayat Termin Pembayaran (Jika ada pembayaran tercatat) -->
+    <?php if (!empty($payments)): ?>
+      <div style="margin: 20px 0 28px 0; background: #FAFAFC; border: 1px solid #ECEEF5; border-radius: 8px; padding: 14px 18px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #1D2939;">
+            Riwayat Pembayaran Termin (Payment History)
+          </div>
+          <span style="font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 4px; background: <?= $isFullyPaid ? '#ECFDF3' : '#FEF0C7' ?>; color: <?= $isFullyPaid ? '#027A48' : '#B54708' ?>;">
+            <?= $isFullyPaid ? 'LUNAS (PAID)' : 'DIBAYAR SEBAGIAN (PARTIALLY PAID)' ?>
+          </span>
+        </div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 11.5px;">
+          <thead>
+            <tr style="border-bottom: 1px solid #E4E7EC; color: #667085; text-align: left; font-size: 10.5px; text-transform: uppercase;">
+              <th style="padding: 6px 8px; width: 30px;">#</th>
+              <th style="padding: 6px 8px;">Keterangan / Tahap</th>
+              <th style="padding: 6px 8px;">Tanggal</th>
+              <th style="padding: 6px 8px;">Metode</th>
+              <th style="padding: 6px 8px; text-align: right;">Nominal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php foreach ($payments as $idx => $p): ?>
+              <tr style="border-bottom: 1px solid #F2F4F7;">
+                <td style="padding: 7px 8px; color: #98A2B3;"><?= $idx + 1 ?></td>
+                <td style="padding: 7px 8px; font-weight: 700; color: #101828;"><?= htmlspecialchars($p['term_name']) ?></td>
+                <td style="padding: 7px 8px; color: #475467;"><?= date('d/m/Y', strtotime($p['payment_date'])) ?></td>
+                <td style="padding: 7px 8px; color: #475467;"><?= htmlspecialchars($p['payment_method'] ?: 'Transfer') ?></td>
+                <td style="padding: 7px 8px; text-align: right; font-weight: 700; color: #027A48;"><?= format_rupiah($p['amount']) ?></td>
+              </tr>
+            <?php endforeach; ?>
+          </tbody>
+        </table>
+      </div>
+    <?php endif; ?>
 
     <!-- 5. Footer: QR Code, Agency Pitch & Social Links -->
     <div class="km-footer-section">

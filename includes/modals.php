@@ -799,6 +799,215 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
+<!-- Modal Catat Pembayaran Termin Baru (Installment) -->
+<div id="modal-add-payment-term" class="modal-backdrop">
+  <div class="modal-dialog" style="max-width: 500px;">
+    <div class="modal-header">
+      <div>
+        <h3 class="modal-title" style="font-size: 16px; font-weight: 700; color: #101828;">Catat Pembayaran Termin</h3>
+        <p style="font-size: 12px; color: #667085; margin: 2px 0 0 0;">Tagihan Invoice #<span id="pay-term-inv-num">-</span></p>
+      </div>
+      <button type="button" class="modal-close" onclick="closeModal('modal-add-payment-term')">&times;</button>
+    </div>
+    <form id="form-add-payment-term" onsubmit="submitAddPaymentTerm(event)" enctype="multipart/form-data">
+      <input type="hidden" name="invoice_id" id="pay-term-invoice-id">
+      <div class="modal-body" style="padding: 20px;">
+        <!-- Remaining Balance Banner -->
+        <div style="background: #F9FAFB; border: 1px solid #EAECF0; border-radius: 8px; padding: 12px 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-size: 12px; color: #475467; font-weight: 500;">Sisa Tagihan Belum Terbayar:</span>
+          <span id="pay-term-remaining-label" style="font-size: 13.5px; font-weight: 800; color: #B42318;">Rp 0</span>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: #344054;">Nama / Label Termin *</label>
+          <input type="text" name="term_name" id="pay-term-name" class="form-control" placeholder="Contoh: DP 50%, Termin 2 Kickoff, Pelunasan" required style="font-size: 13px;">
+          <small style="font-size: 11px; color: #667085; margin-top: 4px; display: block;">Keterangan tahapan pembayaran yang disepakati bersama klien.</small>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: #344054;">Nominal yang Dibayarkan (Rp) *</label>
+          <div class="input-group-currency">
+            <span class="currency-addon" style="font-weight: 700; color: #475467;">Rp</span>
+            <input type="text" name="amount" id="pay-term-amount" class="form-control rupiah-input" placeholder="0" required style="font-size: 14px; font-weight: 700; color: #101828;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: #344054;">Tanggal Pembayaran *</label>
+            <input type="date" name="payment_date" id="pay-term-date" class="form-control" required style="font-size: 13px;">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: #344054;">Metode Pembayaran</label>
+            <select name="payment_method" id="pay-term-method" class="form-control" style="font-size: 13px;">
+              <option value="Bank Transfer Mandiri">Transfer Mandiri</option>
+              <option value="Bank Transfer BCA">Transfer BCA</option>
+              <option value="Bank Transfer BNI / BRI">Transfer BNI / BRI</option>
+              <option value="Cash / Tunai">Cash / Tunai</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: #344054;">Upload Bukti Transfer (Opsional)</label>
+          <input type="file" name="receipt_file" id="pay-term-receipt" class="form-control" accept="image/jpeg,image/png,image/webp,application/pdf" style="font-size: 12px;">
+          <small style="font-size: 11px; color: #667085; margin-top: 4px; display: block;">Format: JPG, PNG, PDF maks. 5MB.</small>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: #344054;">Catatan Tambahan (Opsional)</label>
+          <textarea name="notes" id="pay-term-notes" class="form-control" rows="2" placeholder="Catatan internal transaksi..." style="font-size: 12.5px;"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 14px 20px; border-top: 1px solid #EAECF0;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-payment-term')" style="font-size: 13px;">Batal</button>
+        <button type="submit" id="btn-submit-pay-term" class="btn btn-primary" style="font-size: 13px; font-weight: 700; background: #12B76A; border-color: #12B76A;">Simpan Pembayaran</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  async function submitAddPaymentTerm(e) {
+    e.preventDefault();
+    const form = document.getElementById('form-add-payment-term');
+    const btn = document.getElementById('btn-submit-pay-term');
+    const origText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Menyimpan...';
+
+    const formData = new FormData(form);
+    const invoiceId = formData.get('invoice_id');
+
+    try {
+      const res = await fetch('api/invoices.php?action=add_payment', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+        closeModal('modal-add-payment-term');
+        if (typeof window.loadInvoicePaymentsData === 'function') {
+          await window.loadInvoicePaymentsData(invoiceId);
+        }
+        setTimeout(() => window.location.reload(), 1000);
+      } else {
+        showToast(data.message || 'Gagal menyimpan pembayaran', 'danger');
+      }
+    } catch (err) {
+      showToast('Terjadi kesalahan jaringan/server', 'danger');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = origText;
+    }
+  }
+
+  async function submitEditPaymentTerm(e) {
+    e.preventDefault();
+    const form = document.getElementById('form-edit-payment-term');
+    const btn = document.getElementById('btn-submit-edit-pay-term');
+    const origText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Menyimpan...';
+
+    const formData = new FormData(form);
+    const invoiceId = formData.get('invoice_id');
+
+    try {
+      const res = await fetch('api/invoices.php?action=update_payment', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast(data.message, 'success');
+        closeModal('modal-edit-payment-term');
+        if (typeof window.loadInvoicePaymentsData === 'function') {
+          await window.loadInvoicePaymentsData(invoiceId);
+        }
+        setTimeout(() => window.location.reload(), 1000);
+      } else {
+        showToast(data.message || 'Gagal memperbarui pembayaran', 'danger');
+      }
+    } catch (err) {
+      showToast('Terjadi kesalahan jaringan/server', 'danger');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = origText;
+    }
+  }
+</script>
+
+<!-- Modal Edit Pembayaran Termin (Edit All Fields) -->
+<div id="modal-edit-payment-term" class="modal-backdrop">
+  <div class="modal-dialog" style="max-width: 500px;">
+    <div class="modal-header">
+      <div>
+        <h3 class="modal-title" style="font-size: 16px; font-weight: 700; color: #101828;">Edit Riwayat Pembayaran</h3>
+        <p style="font-size: 12px; color: #667085; margin: 2px 0 0 0;">Tagihan Invoice #<span id="edit-pay-inv-num">-</span></p>
+      </div>
+      <button type="button" class="modal-close" onclick="closeModal('modal-edit-payment-term')">&times;</button>
+    </div>
+    <form id="form-edit-payment-term" onsubmit="submitEditPaymentTerm(event)" enctype="multipart/form-data">
+      <input type="hidden" name="payment_id" id="edit-pay-id">
+      <input type="hidden" name="invoice_id" id="edit-pay-invoice-id">
+      <div class="modal-body" style="padding: 20px;">
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: #344054;">Nama / Label Termin *</label>
+          <input type="text" name="term_name" id="edit-pay-name" class="form-control" placeholder="Contoh: DP 50%, Termin 2 Kickoff, Pelunasan" required style="font-size: 13px;">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: #344054;">Nominal yang Dibayarkan (Rp) *</label>
+          <div class="input-group-currency">
+            <span class="currency-addon" style="font-weight: 700; color: #475467;">Rp</span>
+            <input type="text" name="amount" id="edit-pay-amount" class="form-control rupiah-input" placeholder="0" required style="font-size: 14px; font-weight: 700; color: #101828;">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: #344054;">Tanggal Pembayaran *</label>
+            <input type="date" name="payment_date" id="edit-pay-date" class="form-control" required style="font-size: 13px;">
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: #344054;">Metode Pembayaran</label>
+            <select name="payment_method" id="edit-pay-method" class="form-control" style="font-size: 13px;">
+              <option value="Bank Transfer Mandiri">Transfer Mandiri</option>
+              <option value="Bank Transfer BCA">Transfer BCA</option>
+              <option value="Bank Transfer BNI / BRI">Transfer BNI / BRI</option>
+              <option value="Cash / Tunai">Cash / Tunai</option>
+              <option value="Lainnya">Lainnya</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 14px;">
+          <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: #344054;">Ganti Bukti Transfer (Opsional)</label>
+          <input type="file" name="receipt_file" id="edit-pay-receipt" class="form-control" accept="image/jpeg,image/png,image/webp,application/pdf" style="font-size: 12px;">
+          <div id="edit-pay-receipt-current" style="display: none; margin-top: 6px;">
+            <button type="button" id="edit-pay-receipt-link" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 2px 8px; color: #1D4ED8; border-color: #BFDBFE; background: #EFF6FF;">
+              Lihat Bukti yang Sudah Ada
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label class="form-label" style="font-size: 12.5px; font-weight: 600; color: #344054;">Catatan Tambahan (Opsional)</label>
+          <textarea name="notes" id="edit-pay-notes" class="form-control" rows="2" placeholder="Catatan internal transaksi..." style="font-size: 12.5px;"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 14px 20px; border-top: 1px solid #EAECF0;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-edit-payment-term')" style="font-size: 13px;">Batal</button>
+        <button type="submit" id="btn-submit-edit-pay-term" class="btn btn-primary" style="font-size: 13px; font-weight: 700; background: #1570EF; border-color: #1570EF;">Simpan Perubahan</button>
+      </div>
+    </form>
+  </div>
+</div>
+</script>
+
 <!-- 6. Modal View Bukti Struk (Lightbox Zoom) -->
 <div id="modal-view-receipt" class="modal-backdrop">
   <div class="modal-dialog">

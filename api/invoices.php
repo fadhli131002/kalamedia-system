@@ -18,7 +18,7 @@ if (is_karyawan() || is_freelancer()) {
 
 // CLIENT MUTATION RESTRICTION: Client is read-only
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
-if (is_client() && in_array($action, ['create', 'update', 'delete', 'mark_paid', 'update_status', 'upload_receipt', 'confirm_payment', 'project_detail'])) {
+if (is_client() && in_array($action, ['create', 'update', 'delete', 'mark_paid', 'update_status', 'upload_receipt', 'confirm_payment', 'project_detail', 'add_payment', 'delete_payment'])) {
     echo json_encode(['success' => false, 'message' => 'Akses ditolak: Klien tidak memiliki izin mengubah data invoice.']);
     exit;
 }
@@ -428,8 +428,443 @@ if ($action === 'get_details') {
     $itemsStmt->execute([$invoiceId]);
     $invoice['items'] = $itemsStmt->fetchAll();
 
+    $payStmt = $db->prepare("
+        SELECT id, term_name, amount, payment_date, payment_method, receipt_file, notes, created_at
+        FROM invoice_payments
+        WHERE invoice_id = ? AND COALESCE(is_deleted, 0) = 0
+        ORDER BY payment_date ASC, id ASC
+    ");
+    $payStmt->execute([$invoiceId]);
+    $payments = $payStmt->fetchAll();
+
+    $totalPaidCalc = 0;
+    foreach ($payments as $p) {
+        $totalPaidCalc += floatval($p['amount']);
+    }
+    $invoice['payments'] = $payments;
+    $invoice['total_paid'] = $totalPaidCalc;
+    $invoice['remaining_balance'] = max(0, floatval($invoice['total_amount']) - $totalPaidCalc);
+
     echo json_encode(['success' => true, 'invoice' => $invoice]);
     exit;
+}
+
+if ($action === 'list_payments') {
+    $invoiceId = intval($_GET['invoice_id'] ?? 0);
+    $stmt = $db->prepare("
+        SELECT i.id, i.invoice_number, i.total_amount, i.status, c.company as client_company
+        FROM invoices i
+        JOIN clients c ON i.client_id = c.id
+        WHERE i.id = ? AND COALESCE(i.is_deleted, 0) = 0
+    ");
+    $stmt->execute([$invoiceId]);
+    $invoice = $stmt->fetch();
+
+    if (!$invoice) {
+        echo json_encode(['success' => false, 'message' => 'Invoice tidak ditemukan.']);
+        exit;
+    }
+
+    $payStmt = $db->prepare("
+        SELECT p.*, u.name as recorded_by_name
+        FROM invoice_payments p
+        LEFT JOIN users u ON p.recorded_by = u.id
+        WHERE p.invoice_id = ? AND COALESCE(p.is_deleted, 0) = 0
+        ORDER BY p.payment_date ASC, p.id ASC
+    ");
+    $payStmt->execute([$invoiceId]);
+    $payments = $payStmt->fetchAll();
+
+    $totalPaid = 0;
+    foreach ($payments as &$p) {
+        $p['amount_formatted'] = format_rupiah($p['amount']);
+        $p['receipt_url'] = !empty($p['receipt_file']) ? url(UPLOAD_URL . '/' . $p['receipt_file']) : null;
+        $totalPaid += floatval($p['amount']);
+    }
+
+    $totalAmount = floatval($invoice['total_amount']);
+    $remaining = max(0, $totalAmount - $totalPaid);
+    $percent = $totalAmount > 0 ? min(100, round(($totalPaid / $totalAmount) * 100, 1)) : 0;
+
+    echo json_encode([
+        'success' => true,
+        'invoice' => [
+            'id' => $invoice['id'],
+            'invoice_number' => $invoice['invoice_number'],
+            'total_amount' => $totalAmount,
+            'total_amount_formatted' => format_rupiah($totalAmount),
+            'total_paid' => $totalPaid,
+            'total_paid_formatted' => format_rupiah($totalPaid),
+            'remaining_balance' => $remaining,
+            'remaining_balance_formatted' => format_rupiah($remaining),
+            'progress_percent' => $percent,
+            'status' => $invoice['status']
+        ],
+        'payments' => $payments
+    ]);
+    exit;
+}
+
+if ($action === 'add_payment') {
+    $invoiceId = intval($_POST['invoice_id'] ?? 0);
+    $termName = trim($_POST['term_name'] ?? '');
+    if (empty($termName)) {
+        $termName = 'Pembayaran Termin';
+    }
+
+    // Parse amount
+    $rawAmount = $_POST['amount'] ?? 0;
+    if (is_string($rawAmount)) {
+        $cleanAmount = preg_replace('/[^\d.,]/', '', $rawAmount);
+        if (strpos($cleanAmount, ',') !== false && strpos($cleanAmount, '.') !== false) {
+            $cleanAmount = str_replace('.', '', $cleanAmount);
+            $cleanAmount = str_replace(',', '.', $cleanAmount);
+        } elseif (strpos($cleanAmount, '.') !== false && substr_count($cleanAmount, '.') > 1) {
+            $cleanAmount = str_replace('.', '', $cleanAmount);
+        } elseif (strpos($cleanAmount, ',') !== false) {
+            $cleanAmount = str_replace(',', '.', $cleanAmount);
+        }
+        $amount = floatval($cleanAmount);
+    } else {
+        $amount = floatval($rawAmount);
+    }
+
+    if ($invoiceId <= 0 || $amount <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Invoice ID atau nominal pembayaran tidak valid.']);
+        exit;
+    }
+
+    $paymentDate = $_POST['payment_date'] ?? date('Y-m-d');
+    $paymentMethod = trim($_POST['payment_method'] ?? 'Bank Transfer');
+    $notes = trim($_POST['notes'] ?? '');
+    $currentUser = current_user();
+    $recordedBy = !empty($currentUser['id']) ? (int)$currentUser['id'] : null;
+
+    // Handle receipt file upload if provided
+    $receiptFile = null;
+    if (isset($_FILES['receipt_file']) && $_FILES['receipt_file']['error'] === UPLOAD_ERR_OK) {
+        $file = $_FILES['receipt_file'];
+        $maxSize = 5 * 1024 * 1024;
+        if ($file['size'] > $maxSize) {
+            echo json_encode(['success' => false, 'message' => 'Ukuran file bukti transfer melebihi 5MB!']);
+            exit;
+        }
+        $allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'pdf'];
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowedExts)) {
+            echo json_encode(['success' => false, 'message' => 'Format file tidak didukung. Harap upload JPG, PNG, atau PDF.']);
+            exit;
+        }
+        if (!is_dir(UPLOAD_DIR)) {
+            mkdir(UPLOAD_DIR, 0777, true);
+        }
+        $receiptFile = 'receipt_inv_' . $invoiceId . '_' . date('Ymd_His') . '_' . bin2hex(random_bytes(3)) . '.' . $ext;
+        if (!move_uploaded_file($file['tmp_name'], UPLOAD_DIR . '/' . $receiptFile)) {
+            $receiptFile = null;
+        }
+    }
+
+    try {
+        $db->beginTransaction();
+
+        $invStmt = $db->prepare("SELECT invoice_number, total_amount, status FROM invoices WHERE id = ? AND COALESCE(is_deleted,0)=0");
+        $invStmt->execute([$invoiceId]);
+        $inv = $invStmt->fetch();
+        if (!$inv) {
+            throw new Exception("Invoice tidak ditemukan.");
+        }
+
+        $insStmt = $db->prepare("
+            INSERT INTO invoice_payments (invoice_id, term_name, amount, payment_date, payment_method, receipt_file, notes, recorded_by)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $insStmt->execute([$invoiceId, $termName, $amount, $paymentDate, $paymentMethod, $receiptFile, $notes, $recordedBy]);
+        $paymentId = $db->lastInsertId();
+
+        // Calculate total payments so far
+        $sumStmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) FROM invoice_payments WHERE invoice_id = ? AND COALESCE(is_deleted, 0) = 0");
+        $sumStmt->execute([$invoiceId]);
+        $totalPaidNow = floatval($sumStmt->fetchColumn());
+
+        $totalInv = floatval($inv['total_amount']);
+        $newStatus = $inv['status'];
+        $paidAtUpdate = null;
+
+        if ($totalPaidNow >= $totalInv) {
+            $newStatus = 'Paid';
+            $paidAtUpdate = date('Y-m-d H:i:s');
+        } elseif ($totalPaidNow > 0) {
+            $newStatus = 'Partially Paid';
+        }
+
+        // Update invoice status & latest receipt file if provided
+        if ($receiptFile) {
+            $upd = $db->prepare("UPDATE invoices SET status = ?, receipt_file = ?, paid_at = COALESCE(paid_at, ?) WHERE id = ?");
+            $upd->execute([$newStatus, $receiptFile, $paidAtUpdate, $invoiceId]);
+        } else {
+            $upd = $db->prepare("UPDATE invoices SET status = ?, paid_at = COALESCE(paid_at, ?) WHERE id = ?");
+            $upd->execute([$newStatus, $paidAtUpdate, $invoiceId]);
+        }
+
+        $db->commit();
+
+        log_activity(
+            'invoice',
+            "Pembayaran Termin Dicatat: #{$inv['invoice_number']}",
+            "Tahap '$termName' sebesar " . format_rupiah($amount) . " dicatat via $paymentMethod. Status invoice kini: $newStatus.",
+            $amount
+        );
+
+        echo json_encode([
+            'success' => true,
+            'message' => "Pembayaran termin sebesar " . format_rupiah($amount) . " berhasil dicatat!",
+            'payment_id' => $paymentId,
+            'new_status' => $newStatus,
+            'total_paid' => $totalPaidNow,
+            'remaining_balance' => max(0, $totalInv - $totalPaidNow)
+        ]);
+        exit;
+    } catch (Exception $e) {
+        if ($db->inTransaction()) $db->rollBack();
+        echo json_encode(['success' => false, 'message' => 'Gagal mencatat pembayaran: ' . $e->getMessage()]);
+        exit;
+    }
+}
+
+if ($action === 'delete_payment') {
+    if (!is_owner() && !is_admin()) {
+        echo json_encode(['success' => false, 'message' => 'Akses ditolak.']);
+        exit;
+    }
+
+    $paymentId = intval($_POST['payment_id'] ?? 0);
+    if ($paymentId <= 0) {
+        echo json_encode(['success' => false, 'message' => 'ID pembayaran tidak valid.']);
+        exit;
+    }
+
+    try {
+        $db->beginTransaction();
+
+        $stmt = $db->prepare("SELECT * FROM invoice_payments WHERE id = ? AND COALESCE(is_deleted, 0) = 0");
+        $stmt->execute([$paymentId]);
+        $pay = $stmt->fetch();
+        if (!$pay) {
+            throw new Exception("Riwayat pembayaran tidak ditemukan.");
+        }
+
+        $invoiceId = (int)$pay['invoice_id'];
+
+        // Soft delete payment
+        $del = $db->prepare("UPDATE invoice_payments SET is_deleted = 1 WHERE id = ?");
+        $del->execute([$paymentId]);
+
+        // Recalculate remaining
+        $sumStmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) FROM invoice_payments WHERE invoice_id = ? AND COALESCE(is_deleted, 0) = 0");
+        $sumStmt->execute([$invoiceId]);
+        $totalPaidNow = floatval($sumStmt->fetchColumn());
+
+        $invStmt = $db->prepare("SELECT invoice_number, total_amount, due_date FROM invoices WHERE id = ?");
+        $invStmt->execute([$invoiceId]);
+        $inv = $invStmt->fetch();
+
+        $totalInv = floatval($inv['total_amount']);
+        if ($totalPaidNow >= $totalInv) {
+            $newStatus = 'Paid';
+        } elseif ($totalPaidNow > 0) {
+            $newStatus = 'Partially Paid';
+        } else {
+            // Check overdue or draft/sent
+            $today = date('Y-m-d');
+            $newStatus = ($inv['due_date'] < $today) ? 'Overdue' : 'Draft';
+        }
+
+        $upd = $db->prepare("UPDATE invoices SET status = ? WHERE id = ?");
+        $upd->execute([$newStatus, $invoiceId]);
+
+        $db->commit();
+
+        log_activity(
+            'invoice',
+            "Pembayaran Termin Dihapus: #{$inv['invoice_number']}",
+            "Tahap '{$pay['term_name']}' (" . format_rupiah($pay['amount']) . ") dihapus. Status invoice disesuaikan menjadi: $newStatus."
+        );
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Riwayat pembayaran berhasil dihapus.',
+            'new_status' => $newStatus,
+            'total_paid' => $totalPaidNow,
+            'remaining_balance' => max(0, $totalInv - $totalPaidNow)
+        ]);
+        exit;
+    } catch (Exception $e) {
+        if ($db->inTransaction()) $db->rollBack();
+        echo json_encode(['success' => false, 'message' => 'Gagal menghapus riwayat pembayaran: ' . $e->getMessage()]);
+        exit;
+    }
+}
+
+if ($action === 'get_payment_detail') {
+    $paymentId = intval($_GET['payment_id'] ?? 0);
+    $stmt = $db->prepare("
+        SELECT p.*, i.invoice_number, i.total_amount
+        FROM invoice_payments p
+        JOIN invoices i ON p.invoice_id = i.id
+        WHERE p.id = ? AND COALESCE(p.is_deleted, 0) = 0
+    ");
+    $stmt->execute([$paymentId]);
+    $pay = $stmt->fetch();
+
+    if (!$pay) {
+        echo json_encode(['success' => false, 'message' => 'Data pembayaran tidak ditemukan.']);
+        exit;
+    }
+
+    echo json_encode([
+        'success' => true,
+        'payment' => [
+            'id' => $pay['id'],
+            'invoice_id' => $pay['invoice_id'],
+            'invoice_number' => $pay['invoice_number'],
+            'term_name' => $pay['term_name'],
+            'amount' => floatval($pay['amount']),
+            'amount_formatted' => format_rupiah($pay['amount']),
+            'payment_date' => $pay['payment_date'],
+            'payment_method' => $pay['payment_method'],
+            'receipt_file' => $pay['receipt_file'],
+            'notes' => $pay['notes']
+        ]
+    ]);
+    exit;
+}
+
+if ($action === 'update_payment') {
+    if (!is_owner() && !is_admin()) {
+        echo json_encode(['success' => false, 'message' => 'Akses ditolak.']);
+        exit;
+    }
+
+    $paymentId = intval($_POST['payment_id'] ?? 0);
+    $termName = trim($_POST['term_name'] ?? '');
+    if (empty($termName)) {
+        $termName = 'Pembayaran Termin';
+    }
+
+    // Parse amount
+    $rawAmount = $_POST['amount'] ?? 0;
+    if (is_string($rawAmount)) {
+        $cleanAmount = preg_replace('/[^\d.,]/', '', $rawAmount);
+        if (strpos($cleanAmount, ',') !== false && strpos($cleanAmount, '.') !== false) {
+            $cleanAmount = str_replace('.', '', $cleanAmount);
+            $cleanAmount = str_replace(',', '.', $cleanAmount);
+        } elseif (strpos($cleanAmount, '.') !== false && substr_count($cleanAmount, '.') > 1) {
+            $cleanAmount = str_replace('.', '', $cleanAmount);
+        } elseif (strpos($cleanAmount, ',') !== false) {
+            $cleanAmount = str_replace(',', '.', $cleanAmount);
+        }
+        $amount = floatval($cleanAmount);
+    } else {
+        $amount = floatval($rawAmount);
+    }
+
+    if ($paymentId <= 0 || $amount <= 0) {
+        echo json_encode(['success' => false, 'message' => 'Data input pembayaran tidak valid.']);
+        exit;
+    }
+
+    $paymentDate = $_POST['payment_date'] ?? date('Y-m-d');
+    $paymentMethod = trim($_POST['payment_method'] ?? 'Bank Transfer');
+    $notes = trim($_POST['notes'] ?? '');
+
+    try {
+        $db->beginTransaction();
+
+        $stmt = $db->prepare("SELECT * FROM invoice_payments WHERE id = ? AND COALESCE(is_deleted, 0) = 0");
+        $stmt->execute([$paymentId]);
+        $currentPay = $stmt->fetch();
+        if (!$currentPay) {
+            throw new Exception("Data pembayaran tidak ditemukan.");
+        }
+
+        $invoiceId = (int)$currentPay['invoice_id'];
+        $receiptFile = $currentPay['receipt_file'];
+
+        // Handle updated receipt file if uploaded
+        if (isset($_FILES['receipt_file']) && $_FILES['receipt_file']['error'] === UPLOAD_ERR_OK) {
+            $file = $_FILES['receipt_file'];
+            $maxSize = 5 * 1024 * 1024;
+            if ($file['size'] > $maxSize) {
+                echo json_encode(['success' => false, 'message' => 'Ukuran file bukti transfer melebihi 5MB!']);
+                exit;
+            }
+            $allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'pdf'];
+            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            if (!in_array($ext, $allowedExts)) {
+                echo json_encode(['success' => false, 'message' => 'Format file tidak didukung. Harap upload JPG, PNG, atau PDF.']);
+                exit;
+            }
+            if (!is_dir(UPLOAD_DIR)) {
+                mkdir(UPLOAD_DIR, 0777, true);
+            }
+            $newReceiptFile = 'receipt_inv_' . $invoiceId . '_' . date('Ymd_His') . '_' . bin2hex(random_bytes(3)) . '.' . $ext;
+            if (move_uploaded_file($file['tmp_name'], UPLOAD_DIR . '/' . $newReceiptFile)) {
+                $receiptFile = $newReceiptFile;
+            }
+        }
+
+        $updPay = $db->prepare("
+            UPDATE invoice_payments 
+            SET term_name = ?, amount = ?, payment_date = ?, payment_method = ?, receipt_file = ?, notes = ?
+            WHERE id = ?
+        ");
+        $updPay->execute([$termName, $amount, $paymentDate, $paymentMethod, $receiptFile, $notes, $paymentId]);
+
+        // Recalculate invoice status
+        $sumStmt = $db->prepare("SELECT COALESCE(SUM(amount), 0) FROM invoice_payments WHERE invoice_id = ? AND COALESCE(is_deleted, 0) = 0");
+        $sumStmt->execute([$invoiceId]);
+        $totalPaidNow = floatval($sumStmt->fetchColumn());
+
+        $invStmt = $db->prepare("SELECT invoice_number, total_amount, due_date FROM invoices WHERE id = ?");
+        $invStmt->execute([$invoiceId]);
+        $inv = $invStmt->fetch();
+
+        $totalInv = floatval($inv['total_amount']);
+        $newStatus = $inv['status'];
+        if ($totalPaidNow >= $totalInv) {
+            $newStatus = 'Paid';
+        } elseif ($totalPaidNow > 0) {
+            $newStatus = 'Partially Paid';
+        } else {
+            $today = date('Y-m-d');
+            $newStatus = ($inv['due_date'] < $today) ? 'Overdue' : 'Draft';
+        }
+
+        $updInv = $db->prepare("UPDATE invoices SET status = ? WHERE id = ?");
+        $updInv->execute([$newStatus, $invoiceId]);
+
+        $db->commit();
+
+        log_activity(
+            'invoice',
+            "Pembayaran Termin Diperbarui: #{$inv['invoice_number']}",
+            "Tahap '$termName' diperbarui menjadi " . format_rupiah($amount) . " via $paymentMethod. Status invoice kini: $newStatus.",
+            $amount
+        );
+
+        echo json_encode([
+            'success' => true,
+            'message' => "Riwayat pembayaran termin berhasil diperbarui!",
+            'new_status' => $newStatus,
+            'total_paid' => $totalPaidNow,
+            'remaining_balance' => max(0, $totalInv - $totalPaidNow)
+        ]);
+        exit;
+    } catch (Exception $e) {
+        if ($db->inTransaction()) $db->rollBack();
+        echo json_encode(['success' => false, 'message' => 'Gagal memperbarui pembayaran: ' . $e->getMessage()]);
+        exit;
+    }
 }
 
 if ($action === 'download_pdf') {

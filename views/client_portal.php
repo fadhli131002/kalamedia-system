@@ -200,10 +200,18 @@ if ($clientHasSosmed) {
 
 // Fetch Invoices for this client (STRICT: Financial privacy - only client-facing invoice totals)
 $stmtInvoices = $db->prepare("
-    SELECT id, invoice_number, issue_date, due_date, total_amount, status
-    FROM invoices
-    WHERE client_id = ? AND COALESCE(is_deleted,0)=0
-    ORDER BY id DESC
+    SELECT i.id, i.invoice_number, i.issue_date, i.due_date, i.total_amount, i.status,
+           COALESCE(p_sum.total_paid, 0) as paid_amount,
+           COALESCE(p_sum.payments_count, 0) as payments_count
+    FROM invoices i
+    LEFT JOIN (
+        SELECT invoice_id, SUM(amount) as total_paid, COUNT(id) as payments_count
+        FROM invoice_payments
+        WHERE COALESCE(is_deleted, 0) = 0
+        GROUP BY invoice_id
+    ) p_sum ON p_sum.invoice_id = i.id
+    WHERE i.client_id = ? AND COALESCE(i.is_deleted,0)=0
+    ORDER BY i.id DESC
 ");
 $stmtInvoices->execute([$clientId]);
 $invoices = $stmtInvoices->fetchAll();
@@ -1922,19 +1930,33 @@ try {
                     <tr><td colspan="6" style="text-align: center; padding: 32px; color: var(--text-muted); white-space: nowrap !important;">Belum ada riwayat tagihan invoice.</td></tr>
                   <?php else: ?>
                     <?php foreach ($invoices as $inv): ?>
+                      <?php
+                        $totAmt = floatval($inv['total_amount']);
+                        $paidAmt = floatval($inv['paid_amount']);
+                        $remAmt = max(0, $totAmt - $paidAmt);
+                        $status = $inv['status'];
+                        $bg = ($status === 'Paid') ? '#ECFDF5' : (($status === 'Partially Paid') ? '#FEF0C7' : (($status === 'Overdue') ? '#FEF2F2' : '#F2F4F7'));
+                        $col = ($status === 'Paid') ? '#027A48' : (($status === 'Partially Paid') ? '#B54708' : (($status === 'Overdue') ? '#B42318' : '#344054'));
+                      ?>
                       <tr>
-                        <td style="font-weight: 800; color: #101828; white-space: nowrap !important;"><?= htmlspecialchars($inv['invoice_number']) ?></td>
+                        <td style="font-weight: 800; color: #101828; white-space: nowrap !important;">
+                          <div style="display: flex; align-items: center; gap: 6px;">
+                            <span>#<?= htmlspecialchars($inv['invoice_number']) ?></span>
+                          </div>
+                        </td>
                         <td style="white-space: nowrap !important;"><?= date('d M Y', strtotime($inv['issue_date'])) ?></td>
                         <td style="white-space: nowrap !important;"><?= date('d M Y', strtotime($inv['due_date'])) ?></td>
-                        <td style="font-weight: 800; color: #101828; white-space: nowrap !important;">Rp <?= number_format($inv['total_amount'], 0, ',', '.') ?></td>
+                        <td style="font-weight: 800; color: #101828; white-space: nowrap !important;">
+                          <div>Rp <?= number_format($totAmt, 0, ',', '.') ?></div>
+                          <?php if ($paidAmt > 0 && $remAmt > 0): ?>
+                            <div style="font-size: 11px; font-weight: 600; color: #B54708; margin-top: 2px;">
+                              Sisa: Rp <?= number_format($remAmt, 0, ',', '.') ?>
+                            </div>
+                          <?php endif; ?>
+                        </td>
                         <td style="white-space: nowrap !important;">
-                          <?php
-                            $status = $inv['status'];
-                            $bg = ($status === 'Paid') ? '#ECFDF5' : (($status === 'Overdue') ? '#FEF2F2' : '#F2F4F7');
-                            $col = ($status === 'Paid') ? '#027A48' : (($status === 'Overdue') ? '#B42318' : '#344054');
-                          ?>
                           <span class="badge" style="background: <?= $bg ?>; color: <?= $col ?>; font-weight: 700;">
-                            <?= htmlspecialchars($status) ?>
+                            <?= htmlspecialchars(strtoupper($status)) ?>
                           </span>
                         </td>
                         <td style="text-align: right; white-space: nowrap !important;">

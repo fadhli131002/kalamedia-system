@@ -62,11 +62,25 @@ if ($targetType === 'invoice' && $targetId > 0) {
     $stmt = $db->prepare("UPDATE invoices SET receipt_file = ?, status = 'Paid', paid_at = datetime('now', 'localtime') WHERE id = ?");
     $stmt->execute([$newFileName, $targetId]);
     
-    // Get invoice info for activity log
-    $inv = $db->query("SELECT invoice_number, total_amount FROM invoices WHERE id = $targetId")->fetch();
-    if ($inv) {
-        log_activity('invoice', "Bukti Transfer Invoice #{$inv['invoice_number']} Diunggah", "Pembayaran klien sebesar " . format_rupiah($inv['total_amount']) . " telah diverifikasi.", $inv['total_amount']);
-    }
+    // Also record as a payment entry if not yet recorded
+    try {
+        $inv = $db->query("SELECT invoice_number, total_amount FROM invoices WHERE id = $targetId")->fetch();
+        if ($inv) {
+            $sumPay = $db->query("SELECT COALESCE(SUM(amount), 0) FROM invoice_payments WHERE invoice_id = $targetId AND COALESCE(is_deleted,0)=0")->fetchColumn();
+            $remaining = floatval($inv['total_amount']) - floatval($sumPay);
+            if ($remaining > 0) {
+                $termName = ($sumPay > 0) ? 'Pelunasan Invoice' : 'Pembayaran Penuh';
+                $db->prepare("
+                    INSERT INTO invoice_payments (invoice_id, term_name, amount, payment_date, payment_method, receipt_file, notes)
+                    VALUES (?, ?, ?, date('now', 'localtime'), 'Bank Transfer', ?, 'Dikonfirmasi melalui upload bukti')
+                ")->execute([$targetId, $termName, $remaining, $newFileName]);
+            }
+            log_activity('invoice', "Bukti Transfer Invoice #{$inv['invoice_number']} Diunggah", "Pembayaran klien sebesar " . format_rupiah($inv['total_amount']) . " telah diverifikasi.", $inv['total_amount']);
+        }
+    } catch (Exception $e) {}
+} elseif ($targetType === 'invoice_payment' && $targetId > 0) {
+    $stmt = $db->prepare("UPDATE invoice_payments SET receipt_file = ? WHERE id = ?");
+    $stmt->execute([$newFileName, $targetId]);
 } elseif ($targetType === 'payout' && $targetId > 0) {
     $stmt = $db->prepare("UPDATE freelancer_payouts SET receipt_file = ?, status = 'Paid', paid_at = datetime('now', 'localtime') WHERE id = ?");
     $stmt->execute([$newFileName, $targetId]);

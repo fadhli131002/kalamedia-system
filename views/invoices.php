@@ -18,10 +18,18 @@ if ($filterStatus !== 'all') {
 }
 
 $invoices = $db->query("
-    SELECT i.*, c.name as client_name, c.company as client_company, c.phone as client_phone, p.name as project_name
+    SELECT i.*, c.name as client_name, c.company as client_company, c.phone as client_phone, p.name as project_name,
+           COALESCE(p_sum.total_paid, 0) as paid_amount,
+           COALESCE(p_sum.payments_count, 0) as payments_count
     FROM invoices i
     JOIN clients c ON i.client_id = c.id
     LEFT JOIN projects p ON i.project_id = p.id
+    LEFT JOIN (
+        SELECT invoice_id, SUM(amount) as total_paid, COUNT(id) as payments_count
+        FROM invoice_payments
+        WHERE COALESCE(is_deleted, 0) = 0
+        GROUP BY invoice_id
+    ) p_sum ON p_sum.invoice_id = i.id
     WHERE $whereClause
     ORDER BY i.id DESC
 ")->fetchAll();
@@ -29,8 +37,16 @@ $invoices = $db->query("
 // Statistics (Scoped if client)
 $statClientWhere = ($isClientUser && $clientId) ? " AND client_id = " . intval($clientId) : "";
 $totalBilled = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE COALESCE(is_deleted, 0) = 0" . $statClientWhere)->fetchColumn());
-$totalPaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0" . $statClientWhere)->fetchColumn());
-$totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE status != 'Paid' AND COALESCE(is_deleted, 0) = 0" . $statClientWhere)->fetchColumn());
+
+// Calculate total actual cash paid (including partial installments)
+$paySumQuery = "
+    SELECT COALESCE(SUM(p.amount), 0) 
+    FROM invoice_payments p 
+    JOIN invoices i ON p.invoice_id = i.id 
+    WHERE COALESCE(p.is_deleted, 0) = 0 AND COALESCE(i.is_deleted, 0) = 0
+" . (($isClientUser && $clientId) ? " AND i.client_id = " . intval($clientId) : "");
+$totalPaid = floatval($db->query($paySumQuery)->fetchColumn());
+$totalUnpaid = max(0, $totalBilled - $totalPaid);
 ?>
 
 <!DOCTYPE html>
@@ -177,6 +193,7 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
             <div class="date-filter-group">
               <a href="<?= url('invoices?status=all' . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" class="filter-btn <?= $filterStatus === 'all' ? 'active' : '' ?>">Semua</a>
               <a href="<?= url('invoices?status=Paid' . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" class="filter-btn <?= $filterStatus === 'Paid' ? 'active' : '' ?>">Paid</a>
+              <a href="<?= url('invoices?status=Partially Paid' . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" class="filter-btn <?= $filterStatus === 'Partially Paid' ? 'active' : '' ?>">Partially Paid</a>
               <a href="<?= url('invoices?status=Draft' . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" class="filter-btn <?= $filterStatus === 'Draft' ? 'active' : '' ?>">Draft</a>
             </div>
 
@@ -236,11 +253,23 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
                           ? "https://api.whatsapp.com/send?phone=$waPhone&text=" . urlencode($waText) 
                           : "https://api.whatsapp.com/send?text=" . urlencode($waText);
                     ?>
-                    <tr>
+                    <?php
+                      $totalInvAmt = floatval($inv['total_amount']);
+                      $paidInvAmt = floatval($inv['paid_amount']);
+                      $remainingAmt = max(0, $totalInvAmt - $paidInvAmt);
+                      $payCount = intval($inv['payments_count']);
+                      $percentPaid = $totalInvAmt > 0 ? min(100, round(($paidInvAmt / $totalInvAmt) * 100, 1)) : 0;
+                    ?>
+                    <tr id="inv-row-<?= $inv['id'] ?>" class="invoice-main-row">
                       <td style="font-weight: 700; white-space: nowrap !important;">
-                        <a href="<?= url('invoice-view?id=' . $inv['id'] . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" style="color: #101828; text-decoration: none; font-weight: 700; font-family: inherit;">
-                          #<?= htmlspecialchars($inv['invoice_number']) ?>
-                        </a>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <button type="button" class="btn-toggle-terms" onclick="toggleInvoicePayments(<?= $inv['id'] ?>)" id="btn-toggle-<?= $inv['id'] ?>" title="Lihat Riwayat Termin Pembayaran" style="background: #F2F4F7; border: 1px solid #D0D5DD; border-radius: 6px; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s ease; padding: 0;">
+                            <svg id="arrow-icon-<?= $inv['id'] ?>" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#344054" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s ease;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                          </button>
+                          <a href="<?= url('invoice-view?id=' . $inv['id'] . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" style="color: #101828; text-decoration: none; font-weight: 700; font-family: inherit;">
+                            #<?= htmlspecialchars($inv['invoice_number']) ?>
+                          </a>
+                        </div>
                       </td>
                       <td style="white-space: nowrap !important;">
                         <?php if ($isClientUser): ?>
@@ -259,49 +288,89 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
                       </td>
                       <td style="color: var(--text-secondary); white-space: nowrap !important;"><?= format_date($inv['issue_date']) ?></td>
                       <td style="color: var(--text-secondary); white-space: nowrap !important;"><?= format_date($inv['due_date']) ?></td>
-                      <td style="font-weight: 800; color: var(--text-primary); white-space: nowrap !important; font-size: 13.5px;"><?= format_rupiah($inv['total_amount']) ?></td>
+                      <td style="font-weight: 800; color: var(--text-primary); white-space: nowrap !important; font-size: 13.5px;">
+                        <div><?= format_rupiah($inv['total_amount']) ?></div>
+                        <?php if ($paidInvAmt > 0 && $remainingAmt > 0): ?>
+                          <div style="font-size: 11px; font-weight: 600; color: #B54708; margin-top: 2px;">
+                            Sisa: <?= format_rupiah($remainingAmt) ?>
+                          </div>
+                        <?php endif; ?>
+                      </td>
                       <td style="white-space: nowrap !important;">
-                        <span class="badge-status badge-<?= strtolower($inv['status']) ?>">
+                        <?php
+                          $badgeClass = strtolower(str_replace(' ', '-', $inv['status']));
+                          $badgeBg = '#F2F4F7';
+                          $badgeColor = '#344054';
+                          if ($inv['status'] === 'Paid') {
+                              $badgeBg = '#ECFDF3';
+                              $badgeColor = '#027A48';
+                          } elseif ($inv['status'] === 'Partially Paid') {
+                              $badgeBg = '#FEF0C7';
+                              $badgeColor = '#B54708';
+                          } elseif ($inv['status'] === 'Overdue') {
+                              $badgeBg = '#FEF3F2';
+                              $badgeColor = '#B42318';
+                          }
+                        ?>
+                        <span class="badge-status" style="background: <?= $badgeBg ?>; color: <?= $badgeColor ?>; font-weight: 700; border-radius: 6px; padding: 3px 8px; font-size: 11px;">
                           <?= strtoupper($inv['status']) ?>
                         </span>
+                        <?php if ($payCount > 0): ?>
+                          <div style="font-size: 10.5px; color: #667085; margin-top: 3px; font-weight: 600;">
+                            <?= $payCount ?>x termin (<?= $percentPaid ?>%)
+                          </div>
+                        <?php endif; ?>
                       </td>
                       <td class="td-actions" style="text-align: right; white-space: nowrap !important;">
                         <div class="table-actions">
-                          <a href="<?= url('invoice-view?id=' . $inv['id'] . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" class="btn-action-view" title="Lihat & Unduh PDF">
-                            <span>Lihat Invoice</span>
+                          <!-- Lihat Invoice (Icon Mata) -->
+                          <a href="<?= url('invoice-view?id=' . $inv['id'] . ($isClientUser ? '&portal=client&_slot=client' : '')) ?>" class="btn-action-view" title="Lihat Invoice & Unduh PDF" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border-radius: 6px;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                           </a>
 
                           <?php if (!$isClientUser): ?>
-                            <!-- Share WA Button -->
-                            <a href="<?= $rowWaUrl ?>" target="_blank" class="btn-action-share-wa" title="Share Invoice ke WhatsApp Klien" style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 600; text-decoration: none; background: #25D366; color: #FFFFFF; border: none; cursor: pointer;">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-                              <span>WA</span>
+                            <!-- Share WA Button (Icon WA Asli) -->
+                            <a href="<?= $rowWaUrl ?>" target="_blank" class="btn-action-share-wa" title="Share Invoice ke WhatsApp Klien" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border-radius: 6px; background: #25D366; color: #FFFFFF; border: none; cursor: pointer;">
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
                             </a>
 
-                            <!-- Share Portal Button -->
-                            <button type="button" class="btn-action-share-portal" onclick="shareInvoicePortal('<?= htmlspecialchars($portalLink, ENT_QUOTES) ?>', '<?= htmlspecialchars($inv['invoice_number'], ENT_QUOTES) ?>')" title="Salin / Bagikan Link Portal Klien" style="display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 6px; font-size: 11.5px; font-weight: 600; background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; cursor: pointer;">
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-                              <span>Portal</span>
+                            <!-- Share Portal Button (Icon Link) -->
+                            <button type="button" class="btn-action-share-portal" onclick="shareInvoicePortal('<?= htmlspecialchars($portalLink, ENT_QUOTES) ?>', '<?= htmlspecialchars($inv['invoice_number'], ENT_QUOTES) ?>')" title="Salin / Bagikan Link Portal Klien" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border-radius: 6px; background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; cursor: pointer;">
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                             </button>
 
                             <?php if ($inv['status'] === 'Draft'): ?>
-                              <button type="button" class="btn-action-edit" onclick="openEditInvoiceModal(<?= $inv['id'] ?>)" title="Edit Draft Invoice">
-                                <span>Edit</span>
+                              <button type="button" class="btn-action-edit" onclick="openEditInvoiceModal(<?= $inv['id'] ?>)" title="Edit Draft Invoice" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border-radius: 6px;">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                               </button>
                             <?php endif; ?>
 
                             <?php if ($inv['status'] !== 'Paid'): ?>
-                              <button type="button" class="btn-action-pay" onclick="triggerUploadModal('invoice', <?= $inv['id'] ?>, 'Upload Bukti Pelunasan Invoice #<?= $inv['invoice_number'] ?>')" title="Upload Bukti Pembayaran">
-                                <span>+ Bayar</span>
+                              <!-- Tombol Bayar (Single Icon +) -->
+                              <button type="button" class="btn-action-pay" onclick="openAddPaymentModal(<?= $inv['id'] ?>, '<?= htmlspecialchars($inv['invoice_number'], ENT_QUOTES) ?>', <?= $remainingAmt ?>)" title="Catat Termin Pembayaran" style="background: #12B76A; color: #FFFFFF; border: none; font-weight: 700; border-radius: 6px; padding: 0 10px; height: 32px; font-size: 11.5px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                <span>Bayar</span>
                               </button>
                             <?php endif; ?>
 
                             <?php if (is_owner()): ?>
-                              <button type="button" class="btn-action-delete btn-delete-ghost" onclick="confirmDeleteInvoice(<?= $inv['id'] ?>, '<?= htmlspecialchars($inv['invoice_number'], ENT_QUOTES) ?>')" data-invoice-id="<?= $inv['id'] ?>" data-invoice-number="<?= htmlspecialchars($inv['invoice_number'], ENT_QUOTES) ?>" title="Hapus Invoice">
-                                <span>Hapus</span>
+                              <!-- Tombol Hapus (Icon Tong Sampah) -->
+                              <button type="button" class="btn-action-delete btn-delete-ghost" onclick="confirmDeleteInvoice(<?= $inv['id'] ?>, '<?= htmlspecialchars($inv['invoice_number'], ENT_QUOTES) ?>')" data-invoice-id="<?= $inv['id'] ?>" data-invoice-number="<?= htmlspecialchars($inv['invoice_number'], ENT_QUOTES) ?>" title="Hapus Invoice" style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border-radius: 6px;">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                               </button>
                             <?php endif; ?>
                           <?php endif; ?>
+                        </div>
+                      </td>
+                    </tr>
+
+                    <!-- ACCORDION EXPANDABLE ROW (RIWAYAT TERMIN PEMBAYARAN) -->
+                    <tr id="inv-terms-row-<?= $inv['id'] ?>" class="invoice-terms-row" style="display: none; background: #F8F9FC;">
+                      <td colspan="8" style="padding: 16px 20px; border-top: 1px dashed #D0D5DD; border-bottom: 2px solid #EAECF0;">
+                        <div id="inv-terms-container-<?= $inv['id'] ?>">
+                          <div style="display: flex; align-items: center; justify-content: center; padding: 20px; color: #667085; font-size: 12.5px;">
+                            <span class="spinner-border spinner-border-sm" style="margin-right: 8px;"></span> Memuat riwayat termin pembayaran...
+                          </div>
                         </div>
                       </td>
                     </tr>
@@ -382,6 +451,244 @@ $totalUnpaid = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM i
         initTableSearch('invoice-search-input', 'invoice-table');
       }
     });
+
+    // Toggle and Fetch Invoice Payment Milestones
+    window.toggleInvoicePayments = async function(invoiceId) {
+      const row = document.getElementById(`inv-terms-row-${invoiceId}`);
+      const btn = document.getElementById(`btn-toggle-${invoiceId}`);
+      const arrow = document.getElementById(`arrow-icon-${invoiceId}`);
+      const container = document.getElementById(`inv-terms-container-${invoiceId}`);
+      if (!row) return;
+
+      const isHidden = (row.style.display === 'none' || !row.style.display);
+      if (isHidden) {
+        row.style.display = 'table-row';
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
+        if (btn) btn.style.background = '#E0EAFF';
+        await loadInvoicePaymentsData(invoiceId);
+      } else {
+        row.style.display = 'none';
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        if (btn) btn.style.background = '#F2F4F7';
+      }
+    };
+
+    window.loadInvoicePaymentsData = async function(invoiceId) {
+      const container = document.getElementById(`inv-terms-container-${invoiceId}`);
+      if (!container) return;
+
+      try {
+        const res = await fetch(`api/invoices.php?action=list_payments&invoice_id=${invoiceId}`);
+        const data = await res.json();
+        if (!data.success) {
+          container.innerHTML = `<div style="color: #B42318; font-size: 12.5px; padding: 12px;">Gagal memuat data termin: ${data.message}</div>`;
+          return;
+        }
+
+        const inv = data.invoice;
+        const payments = data.payments || [];
+        const isClient = <?= $isClientUser ? 'true' : 'false' ?>;
+
+        let html = `
+          <div style="background: #FFFFFF; border: 1px solid #E4E7EC; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+            <!-- Header Summary Row -->
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid #F2F4F7;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 32px; height: 32px; border-radius: 8px; background: #EEF4FF; color: #3538CD; display: flex; align-items: center; justify-content: center;">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                </div>
+                <div>
+                  <div style="font-size: 14px; font-weight: 700; color: #101828;">Riwayat Termin &amp; Realisasi Pembayaran</div>
+                  <div style="font-size: 12px; color: #667085;">Tagihan #${inv.invoice_number} &bull; Total: <strong style="color: #101828;">${inv.total_amount_formatted}</strong></div>
+                </div>
+              </div>
+
+              <!-- Quick Stats Pill & Add Button -->
+              <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <div style="display: flex; gap: 8px;">
+                  <div style="background: #ECFDF3; border: 1px solid #A6F4C5; padding: 4px 10px; border-radius: 6px; font-size: 11.5px;">
+                    <span style="color: #027A48; font-weight: 500;">Diterima:</span> <strong style="color: #027A48;">${inv.total_paid_formatted}</strong>
+                  </div>
+                  <div style="background: ${inv.remaining_balance > 0 ? '#FEF3F2' : '#F2F4F7'}; border: 1px solid ${inv.remaining_balance > 0 ? '#FECDCA' : '#E4E7EC'}; padding: 4px 10px; border-radius: 6px; font-size: 11.5px;">
+                    <span style="color: ${inv.remaining_balance > 0 ? '#B42318' : '#344054'}; font-weight: 500;">Sisa:</span> <strong style="color: ${inv.remaining_balance > 0 ? '#B42318' : '#344054'};">${inv.remaining_balance_formatted}</strong>
+                  </div>
+                </div>
+
+                ${!isClient && inv.remaining_balance > 0 ? `
+                  <button type="button" class="btn btn-primary btn-sm" onclick="openAddPaymentModal(${inv.id}, '${inv.invoice_number}', ${inv.remaining_balance})" style="background: #12B76A; border-color: #12B76A; font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span>Catat Pembayaran</span>
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div style="margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: #475467; margin-bottom: 5px; font-weight: 600;">
+                <span>Progres Pelunasan</span>
+                <span>${inv.progress_percent}% Lunas</span>
+              </div>
+              <div style="width: 100%; height: 8px; background: #EAECF0; border-radius: 999px; overflow: hidden;">
+                <div style="width: ${inv.progress_percent}%; height: 100%; background: ${inv.progress_percent >= 100 ? '#12B76A' : '#3538CD'}; border-radius: 999px; transition: width 0.4s ease;"></div>
+              </div>
+            </div>
+
+            <!-- Payments Sub-Table -->
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+                <thead>
+                  <tr style="background: #F9FAFB; border-bottom: 1px solid #EAECF0; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.04em; color: #475467;">
+                    <th style="padding: 8px 12px; text-align: left;">Termin / Keterangan</th>
+                    <th style="padding: 8px 12px; text-align: left;">Tanggal Bayar</th>
+                    <th style="padding: 8px 12px; text-align: left;">Metode</th>
+                    <th style="padding: 8px 12px; text-align: left;">Nominal Masuk</th>
+                    <th style="padding: 8px 12px; text-align: left;">Bukti Transfer</th>
+                    <th style="padding: 8px 12px; text-align: left;">Catatan</th>
+                    ${!isClient ? '<th style="padding: 8px 12px; text-align: right;">Aksi</th>' : ''}
+                  </tr>
+                </thead>
+                <tbody>
+        `;
+
+        if (payments.length === 0) {
+          html += `
+            <tr>
+              <td colspan="${!isClient ? 7 : 6}" style="text-align: center; padding: 20px; color: #98A2B3; font-style: italic;">
+                Belum ada pembayaran yang dicatat untuk invoice ini.
+                ${!isClient ? ` <a href="javascript:void(0)" onclick="openAddPaymentModal(${inv.id}, '${inv.invoice_number}', ${inv.remaining_balance})" style="color: #3538CD; font-weight: 600; text-decoration: underline; margin-left: 4px;">Catat Sekarang</a>` : ''}
+              </td>
+            </tr>
+          `;
+        } else {
+          payments.forEach((p, idx) => {
+            const hasReceipt = Boolean(p.receipt_file);
+            html += `
+              <tr style="border-bottom: 1px solid #F2F4F7;">
+                <td style="padding: 10px 12px; font-weight: 700; color: #101828;">
+                  <span style="display: inline-block; width: 18px; height: 18px; border-radius: 50%; background: #F2F4F7; color: #475467; text-align: center; line-height: 18px; font-size: 10px; margin-right: 6px;">${idx + 1}</span>
+                  ${escapeHtml(p.term_name || 'Pembayaran Termin')}
+                </td>
+                <td style="padding: 10px 12px; color: #475467;">${escapeHtml(p.payment_date)}</td>
+                <td style="padding: 10px 12px; color: #475467;">
+                  <span style="background: #F8F9FA; border: 1px solid #E4E7EC; border-radius: 4px; padding: 2px 6px; font-size: 11px;">${escapeHtml(p.payment_method || 'Transfer')}</span>
+                </td>
+                <td style="padding: 10px 12px; font-weight: 800; color: #027A48; font-size: 13px;">${p.amount_formatted}</td>
+                <td style="padding: 10px 12px;">
+                  ${hasReceipt ? `
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="viewReceiptImage('${escapeHtml(p.receipt_file)}', 'Bukti ${escapeHtml(p.term_name)} - #${inv.invoice_number}')" style="font-size: 11px; padding: 3px 8px; display: inline-flex; align-items: center; gap: 4px; color: #1D4ED8; border-color: #BFDBFE; background: #EFF6FF;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                      <span>Lihat Bukti</span>
+                    </button>
+                  ` : `
+                    <span style="color: #98A2B3; font-size: 11.5px; font-style: italic;">Tanpa Bukti</span>
+                  `}
+                </td>
+                <td style="padding: 10px 12px; color: #667085; font-size: 12px;">${escapeHtml(p.notes || '-')}</td>
+                ${!isClient ? `
+                  <td style="padding: 10px 12px; text-align: right; white-space: nowrap;">
+                    <!-- Edit Button -->
+                    <button type="button" onclick="openEditPaymentModal(${p.id})" title="Edit Riwayat Pembayaran Ini" style="background: transparent; border: none; color: #1570EF; cursor: pointer; padding: 4px 6px; border-radius: 4px; font-size: 11.5px; display: inline-flex; align-items: center; margin-right: 4px;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    </button>
+                    <!-- Delete Button -->
+                    <button type="button" onclick="confirmDeletePayment(${p.id}, ${inv.id}, '${escapeHtml(p.term_name)}', '${p.amount_formatted}')" title="Hapus Riwayat Pembayaran Ini" style="background: transparent; border: none; color: #D92D20; cursor: pointer; padding: 4px 6px; border-radius: 4px; font-size: 11.5px; display: inline-flex; align-items: center;">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                  </td>
+                ` : ''}
+              </tr>
+            `;
+          });
+        }
+
+        html += `
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `;
+
+        container.innerHTML = html;
+      } catch (err) {
+        container.innerHTML = `<div style="color: #B42318; font-size: 12.5px; padding: 12px;">Terjadi kesalahan saat memuat termin: ${err.message}</div>`;
+      }
+    };
+
+    // Modal Catat Pembayaran Termin Baru
+    window.openAddPaymentModal = function(invoiceId, invoiceNumber, remainingBalance) {
+      const modal = document.getElementById('modal-add-payment-term');
+      if (!modal) return;
+
+      document.getElementById('pay-term-invoice-id').value = invoiceId;
+      document.getElementById('pay-term-inv-num').innerText = invoiceNumber;
+      document.getElementById('pay-term-remaining-label').innerText = 'Rp ' + Number(remainingBalance).toLocaleString('id-ID');
+      document.getElementById('pay-term-amount').value = remainingBalance > 0 ? Number(remainingBalance).toLocaleString('id-ID') : '';
+      document.getElementById('pay-term-name').value = 'Termin Pembayaran';
+      document.getElementById('pay-term-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('pay-term-method').value = 'Bank Transfer Mandiri';
+      document.getElementById('pay-term-notes').value = '';
+      document.getElementById('pay-term-receipt').value = '';
+
+      openModal('modal-add-payment-term');
+    };
+
+    window.confirmDeletePayment = function(paymentId, invoiceId, termName, amountFormatted) {
+      if (!confirm(`Hapus data pembayaran "${termName}" senilai ${amountFormatted}?`)) return;
+
+      const fd = new FormData();
+      fd.append('payment_id', paymentId);
+
+      fetch('api/invoices.php?action=delete_payment', {
+        method: 'POST',
+        body: fd
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          showToast(res.message, 'success');
+          loadInvoicePaymentsData(invoiceId);
+          setTimeout(() => window.location.reload(), 1200);
+        } else {
+          showToast(res.message || 'Gagal menghapus pembayaran', 'danger');
+        }
+      })
+      .catch(() => showToast('Kesalahan koneksi ke server', 'danger'));
+    };
+
+    window.openEditPaymentModal = async function(paymentId) {
+      try {
+        const res = await fetch(`api/invoices.php?action=get_payment_detail&payment_id=${paymentId}`);
+        const data = await res.json();
+        if (!data.success) {
+          showToast(data.message || 'Gagal mengambil detail pembayaran', 'danger');
+          return;
+        }
+
+        const p = data.payment;
+        document.getElementById('edit-pay-id').value = p.id;
+        document.getElementById('edit-pay-invoice-id').value = p.invoice_id;
+        document.getElementById('edit-pay-inv-num').innerText = p.invoice_number;
+        document.getElementById('edit-pay-name').value = p.term_name || '';
+        document.getElementById('edit-pay-amount').value = Number(p.amount).toLocaleString('id-ID');
+        document.getElementById('edit-pay-date').value = p.payment_date || '';
+        document.getElementById('edit-pay-method').value = p.payment_method || 'Bank Transfer Mandiri';
+        document.getElementById('edit-pay-notes').value = p.notes || '';
+        document.getElementById('edit-pay-receipt').value = '';
+
+        const previewContainer = document.getElementById('edit-pay-receipt-current');
+        if (p.receipt_file) {
+          previewContainer.style.display = 'block';
+          document.getElementById('edit-pay-receipt-link').onclick = () => viewReceiptImage(p.receipt_file, `Bukti ${p.term_name}`);
+        } else {
+          previewContainer.style.display = 'none';
+        }
+
+        openModal('modal-edit-payment-term');
+      } catch (e) {
+        showToast('Terjadi kesalahan saat memuat data', 'danger');
+      }
+    };
   </script>
 
   <?php require_once BASE_PATH . '/includes/footer.php'; ?>

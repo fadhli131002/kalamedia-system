@@ -251,13 +251,16 @@ function render_pwa_meta_tags(): void {
     ?>
     <!-- PWA Settings & Portal Kala Mobile Capabilities -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2563EB">
+    <meta name="theme-color" content="#121316">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Portal Kala">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Portal Kala">
-    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon-16x16.png">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/img/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="assets/img/icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="assets/img/icon-512.png">
     <?php

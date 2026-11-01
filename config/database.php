@@ -80,10 +80,10 @@ class Database {
             }
 
             // High Performance: Only run migrations if lock file does not exist (0ms overhead on requests)
-            $lockFile = BASE_PATH . '/database/.schema_v15.lock';
+            $lockFile = BASE_PATH . '/database/.schema_v16.lock';
             if (!file_exists($lockFile)) {
                 self::runMigrations(self::$instance, self::$driver);
-                @file_put_contents($lockFile, "Schema v15 initialized at " . date('Y-m-d H:i:s'));
+                @file_put_contents($lockFile, "Schema v16 initialized at " . date('Y-m-d H:i:s'));
             }
 
             // Ensure core system accounts (Owner & Admin) always exist
@@ -210,6 +210,20 @@ class Database {
                 quantity DECIMAL(10,2) NOT NULL DEFAULT 1,
                 unit_price DECIMAL(15,2) NOT NULL DEFAULT 0,
                 total_price DECIMAL(15,2) NOT NULL DEFAULT 0
+            );
+
+            CREATE TABLE IF NOT EXISTS invoice_payments (
+                id {$pkDef},
+                invoice_id INT NOT NULL,
+                term_name VARCHAR(150) NOT NULL DEFAULT 'Pembayaran',
+                amount DECIMAL(15,2) NOT NULL DEFAULT 0,
+                payment_date DATE NOT NULL,
+                payment_method VARCHAR(50) DEFAULT 'Bank Transfer',
+                receipt_file VARCHAR(255) DEFAULT NULL,
+                notes TEXT DEFAULT NULL,
+                recorded_by INT DEFAULT NULL,
+                is_deleted INT DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS freelancer_payouts (
@@ -817,7 +831,7 @@ class Database {
         } catch (Exception $e) {}
 
         // 4. Ensure is_deleted on other standard tables
-        $tablesWithDeleted = ['tasks', 'invoices', 'freelancer_payouts', 'ads_spend', 'ads_budget_logs', 'ads_topup_transactions', 'salaries', 'content_planner', 'client_reports', 'performance_reports'];
+        $tablesWithDeleted = ['tasks', 'invoices', 'invoice_payments', 'freelancer_payouts', 'ads_spend', 'ads_budget_logs', 'ads_topup_transactions', 'salaries', 'content_planner', 'client_reports', 'performance_reports'];
         foreach ($tablesWithDeleted as $t) {
             $cols = $getTableCols($t);
             if (!empty($cols) && !in_array('is_deleted', $cols)) {

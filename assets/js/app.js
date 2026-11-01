@@ -1552,12 +1552,26 @@ window.toggleExportRangeMode = function(mode) {
 window.togglePasswordVisibility = function(inputId, btn) {
   const input = document.getElementById(inputId);
   if (!input) return;
-  if (input.type === 'password') {
-    input.type = 'text';
-    if (btn) btn.textContent = 'Tutup';
-  } else {
-    input.type = 'password';
-    if (btn) btn.textContent = 'Lihat';
+
+  const isPassword = (input.type === 'password');
+  input.type = isPassword ? 'text' : 'password';
+
+  if (btn) {
+    const eyeOpen = btn.querySelector('.icon-eye-open');
+    const eyeClosed = btn.querySelector('.icon-eye-closed');
+    if (eyeOpen && eyeClosed) {
+      if (isPassword) {
+        eyeOpen.style.display = 'none';
+        eyeClosed.style.display = 'block';
+        btn.setAttribute('title', 'Sembunyikan Password');
+      } else {
+        eyeOpen.style.display = 'block';
+        eyeClosed.style.display = 'none';
+        btn.setAttribute('title', 'Lihat Password');
+      }
+    } else {
+      btn.textContent = isPassword ? 'Tutup' : 'Lihat';
+    }
   }
 };
 

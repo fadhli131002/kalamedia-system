@@ -111,6 +111,204 @@ $totalUnpaid = max(0, $totalBilled - $totalPaid);
         width: 100% !important;
       }
     }
+
+    /* Accordion Payments Panel Dark Mode & Light Mode Theme Support */
+    .inv-terms-card {
+      background: #FFFFFF;
+      border: 1px solid #E4E7EC;
+      border-radius: 12px;
+      padding: 18px 20px;
+      box-shadow: 0 1px 3px rgba(16,24,40,0.05);
+    }
+    .inv-terms-header-border {
+      border-bottom: 1px solid #F2F4F7;
+    }
+    .inv-terms-title {
+      color: #101828;
+    }
+    .inv-terms-subtitle {
+      color: #667085;
+    }
+    .inv-terms-thead {
+      background: #F9FAFB;
+      border-bottom: 1px solid #EAECF0;
+      color: #475467;
+    }
+    .inv-terms-row-border {
+      border-bottom: 1px solid #F2F4F7;
+    }
+    .inv-terms-num-badge {
+      background: #F2F4F7;
+      color: #475467;
+    }
+    .inv-terms-name {
+      color: #101828;
+    }
+    .inv-terms-text {
+      color: #475467;
+    }
+    .inv-terms-method-badge {
+      background: #F1F5F9;
+      color: #334155;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11.5px;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .inv-terms-stat-received {
+      background: #ECFDF3;
+      border: 1px solid #A6F4C5;
+      color: #027A48;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+    }
+    .inv-terms-stat-remaining-due {
+      background: #FEF3F2;
+      border: 1px solid #FECDCA;
+      color: #B42318;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+    }
+    .inv-terms-stat-remaining-zero {
+      background: #F2F4F7;
+      border: 1px solid #E4E7EC;
+      color: #344054;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11.5px;
+    }
+    .inv-terms-btn-receipt {
+      font-size: 11px;
+      padding: 3px 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: #1D4ED8;
+      border: 1px solid #BFDBFE;
+      background: #EFF6FF;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* DARK MODE OVERRIDES */
+    html[data-theme="dark"] .invoice-terms-row,
+    body.dark-mode .invoice-terms-row,
+    html.dark-mode .invoice-terms-row {
+      background: #0B0E14 !important;
+    }
+    html[data-theme="dark"] .inv-terms-card,
+    body.dark-mode .inv-terms-card,
+    html.dark-mode .inv-terms-card {
+      background: #111622 !important;
+      border-color: rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    }
+    html[data-theme="dark"] .inv-terms-header-border,
+    body.dark-mode .inv-terms-header-border,
+    html.dark-mode .inv-terms-header-border {
+      border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+    }
+    html[data-theme="dark"] .inv-terms-title,
+    body.dark-mode .inv-terms-title,
+    html.dark-mode .inv-terms-title {
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .inv-terms-subtitle,
+    body.dark-mode .inv-terms-subtitle,
+    html.dark-mode .inv-terms-subtitle {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .inv-terms-thead,
+    body.dark-mode .inv-terms-thead,
+    html.dark-mode .inv-terms-thead {
+      background: #161D2C !important;
+      border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .inv-terms-row-border,
+    body.dark-mode .inv-terms-row-border,
+    html.dark-mode .inv-terms-row-border {
+      border-bottom-color: rgba(255, 255, 255, 0.06) !important;
+    }
+    html[data-theme="dark"] .inv-terms-num-badge,
+    body.dark-mode .inv-terms-num-badge,
+    html.dark-mode .inv-terms-num-badge {
+      background: #1E293B !important;
+      color: #CBD5E1 !important;
+    }
+    html[data-theme="dark"] .inv-terms-name,
+    body.dark-mode .inv-terms-name,
+    html.dark-mode .inv-terms-name {
+      color: #F8FAFC !important;
+    }
+    html[data-theme="dark"] .inv-terms-text,
+    body.dark-mode .inv-terms-text,
+    html.dark-mode .inv-terms-text {
+      color: #CBD5E1 !important;
+    }
+    html[data-theme="dark"] .inv-terms-method-badge,
+    body.dark-mode .inv-terms-method-badge,
+    html.dark-mode .inv-terms-method-badge {
+      background: #1E293B !important;
+      color: #E2E8F0 !important;
+      border-color: #334155 !important;
+    }
+    html[data-theme="dark"] .inv-terms-stat-received,
+    body.dark-mode .inv-terms-stat-received,
+    html.dark-mode .inv-terms-stat-received {
+      background: rgba(18, 183, 106, 0.15) !important;
+      border-color: rgba(18, 183, 106, 0.35) !important;
+      color: #34D399 !important;
+    }
+    html[data-theme="dark"] .inv-terms-stat-received span,
+    html[data-theme="dark"] .inv-terms-stat-received strong,
+    body.dark-mode .inv-terms-stat-received span,
+    body.dark-mode .inv-terms-stat-received strong,
+    html.dark-mode .inv-terms-stat-received span,
+    html.dark-mode .inv-terms-stat-received strong {
+      color: #34D399 !important;
+    }
+    html[data-theme="dark"] .inv-terms-stat-remaining-due,
+    body.dark-mode .inv-terms-stat-remaining-due,
+    html.dark-mode .inv-terms-stat-remaining-due {
+      background: rgba(239, 68, 68, 0.15) !important;
+      border-color: rgba(239, 68, 68, 0.35) !important;
+      color: #F87171 !important;
+    }
+    html[data-theme="dark"] .inv-terms-stat-remaining-due span,
+    html[data-theme="dark"] .inv-terms-stat-remaining-due strong,
+    body.dark-mode .inv-terms-stat-remaining-due span,
+    body.dark-mode .inv-terms-stat-remaining-due strong,
+    html.dark-mode .inv-terms-stat-remaining-due span,
+    html.dark-mode .inv-terms-stat-remaining-due strong {
+      color: #F87171 !important;
+    }
+    html[data-theme="dark"] .inv-terms-stat-remaining-zero,
+    body.dark-mode .inv-terms-stat-remaining-zero,
+    html.dark-mode .inv-terms-stat-remaining-zero {
+      background: #1E293B !important;
+      border-color: #334155 !important;
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .inv-terms-stat-remaining-zero span,
+    html[data-theme="dark"] .inv-terms-stat-remaining-zero strong,
+    body.dark-mode .inv-terms-stat-remaining-zero span,
+    body.dark-mode .inv-terms-stat-remaining-zero strong,
+    html.dark-mode .inv-terms-stat-remaining-zero span,
+    html.dark-mode .inv-terms-stat-remaining-zero strong {
+      color: #94A3B8 !important;
+    }
+    html[data-theme="dark"] .inv-terms-btn-receipt,
+    body.dark-mode .inv-terms-btn-receipt,
+    html.dark-mode .inv-terms-btn-receipt {
+      color: #93C5FD !important;
+      border-color: rgba(59, 130, 246, 0.4) !important;
+      background: rgba(37, 99, 235, 0.18) !important;
+    }
   </style>
 </head>
 <body>
@@ -490,27 +688,27 @@ $totalUnpaid = max(0, $totalBilled - $totalPaid);
         const isClient = <?= $isClientUser ? 'true' : 'false' ?>;
 
         let html = `
-          <div style="background: #FFFFFF; border: 1px solid #E4E7EC; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(16,24,40,0.05);">
+          <div class="inv-terms-card">
             <!-- Header Summary Row -->
-            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid #F2F4F7;">
+            <div class="inv-terms-header-border" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding-bottom: 14px;">
               <div style="display: flex; align-items: center; gap: 10px;">
                 <div style="width: 32px; height: 32px; border-radius: 8px; background: #EEF4FF; color: #3538CD; display: flex; align-items: center; justify-content: center;">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
                 </div>
                 <div>
-                  <div style="font-size: 14px; font-weight: 700; color: #101828;">Riwayat Termin &amp; Realisasi Pembayaran</div>
-                  <div style="font-size: 12px; color: #667085;">Tagihan #${inv.invoice_number} &bull; Total: <strong style="color: #101828;">${inv.total_amount_formatted}</strong></div>
+                  <div class="inv-terms-title" style="font-size: 14px; font-weight: 700;">Riwayat Termin &amp; Realisasi Pembayaran</div>
+                  <div class="inv-terms-subtitle" style="font-size: 12px;">Tagihan #${inv.invoice_number} &bull; Total: <strong class="inv-terms-title">${inv.total_amount_formatted}</strong></div>
                 </div>
               </div>
 
               <!-- Quick Stats Pill & Add Button -->
               <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                 <div style="display: flex; gap: 8px;">
-                  <div style="background: #ECFDF3; border: 1px solid #A6F4C5; padding: 4px 10px; border-radius: 6px; font-size: 11.5px;">
-                    <span style="color: #027A48; font-weight: 500;">Diterima:</span> <strong style="color: #027A48;">${inv.total_paid_formatted}</strong>
+                  <div class="inv-terms-stat-received">
+                    <span>Diterima:</span> <strong>${inv.total_paid_formatted}</strong>
                   </div>
-                  <div style="background: ${inv.remaining_balance > 0 ? '#FEF3F2' : '#F2F4F7'}; border: 1px solid ${inv.remaining_balance > 0 ? '#FECDCA' : '#E4E7EC'}; padding: 4px 10px; border-radius: 6px; font-size: 11.5px;">
-                    <span style="color: ${inv.remaining_balance > 0 ? '#B42318' : '#344054'}; font-weight: 500;">Sisa:</span> <strong style="color: ${inv.remaining_balance > 0 ? '#B42318' : '#344054'};">${inv.remaining_balance_formatted}</strong>
+                  <div class="${inv.remaining_balance > 0 ? 'inv-terms-stat-remaining-due' : 'inv-terms-stat-remaining-zero'}">
+                    <span>Sisa:</span> <strong>${inv.remaining_balance_formatted}</strong>
                   </div>
                 </div>
 
@@ -525,12 +723,12 @@ $totalUnpaid = max(0, $totalBilled - $totalPaid);
 
             <!-- Progress Bar -->
             <div style="margin-bottom: 16px;">
-              <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: #475467; margin-bottom: 5px; font-weight: 600;">
-                <span>Progres Pelunasan</span>
-                <span>${inv.progress_percent}% Lunas</span>
+              <div style="display: flex; justify-content: space-between; font-size: 11.5px; margin-bottom: 5px; font-weight: 600;">
+                <span class="inv-terms-subtitle">Progres Pelunasan</span>
+                <span class="inv-terms-title">${inv.progress_percent}% Lunas</span>
               </div>
-              <div style="width: 100%; height: 8px; background: #EAECF0; border-radius: 999px; overflow: hidden;">
-                <div style="width: ${inv.progress_percent}%; height: 100%; background: ${inv.progress_percent >= 100 ? '#12B76A' : '#3538CD'}; border-radius: 999px; transition: width 0.4s ease;"></div>
+              <div style="width: 100%; height: 8px; background: rgba(148, 163, 184, 0.2); border-radius: 999px; overflow: hidden;">
+                <div style="width: ${inv.progress_percent}%; height: 100%; background: ${inv.progress_percent >= 100 ? '#12B76A' : '#5B3DF5'}; border-radius: 999px; transition: width 0.4s ease;"></div>
               </div>
             </div>
 
@@ -538,7 +736,7 @@ $totalUnpaid = max(0, $totalBilled - $totalPaid);
             <div style="overflow-x: auto;">
               <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
                 <thead>
-                  <tr style="background: #F9FAFB; border-bottom: 1px solid #EAECF0; text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.04em; color: #475467;">
+                  <tr class="inv-terms-thead" style="text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.04em;">
                     <th style="padding: 8px 12px; text-align: left;">Termin / Keterangan</th>
                     <th style="padding: 8px 12px; text-align: left;">Tanggal Bayar</th>
                     <th style="padding: 8px 12px; text-align: left;">Metode</th>
@@ -564,19 +762,19 @@ $totalUnpaid = max(0, $totalBilled - $totalPaid);
           payments.forEach((p, idx) => {
             const hasReceipt = Boolean(p.receipt_file);
             html += `
-              <tr style="border-bottom: 1px solid #F2F4F7;">
-                <td style="padding: 10px 12px; font-weight: 700; color: #101828;">
-                  <span style="display: inline-block; width: 18px; height: 18px; border-radius: 50%; background: #F2F4F7; color: #475467; text-align: center; line-height: 18px; font-size: 10px; margin-right: 6px;">${idx + 1}</span>
-                  ${escapeHtml(p.term_name || 'Pembayaran Termin')}
+              <tr class="inv-terms-row-border">
+                <td style="padding: 10px 12px; font-weight: 700;">
+                  <span class="inv-terms-num-badge" style="display: inline-block; width: 18px; height: 18px; border-radius: 50%; text-align: center; line-height: 18px; font-size: 10px; margin-right: 6px;">${idx + 1}</span>
+                  <span class="inv-terms-name">${escapeHtml(p.term_name || 'Pembayaran Termin')}</span>
                 </td>
-                <td style="padding: 10px 12px; color: #475467;">${escapeHtml(p.payment_date)}</td>
-                <td style="padding: 10px 12px; color: #475467;">
-                  <span style="background: #F8F9FA; border: 1px solid #E4E7EC; border-radius: 4px; padding: 2px 6px; font-size: 11px;">${escapeHtml(p.payment_method || 'Transfer')}</span>
+                <td class="inv-terms-text" style="padding: 10px 12px;">${escapeHtml(p.payment_date)}</td>
+                <td style="padding: 10px 12px;">
+                  <span class="inv-terms-method-badge">${escapeHtml(p.payment_method || 'Transfer')}</span>
                 </td>
-                <td style="padding: 10px 12px; font-weight: 800; color: #027A48; font-size: 13px;">${p.amount_formatted}</td>
+                <td style="padding: 10px 12px; font-weight: 800; color: #12B76A; font-size: 13px;">${p.amount_formatted}</td>
                 <td style="padding: 10px 12px;">
                   ${hasReceipt ? `
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="viewReceiptImage('${escapeHtml(p.receipt_file)}', 'Bukti ${escapeHtml(p.term_name)} - #${inv.invoice_number}')" style="font-size: 11px; padding: 3px 8px; display: inline-flex; align-items: center; gap: 4px; color: #1D4ED8; border-color: #BFDBFE; background: #EFF6FF;">
+                    <button type="button" class="inv-terms-btn-receipt" onclick="viewReceiptImage('${escapeHtml(p.receipt_file)}', 'Bukti ${escapeHtml(p.term_name)} - #${inv.invoice_number}')">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                       <span>Lihat Bukti</span>
                     </button>
@@ -584,7 +782,7 @@ $totalUnpaid = max(0, $totalBilled - $totalPaid);
                     <span style="color: #98A2B3; font-size: 11.5px; font-style: italic;">Tanpa Bukti</span>
                   `}
                 </td>
-                <td style="padding: 10px 12px; color: #667085; font-size: 12px;">${escapeHtml(p.notes || '-')}</td>
+                <td class="inv-terms-subtitle" style="padding: 10px 12px; font-size: 12px;">${escapeHtml(p.notes || '-')}</td>
                 ${!isClient ? `
                   <td style="padding: 10px 12px; text-align: right; white-space: nowrap;">
                     <!-- Edit Button -->

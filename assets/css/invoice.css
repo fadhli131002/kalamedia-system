@@ -1,663 +1,667 @@
-/*
- * PT Kala Kausa Prima - Official Invoice Template
- * 1:1 Pixel-Accurate Match with PT Kala Kausa Prima Brand Guidelines
- */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-.invoice-wrapper {
-  background: #F5F5F7;
-  min-height: 100vh;
-  padding: 30px 15px;
-  font-family: var(--font-sans, 'Inter', sans-serif) !important;
-  color: #000000;
-}
-
-.invoice-actions-bar {
-  max-width: 800px;
-  margin: 0 auto 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.invoice-actions-bar .btn-action-back {
-  background: #FFFFFF;
-  color: #6E7485;
-  border: 1px solid #ECEEF5;
-  font-weight: 600;
-  font-size: 13px;
-  height: 38px;
-  padding: 0 16px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  text-decoration: none;
-  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, color 200ms ease, border-color 200ms ease;
-  box-shadow: 0 1px 2px rgba(18, 24, 48, 0.03);
-  will-change: transform;
-}
-
-.invoice-actions-bar .btn-action-back:hover {
-  background: #F8F9FC;
-  color: #000000;
-  border-color: #DDE1EE;
-  transform: translate3d(0, -1.5px, 0);
-}
-
-.invoice-actions-bar .btn-action-back:active {
-  transform: translate3d(0, 0.5px, 0) scale(0.96);
-  transition-duration: 90ms;
-}
-
-.invoice-actions-right {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-/* Status Pill Badge (Untitled UI) */
-.inv-status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 36px;
-  padding: 0 12px;
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 700;
-  white-space: nowrap;
-  letter-spacing: 0.2px;
-  box-sizing: border-box;
-}
-
-.inv-status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.inv-status-paid {
-  background: #ECFDF5;
-  color: #027A48;
-  border: 1px solid #A6F4C7;
-}
-.inv-status-paid .inv-status-dot {
-  background: #12B76A;
-}
-
-.inv-status-sent {
-  background: #EFF8FF;
-  color: #175CD3;
-  border: 1px solid #B2DDFF;
-}
-.inv-status-sent .inv-status-dot {
-  background: #2E90FA;
-}
-
-.inv-status-draft {
-  background: #F8FAFC;
-  color: #475467;
-  border: 1px solid #EAECF0;
-}
-.inv-status-draft .inv-status-dot {
-  background: #98A2B3;
-}
-
-/* WhatsApp Button */
-.btn-action-wa {
-  background: #F6FEF9;
-  color: #027A48;
-  border: 1px solid #A6F4C7;
-  font-weight: 600;
-  font-size: 13px;
-  height: 36px;
-  padding: 0 12px;
-  border-radius: 8px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  text-decoration: none;
-  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, color 200ms ease, border-color 200ms ease;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-  will-change: transform;
-}
-.btn-action-wa:hover {
-  background: #ECFDF5;
-  border-color: #6CE9A6;
-  color: #054F31;
-  transform: translate3d(0, -1.5px, 0);
-}
-.btn-action-wa:active {
-  transform: translate3d(0, 0.5px, 0) scale(0.96);
-  transition-duration: 90ms;
-}
-
-/* Secondary Action Button */
-.btn-action-secondary {
-  background: #FFFFFF;
-  color: #6E7485;
-  border: 1px solid #ECEEF5;
-  font-weight: 600;
-  font-size: 13px;
-  height: 38px;
-  padding: 0 16px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  text-decoration: none;
-  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, color 200ms ease, border-color 200ms ease;
-  box-shadow: 0 1px 2px rgba(18, 24, 48, 0.03);
-  will-change: transform;
-}
-.btn-action-secondary:hover {
-  background: #F8F9FC;
-  color: #000000;
-  border-color: #DDE1EE;
-  transform: translate3d(0, -1.5px, 0);
-}
-.btn-action-secondary:active {
-  transform: translate3d(0, 0.5px, 0) scale(0.96);
-  transition-duration: 90ms;
-}
-
-/* Primary Action Button (Download PDF) */
-.btn-action-primary {
-  background: #5D76F5;
-  color: #FFFFFF;
-  border: 1px solid #5D76F5;
-  font-weight: 600;
-  font-size: 13px;
-  height: 38px;
-  padding: 0 18px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, border-color 200ms ease;
-  box-shadow: 0 4px 14px rgba(93, 118, 245, 0.25);
-  will-change: transform;
-}
-.btn-action-primary:hover {
-  background: #4A63E2;
-  border-color: #4A63E2;
-  box-shadow: 0 8px 20px -4px rgba(93, 118, 245, 0.38);
-  transform: translate3d(0, -1.5px, 0);
-}
-.btn-action-primary:active {
-  transform: translate3d(0, 0.5px, 0) scale(0.96);
-  transition-duration: 90ms;
-}
-
-.invoice-paper {
-  background: #FFFFFF !important;
-  color: #000000 !important;
-  width: 794px !important;
-  min-width: 794px !important;
-  max-width: 794px !important;
-  min-height: 1120px;
-  margin: 0 auto;
-  padding: 44px 48px 36px !important;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
-  box-sizing: border-box !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: space-between !important;
-  position: relative;
-}
-
-/* 1. Top To/Date Bar */
-.km-top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding-bottom: 12px;
-  border-bottom: 1.5px solid #000000;
-  margin-bottom: 24px;
-}
-
-.km-to-box .label {
-  font-size: 13px;
-  font-weight: 500;
-  color: #000000;
-  margin-bottom: 4px;
-}
-
-.km-to-box .client-name {
-  font-size: 15px;
-  font-weight: 700;
-  color: #000000;
-}
-
-.km-to-box .client-sub {
-  font-size: 12px;
-  color: #4B5563;
-  margin-top: 2px;
-}
-
-.km-date-inv-box {
-  text-align: right;
-}
-
-.km-date-inv-box .date-line {
-  font-size: 13px;
-  color: #000000;
-  margin-bottom: 4px;
-}
-
-.km-date-inv-box .inv-num {
-  font-size: 14px;
-  font-weight: 700;
-  color: #000000;
-  letter-spacing: 0.5px;
-}
-
-/* 2. Main Header Block: Logo & INVOICE */
-.km-main-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 36px;
-}
-
-.km-logo-col {
-  width: 250px;
-}
-
-.km-logo-img {
-  height: 85px;
-  width: auto;
-  max-width: 130px;
-  object-fit: contain;
-  margin-bottom: 12px;
-  display: block;
-}
-
-.km-agency-address {
-  font-size: 10.5px;
-  line-height: 1.35;
-  color: #6B7280;
-}
-
-.km-invoice-title-col {
-  text-align: right;
-}
-
-.km-title-large {
-  font-size: 64px;
-  font-weight: 900;
-  color: #000000;
-  letter-spacing: 4px;
-  line-height: 1;
-  margin-bottom: 12px;
-  text-transform: uppercase;
-}
-
-.km-dates-row {
-  display: flex;
-  justify-content: flex-end;
-  gap: 28px;
-  font-size: 12.5px;
-  color: #000000;
-}
-
-.km-dates-row span.val {
-  font-weight: 600;
-}
-
-/* 3. Items Table */
-.km-table-wrapper {
-  margin-bottom: 24px;
-}
-
-.km-invoice-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.km-invoice-table th {
-  font-size: 14px;
-  font-weight: 700;
-  color: #000000;
-  padding: 10px 0 14px;
-  text-align: left;
-  border-bottom: 1px solid #E5E7EB;
-}
-
-.km-invoice-table th.col-desc { width: 52%; }
-.km-invoice-table th.col-price { width: 18%; text-align: right; }
-.km-invoice-table th.col-qty { width: 10%; text-align: center; }
-.km-invoice-table th.col-total { width: 20%; text-align: right; }
-
-.km-invoice-table td {
-  padding: 12px 0;
-  font-size: 12.5px;
-  color: #111827;
-  vertical-align: top;
-  border-bottom: 1px solid #F3F4F6;
-}
-
-.km-invoice-table td.col-desc {
-  font-weight: 500;
-  line-height: 1.4;
-  padding-right: 15px;
-}
-
-.km-invoice-table td.col-price {
-  text-align: right;
-  color: #374151;
-}
-
-.km-invoice-table td.col-qty {
-  text-align: center;
-  color: #374151;
-}
-
-.km-invoice-table td.col-total {
-  text-align: right;
-  font-weight: 600;
-  color: #000000;
-}
-
-/* 4. Notes & Totals Area */
-.km-middle-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 30px;
-  margin-top: 10px;
-  margin-bottom: 30px;
-}
-
-.km-notes-col {
-  flex: 1;
-}
-
-.km-note-block {
-  margin-bottom: 16px;
-}
-
-.km-note-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: #000000;
-  margin-bottom: 4px;
-}
-
-.km-note-text {
-  font-size: 11px;
-  line-height: 1.45;
-  color: #374151;
-}
-
-.km-bank-info {
-  margin-top: 12px;
-}
-
-.km-bank-title {
-  font-size: 12px;
-  font-weight: 700;
-  color: #000000;
-  margin-bottom: 4px;
-}
-
-.km-bank-detail {
-  font-size: 12px;
-  font-weight: 600;
-  color: #000000;
-}
-
-.km-totals-col {
-  width: 260px;
-  flex-shrink: 0;
-}
-
-.km-total-line {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13.5px;
-  font-weight: 700;
-  padding: 4px 0;
-  color: #000000;
-}
-
-.km-total-line.discount {
-  font-weight: 500;
-  color: #6B7280;
-}
-
-.km-total-line.grand {
-  font-size: 15px;
-  font-weight: 800;
-  margin-top: 6px;
-  padding-top: 6px;
-  color: #000000;
-}
-
-/* 5. Footer Brand Box & Bottom Links */
-.km-footer-section {
-  margin-top: auto;
-  border-top: 1px solid #E5E7EB;
-  padding-top: 18px;
-}
-
-.km-footer-brand-box {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 18px;
-}
-
-.km-qr-box {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.km-qr-img {
-  width: 58px;
-  height: 58px;
-}
-
-.km-qr-text {
-  font-size: 9.5px;
-  font-weight: 800;
-  line-height: 1.25;
-  color: #000000;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
-.km-about-text-box {
-  flex: 1;
-}
-
-.km-about-title {
-  font-size: 13px;
-  font-weight: 800;
-  color: #000000;
-  margin-bottom: 4px;
-}
-
-.km-about-desc {
-  font-size: 10.5px;
-  line-height: 1.4;
-  color: #4B5563;
-}
-
-.km-bottom-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 1px solid #E5E7EB;
-  padding-top: 12px;
-  font-size: 11px;
-}
-
-.km-tagline {
-  font-weight: 700;
-  color: #000000;
-}
-
-.km-social-links {
-  display: flex;
-  gap: 16px;
-  color: #4B5563;
-}
-
-.km-social-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: #4B5563;
-  text-decoration: none;
-}
-
-.km-social-item svg {
-  width: 12px;
-  height: 12px;
-}
-
-/* Status watermark / stamp */
-.km-stamp-badge {
-  position: absolute;
-  top: 115px;
-  right: 280px;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-weight: 800;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.km-stamp-paid {
-  border: 1.5px solid #10B981;
-  color: #10B981;
-  background: rgba(16, 185, 129, 0.08);
-}
-
-.km-stamp-sent {
-  border: 1.5px solid #3B82F6;
-  color: #3B82F6;
-  background: rgba(59, 130, 246, 0.08);
-}
-
-.km-stamp-draft {
-  border: 1.5px solid #9CA3AF;
-  color: #6B7280;
-  background: rgba(156, 163, 175, 0.08);
-}
-
-/* Print Optimization */
-@media print {
-  @page {
-    size: A4 portrait;
-    margin: 0;
-  }
-  *, *:before, *:after {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color-adjust: exact !important;
-  }
-  html, body, .invoice-wrapper {
-    background: #FFFFFF !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    width: 100% !important;
-  }
-  .invoice-actions-bar, .sidebar, .topbar, #dl-notice, .auto-download-notice, .no-print, [data-html2canvas-ignore="true"] {
-    display: none !important;
-  }
-  .invoice-paper {
-    box-shadow: none !important;
-    padding: 40px 48px 30px !important;
-    max-width: 100% !important;
-    width: 100% !important;
-    min-height: 100vh !important;
-    margin: 0 !important;
-  }
-}
-
-@media (max-width: 768px) {
-  .invoice-wrapper {
-    padding: 16px 8px;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-  .invoice-actions-bar {
-    flex-direction: column;
-    align-items: stretch !important;
-    gap: 8px;
-    max-width: 794px;
-    margin: 0 auto 16px;
-  }
-  .invoice-actions-right {
-    width: 100%;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
-  /* On mobile preview, preserve authentic A4 proportions in a scrollable frame */
-  .invoice-paper {
-    width: 794px !important;
-    min-width: 794px !important;
-    max-width: 794px !important;
-    box-sizing: border-box !important;
-  }
-  .km-main-header {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: space-between !important;
-    align-items: flex-start !important;
-    margin-bottom: 36px !important;
-  }
-  .km-logo-col {
-    width: 250px !important;
-  }
-  .km-invoice-title-col {
-    text-align: right !important;
-  }
-  .km-title-large {
-    font-size: 64px !important;
-    letter-spacing: 4px !important;
-    line-height: 1 !important;
-  }
-  .km-top-bar {
-    display: flex !important;
-    flex-direction: row !important;
-    justify-content: space-between !important;
-    align-items: flex-start !important;
-  }
-  .km-date-inv-box {
-    text-align: right !important;
-  }
-}
-
-/* NebulaPay Dark Mode for Invoice Action Bar & Wrapper */
-html[data-theme="dark"] .invoice-wrapper,
-body.dark-mode.invoice-wrapper {
-  background: #07090E !important;
-  color: #FFFFFF !important;
-}
-
-html[data-theme="dark"] .invoice-actions-bar .btn-action-back {
-  background: #12151F !important;
-  color: #94A3B8 !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-}
-html[data-theme="dark"] .invoice-actions-bar .btn-action-back:hover {
-  background: #181C29 !important;
-  color: #FFFFFF !important;
-  border-color: rgba(56, 189, 248, 0.42) !important;
-}
-
+/*
+ * PT Kala Kausa Prima - Official Invoice Template
+ * 1:1 Pixel-Accurate Match with PT Kala Kausa Prima Brand Guidelines
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+.invoice-wrapper {
+  background: #F5F5F7;
+  min-height: 100vh;
+  padding: 30px 15px;
+  font-family: var(--font-sans, 'Inter', sans-serif) !important;
+  color: #000000;
+}
+
+.invoice-actions-bar {
+  max-width: 800px;
+  margin: 0 auto 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.invoice-actions-bar .btn-action-back {
+  background: #FFFFFF;
+  color: #6E7485;
+  border: 1px solid #ECEEF5;
+  font-weight: 600;
+  font-size: 13px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+  box-shadow: 0 1px 2px rgba(18, 24, 48, 0.03);
+  will-change: transform;
+}
+
+.invoice-actions-bar .btn-action-back:hover {
+  background: #F8F9FC;
+  color: #000000;
+  border-color: #DDE1EE;
+  transform: translate3d(0, -1.5px, 0);
+}
+
+.invoice-actions-bar .btn-action-back:active {
+  transform: translate3d(0, 0.5px, 0) scale(0.96);
+  transition-duration: 90ms;
+}
+
+.invoice-actions-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Status Pill Badge (Untitled UI) */
+.inv-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+  box-sizing: border-box;
+}
+
+.inv-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.inv-status-paid {
+  background: #ECFDF5;
+  color: #027A48;
+  border: 1px solid #A6F4C7;
+}
+.inv-status-paid .inv-status-dot {
+  background: #12B76A;
+}
+
+.inv-status-sent {
+  background: #EFF8FF;
+  color: #175CD3;
+  border: 1px solid #B2DDFF;
+}
+.inv-status-sent .inv-status-dot {
+  background: #2E90FA;
+}
+
+.inv-status-draft {
+  background: #F8FAFC;
+  color: #475467;
+  border: 1px solid #EAECF0;
+}
+.inv-status-draft .inv-status-dot {
+  background: #98A2B3;
+}
+
+/* WhatsApp Button */
+.btn-action-wa {
+  background: #F6FEF9;
+  color: #027A48;
+  border: 1px solid #A6F4C7;
+  font-weight: 600;
+  font-size: 13px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  will-change: transform;
+}
+.btn-action-wa:hover {
+  background: #ECFDF5;
+  border-color: #6CE9A6;
+  color: #054F31;
+  transform: translate3d(0, -1.5px, 0);
+}
+.btn-action-wa:active {
+  transform: translate3d(0, 0.5px, 0) scale(0.96);
+  transition-duration: 90ms;
+}
+
+/* Secondary Action Button */
+.btn-action-secondary {
+  background: #FFFFFF;
+  color: #6E7485;
+  border: 1px solid #ECEEF5;
+  font-weight: 600;
+  font-size: 13px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, color 200ms ease, border-color 200ms ease;
+  box-shadow: 0 1px 2px rgba(18, 24, 48, 0.03);
+  will-change: transform;
+}
+.btn-action-secondary:hover {
+  background: #F8F9FC;
+  color: #000000;
+  border-color: #DDE1EE;
+  transform: translate3d(0, -1.5px, 0);
+}
+.btn-action-secondary:active {
+  transform: translate3d(0, 0.5px, 0) scale(0.96);
+  transition-duration: 90ms;
+}
+
+/* Primary Action Button (Download PDF) */
+.btn-action-primary {
+  background: #5D76F5;
+  color: #FFFFFF;
+  border: 1px solid #5D76F5;
+  font-weight: 600;
+  font-size: 13px;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 200ms cubic-bezier(0.22, 1, 0.36, 1), background-color 200ms ease, border-color 200ms ease;
+  box-shadow: 0 4px 14px rgba(93, 118, 245, 0.25);
+  will-change: transform;
+}
+.btn-action-primary:hover {
+  background: #4A63E2;
+  border-color: #4A63E2;
+  box-shadow: 0 8px 20px -4px rgba(93, 118, 245, 0.38);
+  transform: translate3d(0, -1.5px, 0);
+}
+.btn-action-primary:active {
+  transform: translate3d(0, 0.5px, 0) scale(0.96);
+  transition-duration: 90ms;
+}
+
+.invoice-paper {
+  background: #FFFFFF !important;
+  color: #000000 !important;
+  width: 794px !important;
+  min-width: 794px !important;
+  max-width: 794px !important;
+  min-height: 1120px;
+  margin: 0 auto;
+  padding: 44px 48px 36px !important;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  position: relative;
+}
+
+/* 1. Top To/Date Bar */
+.km-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 12px;
+  border-bottom: 1.5px solid #000000;
+  margin-bottom: 24px;
+}
+
+.km-to-box .label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #000000;
+  margin-bottom: 4px;
+}
+
+.km-to-box .client-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.km-to-box .client-sub {
+  font-size: 12px;
+  color: #4B5563;
+  margin-top: 2px;
+}
+
+.km-date-inv-box {
+  text-align: right;
+}
+
+.km-date-inv-box .date-line {
+  font-size: 13px;
+  color: #000000;
+  margin-bottom: 4px;
+}
+
+.km-date-inv-box .inv-num {
+  font-size: 14px;
+  font-weight: 700;
+  color: #000000;
+  letter-spacing: 0.5px;
+}
+
+/* 2. Main Header Block: Logo & INVOICE */
+.km-main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+}
+
+.km-logo-col {
+  width: 250px;
+}
+
+.km-logo-img {
+  height: 56px;
+  width: auto;
+  max-width: 140px;
+  object-fit: contain;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.km-agency-address {
+  font-size: 10.5px;
+  line-height: 1.4;
+  color: #000000;
+}
+
+.km-invoice-title-col {
+  text-align: right;
+}
+
+.km-title-large {
+  font-size: 56px;
+  font-weight: 900;
+  color: #000000;
+  letter-spacing: 3.5px;
+  line-height: 1;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.km-dates-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 24px;
+  font-size: 12px;
+  color: #000000;
+}
+
+.km-dates-row span.val {
+  font-weight: 700;
+  color: #000000;
+}
+
+/* 3. Items Table */
+.km-table-wrapper {
+  margin-bottom: 20px;
+}
+
+.km-invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: none !important;
+}
+
+.km-invoice-table th {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #000000;
+  padding: 10px 0 14px;
+  text-align: left;
+  border: none !important;
+}
+
+.km-invoice-table th.col-desc { width: 52%; }
+.km-invoice-table th.col-price { width: 18%; text-align: right; }
+.km-invoice-table th.col-qty { width: 10%; text-align: center; }
+.km-invoice-table th.col-total { width: 20%; text-align: right; }
+
+.km-invoice-table td {
+  padding: 8px 0;
+  font-size: 12.5px;
+  color: #000000;
+  vertical-align: top;
+  border: none !important;
+}
+
+.km-invoice-table td.col-desc {
+  font-weight: 500;
+  line-height: 1.45;
+  padding-right: 15px;
+  color: #000000;
+}
+
+.km-invoice-table td.col-price {
+  text-align: right;
+  color: #000000;
+  font-weight: 500;
+}
+
+.km-invoice-table td.col-qty {
+  text-align: center;
+  color: #000000;
+  font-weight: 500;
+}
+
+.km-invoice-table td.col-total {
+  text-align: right;
+  font-weight: 700;
+  color: #000000;
+}
+
+/* 4. Notes & Totals Area */
+.km-middle-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 30px;
+  margin-top: 28px;
+  margin-bottom: 24px;
+}
+
+.km-notes-col {
+  flex: 1;
+}
+
+.km-note-block {
+  margin-bottom: 16px;
+}
+
+.km-note-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 4px;
+}
+
+.km-note-text {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: #000000;
+}
+
+.km-bank-info {
+  margin-top: 14px;
+}
+
+.km-bank-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 4px;
+}
+
+.km-bank-detail {
+  font-size: 12px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.km-totals-col {
+  width: 270px;
+  flex-shrink: 0;
+}
+
+.km-total-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 4px 0;
+  color: #000000;
+}
+
+.km-total-line.discount {
+  font-weight: 700;
+  color: #000000;
+}
+
+.km-total-line.grand {
+  font-size: 15px;
+  font-weight: 900;
+  margin-top: 4px;
+  padding-top: 4px;
+  color: #000000;
+}
+
+/* 5. Footer Brand Box & Bottom Links */
+.km-footer-section {
+  margin-top: auto;
+  border-top: 1px solid #E5E7EB;
+  padding-top: 16px;
+}
+
+.km-footer-brand-box {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 14px;
+}
+
+.km-qr-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.km-qr-img {
+  width: 54px;
+  height: 54px;
+}
+
+.km-qr-text {
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #000000;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.km-about-text-box {
+  flex: 1;
+}
+
+.km-about-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #000000;
+  margin-bottom: 4px;
+}
+
+.km-about-desc {
+  font-size: 10px;
+  line-height: 1.45;
+  color: #4B5563;
+}
+
+.km-bottom-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: none !important;
+  margin-top: 12px;
+  font-size: 11px;
+}
+
+.km-tagline {
+  font-weight: 700;
+  color: #000000;
+}
+
+.km-social-links {
+  display: flex;
+  gap: 20px;
+  color: #4B5563;
+  font-size: 10.5px;
+}
+
+.km-social-item {
+  color: #4B5563;
+  text-decoration: none;
+}
+
+.km-social-item svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Status watermark / stamp */
+.km-stamp-badge {
+  position: absolute;
+  top: 115px;
+  right: 280px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: 800;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.km-stamp-paid {
+  border: 1.5px solid #10B981;
+  color: #10B981;
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.km-stamp-sent {
+  border: 1.5px solid #3B82F6;
+  color: #3B82F6;
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.km-stamp-draft {
+  border: 1.5px solid #9CA3AF;
+  color: #6B7280;
+  background: rgba(156, 163, 175, 0.08);
+}
+
+/* Print Optimization */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+  *, *:before, *:after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  html, body, .invoice-wrapper {
+    background: #FFFFFF !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+  .invoice-actions-bar, .sidebar, .topbar, #dl-notice, .auto-download-notice, .no-print, [data-html2canvas-ignore="true"] {
+    display: none !important;
+  }
+  .invoice-paper {
+    box-shadow: none !important;
+    padding: 40px 48px 30px !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .invoice-wrapper {
+    padding: 16px 8px;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .invoice-actions-bar {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 8px;
+    max-width: 794px;
+    margin: 0 auto 16px;
+  }
+  .invoice-actions-right {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  /* On mobile preview, preserve authentic A4 proportions in a scrollable frame */
+  .invoice-paper {
+    width: 794px !important;
+    min-width: 794px !important;
+    max-width: 794px !important;
+    box-sizing: border-box !important;
+  }
+  .km-main-header {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    margin-bottom: 36px !important;
+  }
+  .km-logo-col {
+    width: 250px !important;
+  }
+  .km-invoice-title-col {
+    text-align: right !important;
+  }
+  .km-title-large {
+    font-size: 64px !important;
+    letter-spacing: 4px !important;
+    line-height: 1 !important;
+  }
+  .km-top-bar {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+  }
+  .km-date-inv-box {
+    text-align: right !important;
+  }
+}
+
+/* NebulaPay Dark Mode for Invoice Action Bar & Wrapper */
+html[data-theme="dark"] .invoice-wrapper,
+body.dark-mode.invoice-wrapper {
+  background: #07090E !important;
+  color: #FFFFFF !important;
+}
+
+html[data-theme="dark"] .invoice-actions-bar .btn-action-back {
+  background: #12151F !important;
+  color: #94A3B8 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+html[data-theme="dark"] .invoice-actions-bar .btn-action-back:hover {
+  background: #181C29 !important;
+  color: #FFFFFF !important;
+  border-color: rgba(56, 189, 248, 0.42) !important;
+}
+

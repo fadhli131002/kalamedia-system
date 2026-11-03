@@ -102,11 +102,17 @@ $waText .= "A.N: *" . AGENCY_BANK_HOLDER . "*\n\n";
 $waText .= "Lihat & Unduh Invoice Resmi:\n";
 $waText .= "$invoiceUrl\n\n";
 $waText .= "Terima kasih atas kerja samanya.\n";
-$waText .= "_PT Kala Kausa Prima • Built for What’s Next_";
+$waText .= "_PT Kala Kausa Prima • Built for What's Next_";
 
 $waUrl = !empty($waPhone) 
     ? "https://api.whatsapp.com/send?phone=$waPhone&text=" . urlencode($waText) 
     : "https://api.whatsapp.com/send?text=" . urlencode($waText);
+
+$logoPath = BASE_PATH . '/assets/img/Logo-1.webp';
+$logoData = file_exists($logoPath) ? 'data:image/webp;base64,' . base64_encode(file_get_contents($logoPath)) : 'assets/img/Logo-1.webp';
+
+$qrPath = BASE_PATH . '/assets/img/qr_code.svg';
+$qrData = file_exists($qrPath) ? 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($qrPath)) : 'assets/img/qr_code.svg';
 ?>
 
 <!DOCTYPE html>
@@ -118,6 +124,50 @@ $waUrl = !empty($waPhone)
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css?v=saas-linear-1.0">
   <link rel="stylesheet" href="assets/css/invoice.css?v=saas-linear-1.0">
+  <style>
+    @page { size: A4 portrait; margin: 0 !important; }
+    @media print {
+      html, body {
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #FFFFFF !important;
+        overflow: hidden !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .invoice-wrapper {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #FFFFFF !important;
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 0 !important;
+        display: block !important;
+        overflow: hidden !important;
+      }
+      .invoice-actions-bar, .sidebar, .topbar, #dl-notice, .auto-download-notice, .no-print, [data-html2canvas-ignore="true"] {
+        display: none !important;
+      }
+      .invoice-paper {
+        box-shadow: none !important;
+        margin: 0 auto !important;
+        padding: 56px 58px 44px !important;
+        width: 794px !important;
+        min-width: 794px !important;
+        max-width: 794px !important;
+        height: 1120px !important;
+        max-height: 1120px !important;
+        box-sizing: border-box !important;
+        page-break-inside: avoid !important;
+        page-break-after: avoid !important;
+        page-break-before: avoid !important;
+        break-inside: avoid !important;
+        overflow: hidden !important;
+      }
+    }
+  </style>
   <?php render_tab_uid_script(); ?>
 </head>
 <body class="invoice-wrapper">
@@ -184,24 +234,24 @@ $waUrl = !empty($waPhone)
   <div class="invoice-paper" id="invoice-canvas" style="width: 794px !important; min-width: 794px !important; max-width: 794px !important; min-height: 1120px; padding: 56px 58px 44px !important; box-sizing: border-box !important;">
 
     <!-- 1. Top To / Date Bar -->
-    <div class="km-top-bar">
-      <div class="km-to-box">
+    <div class="km-top-bar" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; justify-content: space-between !important; align-items: flex-start !important; width: 100% !important; padding-bottom: 12px !important; border-bottom: 1.5px solid #000000 !important; margin-bottom: 28px !important; box-sizing: border-box !important;">
+      <div class="km-to-box" style="flex: 1 1 auto !important; text-align: left !important;">
         <div class="label">To:</div>
         <div class="client-name"><?= htmlspecialchars($invoice['client_company'] ?: $invoice['client_name']) ?></div>
         <?php if (!empty($invoice['client_name']) && $invoice['client_company'] !== $invoice['client_name']): ?>
           <div class="client-sub">Up: <?= htmlspecialchars($invoice['client_name']) ?></div>
         <?php endif; ?>
       </div>
-      <div class="km-date-inv-box">
+      <div class="km-date-inv-box" style="flex: 0 0 auto !important; text-align: right !important; white-space: nowrap !important;">
         <div class="date-line">Date: <?= $issueDateFormatted ?></div>
         <div class="inv-num"><?= htmlspecialchars($invoice['invoice_number']) ?></div>
       </div>
     </div>
 
     <!-- 2. Main Header: Logo, Address, INVOICE & Dates -->
-    <div class="km-main-header">
-      <div class="km-logo-col">
-        <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" class="km-logo-img">
+    <div class="km-main-header" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; justify-content: space-between !important; align-items: flex-start !important; width: 100% !important; margin-bottom: 32px !important; box-sizing: border-box !important;">
+      <div class="km-logo-col" style="flex: 0 0 260px !important; width: 260px !important; max-width: 260px !important; text-align: left !important;">
+        <img src="<?= $logoData ?>" alt="PT Kala Kausa Prima" class="km-logo-img">
         <div class="km-agency-address">
           Jl. Padat Karya, Cisauk Girang, RT 001/RW 005,<br>
           Kel. Cisauk, Tangerang,<br>
@@ -209,9 +259,9 @@ $waUrl = !empty($waPhone)
         </div>
       </div>
 
-      <div class="km-invoice-title-col">
-        <div class="km-title-large">INVOICE</div>
-        <div class="km-dates-row">
+      <div class="km-invoice-title-col" style="flex: 1 1 auto !important; text-align: right !important;">
+        <div class="km-title-large" style="font-size: 56px !important; font-weight: 900 !important; color: #000000 !important; letter-spacing: 3.5px !important; line-height: 1 !important; margin-bottom: 12px !important; text-transform: uppercase !important; text-align: right !important;">INVOICE</div>
+        <div class="km-dates-row" style="display: flex !important; justify-content: flex-end !important; gap: 24px !important; font-size: 12px !important; color: #000000 !important; white-space: nowrap !important;">
           <div>Date : <span class="val"><?= $issueDateFormatted ?></span></div>
           <div>Due date: <span class="val"><?= $dueDateFormatted ?></span></div>
         </div>
@@ -219,8 +269,8 @@ $waUrl = !empty($waPhone)
     </div>
 
     <!-- 3. Description & Price Table -->
-    <div class="km-table-wrapper">
-      <table class="km-invoice-table">
+    <div class="km-table-wrapper" style="width: 100% !important; margin-bottom: 20px !important;">
+      <table class="km-invoice-table" style="width: 100% !important; border-collapse: collapse !important; border: none !important;">
         <thead>
           <tr>
             <th class="col-desc">Description</th>
@@ -243,8 +293,8 @@ $waUrl = !empty($waPhone)
     </div>
 
     <!-- 4. Notes, Account Info & Subtotal / Grand Total -->
-    <div class="km-middle-section">
-      <div class="km-notes-col">
+    <div class="km-middle-section" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; justify-content: space-between !important; align-items: flex-start !important; gap: 30px !important; margin-top: 28px !important; margin-bottom: 24px !important; width: 100% !important; box-sizing: border-box !important;">
+      <div class="km-notes-col" style="flex: 1 1 auto !important; text-align: left !important;">
         <div class="km-note-block">
           <div class="km-note-title">Note:</div>
           <div class="km-note-text"><?= nl2br(htmlspecialchars($displayNote)) ?></div>
@@ -256,7 +306,7 @@ $waUrl = !empty($waPhone)
         </div>
       </div>
 
-      <div class="km-totals-col">
+      <div class="km-totals-col" style="flex: 0 0 280px !important; width: 280px !important; text-align: right !important;">
         <div class="km-total-line">
           <span>Sub Total</span>
           <span><?= format_rupiah($invoice['subtotal']) ?></span>
@@ -289,10 +339,10 @@ $waUrl = !empty($waPhone)
     </div>
 
     <!-- 5. Footer: QR Code, Agency Pitch & Social Links -->
-    <div class="km-footer-section">
-      <div class="km-footer-brand-box">
-        <div class="km-qr-box">
-          <img src="assets/img/qr_code.svg" alt="QR Code" class="km-qr-img">
+    <div class="km-footer-section" style="margin-top: auto !important; border-top: 1px solid #E5E7EB !important; padding-top: 16px !important; width: 100% !important; box-sizing: border-box !important;">
+      <div class="km-footer-brand-box" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; align-items: center !important; gap: 20px !important; margin-bottom: 14px !important; width: 100% !important;">
+        <div class="km-qr-box" style="display: flex !important; align-items: center !important; gap: 10px !important; flex: 0 0 auto !important;">
+          <img src="<?= $qrData ?>" alt="QR Code" class="km-qr-img">
           <div class="km-qr-text">
             SCAN ME<br>
             TO MORE<br>
@@ -300,7 +350,7 @@ $waUrl = !empty($waPhone)
           </div>
         </div>
 
-        <div class="km-about-text-box">
+        <div class="km-about-text-box" style="flex: 1 1 auto !important;">
           <div class="km-about-title">PT Kala Kausa Prima</div>
           <div class="km-about-desc">
             PT Kala Kausa Prima represents a modern creative agency focused on visibility, clarity, and impactful storytelling. The brand combines bold creativity with professional execution to create strong and meaningful brand communication.
@@ -308,8 +358,8 @@ $waUrl = !empty($waPhone)
         </div>
       </div>
 
-      <div class="km-bottom-bar">
-        <div class="km-tagline">Built for What’s Next</div>
+      <div class="km-bottom-bar" style="display: flex !important; flex-direction: row !important; flex-wrap: nowrap !important; justify-content: space-between !important; align-items: center !important; margin-top: 12px !important; font-size: 11px !important; width: 100% !important;">
+        <div class="km-tagline">Built for What's Next</div>
         <div class="km-social-links">
           <span class="km-social-item">
             <?= AGENCY_INSTAGRAM ?>
@@ -392,7 +442,8 @@ $waUrl = !empty($waPhone)
           useCORS: true,
           letterRendering: true,
           scrollY: 0,
-          windowWidth: 1024,
+          windowWidth: 1200,
+          scrollX: 0,
           ignoreElements: (el) => el.hasAttribute('data-html2canvas-ignore') || el.classList.contains('no-print') || el.id === 'dl-notice'
         },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },

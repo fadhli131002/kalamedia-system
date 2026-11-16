@@ -130,28 +130,45 @@ $badgeLabel = $sidebarBadge;
   }
 }
 
-/* 4. Micro-Interactions pada Item & Ikon Sidebar (Spring Hover & Tactile Press) */
+/* 4. Transisi Lebar & Geser Mulus Sidebar + Efek Tekan Tombol Active (transform: scale) */
+.sidebar,
+aside.sidebar,
+#app-sidebar {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
 .sidebar-nav {
   position: relative;
 }
+.sidebar-menu-item,
 .sidebar-nav .nav-link,
 .sidebar-nav .sidebar-link {
   position: relative;
   z-index: 2;
-  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
+  transition: transform 0.1s ease,
               color 0.2s ease,
               background-color 0.2s ease !important;
+}
+.sidebar-menu-item:active,
+.sidebar-menu-item.active,
+.sidebar-nav .nav-link:active,
+.sidebar-nav .nav-link.active,
+.sidebar-nav .sidebar-link:active,
+.sidebar-nav .sidebar-link.active,
+.mobile-bottom-nav .mob-nav-item:active {
+  transform: scale(0.98) !important;
+  transition: transform 0.1s ease !important;
 }
 .sidebar-nav .nav-link .nav-icon-wrap {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
-              filter 0.28s ease;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              filter 0.2s ease;
 }
 .sidebar-nav .nav-link:hover:not(.active) {
-  transform: translate3d(4px, 0, 0) !important;
   color: #5B3DF5 !important;
   background-color: transparent !important;
 }
@@ -159,17 +176,8 @@ html[data-theme="dark"] .sidebar-nav .nav-link:hover:not(.active),
 body.dark-mode .sidebar-nav .nav-link:hover:not(.active) {
   color: #A5B4FC !important;
 }
-.sidebar-nav .nav-link:hover:not(.active) .nav-icon-wrap {
-  transform: scale(1.08);
-}
-.sidebar-nav .nav-link:active,
-.mobile-bottom-nav .mob-nav-item:active {
-  transform: scale(0.96) !important;
-  transition-duration: 90ms !important;
-}
 .sidebar-nav .nav-link.active .nav-icon-wrap svg {
   filter: drop-shadow(0 2px 8px rgba(99, 102, 241, 0.45));
-  transform: scale(1.05);
 }
 
 /* When FLIP Gliding Pill is active, let the pill render the active background */
@@ -235,8 +243,9 @@ body.dark-mode .sidebar-hover-pill {
     height: 100dvh !important;
     z-index: 99999 !important;
     transform: translate3d(-104%, 0, 0) !important;
-    transition: transform 360ms cubic-bezier(0.32, 0.72, 0, 1),
-                visibility 0ms linear 360ms !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                visibility 0ms linear 0.3s !important;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25) !important;
   }
   aside.sidebar.sidebar-open, aside.sidebar.active, aside.sidebar.open,
@@ -246,7 +255,8 @@ body.dark-mode .sidebar-hover-pill {
     visibility: visible !important;
     pointer-events: auto !important;
     transform: translate3d(0, 0, 0) !important;
-    transition: transform 360ms cubic-bezier(0.32, 0.72, 0, 1),
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
                 visibility 0ms linear 0ms !important;
   }
 }
@@ -278,7 +288,7 @@ body.dark-mode .sidebar-hover-pill {
       <!-- CLIENT PORTAL NAVIGATION -->
       <div class="nav-section-title">Client Portal</div>
 
-      <a href="<?= url('client-portal?tab=deliverables&portal=client&_slot=client') ?>" data-nav-key="client-deliverables" class="nav-link sidebar-link <?= ($currentPage === 'client-portal' && (!isset($_GET['tab']) || $_GET['tab'] === 'deliverables')) ? 'active' : '' ?>">
+      <a href="<?= url('client-portal?tab=deliverables&portal=client&_slot=client') ?>" data-nav-key="client-deliverables" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && (!isset($_GET['tab']) || $_GET['tab'] === 'deliverables')) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('deliverables', 20) ?></span>
         <span>Progress &amp; Deliverables</span>
       </a>
@@ -288,18 +298,18 @@ body.dark-mode .sidebar-hover-pill {
         $clientHasSosmed = $clientCId ? client_has_sosmed_service($clientCId) : true;
         if ($clientHasSosmed): 
       ?>
-      <a href="<?= url('client-portal?tab=calendar&portal=client&_slot=client') ?>" data-nav-key="client-calendar" class="nav-link sidebar-link <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'calendar') || in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
+      <a href="<?= url('client-portal?tab=calendar&portal=client&_slot=client') ?>" data-nav-key="client-calendar" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'calendar') || in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('calendar', 20) ?></span>
         <span>Kalender Konten</span>
       </a>
       <?php endif; ?>
 
-      <a href="<?= url('client-portal?tab=invoices&portal=client&_slot=client') ?>" data-nav-key="client-invoices" class="nav-link sidebar-link <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'invoices') || in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
+      <a href="<?= url('client-portal?tab=invoices&portal=client&_slot=client') ?>" data-nav-key="client-invoices" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'invoices') || in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('invoices', 20) ?></span>
         <span>Tagihan / Invoices</span>
       </a>
 
-      <a href="<?= url('client-portal?tab=reports&portal=client&_slot=client') ?>" data-nav-key="client-reports" class="nav-link sidebar-link <?= ($currentPage === 'client-portal' && in_array(($_GET['tab'] ?? ''), ['reports', 'ads'])) || in_array($currentPage, ['reports', 'report-deck']) ? 'active' : '' ?>">
+      <a href="<?= url('client-portal?tab=reports&portal=client&_slot=client') ?>" data-nav-key="client-reports" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && in_array(($_GET['tab'] ?? ''), ['reports', 'ads'])) || in_array($currentPage, ['reports', 'report-deck']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('reports', 20) ?></span>
         <span>Laporan Performa</span>
       </a>
@@ -308,23 +318,23 @@ body.dark-mode .sidebar-hover-pill {
       <!-- WORKER & FREELANCER NAVIGATION (SMART SPECIALIZATION ADAPTIVE) -->
       <div class="nav-section-title">Workspace Tim</div>
 
-      <a href="<?= url('tasks?_slot=internal') ?>" data-nav-key="worker-tasks" class="nav-link sidebar-link <?= (in_array($currentPage, ['tasks', 'team-workspace']) && (empty($_GET['tab']) || $_GET['tab'] === 'tasks')) ? 'active' : '' ?>">
+      <a href="<?= url('tasks?_slot=internal') ?>" data-nav-key="worker-tasks" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && (empty($_GET['tab']) || $_GET['tab'] === 'tasks')) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('tasks', 20) ?></span>
         <span>Tugas Saya &amp; Progres</span>
       </a>
 
       <?php if (is_ads_specialist($currentUser)): ?>
-        <a href="<?= url('tasks?tab=ads&_slot=internal') ?>" data-nav-key="worker-ads" class="nav-link sidebar-link <?= (in_array($currentPage, ['tasks', 'team-workspace']) && in_array(($_GET['tab'] ?? ''), ['ads', 'ads_tracker'])) ? 'active' : '' ?>">
+        <a href="<?= url('tasks?tab=ads&_slot=internal') ?>" data-nav-key="worker-ads" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && in_array(($_GET['tab'] ?? ''), ['ads', 'ads_tracker'])) ? 'active' : '' ?>">
           <span class="nav-icon-wrap"><?= renderItshoverIcon('ads', 20) ?></span>
           <span>Saldo Ads</span>
         </a>
 
-        <a href="<?= url('reports?tab=ads_report&_slot=internal') ?>" data-nav-key="worker-reports" class="nav-link sidebar-link <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
+        <a href="<?= url('reports?tab=ads_report&_slot=internal') ?>" data-nav-key="worker-reports" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
           <span class="nav-icon-wrap"><?= renderItshoverIcon('reports', 20) ?></span>
           <span>Report Ads</span>
         </a>
       <?php else: ?>
-        <a href="<?= url('tasks?tab=work_recap&_slot=internal') ?>" data-nav-key="worker-recap" class="nav-link sidebar-link <?= ($currentPage === 'tasks' && ($_GET['tab'] ?? '') === 'work_recap') ? 'active' : '' ?>">
+        <a href="<?= url('tasks?tab=work_recap&_slot=internal') ?>" data-nav-key="worker-recap" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'tasks' && ($_GET['tab'] ?? '') === 'work_recap') ? 'active' : '' ?>">
           <span class="nav-icon-wrap"><?= renderItshoverIcon('invoices', 20) ?></span>
           <span>Report Pekerjaan</span>
         </a>
@@ -334,14 +344,14 @@ body.dark-mode .sidebar-hover-pill {
           $hasSosmedProj = worker_has_sosmed_projects($workerUid);
           if ($hasSosmedProj): 
         ?>
-        <a href="<?= url('content-calendar?_slot=internal') ?>" data-nav-key="worker-calendar" class="nav-link sidebar-link <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
+        <a href="<?= url('content-calendar?_slot=internal') ?>" data-nav-key="worker-calendar" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
           <span class="nav-icon-wrap"><?= renderItshoverIcon('calendar', 20) ?></span>
           <span>Kalender Konten</span>
         </a>
         <?php endif; ?>
       <?php endif; ?>
 
-      <a href="<?= url('tasks?tab=profile&_slot=internal') ?>" data-nav-key="worker-profile" class="nav-link sidebar-link <?= (in_array($currentPage, ['tasks', 'team-workspace']) && ($_GET['tab'] ?? '') === 'profile') ? 'active' : '' ?>">
+      <a href="<?= url('tasks?tab=profile&_slot=internal') ?>" data-nav-key="worker-profile" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && ($_GET['tab'] ?? '') === 'profile') ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('profile', 20) ?></span>
         <span>Profil Saya</span>
       </a>
@@ -351,12 +361,12 @@ body.dark-mode .sidebar-hover-pill {
       <div class="nav-section-title">Menu Utama</div>
 
       <?php if ($isOwner): ?>
-        <a href="<?= url('owner-dashboard?_slot=internal') ?>" data-nav-key="owner-dashboard" class="nav-link sidebar-link <?= $currentPage === 'owner-dashboard' ? 'active' : '' ?>">
+        <a href="<?= url('owner-dashboard?_slot=internal') ?>" data-nav-key="owner-dashboard" class="nav-link sidebar-link sidebar-menu-item <?= $currentPage === 'owner-dashboard' ? 'active' : '' ?>">
           <span class="nav-icon-wrap"><?= renderItshoverIcon('dashboard', 20) ?></span>
           <span>Executive Dashboard</span>
         </a>
       <?php else: ?>
-        <a href="<?= url('admin-dashboard?_slot=internal') ?>" data-nav-key="admin-dashboard" class="nav-link sidebar-link <?= $currentPage === 'admin-dashboard' ? 'active' : '' ?>">
+        <a href="<?= url('admin-dashboard?_slot=internal') ?>" data-nav-key="admin-dashboard" class="nav-link sidebar-link sidebar-menu-item <?= $currentPage === 'admin-dashboard' ? 'active' : '' ?>">
           <span class="nav-icon-wrap"><?= renderItshoverIcon('dashboard', 20) ?></span>
           <span>Admin Dashboard</span>
         </a>
@@ -365,32 +375,32 @@ body.dark-mode .sidebar-hover-pill {
       <div class="nav-section-title">Operasional &amp; Bisnis</div>
 
       <!-- 1. Tugas & Operasional -->
-      <a href="<?= url('tasks?_slot=internal') ?>" data-nav-key="tasks-ops" class="nav-link sidebar-link <?= in_array($currentPage, ['tasks', 'team-workspace', 'content-calendar', 'content-planner']) ? 'active' : '' ?>">
+      <a href="<?= url('tasks?_slot=internal') ?>" data-nav-key="tasks-ops" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['tasks', 'team-workspace', 'content-calendar', 'content-planner']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('tasks', 20) ?></span>
         <span>Tugas &amp; Operasional</span>
       </a>
 
       <!-- 2. Klien & Tim -->
-      <a href="<?= url('clients?_slot=internal') ?>" data-nav-key="clients-team" class="nav-link sidebar-link <?= in_array($currentPage, ['clients', 'team', 'employees-management', 'client-portal']) ? 'active' : '' ?>">
+      <a href="<?= url('clients?_slot=internal') ?>" data-nav-key="clients-team" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['clients', 'team', 'employees-management', 'client-portal']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('clients', 20) ?></span>
         <span>Klien &amp; Tim</span>
       </a>
 
       <!-- 3. Keuangan & Invoice -->
-      <a href="<?= url('invoices?_slot=internal') ?>" data-nav-key="finance-invoices" class="nav-link sidebar-link <?= in_array($currentPage, ['invoices', 'invoice-view', 'expenses', 'salaries', 'salary-view']) ? 'active' : '' ?>">
+      <a href="<?= url('invoices?_slot=internal') ?>" data-nav-key="finance-invoices" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['invoices', 'invoice-view', 'expenses', 'salaries', 'salary-view']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('invoices', 20) ?></span>
         <span>Keuangan &amp; Invoice</span>
       </a>
 
       <!-- 4. Laporan Klien -->
-      <a href="<?= url('reports?_slot=internal') ?>" data-nav-key="reports" class="nav-link sidebar-link <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
+      <a href="<?= url('reports?_slot=internal') ?>" data-nav-key="reports" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('reports', 20) ?></span>
         <span>Laporan Klien</span>
       </a>
 
       <?php if ($isOwner || $isAdmin): ?>
         <div class="nav-section-title">Sistem</div>
-        <a href="<?= url('settings?_slot=internal') ?>" data-nav-key="settings" class="nav-link sidebar-link <?= $currentPage === 'settings' ? 'active' : '' ?>">
+        <a href="<?= url('settings?_slot=internal') ?>" data-nav-key="settings" class="nav-link sidebar-link sidebar-menu-item <?= $currentPage === 'settings' ? 'active' : '' ?>">
           <span class="nav-icon-wrap"><?= renderItshoverIcon('settings', 20) ?></span>
           <span>Pengaturan Agensi</span>
         </a>
@@ -401,7 +411,7 @@ body.dark-mode .sidebar-hover-pill {
     <?php
       $sbLogoutContext = is_client() ? 'client' : 'internal';
     ?>
-    <a href="<?= url('logout') ?>?context=<?= $sbLogoutContext ?>" data-nav-key="logout" onclick="if(window.handleKalaLogout){handleKalaLogout(this.href);return false;}else{sessionStorage.removeItem('kala_tab_uid');}" class="nav-link sidebar-link nav-link-logout" style="margin-top: 6px;">
+    <a href="<?= url('logout') ?>?context=<?= $sbLogoutContext ?>" data-nav-key="logout" onclick="if(window.handleKalaLogout){handleKalaLogout(this.href);return false;}else{sessionStorage.removeItem('kala_tab_uid');}" class="nav-link sidebar-link sidebar-menu-item nav-link-logout" style="margin-top: 6px;">
       <span class="nav-icon-wrap"><?= renderItshoverIcon('logout', 20) ?></span>
       <span>Keluar (Logout)</span>
     </a>

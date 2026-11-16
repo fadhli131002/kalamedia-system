@@ -7210,3 +7210,19 @@ html:not([data-theme="dark"]):not(.dark-mode) body:not(.dark-mode) .bento-stat-s
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ==========================================================================
+   SIDEBAR SMOOTH TRANSITION & TACTILE ACTIVE SCALE
+   ========================================================================== */
+.sidebar {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.sidebar-menu-item:active,
+.sidebar-menu-item.active,
+.sidebar-nav .nav-link:active,
+.sidebar-nav .nav-link.active {
+  transform: scale(0.98) !important;
+  transition: transform 0.1s ease !important;
+}

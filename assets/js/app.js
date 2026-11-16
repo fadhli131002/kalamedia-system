@@ -136,7 +136,7 @@ function closeMobileSidebar() {
     // If clicked inside modal or dropdown toggle or has custom onclick, let default or script handle
     if (link.closest('.modal') || link.closest('.dropdown-menu') || link.hasAttribute('onclick') || link.classList.contains('no-transition')) return;
 
-    const mainEl = document.querySelector('.main-content, main, .main-wrapper, .content-body');
+    const mainEl = document.querySelector('.content-body, .main-content');
     if (mainEl) {
       e.preventDefault();
       isNavigating = true;
@@ -148,12 +148,12 @@ function closeMobileSidebar() {
 
       // Smooth slide pill to target link if in sidebar
       if (link.closest('.sidebar-nav') && window.updateSidebarSlidingPill) {
-        window.updateSidebarSlidingPill(link);
+        window.updateSidebarSlidingPill(link, true);
       }
 
       // Smooth slide pill to target link if in bottom nav
       if (link.closest('.mobile-bottom-nav') && window.updateBottomNavPill) {
-        window.updateBottomNavPill(link);
+        window.updateBottomNavPill(link, true);
       }
 
       mainEl.classList.add('kala-page-leaving');
@@ -167,7 +167,7 @@ function closeMobileSidebar() {
   // Restore on back/forward browser cache navigation (bfcache)
   window.addEventListener('pageshow', function() {
     isNavigating = false;
-    const mainEl = document.querySelector('.main-content, main, .main-wrapper, .content-body');
+    const mainEl = document.querySelector('.content-body, .main-content');
     if (mainEl) {
       mainEl.classList.remove('kala-page-leaving');
       mainEl.classList.add('kala-page-view');
@@ -275,7 +275,7 @@ function initSidebarController() {
     }, { passive: true });
   }
 
-  // Smooth Sidebar Link Interception (Sidebar stays 100% stationary!)
+  // Smooth Sidebar Link Interception (Sidebar stays 100% stationary + FLIP Gliding Pill!)
   document.querySelectorAll('.sidebar-nav a.nav-link').forEach(link => {
     link.addEventListener('click', function(e) {
       const href = this.getAttribute('href');
@@ -284,25 +284,33 @@ function initSidebarController() {
       if (this.getAttribute('target') === '_blank') return;
       if (href.includes('logout')) return;
 
-      // Lock current scroll position before page transition
+      // 1. Capture First (Old Active Item) state for FLIP before changing .active class
       if (sidebarNav) {
+        const prevActive = sidebarNav.querySelector('.nav-link.active') || this;
         sessionStorage.setItem('kala_sidebar_scroll', sidebarNav.scrollTop);
+        sessionStorage.setItem('kala_sidebar_motion', JSON.stringify({
+          top: prevActive.offsetTop,
+          height: prevActive.offsetHeight,
+          scroll: sidebarNav.scrollTop,
+          key: prevActive.getAttribute('data-nav-key') || ''
+        }));
       }
 
-      // Instant active state switch without jumping
+      // 2. Instant active state switch + start 60fps pill glide
       document.querySelectorAll('.sidebar-nav a.nav-link').forEach(l => l.classList.remove('active'));
       this.classList.add('active');
+      if (typeof window.updateSidebarSlidingPill === 'function') {
+        window.updateSidebarSlidingPill(this, true);
+      }
 
-      // Only transition the right content area (<main>) while Sidebar stays completely fixed
-      const mainWrapper = document.querySelector('.main-wrapper') || document.querySelector('.content-body');
-      if (mainWrapper) {
+      // 3. Only transition the right content area (.content-body) while Sidebar & Topbar stay fixed
+      const contentBody = document.querySelector('.content-body');
+      if (contentBody) {
         e.preventDefault();
-        mainWrapper.style.transition = 'opacity 140ms ease, transform 140ms ease';
-        mainWrapper.style.opacity = '0.4';
-        mainWrapper.style.transform = 'translateY(2px)';
+        contentBody.classList.add('kala-page-leaving');
         setTimeout(() => {
-          window.location.href = href;
-        }, 80);
+          window.location.href = this.href || href;
+        }, 120);
       }
     });
   });

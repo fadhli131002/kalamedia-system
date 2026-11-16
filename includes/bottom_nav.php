@@ -77,7 +77,7 @@ $isAdmin = is_admin();
   ?>
     <!-- CLIENT PORTAL BOTTOM NAV -->
     <a href="<?= url('client-portal?tab=deliverables&portal=client&_slot=client') ?>" class="mob-nav-item <?= ($currentPage === 'client-portal' && (!isset($_GET['tab']) || $_GET['tab'] === 'deliverables')) ? 'active' : '' ?>">
-      <div class="mob-nav-icon">
+      <div class="mob-nav-icon nav-icon-wrap">
         <?= renderItshoverIcon('deliverables', 22) ?>
       </div>
       <span class="mob-nav-label">Deliverable</span>
@@ -85,7 +85,7 @@ $isAdmin = is_admin();
 
     <?php if ($clientHasSosmed): ?>
       <a href="<?= url('client-portal?tab=calendar&portal=client&_slot=client') ?>" class="mob-nav-item <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'calendar') || in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
-        <div class="mob-nav-icon">
+        <div class="mob-nav-icon nav-icon-wrap">
           <?= renderItshoverIcon('calendar', 22) ?>
         </div>
         <span class="mob-nav-label">Kalender</span>
@@ -93,21 +93,21 @@ $isAdmin = is_admin();
     <?php endif; ?>
 
     <a href="<?= url('client-portal?tab=invoices&portal=client&_slot=client') ?>" class="mob-nav-item <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'invoices') || in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
-      <div class="mob-nav-icon">
+      <div class="mob-nav-icon nav-icon-wrap">
         <?= renderItshoverIcon('invoices', 22) ?>
       </div>
       <span class="mob-nav-label">Tagihan</span>
     </a>
 
     <a href="<?= url('client-portal?tab=reports&portal=client&_slot=client') ?>" class="mob-nav-item <?= ($currentPage === 'client-portal' && in_array(($_GET['tab'] ?? ''), ['reports', 'ads'])) || in_array($currentPage, ['reports', 'report-deck']) ? 'active' : '' ?>">
-      <div class="mob-nav-icon">
+      <div class="mob-nav-icon nav-icon-wrap">
         <?= renderItshoverIcon('reports', 22) ?>
       </div>
       <span class="mob-nav-label">Laporan</span>
     </a>
 
     <button type="button" class="mob-nav-item" onclick="toggleMobileSidebar()" aria-label="Buka Menu Lainnya">
-      <div class="mob-nav-icon">
+      <div class="mob-nav-icon nav-icon-wrap">
         <?= renderItshoverIcon('menu', 22) ?>
       </div>
       <span class="mob-nav-label">Menu</span>
@@ -120,7 +120,7 @@ $isAdmin = is_admin();
   ?>
     <!-- TIM ADS / FREELANCER / KARYAWAN BOTTOM NAV (SLIDE 2 DARK PILL STYLE) -->
     <a href="<?= url('tasks?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['tasks', 'team-workspace']) && (empty($workerCurrentTab) || $workerCurrentTab === 'tasks') ? 'active' : '' ?>" id="mob-nav-tasks-item" onclick="handleWorkerBottomNavTasks(event)">
-      <div class="mob-nav-icon">
+      <div class="mob-nav-icon nav-icon-wrap">
         <?= renderItshoverIcon('tasks', 22) ?>
       </div>
       <span class="mob-nav-label">Tugas Saya</span>
@@ -129,14 +129,14 @@ $isAdmin = is_admin();
     <?php if ($isAdsSpecialistUser): ?>
       <!-- ORANG ADS: Saldo Ads + Report Ads -->
       <a href="<?= url('tasks?tab=ads_tracker&_slot=internal') ?>" class="mob-nav-item <?= ($currentPage === 'tasks' && in_array($workerCurrentTab, ['ads', 'ads_tracker'])) ? 'active' : '' ?>" id="mob-nav-ads-item" onclick="handleWorkerBottomNavAds(event)">
-        <div class="mob-nav-icon">
+        <div class="mob-nav-icon nav-icon-wrap">
           <?= renderItshoverIcon('ads', 22) ?>
         </div>
         <span class="mob-nav-label">Saldo Ads</span>
       </a>
 
       <a href="<?= url('reports?tab=ads_report&_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
-        <div class="mob-nav-icon">
+        <div class="mob-nav-icon nav-icon-wrap">
           <?= renderItshoverIcon('reports', 22) ?>
         </div>
         <span class="mob-nav-label">Report Ads</span>
@@ -144,7 +144,7 @@ $isAdmin = is_admin();
     <?php else: ?>
       <!-- TIM KREATIF: Rekap Kerja Bulanan / Per Proyek + Kalender (Jika ada Sosmed) -->
       <a href="<?= url('tasks?tab=recap&_slot=internal') ?>" class="mob-nav-item <?= ($currentPage === 'tasks' && $workerCurrentTab === 'recap') ? 'active' : '' ?>" id="mob-nav-recap-item" onclick="handleWorkerBottomNavRecap(event)">
-        <div class="mob-nav-icon">
+        <div class="mob-nav-icon nav-icon-wrap">
           <?= renderItshoverIcon('invoices', 22) ?>
         </div>
         <span class="mob-nav-label">Rekap Kerja</span>
@@ -152,7 +152,7 @@ $isAdmin = is_admin();
 
       <?php if ($workerHasSosmed): ?>
         <a href="<?= url('content-calendar?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
-          <div class="mob-nav-icon">
+          <div class="mob-nav-icon nav-icon-wrap">
             <?= renderItshoverIcon('calendar', 22) ?>
           </div>
           <span class="mob-nav-label">Kalender</span>
@@ -162,7 +162,7 @@ $isAdmin = is_admin();
 
     <!-- ITEM 4: PROFILE KARYAWAN (Menggantikan Menu) -->
     <a href="<?= url('tasks?tab=profile&_slot=internal') ?>" class="mob-nav-item <?= ($currentPage === 'tasks' && $workerCurrentTab === 'profile') ? 'active' : '' ?>" id="mob-nav-profile-item" onclick="handleWorkerBottomNavProfile(event)" aria-label="Buka Profile Karyawan">
-      <div class="mob-nav-icon">
+      <div class="mob-nav-icon nav-icon-wrap">
         <?= renderItshoverIcon('profile', 22) ?>
       </div>
       <span class="mob-nav-label">Profile</span>
@@ -172,7 +172,7 @@ $isAdmin = is_admin();
     <!-- OWNER BOTTOM NAV: 4 TAB PILAR UTAMA + 1 TOMBOL SEMUA MENU (LAUNCHER) -->
     <!-- Tab 1: Eksekutif -->
     <a href="<?= url('owner-dashboard?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['owner-dashboard', 'dashboard']) ? 'active' : '' ?>" title="Executive Dashboard">
-      <div class="mob-nav-icon">
+      <div class="mob-nav-icon nav-icon-wrap">
         <?= renderItshoverIcon('dashboard', 22) ?>
       </div>
       <span class="mob-nav-label">Eksekutif</span>
@@ -180,7 +180,7 @@ $isAdmin = is_admin();
 
     <!-- Tab 2: Operasional -->
     <a href="<?= url('tasks?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['tasks', 'team-workspace']) ? 'active' : '' ?>" title="Pembagian Tugas Tim & Saldo Ads">
-      <div class="mob-nav-icon">
+      <div class="mob-nav-icon nav-icon-wrap">
         <?= renderItshoverIcon('tasks', 22) ?>
       </div>
       <span class="mob-nav-label">Operasional</span>
@@ -188,7 +188,7 @@ $isAdmin = is_admin();
 
     <!-- Tab 3: Keuangan -->
     <a href="<?= url('invoices?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['invoices', 'invoice-view', 'expenses', 'salaries', 'salary-view', 'payroll']) ? 'active' : '' ?>" title="Invoice, Pengeluaran & Penggajian">
-      <div class="mob-nav-icon">
+      <div class="mob-nav-icon nav-icon-wrap">
         <?= renderItshoverIcon('wallet', 22) ?>
       </div>
       <span class="mob-nav-label">Keuangan</span>
@@ -196,7 +196,7 @@ $isAdmin = is_admin();
 
     <!-- Tab 4: Klien & Tim -->
     <a href="<?= url('clients?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['clients', 'team', 'employees-management']) ? 'active' : '' ?>" title="Database Klien, Proyek & Tim">
-      <div class="mob-nav-icon">
+      <div class="mob-nav-icon nav-icon-wrap">
         <?= renderItshoverIcon('team', 22) ?>
       </div>
       <span class="mob-nav-label">Klien &amp; Tim</span>
@@ -204,7 +204,7 @@ $isAdmin = is_admin();
 
     <!-- Tab 5: Semua (Buka Bottom Sheet Launcher) -->
     <button type="button" class="mob-nav-item" onclick="openOwnerBottomSheet()" aria-label="Buka Semua Menu Owner" title="Pusat Seluruh Menu Eksekutif">
-      <div class="mob-nav-icon">
+      <div class="mob-nav-icon nav-icon-wrap">
         <?= renderItshoverIcon('all-menu', 22) ?>
       </div>
       <span class="mob-nav-label">Semua</span>
@@ -213,35 +213,35 @@ $isAdmin = is_admin();
   <?php else: ?>
     <!-- ADMIN BOTTOM NAV -->
     <a href="<?= url('admin-dashboard?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['admin-dashboard']) ? 'active' : '' ?>">
-      <div class="mob-nav-icon">
+      <div class="mob-nav-icon nav-icon-wrap">
         <?= renderItshoverIcon('dashboard', 22) ?>
       </div>
       <span class="mob-nav-label">Dashboard</span>
     </a>
 
     <a href="<?= url('tasks?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['tasks', 'team-workspace']) ? 'active' : '' ?>">
-      <div class="mob-nav-icon">
+      <div class="mob-nav-icon nav-icon-wrap">
         <?= renderItshoverIcon('tasks', 22) ?>
       </div>
       <span class="mob-nav-label">Tugas Tim</span>
     </a>
 
     <a href="<?= url('invoices?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
-      <div class="mob-nav-icon">
+      <div class="mob-nav-icon nav-icon-wrap">
         <?= renderItshoverIcon('invoices', 22) ?>
       </div>
       <span class="mob-nav-label">Invoice</span>
     </a>
 
     <a href="<?= url('clients?_slot=internal') ?>" class="mob-nav-item <?= $currentPage === 'clients' ? 'active' : '' ?>">
-      <div class="mob-nav-icon">
+      <div class="mob-nav-icon nav-icon-wrap">
         <?= renderItshoverIcon('team', 22) ?>
       </div>
       <span class="mob-nav-label">Klien</span>
     </a>
 
     <button type="button" class="mob-nav-item" onclick="toggleMobileSidebar()" aria-label="Buka Menu Lainnya">
-      <div class="mob-nav-icon">
+      <div class="mob-nav-icon nav-icon-wrap">
         <?= renderItshoverIcon('menu', 22) ?>
       </div>
       <span class="mob-nav-label">Menu</span>
@@ -250,11 +250,11 @@ $isAdmin = is_admin();
 </nav>
 
 <?php if ($isOwner): ?>
-<!-- Dark Blurred Backdrop for Owner Menu Bottom Sheet -->
-<div id="owner-menu-backdrop" class="owner-sheet-backdrop" onclick="closeOwnerBottomSheet()" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 1099; opacity: 0; transition: opacity 280ms cubic-bezier(0.22, 1, 0.36, 1);"></div>
+<!-- Dark Blurred Backdrop for Owner Menu Bottom Sheet (iOS Spring Curve) -->
+<div id="owner-menu-backdrop" class="owner-sheet-backdrop" onclick="closeOwnerBottomSheet()" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 1099; opacity: 0; transition: opacity 0.36s cubic-bezier(0.32, 0.72, 0, 1); will-change: opacity;"></div>
 
-<!-- Slide-Up Bottom Sheet: Pusat Menu Eksekutif Owner -->
-<div id="owner-menu-bottom-sheet" class="owner-bottom-sheet" style="display: none; position: fixed; left: 0; right: 0; bottom: 0; max-height: 82dvh; background: #FFFFFF; border-radius: 24px 24px 0 0; box-shadow: 0 -10px 40px rgba(15, 23, 42, 0.18); padding: 18px 16px 36px; z-index: 1100; transform: translate3d(0, 100%, 0); transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1); overflow-y: auto; -webkit-overflow-scrolling: touch; box-sizing: border-box;">
+<!-- Slide-Up Bottom Sheet: Pusat Menu Eksekutif Owner (iOS Spring Curve) -->
+<div id="owner-menu-bottom-sheet" class="owner-bottom-sheet" style="display: none; position: fixed; left: 0; right: 0; bottom: 0; max-height: 82dvh; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 24px 24px 0 0; box-shadow: 0 -10px 40px rgba(15, 23, 42, 0.18); padding: 18px 16px 36px; z-index: 1100; transform: translate3d(0, 100%, 0); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); will-change: transform; overflow-y: auto; -webkit-overflow-scrolling: touch; box-sizing: border-box;">
   
   <!-- Drag Handle Bar -->
   <div style="width: 40px; height: 4px; background: #CBD5E1; border-radius: 999px; margin: 0 auto 16px; cursor: pointer;" onclick="closeOwnerBottomSheet()"></div>
@@ -501,28 +501,65 @@ $isAdmin = is_admin();
     dismissPwaBanner();
   });
 
-  // Mobile Bottom Nav Sliding Active Pill Manager
-  window.updateBottomNavPill = function(targetItem) {
+  // Mobile Bottom Nav Sliding Active Pill Manager (60fps Horizontal FLIP)
+  window.updateBottomNavPill = function(targetItem, useSpring) {
     const nav = document.getElementById('mobile-bottom-nav');
     const pill = document.getElementById('bottom-nav-sliding-pill');
     if (!nav || !pill) return;
     const activeItem = targetItem || nav.querySelector('.mob-nav-item.active');
     if (activeItem && activeItem.offsetParent !== null) {
-      const left = activeItem.offsetLeft + (activeItem.offsetWidth - 28) / 2;
-      pill.style.transform = 'translate3d(' + left + 'px, 0, 0)';
-      pill.style.width = '28px';
-      pill.style.opacity = '1';
+      const targetLeft = activeItem.offsetLeft + (activeItem.offsetWidth - 32) / 2;
+      const savedLeft = parseFloat(sessionStorage.getItem('kala_bottom_nav_left') || 'NaN');
+
+      if (!targetItem && !isNaN(savedLeft) && Math.abs(savedLeft - targetLeft) > 2) {
+        pill.style.transition = 'none';
+        pill.style.transform = 'translate3d(' + savedLeft + 'px, 0, 0)';
+        pill.style.width = '32px';
+        pill.style.opacity = '1';
+        void pill.offsetWidth;
+        requestAnimationFrame(function() {
+          pill.style.transition = 'transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), width 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease';
+          pill.style.transform = 'translate3d(' + targetLeft + 'px, 0, 0)';
+        });
+      } else {
+        if (useSpring !== false) {
+          pill.style.transition = 'transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), width 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease';
+        }
+        pill.style.transform = 'translate3d(' + targetLeft + 'px, 0, 0)';
+        pill.style.width = '32px';
+        pill.style.opacity = '1';
+      }
+      sessionStorage.setItem('kala_bottom_nav_left', String(targetLeft));
     } else if (!targetItem) {
       pill.style.opacity = '0';
     }
   };
 
+  document.addEventListener('DOMContentLoaded', function() {
+    const nav = document.getElementById('mobile-bottom-nav');
+    if (nav) {
+      nav.querySelectorAll('a.mob-nav-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+          const curActive = nav.querySelector('.mob-nav-item.active') || item;
+          if (curActive && curActive.offsetParent !== null) {
+            const curLeft = curActive.offsetLeft + (curActive.offsetWidth - 32) / 2;
+            sessionStorage.setItem('kala_bottom_nav_left', String(curLeft));
+          }
+          window.updateBottomNavPill(item, true);
+        });
+      });
+    }
+    requestAnimationFrame(function() {
+      window.updateBottomNavPill(null, true);
+    });
+  });
+
   window.addEventListener('resize', function() {
-    if (window.updateBottomNavPill) window.updateBottomNavPill();
+    if (window.updateBottomNavPill) window.updateBottomNavPill(null, false);
   });
 
   window.addEventListener('load', function() {
-    setTimeout(window.updateBottomNavPill, 100);
+    setTimeout(function() { window.updateBottomNavPill(null, true); }, 60);
   });
 
   // Worker workspace seamless tab switching handlers

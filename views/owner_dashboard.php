@@ -83,6 +83,71 @@ usort($leaderboard, function($a, $b) {
     return $b['profit'] <=> $a['profit'];
 });
 
+// Build Project Financial History Map (Uang Masuk Invoice + Uang Keluar Freelance & Ads) for Leaderboard Accordion
+$projectCashflowHistoryMap = [];
+try {
+    // 1. Invoice Payments (Uang Masuk)
+    $invPays = $db->query("
+        SELECT ip.*, i.invoice_number, i.project_id, i.client_id
+        FROM invoice_payments ip
+        JOIN invoices i ON ip.invoice_id = i.id
+        WHERE COALESCE(ip.is_deleted, 0) = 0 AND COALESCE(i.is_deleted, 0) = 0
+        ORDER BY ip.payment_date ASC, ip.id ASC
+    ")->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($invPays as $ip) {
+        $pid = intval($ip['project_id'] ?: 0);
+        if ($pid > 0) {
+            $projectCashflowHistoryMap[$pid][] = [
+                'type' => 'in',
+                'title' => ($ip['term_name'] ?: 'Pembayaran Termin') . ' (#' . $ip['invoice_number'] . ')',
+                'date' => $ip['payment_date'],
+                'method' => $ip['payment_method'] ?: 'Bank Transfer',
+                'amount' => floatval($ip['amount']),
+                'receipt' => $ip['receipt_file'] ?: '',
+                'notes' => $ip['notes'] ?: 'Uang Masuk Invoice'
+            ];
+        }
+    }
+
+    // 2. Freelancer Payouts (Uang Keluar)
+    $fpRows = $db->query("
+        SELECT * FROM freelancer_payouts WHERE COALESCE(is_deleted, 0) = 0 ORDER BY id ASC
+    ")->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($fpRows as $fp) {
+        $pid = intval($fp['project_id'] ?: 0);
+        if ($pid > 0) {
+            $projectCashflowHistoryMap[$pid][] = [
+                'type' => 'out',
+                'title' => 'Fee Freelance: ' . $fp['freelancer_name'] . ' (' . $fp['task_description'] . ')',
+                'date' => substr($fp['paid_at'] ?: $fp['created_at'], 0, 10),
+                'method' => 'Transfer ' . ($fp['freelancer_bank'] ?: 'Bank'),
+                'amount' => floatval($fp['amount']),
+                'receipt' => !empty($fp['receipt_file']) ? (UPLOAD_URL . '/' . $fp['receipt_file']) : '',
+                'notes' => 'Status: ' . $fp['status']
+            ];
+        }
+    }
+
+    // 3. Ads Spend (Uang Keluar)
+    $adRows = $db->query("
+        SELECT * FROM ads_spend WHERE COALESCE(is_deleted, 0) = 0 ORDER BY spent_date ASC, id ASC
+    ")->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($adRows as $ar) {
+        $pid = intval($ar['project_id'] ?: 0);
+        if ($pid > 0) {
+            $projectCashflowHistoryMap[$pid][] = [
+                'type' => 'out',
+                'title' => 'Top-Up Saldo ' . $ar['platform'],
+                'date' => substr($ar['spent_date'], 0, 10),
+                'method' => $ar['platform'] . (!empty($ar['account_id']) ? ' • ' . $ar['account_id'] : ''),
+                'amount' => floatval($ar['amount']),
+                'receipt' => !empty($ar['receipt_file']) ? (UPLOAD_URL . '/' . $ar['receipt_file']) : '',
+                'notes' => $ar['notes'] ?: 'Pengeluaran Saldo Ads'
+            ];
+        }
+    }
+} catch (Throwable $e) {}
+
 // 6. Internal Team & Payroll Summary
 $activeEmployees = $db->query("SELECT * FROM employees WHERE status = 'Active' ORDER BY name ASC LIMIT 5")->fetchAll();
 $activeEmployeeCount = intval($db->query("SELECT COUNT(*) FROM employees WHERE status = 'Active'")->fetchColumn());
@@ -495,9 +560,22 @@ $initialChartData = [
                     <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">Belum ada proyek berjalan.</td></tr>
                   <?php else: ?>
                     <?php foreach ($leaderboard as $idx => $p): ?>
+                      <?php
+                        $pHist = $projectCashflowHistoryMap[$p['id']] ?? [];
+                        $pContractVal = floatval($p['total_contract'] > 0 ? $p['total_contract'] : $p['contract_value']);
+                        $pInTotal = 0;
+                        foreach ($pHist as $phi) {
+                            if ($phi['type'] === 'in') $pInTotal += $phi['amount'];
+                        }
+                        $pOutTotal = floatval($p['prod_cost']);
+                        $pPctIn = $pContractVal > 0 ? min(100, round(($pInTotal / $pContractVal) * 100, 1)) : 0;
+                      ?>
                       <tr>
                         <td>
-                          <div style="display: flex; align-items: center; gap: 12px;">
+                          <div style="display: flex; align-items: center; gap: 10px;">
+                            <button type="button" class="btn-toggle-terms" onclick="toggleDashboardRow('proj', <?= $p['id'] ?>)" id="btn-toggle-dash-proj-<?= $p['id'] ?>" title="Lihat Riwayat Uang Masuk & Uang Keluar Proyek">
+                              <svg id="arrow-icon-dash-proj-<?= $p['id'] ?>" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#344054" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s ease;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
                             <?php
                               $rankClass = $idx === 0 ? 'rank-badge-1' : ($idx === 1 ? 'rank-badge-2' : ($idx === 2 ? 'rank-badge-3' : 'rank-badge-other'));
                             ?>
@@ -520,7 +598,7 @@ $initialChartData = [
                           </div>
                         </td>
                         <td style="font-weight: 700; color: var(--text-primary); white-space: nowrap;">
-                          <?= format_rupiah($p['total_contract'] > 0 ? $p['total_contract'] : $p['contract_value']) ?>
+                          <?= format_rupiah($pContractVal) ?>
                         </td>
                         <td style="white-space: nowrap;">
                           <div style="color: <?= $p['prod_cost'] > 0 ? 'var(--danger-text)' : 'var(--text-primary)' ?>; font-weight: 700;">
@@ -553,6 +631,94 @@ $initialChartData = [
                               <?php endif; ?>
                             </div>
                           <?php endif; ?>
+                        </td>
+                      </tr>
+
+                      <!-- ACCORDION EXPANDABLE ROW: RIWAYAT UANG MASUK & UANG KELUAR PROYEK -->
+                      <tr id="dash-hist-row-proj-<?= $p['id'] ?>" class="invoice-terms-row" style="display: none; background: #F8F9FC;">
+                        <td colspan="5" style="padding: 16px 20px; border-top: 1px dashed #D0D5DD; border-bottom: 2px solid #EAECF0;">
+                          <div class="inv-terms-card">
+                            <div class="inv-terms-header-border" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding-bottom: 14px;">
+                              <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 32px; height: 32px; border-radius: 8px; background: #EEF4FF; color: #3538CD; display: flex; align-items: center; justify-content: center;">
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                                </div>
+                                <div>
+                                  <div class="inv-terms-title" style="font-size: 14px; font-weight: 700;">Riwayat Uang Masuk &amp; Uang Keluar Proyek</div>
+                                  <div class="inv-terms-subtitle" style="font-size: 12px;">
+                                    Proyek: <strong class="inv-terms-title"><?= htmlspecialchars($p['name']) ?></strong> (<?= htmlspecialchars($p['client_company']) ?>) &bull; Kontrak: <strong class="inv-terms-title"><?= format_rupiah($pContractVal) ?></strong>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <div class="inv-terms-stat-received">
+                                  <span>Uang Masuk:</span> <strong><?= format_rupiah($pInTotal) ?></strong>
+                                </div>
+                                <div class="<?= $pOutTotal > 0 ? 'inv-terms-stat-remaining-due' : 'inv-terms-stat-remaining-zero' ?>">
+                                  <span>Uang Keluar:</span> <strong><?= format_rupiah($pOutTotal) ?></strong>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div style="margin-bottom: 16px;">
+                              <div style="display: flex; justify-content: space-between; font-size: 11.5px; margin-bottom: 5px; font-weight: 600;">
+                                <span class="inv-terms-subtitle">Progres Realisasi Uang Masuk</span>
+                                <span class="inv-terms-title"><?= $pPctIn ?>% Diterima</span>
+                              </div>
+                              <div style="width: 100%; height: 8px; background: rgba(148, 163, 184, 0.2); border-radius: 999px; overflow: hidden;">
+                                <div style="width: <?= $pPctIn ?>%; height: 100%; background: <?= $pPctIn >= 100 ? '#12B76A' : '#5B3DF5' ?>; border-radius: 999px;"></div>
+                              </div>
+                            </div>
+
+                            <div style="overflow-x: auto;">
+                              <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+                                <thead>
+                                  <tr class="inv-terms-thead" style="text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.04em;">
+                                    <th style="padding: 8px 12px; text-align: left;">Termin / Keterangan Mutasi</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Tanggal</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Metode</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Nominal</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Bukti Transfer</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Catatan</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <?php if (empty($pHist)): ?>
+                                    <tr>
+                                      <td colspan="6" style="text-align: center; padding: 18px; color: #98A2B3; font-style: italic;">Belum ada riwayat uang masuk atau uang keluar pada proyek ini.</td>
+                                    </tr>
+                                  <?php else: ?>
+                                    <?php foreach ($pHist as $hIdx => $hi): ?>
+                                      <tr class="inv-terms-row-border">
+                                        <td style="padding: 10px 12px; font-weight: 700;">
+                                          <span class="inv-terms-num-badge"><?= $hIdx + 1 ?></span>
+                                          <span class="inv-terms-name"><?= htmlspecialchars($hi['title']) ?></span>
+                                        </td>
+                                        <td class="inv-terms-text" style="padding: 10px 12px; white-space: nowrap;"><?= htmlspecialchars($hi['date']) ?></td>
+                                        <td style="padding: 10px 12px; white-space: nowrap;">
+                                          <span class="inv-terms-method-badge"><?= htmlspecialchars($hi['method']) ?></span>
+                                        </td>
+                                        <td style="padding: 10px 12px; font-weight: 800; color: <?= $hi['type'] === 'in' ? '#12B76A' : '#D92D20' ?>; font-size: 13px; white-space: nowrap;">
+                                          <?= $hi['type'] === 'in' ? '+' : '-' ?><?= format_rupiah($hi['amount']) ?>
+                                        </td>
+                                        <td style="padding: 10px 12px; white-space: nowrap;">
+                                          <?php if (!empty($hi['receipt'])): ?>
+                                            <button type="button" class="inv-terms-btn-receipt" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($hi['receipt'])) ?>', '<?= htmlspecialchars(addslashes($hi['title'])) ?>')">
+                                              <span>Lihat Bukti</span>
+                                            </button>
+                                          <?php else: ?>
+                                            <span style="color: #98A2B3; font-size: 11.5px; font-style: italic;">Tanpa Bukti</span>
+                                          <?php endif; ?>
+                                        </td>
+                                        <td class="inv-terms-subtitle" style="padding: 10px 12px; font-size: 12px;"><?= htmlspecialchars($hi['notes']) ?></td>
+                                      </tr>
+                                    <?php endforeach; ?>
+                                  <?php endif; ?>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
                         </td>
                       </tr>
                     <?php endforeach; ?>
@@ -781,11 +947,20 @@ $initialChartData = [
                       $tfAmount = floatval($rt['transfer_amount_owner']);
                       $platformAmount = floatval($rt['platform_topup_amount']);
                       $spendAmount = floatval($rt['ad_spend_amount']);
+                      $rtRem = max(0, $tfAmount - $spendAmount);
+                      $rtPct = $tfAmount > 0 ? min(100, round(($spendAmount / $tfAmount) * 100, 1)) : 0;
                     ?>
                       <tr>
                         <td style="min-width: 180px; white-space: nowrap;">
-                          <div style="font-weight: 700; color: var(--text-primary, #101828);"><?= date('d M Y', strtotime($rt['transaction_date'])) ?></div>
-                          <div style="font-size: 11px; color: var(--text-secondary);">Petugas: <b><?= htmlspecialchars($rt['assigned_user_name'] ?? 'Tim Ads') ?></b></div>
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <button type="button" class="btn-toggle-terms" onclick="toggleDashboardRow('ads', <?= $rt['id'] ?>)" id="btn-toggle-dash-ads-<?= $rt['id'] ?>" title="Lihat Riwayat Alur 2 Tahap Saldo Ads">
+                              <svg id="arrow-icon-dash-ads-<?= $rt['id'] ?>" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#344054" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s ease;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                            <div>
+                              <div style="font-weight: 700; color: var(--text-primary, #101828);"><?= date('d M Y', strtotime($rt['transaction_date'])) ?></div>
+                              <div style="font-size: 11px; color: var(--text-secondary);">Petugas: <b><?= htmlspecialchars($rt['assigned_user_name'] ?? 'Tim Ads') ?></b></div>
+                            </div>
+                          </div>
                         </td>
                         <td>
                           <div style="font-weight: 700; color: var(--text-primary, #101828);"><?= htmlspecialchars($rt['client_company'] ?? '-') ?></div>
@@ -833,6 +1008,86 @@ $initialChartData = [
                           <span class="badge" style="background: <?= ($rt['status'] === 'verified') ? '#ECFDF3' : '#EFF8FF' ?>; color: <?= ($rt['status'] === 'verified') ? '#027A48' : '#175CD3' ?>; font-size: 10.5px; font-weight: 700;">
                             <?= ($rt['status'] === 'verified') ? '✓ Terverifikasi' : 'Terekam' ?>
                           </span>
+                        </td>
+                      </tr>
+
+                      <!-- ACCORDION EXPANDABLE ROW: RIWAYAT ALUR 2 TAHAP SALDO ADS -->
+                      <tr id="dash-hist-row-ads-<?= $rt['id'] ?>" class="invoice-terms-row" style="display: none; background: #F8F9FC;">
+                        <td colspan="7" style="padding: 16px 20px; border-top: 1px dashed #D0D5DD; border-bottom: 2px solid #EAECF0;">
+                          <div class="inv-terms-card">
+                            <div class="inv-terms-header-border" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding-bottom: 14px;">
+                              <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 32px; height: 32px; border-radius: 8px; background: #EEF4FF; color: #3538CD; display: flex; align-items: center; justify-content: center;">
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                                </div>
+                                <div>
+                                  <div class="inv-terms-title" style="font-size: 14px; font-weight: 700;">Riwayat Alur 2 Tahap &amp; Realisasi Saldo Ads</div>
+                                  <div class="inv-terms-subtitle" style="font-size: 12px;">
+                                    <?= htmlspecialchars($rt['client_company'] ?? '-') ?> &bull; <?= htmlspecialchars($rt['project_name'] ?? '-') ?> &bull; Ditransfer: <strong class="inv-terms-title"><?= format_rupiah($tfAmount) ?></strong>
+                                  </div>
+                                </div>
+                              </div>
+                              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <div class="inv-terms-stat-received"><span>Terpakai (Spend):</span> <strong><?= format_rupiah($spendAmount) ?></strong></div>
+                                <div class="<?= $rtRem > 0 ? 'inv-terms-stat-remaining-due' : 'inv-terms-stat-remaining-zero' ?>"><span>Sisa Saldo:</span> <strong><?= format_rupiah($rtRem) ?></strong></div>
+                              </div>
+                            </div>
+
+                            <div style="margin-bottom: 16px;">
+                              <div style="display: flex; justify-content: space-between; font-size: 11.5px; margin-bottom: 5px; font-weight: 600;">
+                                <span class="inv-terms-subtitle">Progres Penyerapan Saldo Iklan</span>
+                                <span class="inv-terms-title"><?= $rtPct ?>% Terpakai</span>
+                              </div>
+                              <div style="width: 100%; height: 8px; background: rgba(148, 163, 184, 0.2); border-radius: 999px; overflow: hidden;">
+                                <div style="width: <?= $rtPct ?>%; height: 100%; background: <?= $rtPct >= 100 ? '#12B76A' : '#5B3DF5' ?>; border-radius: 999px;"></div>
+                              </div>
+                            </div>
+
+                            <div style="overflow-x: auto;">
+                              <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+                                <thead>
+                                  <tr class="inv-terms-thead" style="text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.04em;">
+                                    <th style="padding: 8px 12px; text-align: left;">Tahap / Keterangan</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Tanggal</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Metode / Platform</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Nominal</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Bukti Transfer</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Catatan</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <tr class="inv-terms-row-border">
+                                    <td style="padding: 10px 12px; font-weight: 700;"><span class="inv-terms-num-badge">1</span><span class="inv-terms-name">Tahap 1: Transfer Manajemen &rarr; Tim Ads (<?= htmlspecialchars($rt['stage_label'] ?? 'Tahap 1') ?>)</span></td>
+                                    <td class="inv-terms-text" style="padding: 10px 12px;"><?= htmlspecialchars($rt['transaction_date']) ?></td>
+                                    <td style="padding: 10px 12px;"><span class="inv-terms-method-badge">Petugas: <?= htmlspecialchars($rt['assigned_user_name'] ?? 'Tim Ads') ?></span></td>
+                                    <td style="padding: 10px 12px; font-weight: 800; color: #175CD3;"><?= format_rupiah($tfAmount) ?></td>
+                                    <td style="padding: 10px 12px;">
+                                      <?php if (!empty($tfOwnerProof)): ?>
+                                        <button type="button" class="inv-terms-btn-receipt" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($tfOwnerProof)) ?>', 'Bukti Transfer Manajemen')"><span>Lihat Bukti</span></button>
+                                      <?php else: ?>
+                                        <span style="color: #98A2B3; font-size: 11.5px; font-style: italic;">Tanpa Bukti</span>
+                                      <?php endif; ?>
+                                    </td>
+                                    <td class="inv-terms-subtitle" style="padding: 10px 12px; font-size: 12px;"><?= htmlspecialchars($rt['notes'] ?: '-') ?></td>
+                                  </tr>
+                                  <tr class="inv-terms-row-border">
+                                    <td style="padding: 10px 12px; font-weight: 700;"><span class="inv-terms-num-badge">2</span><span class="inv-terms-name">Tahap 2: Top-Up Platform &amp; Realisasi Spend</span></td>
+                                    <td class="inv-terms-text" style="padding: 10px 12px;"><?= htmlspecialchars($rt['transaction_date']) ?></td>
+                                    <td style="padding: 10px 12px;"><span class="inv-terms-method-badge"><?= htmlspecialchars($rt['platform']) ?></span></td>
+                                    <td style="padding: 10px 12px; font-weight: 800; color: #12B76A;">Top-Up: <?= format_rupiah($platformAmount) ?> &bull; Spend: <?= format_rupiah($spendAmount) ?></td>
+                                    <td style="padding: 10px 12px;">
+                                      <?php if (!empty($topupPlatformProof)): ?>
+                                        <button type="button" class="inv-terms-btn-receipt" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($topupPlatformProof)) ?>', 'Bukti Top-Up Platform')"><span>Lihat Bukti</span></button>
+                                      <?php else: ?>
+                                        <span style="color: #98A2B3; font-size: 11.5px; font-style: italic;">Tanpa Bukti</span>
+                                      <?php endif; ?>
+                                    </td>
+                                    <td class="inv-terms-subtitle" style="padding: 10px 12px; font-size: 12px;">Sisa Saldo: <?= format_rupiah($rtRem) ?></td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
                         </td>
                       </tr>
                     <?php endforeach; ?>
@@ -980,6 +1235,23 @@ $initialChartData = [
         </div>
 
   <script>
+    window.toggleDashboardRow = function(type, id) {
+      const row = document.getElementById(`dash-hist-row-${type}-${id}`);
+      const btn = document.getElementById(`btn-toggle-dash-${type}-${id}`);
+      const arrow = document.getElementById(`arrow-icon-dash-${type}-${id}`);
+      if (!row) return;
+      const isHidden = (row.style.display === 'none' || !row.style.display);
+      if (isHidden) {
+        row.style.display = 'table-row';
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
+        if (btn) btn.style.background = '#E0EAFF';
+      } else {
+        row.style.display = 'none';
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        if (btn) btn.style.background = '#F2F4F7';
+      }
+    };
+
     window.__INITIAL_CHART_DATA__ = <?= json_encode($initialChartData) ?>;
 
     document.addEventListener('DOMContentLoaded', () => {

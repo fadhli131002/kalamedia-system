@@ -446,14 +446,17 @@ $projects = $db->query("
       <div class="content-body">
         
         <?php if (is_owner() || is_admin()): ?>
-        <!-- Quick Sub-Tab Switcher: Database Klien & Proyek | Tim & Karyawan -->
+        <!-- Quick Sub-Tab Switcher: Database Klien & Proyek | Tim & Karyawan | Preview Portal Klien -->
         <div class="quick-subtab-bar" style="margin-bottom: 14px;">
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
             <a href="<?= url('clients?_slot=internal') ?>" class="quick-subtab-btn active" style="display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 700; text-decoration: none; text-align: center; white-space: nowrap; background: #5B3DF5; color: #FFFFFF; box-shadow: 0 2px 6px rgba(91,61,245,0.25);">
               Database Klien &amp; Proyek
             </a>
             <a href="<?= url('team?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
               Tim &amp; Karyawan
+            </a>
+            <a href="<?= url('client-portal?preview=1&portal=internal&_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
+              Preview Portal Klien
             </a>
           </div>
         </div>
@@ -641,6 +644,10 @@ $projects = $db->query("
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>
                             <span>AI Brand Audit</span>
                           </button>
+
+                          <a href="<?= url('client-portal?preview=1&portal=internal&_slot=internal&client_id=' . (int)$c['id']) ?>" class="btn-action-edit" style="text-decoration: none;" title="Pratinjau Portal Klien">
+                            Portal
+                          </a>
 
                           <button type="button" class="btn-action-edit" onclick='openEditClientModal(<?= json_encode($c, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' title="Edit Data Klien">
                             Edit

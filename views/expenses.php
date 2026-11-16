@@ -33,6 +33,29 @@ $adsList = $db->query("
 $totalFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) FROM freelancer_payouts WHERE status = 'Paid' AND COALESCE(is_deleted, 0) = 0")->fetchColumn());
 $totalAds = floatval($db->query("SELECT COALESCE(SUM(amount), 0) FROM ads_spend WHERE COALESCE(is_deleted, 0) = 0")->fetchColumn());
 $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) FROM freelancer_payouts WHERE status = 'Pending' AND COALESCE(is_deleted, 0) = 0")->fetchColumn());
+
+// Group Freelancer Payouts by Freelancer Name (Chronological for History Accordion)
+$payoutsByFreelancer = [];
+foreach (array_reverse($payouts) as $item) {
+    $fKey = strtolower(trim($item['freelancer_name'])) ?: ('id_' . $item['id']);
+    $payoutsByFreelancer[$fKey][] = $item;
+}
+
+// Group Ads Spend by Client + Project (Chronological for History Accordion)
+$adsByGroup = [];
+foreach (array_reverse($adsList) as $item) {
+    $aKey = $item['client_id'] . '_' . ($item['project_id'] ?: 0);
+    $adsByGroup[$aKey][] = $item;
+}
+
+// Map Project Ads Budget Pool for Progress Calculation
+$projectAdsPaguMap = [];
+try {
+    $projRows = $db->query("SELECT id, COALESCE(NULLIF(ads_budget_pool, 0), allocated_ads_budget, contract_value, 0) as pagu FROM projects WHERE COALESCE(is_deleted, 0) = 0")->fetchAll();
+    foreach ($projRows as $pr) {
+        $projectAdsPaguMap[$pr['id']] = floatval($pr['pagu']);
+    }
+} catch (Throwable $e) {}
 ?>
 
 <!DOCTYPE html>
@@ -721,7 +744,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
           <?php if ($tab === 'freelancers'): ?>
             <!-- 4. Freelancer Payouts Table -->
             <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; margin: 0; padding-bottom: 6px;">
-              <table class="untitled-table" id="payout-table" style="min-width: 950px !important; width: 100%;">
+              <table class="untitled-table" id="payout-table" style="min-width: 760px; width: 100%;">
                 <thead>
                   <tr>
                     <th style="white-space: nowrap !important;">NAMA FREELANCER &amp; REKENING</th>
@@ -729,7 +752,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                     <th style="white-space: nowrap !important;">URAIAN PEKERJAAN</th>
                     <th style="white-space: nowrap !important;">NOMINAL FEE</th>
                     <th style="white-space: nowrap !important;">STATUS</th>
-                    <th class="th-actions" style="text-align: right; white-space: nowrap !important; min-width: 250px;">BUKTI &amp; AKSI</th>
+                    <th class="th-actions" style="text-align: right; white-space: nowrap !important; min-width: 210px;">BUKTI &amp; AKSI</th>
                   </tr>
                 </thead>
                 <tbody id="payout-tbody">
@@ -740,9 +763,23 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                       <?php
                         $rawDate = substr($p['paid_at'] ?: $p['created_at'], 0, 10);
                         $searchCorpus = strtolower($p['freelancer_name'] . ' ' . ($p['freelancer_phone'] ?? '') . ' ' . $p['freelancer_bank'] . ' ' . $p['freelancer_account'] . ' ' . $p['project_name'] . ' ' . $p['client_company'] . ' ' . $p['task_description']);
+                        $fKey = strtolower(trim($p['freelancer_name'])) ?: ('id_' . $p['id']);
+                        $fHistory = $payoutsByFreelancer[$fKey] ?? [$p];
+                        $fTotalAmt = 0;
+                        $fPaidAmt = 0;
+                        foreach ($fHistory as $fh) {
+                            $fTotalAmt += floatval($fh['amount']);
+                            if ($fh['status'] === 'Paid') {
+                                $fPaidAmt += floatval($fh['amount']);
+                            }
+                        }
+                        $fRemAmt = max(0, $fTotalAmt - $fPaidAmt);
+                        $fPct = $fTotalAmt > 0 ? min(100, round(($fPaidAmt / $fTotalAmt) * 100, 1)) : 0;
                       ?>
                       <tr 
+                        id="exp-main-row-payout-<?= $p['id'] ?>"
                         class="expense-row" 
+                        data-hist-id="exp-hist-row-payout-<?= $p['id'] ?>"
                         data-search="<?= htmlspecialchars($searchCorpus) ?>"
                         data-status="<?= $p['status'] ?>"
                         data-date="<?= $rawDate ?>"
@@ -752,14 +789,21 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                         data-client="<?= htmlspecialchars($p['client_company']) ?>"
                       >
                         <td style="white-space: nowrap;">
-                          <div style="font-weight: 700; color: #101828; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                            <span><?= htmlspecialchars($p['freelancer_name']) ?></span>
-                            <?php if (!empty($p['freelancer_phone'])): ?>
-                              <span style="font-size: 10.5px; padding: 2px 6px; border-radius: 4px; background: rgba(37, 211, 102, 0.12); color: #15803d; font-weight: 600;">WA: <?= htmlspecialchars($p['freelancer_phone']) ?></span>
-                            <?php endif; ?>
-                          </div>
-                          <div style="font-size: 11.5px; color: #667085; margin-top: 2px;">
-                            <?= htmlspecialchars($p['freelancer_bank'] ?: 'Bank') ?> &bull; <?= htmlspecialchars($p['freelancer_account'] ?: 'No Rekening -') ?>
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <button type="button" class="btn-toggle-terms" onclick="toggleExpenseHistory('payout', <?= $p['id'] ?>)" id="btn-toggle-payout-<?= $p['id'] ?>" title="Lihat Riwayat Pembayaran Fee Freelancer">
+                              <svg id="arrow-icon-payout-<?= $p['id'] ?>" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#344054" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s ease;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                            <div>
+                              <div style="font-weight: 700; color: #101828; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                                <span><?= htmlspecialchars($p['freelancer_name']) ?></span>
+                                <?php if (!empty($p['freelancer_phone'])): ?>
+                                  <span style="font-size: 10.5px; padding: 2px 6px; border-radius: 4px; background: rgba(37, 211, 102, 0.12); color: #15803d; font-weight: 600;">WA: <?= htmlspecialchars($p['freelancer_phone']) ?></span>
+                                <?php endif; ?>
+                              </div>
+                              <div style="font-size: 11.5px; color: #667085; margin-top: 2px;">
+                                <?= htmlspecialchars($p['freelancer_bank'] ?: 'Bank') ?> &bull; <?= htmlspecialchars($p['freelancer_account'] ?: 'No Rekening -') ?>
+                              </div>
+                            </div>
                           </div>
                         </td>
                         <td style="white-space: nowrap;">
@@ -770,7 +814,12 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                           <?= htmlspecialchars($p['task_description']) ?>
                         </td>
                         <td style="font-weight: 700; color: #D92D20; font-size: 13.5px; white-space: nowrap;">
-                          <?= format_rupiah($p['amount']) ?>
+                          <div><?= format_rupiah($p['amount']) ?></div>
+                          <?php if ($fRemAmt > 0): ?>
+                            <div style="font-size: 11px; font-weight: 600; color: #B54708; margin-top: 2px;">
+                              Pending: <?= format_rupiah($fRemAmt) ?>
+                            </div>
+                          <?php endif; ?>
                         </td>
                         <td style="white-space: nowrap;">
                           <?php if ($p['status'] === 'Paid'): ?>
@@ -784,6 +833,9 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                               <span>PENDING</span>
                             </span>
                           <?php endif; ?>
+                          <div style="font-size: 10.5px; color: #667085; margin-top: 3px; font-weight: 600;">
+                            <?= count($fHistory) ?>x transaksi (<?= $fPct ?>%)
+                          </div>
                         </td>
                         <td class="td-actions" style="text-align: right; white-space: nowrap;">
                           <div class="table-actions">
@@ -817,6 +869,102 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                           </div>
                         </td>
                       </tr>
+
+                      <!-- ACCORDION EXPANDABLE ROW: RIWAYAT PEMBAYARAN FEE FREELANCER -->
+                      <tr id="exp-hist-row-payout-<?= $p['id'] ?>" class="invoice-terms-row" style="display: none; background: #F8F9FC;">
+                        <td colspan="6" style="padding: 16px 20px; border-top: 1px dashed #D0D5DD; border-bottom: 2px solid #EAECF0;">
+                          <div class="inv-terms-card">
+                            <div class="inv-terms-header-border" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding-bottom: 14px;">
+                              <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 32px; height: 32px; border-radius: 8px; background: #EEF4FF; color: #3538CD; display: flex; align-items: center; justify-content: center;">
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                                </div>
+                                <div>
+                                  <div class="inv-terms-title" style="font-size: 14px; font-weight: 700;">Riwayat Pembayaran &amp; Realisasi Fee Freelancer</div>
+                                  <div class="inv-terms-subtitle" style="font-size: 12px;">
+                                    Talenta: <strong class="inv-terms-title"><?= htmlspecialchars($p['freelancer_name']) ?></strong> &bull; Total Akumulasi Fee: <strong class="inv-terms-title"><?= format_rupiah($fTotalAmt) ?></strong>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                  <div class="inv-terms-stat-received">
+                                    <span>Dibayarkan:</span> <strong><?= format_rupiah($fPaidAmt) ?></strong>
+                                  </div>
+                                  <div class="<?= $fRemAmt > 0 ? 'inv-terms-stat-remaining-due' : 'inv-terms-stat-remaining-zero' ?>">
+                                    <span>Sisa Pending:</span> <strong><?= format_rupiah($fRemAmt) ?></strong>
+                                  </div>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="openModal('modal-input-payout')" style="background: #12B76A; border-color: #12B76A; font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+                                  <span>+ Input Fee Baru</span>
+                                </button>
+                              </div>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div style="margin-bottom: 16px;">
+                              <div style="display: flex; justify-content: space-between; font-size: 11.5px; margin-bottom: 5px; font-weight: 600;">
+                                <span class="inv-terms-subtitle">Progres Pencairan Fee</span>
+                                <span class="inv-terms-title"><?= $fPct ?>% Lunas</span>
+                              </div>
+                              <div style="width: 100%; height: 8px; background: rgba(148, 163, 184, 0.2); border-radius: 999px; overflow: hidden;">
+                                <div style="width: <?= $fPct ?>%; height: 100%; background: <?= $fPct >= 100 ? '#12B76A' : '#5B3DF5' ?>; border-radius: 999px; transition: width 0.4s ease;"></div>
+                              </div>
+                            </div>
+
+                            <!-- History Sub-Table -->
+                            <div style="overflow-x: auto;">
+                              <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+                                <thead>
+                                  <tr class="inv-terms-thead" style="text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.04em;">
+                                    <th style="padding: 8px 12px; text-align: left;">Termin / Uraian Pekerjaan</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Tanggal Bayar</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Metode &amp; Rekening</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Nominal Keluar</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Bukti Transfer</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Proyek &amp; Status</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <?php foreach ($fHistory as $idx => $fh): ?>
+                                    <tr class="inv-terms-row-border" style="<?= $fh['id'] == $p['id'] ? 'background: rgba(91, 61, 245, 0.04);' : '' ?>">
+                                      <td style="padding: 10px 12px; font-weight: 700;">
+                                        <span class="inv-terms-num-badge"><?= $idx + 1 ?></span>
+                                        <span class="inv-terms-name"><?= htmlspecialchars($fh['task_description'] ?: 'Pembayaran Fee Freelancer') ?></span>
+                                      </td>
+                                      <td class="inv-terms-text" style="padding: 10px 12px; white-space: nowrap;">
+                                        <?= htmlspecialchars(substr($fh['paid_at'] ?: $fh['created_at'], 0, 10)) ?>
+                                      </td>
+                                      <td style="padding: 10px 12px; white-space: nowrap;">
+                                        <span class="inv-terms-method-badge">
+                                          Bank Transfer <?= htmlspecialchars($fh['freelancer_bank'] ?: 'BCA') ?><?= !empty($fh['freelancer_account']) ? ' &bull; ' . htmlspecialchars($fh['freelancer_account']) : '' ?>
+                                        </span>
+                                      </td>
+                                      <td style="padding: 10px 12px; font-weight: 800; color: <?= $fh['status'] === 'Paid' ? '#12B76A' : '#D92D20' ?>; font-size: 13px; white-space: nowrap;">
+                                        <?= format_rupiah($fh['amount']) ?>
+                                      </td>
+                                      <td style="padding: 10px 12px; white-space: nowrap;">
+                                        <?php if (!empty($fh['receipt_file'])): ?>
+                                          <button type="button" class="inv-terms-btn-receipt" onclick="viewReceiptImage('<?= UPLOAD_URL . '/' . htmlspecialchars($fh['receipt_file']) ?>', 'Bukti Fee <?= htmlspecialchars($fh['freelancer_name'], ENT_QUOTES) ?>')">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                            <span>Lihat Bukti</span>
+                                          </button>
+                                        <?php else: ?>
+                                          <span style="color: #98A2B3; font-size: 11.5px; font-style: italic;">Tanpa Bukti</span>
+                                        <?php endif; ?>
+                                      </td>
+                                      <td class="inv-terms-subtitle" style="padding: 10px 12px; font-size: 12px;">
+                                        <?= htmlspecialchars($fh['project_name']) ?> (<?= htmlspecialchars($fh['status']) ?>)
+                                      </td>
+                                    </tr>
+                                  <?php endforeach; ?>
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
                     <?php endforeach; ?>
                   <?php endif; ?>
                 </tbody>
@@ -826,7 +974,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
           <?php else: ?>
             <!-- 4b. Ads Top-Up Table -->
             <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; margin: 0; padding-bottom: 6px;">
-              <table class="untitled-table" id="ads-table" style="min-width: 950px !important; width: 100%;">
+              <table class="untitled-table" id="ads-table" style="min-width: 760px; width: 100%;">
                 <thead>
                   <tr>
                     <th style="white-space: nowrap !important;">PLATFORM &amp; ID AKUN</th>
@@ -834,7 +982,7 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                     <th style="white-space: nowrap !important;">TANGGAL TOP-UP</th>
                     <th style="white-space: nowrap !important;">KETERANGAN CAMPAIGN</th>
                     <th style="white-space: nowrap !important;">NOMINAL TOP-UP</th>
-                    <th class="th-actions" style="text-align: right; white-space: nowrap !important; min-width: 250px;">BUKTI &amp; AKSI</th>
+                    <th class="th-actions" style="text-align: right; white-space: nowrap !important; min-width: 210px;">BUKTI &amp; AKSI</th>
                   </tr>
                 </thead>
                 <tbody id="ads-tbody">
@@ -845,9 +993,22 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                       <?php
                         $rawDate = substr($ad['spent_date'], 0, 10);
                         $searchCorpus = strtolower($ad['platform'] . ' ' . ($ad['account_id'] ?? '') . ' ' . $ad['client_company'] . ' ' . ($ad['project_name'] ?? '') . ' ' . ($ad['notes'] ?? ''));
+                        $aKey = $ad['client_id'] . '_' . ($ad['project_id'] ?: 0);
+                        $aHistory = $adsByGroup[$aKey] ?? [$ad];
+                        $aTotalSpent = 0;
+                        foreach ($aHistory as $ah) {
+                            $aTotalSpent += floatval($ah['amount']);
+                        }
+                        $aPagu = !empty($ad['project_id']) && isset($projectAdsPaguMap[$ad['project_id']]) && $projectAdsPaguMap[$ad['project_id']] > 0
+                            ? $projectAdsPaguMap[$ad['project_id']]
+                            : $aTotalSpent;
+                        $aRemPagu = max(0, $aPagu - $aTotalSpent);
+                        $aPct = $aPagu > 0 ? min(100, round(($aTotalSpent / $aPagu) * 100, 1)) : 100;
                       ?>
                       <tr 
+                        id="exp-main-row-ads-<?= $ad['id'] ?>"
                         class="expense-row"
+                        data-hist-id="exp-hist-row-ads-<?= $ad['id'] ?>"
                         data-search="<?= htmlspecialchars($searchCorpus) ?>"
                         data-platform="<?= htmlspecialchars($ad['platform']) ?>"
                         data-date="<?= $rawDate ?>"
@@ -856,8 +1017,15 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                         data-project="<?= htmlspecialchars($ad['project_name'] ?: '-') ?>"
                       >
                         <td style="white-space: nowrap;">
-                          <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($ad['platform']) ?></div>
-                          <div style="font-size: 11.5px; color: #667085; margin-top: 2px;">ID: <?= htmlspecialchars($ad['account_id'] ?: '-') ?></div>
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <button type="button" class="btn-toggle-terms" onclick="toggleExpenseHistory('ads', <?= $ad['id'] ?>)" id="btn-toggle-ads-<?= $ad['id'] ?>" title="Lihat Riwayat Top-Up Saldo Iklan">
+                              <svg id="arrow-icon-ads-<?= $ad['id'] ?>" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#344054" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s ease;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                            <div>
+                              <div style="font-weight: 700; color: #101828;"><?= htmlspecialchars($ad['platform']) ?></div>
+                              <div style="font-size: 11.5px; color: #667085; margin-top: 2px;">ID: <?= htmlspecialchars($ad['account_id'] ?: '-') ?> &bull; <?= count($aHistory) ?>x top-up</div>
+                            </div>
+                          </div>
                         </td>
                         <td style="white-space: nowrap;">
                           <div style="font-weight: 600; color: #101828;"><?= htmlspecialchars($ad['client_company']) ?></div>
@@ -866,7 +1034,10 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                         <td style="color: #475467; white-space: nowrap;"><?= format_date($ad['spent_date']) ?></td>
                         <td style="color: #475467; max-width: 240px; line-height: 1.4; white-space: normal;"><?= htmlspecialchars($ad['notes'] ?: '-') ?></td>
                         <td style="font-weight: 700; color: #D92D20; font-size: 13.5px; white-space: nowrap;">
-                          <?= format_rupiah($ad['amount']) ?>
+                          <div><?= format_rupiah($ad['amount']) ?></div>
+                          <div style="font-size: 10.5px; color: #667085; font-weight: 600; margin-top: 2px;">
+                            Akumulasi: <?= format_rupiah($aTotalSpent) ?>
+                          </div>
                         </td>
                         <td class="td-actions" style="text-align: right; white-space: nowrap;">
                           <div class="table-actions">
@@ -897,6 +1068,102 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
                                 Hapus
                               </button>
                             <?php endif; ?>
+                          </div>
+                        </td>
+                      </tr>
+
+                      <!-- ACCORDION EXPANDABLE ROW: RIWAYAT TOP-UP SALDO ADS -->
+                      <tr id="exp-hist-row-ads-<?= $ad['id'] ?>" class="invoice-terms-row" style="display: none; background: #F8F9FC;">
+                        <td colspan="6" style="padding: 16px 20px; border-top: 1px dashed #D0D5DD; border-bottom: 2px solid #EAECF0;">
+                          <div class="inv-terms-card">
+                            <div class="inv-terms-header-border" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding-bottom: 14px;">
+                              <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 32px; height: 32px; border-radius: 8px; background: #EEF4FF; color: #3538CD; display: flex; align-items: center; justify-content: center;">
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                                </div>
+                                <div>
+                                  <div class="inv-terms-title" style="font-size: 14px; font-weight: 700;">Riwayat Top-Up &amp; Realisasi Saldo Iklan Klien</div>
+                                  <div class="inv-terms-subtitle" style="font-size: 12px;">
+                                    Klien: <strong class="inv-terms-title"><?= htmlspecialchars($ad['client_company']) ?></strong> &bull; Proyek: <strong class="inv-terms-title"><?= htmlspecialchars($ad['project_name'] ?: '-') ?></strong>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                  <div class="inv-terms-stat-received">
+                                    <span>Realisasi Top-Up:</span> <strong><?= format_rupiah($aTotalSpent) ?></strong>
+                                  </div>
+                                  <div class="<?= $aRemPagu > 0 ? 'inv-terms-stat-remaining-due' : 'inv-terms-stat-remaining-zero' ?>">
+                                    <span>Sisa Pagu:</span> <strong><?= format_rupiah($aRemPagu) ?></strong>
+                                  </div>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="openModal('modal-catat-ads')" style="background: #12B76A; border-color: #12B76A; font-weight: 600; font-size: 12px; display: inline-flex; align-items: center; gap: 6px;">
+                                  <span>+ Catat Top-Up Ads</span>
+                                </button>
+                              </div>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div style="margin-bottom: 16px;">
+                              <div style="display: flex; justify-content: space-between; font-size: 11.5px; margin-bottom: 5px; font-weight: 600;">
+                                <span class="inv-terms-subtitle">Progres Penyerapan Saldo Iklan</span>
+                                <span class="inv-terms-title"><?= $aPct ?>% Terealisasi</span>
+                              </div>
+                              <div style="width: 100%; height: 8px; background: rgba(148, 163, 184, 0.2); border-radius: 999px; overflow: hidden;">
+                                <div style="width: <?= $aPct ?>%; height: 100%; background: <?= $aPct >= 100 ? '#12B76A' : '#5B3DF5' ?>; border-radius: 999px; transition: width 0.4s ease;"></div>
+                              </div>
+                            </div>
+
+                            <!-- History Sub-Table -->
+                            <div style="overflow-x: auto;">
+                              <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+                                <thead>
+                                  <tr class="inv-terms-thead" style="text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.04em;">
+                                    <th style="padding: 8px 12px; text-align: left;">Tahap / Keterangan Campaign</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Tanggal Top-Up</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Metode / Platform</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Nominal Keluar</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Bukti Transfer</th>
+                                    <th style="padding: 8px 12px; text-align: left;">Catatan</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  <?php foreach ($aHistory as $idx => $ah): ?>
+                                    <tr class="inv-terms-row-border" style="<?= $ah['id'] == $ad['id'] ? 'background: rgba(91, 61, 245, 0.04);' : '' ?>">
+                                      <td style="padding: 10px 12px; font-weight: 700;">
+                                        <span class="inv-terms-num-badge"><?= $idx + 1 ?></span>
+                                        <span class="inv-terms-name"><?= htmlspecialchars($ah['notes'] ?: ('Top-Up Saldo ' . $ah['platform'])) ?></span>
+                                      </td>
+                                      <td class="inv-terms-text" style="padding: 10px 12px; white-space: nowrap;">
+                                        <?= htmlspecialchars(substr($ah['spent_date'], 0, 10)) ?>
+                                      </td>
+                                      <td style="padding: 10px 12px; white-space: nowrap;">
+                                        <span class="inv-terms-method-badge">
+                                          <?= htmlspecialchars($ah['platform']) ?><?= !empty($ah['account_id']) ? ' &bull; ID: ' . htmlspecialchars($ah['account_id']) : '' ?>
+                                        </span>
+                                      </td>
+                                      <td style="padding: 10px 12px; font-weight: 800; color: #12B76A; font-size: 13px; white-space: nowrap;">
+                                        <?= format_rupiah($ah['amount']) ?>
+                                      </td>
+                                      <td style="padding: 10px 12px; white-space: nowrap;">
+                                        <?php if (!empty($ah['receipt_file'])): ?>
+                                          <button type="button" class="inv-terms-btn-receipt" onclick="viewReceiptImage('<?= UPLOAD_URL . '/' . htmlspecialchars($ah['receipt_file']) ?>', 'Bukti Top-Up <?= htmlspecialchars($ah['platform'], ENT_QUOTES) ?>')">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                                            <span>Lihat Bukti</span>
+                                          </button>
+                                        <?php else: ?>
+                                          <span style="color: #98A2B3; font-size: 11.5px; font-style: italic;">Tanpa Bukti</span>
+                                        <?php endif; ?>
+                                      </td>
+                                      <td class="inv-terms-subtitle" style="padding: 10px 12px; font-size: 12px;">
+                                        <?= htmlspecialchars($ah['notes'] ?: '-') ?>
+                                      </td>
+                                    </tr>
+                                  <?php endforeach; ?>
+                                </tbody>
+                              </table>
+                            </div>
                           </div>
                         </td>
                       </tr>
@@ -955,13 +1222,72 @@ $totalPendingFreelancer = floatval($db->query("SELECT COALESCE(SUM(amount), 0) F
           }
         }
 
+        const histId = row.dataset.histId;
+        const histRow = histId ? document.getElementById(histId) : null;
         if (matchSearch && matchStatus && matchPlatform && matchPeriod) {
           row.style.display = '';
           visibleCount++;
         } else {
           row.style.display = 'none';
+          if (histRow) histRow.style.display = 'none';
         }
       });
+    }
+
+    window.toggleExpenseHistory = function(type, id) {
+      const row = document.getElementById(`exp-hist-row-${type}-${id}`);
+      const btn = document.getElementById(`btn-toggle-${type}-${id}`);
+      const arrow = document.getElementById(`arrow-icon-${type}-${id}`);
+      if (!row) return;
+      const isHidden = (row.style.display === 'none' || !row.style.display);
+      if (isHidden) {
+        row.style.display = 'table-row';
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
+        if (btn) btn.style.background = '#E0EAFF';
+      } else {
+        row.style.display = 'none';
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        if (btn) btn.style.background = '#F2F4F7';
+      }
+SEARCH
+    ,
+    'expenses.php toggleExpenseHistory JS'
+);
+
+// ============================================================================
+// 4. views/salaries.php - Expandable History for Payroll & Master Karyawan
+// ============================================================================
+replace_Normalized(
+    "$base/views/salaries.php",
+    <<<'SEARCH'
+// Fetch Employees Master
+$employeesList = $db->query("SELECT * FROM employees ORDER BY status ASC, name ASC")->fetchAll();
+SEARCH
+    ,
+    <<<'REPLACE'
+// Fetch Employees Master
+$employeesList = $db->query("SELECT * FROM employees ORDER BY status ASC, name ASC")->fetchAll();
+
+// Fetch All Salaries History (Chronological) grouped by Employee for Accordion History
+$allSalariesChrono = $db->query("
+    SELECT s.*, e.department, e.employment_type
+    FROM salaries s
+    LEFT JOIN employees e ON s.employee_id = e.id
+    WHERE COALESCE(s.is_deleted, 0) = 0
+    ORDER BY s.payment_date ASC, s.id ASC
+")->fetchAll();
+
+$salariesByEmpId = [];
+$salariesByEmpName = [];
+foreach ($allSalariesChrono as $sc) {
+    if (!empty($sc['employee_id'])) {
+        $salariesByEmpId[intval($sc['employee_id'])][] = $sc;
+    }
+    $nKey = strtolower(trim($sc['employee_name']));
+    if ($nKey !== '') {
+        $salariesByEmpName[$nKey][] = $sc;
+    }
+}
 
       // Handle Empty State dynamically
       let emptyMsgRow = document.getElementById('filter-empty-row');

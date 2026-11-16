@@ -142,7 +142,24 @@ if (!$client) {
     <main class="main-wrapper">
       <?php require_once BASE_PATH . '/includes/header.php'; ?>
       <div class="content-body">
-        <div style="background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 24px; padding: 50px 30px; text-align: center; margin-top: 20px; box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);">
+        <?php if ($role !== 'client'): ?>
+        <!-- Quick Sub-Tab Switcher: Database Klien & Proyek | Tim & Karyawan | Preview Portal Klien -->
+        <div class="quick-subtab-bar" style="margin-bottom: 14px;">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
+            <a href="<?= url('clients?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
+              Database Klien &amp; Proyek
+            </a>
+            <a href="<?= url('team?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
+              Tim &amp; Karyawan
+            </a>
+            <a href="<?= url('client-portal?preview=1&portal=internal&_slot=internal') ?>" class="quick-subtab-btn active" style="display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 700; text-decoration: none; text-align: center; white-space: nowrap; background: #5B3DF5; color: #FFFFFF; box-shadow: 0 2px 6px rgba(91,61,245,0.25);">
+              Preview Portal Klien
+            </a>
+          </div>
+        </div>
+        <?php endif; ?>
+
+        <div style="background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 24px; padding: 50px 30px; text-align: center; margin-top: 12px; box-shadow: 0 10px 30px -10px rgba(18, 24, 48, 0.05), 0 2px 6px -1px rgba(18, 24, 48, 0.02);">
           <div style="display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: rgba(93, 118, 245, 0.12); color: #5D76F5; border-radius: 20px; font-size: 28px; margin-bottom: 16px;">
             ✦
           </div>
@@ -152,10 +169,13 @@ if (!$client) {
           </p>
           <div style="display: flex; justify-content: center; gap: 12px; flex-wrap: wrap;">
             <?php if ($role === 'owner' || $role === 'admin'): ?>
+              <a href="<?= home_url_for_role($role) ?>" class="btn btn-secondary">
+                &larr; Kembali ke Dashboard
+              </a>
               <button type="button" class="btn btn-primary" onclick="openModal('modal-create-invoice')">
                 + Buat Invoice Baru
               </button>
-              <a href="<?= url('clients') ?>" class="btn btn-secondary">
+              <a href="<?= url('clients?_slot=internal') ?>" class="btn btn-secondary">
                 Kelola Data Klien
               </a>
             <?php else: ?>
@@ -169,6 +189,7 @@ if (!$client) {
     </main>
   </div>
   <?php require_once BASE_PATH . '/includes/modals.php'; ?>
+  <?php require_once BASE_PATH . '/includes/footer.php'; ?>
   <script src="assets/js/app.js?v=<?= time() ?>"></script>
   <script src="assets/js/invoice.js?v=<?= time() ?>"></script>
 </body>
@@ -1266,6 +1287,20 @@ try {
 
         <!-- Preview Notice if Admin/Owner is looking at portal -->
         <?php if ($role !== 'client'): ?>
+          <!-- Quick Sub-Tab Switcher: Database Klien & Proyek | Tim & Karyawan | Preview Portal Klien -->
+          <div class="quick-subtab-bar" style="margin-bottom: 14px;">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
+              <a href="<?= url('clients?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
+                Database Klien &amp; Proyek
+              </a>
+              <a href="<?= url('team?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
+                Tim &amp; Karyawan
+              </a>
+              <a href="<?= url('client-portal?preview=1&portal=internal&_slot=internal') ?>" class="quick-subtab-btn active" style="display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 700; text-decoration: none; text-align: center; white-space: nowrap; background: #5B3DF5; color: #FFFFFF; box-shadow: 0 2px 6px rgba(91,61,245,0.25);">
+                Preview Portal Klien
+              </a>
+            </div>
+          </div>
           <div class="portal-preview-notice" style="background: #F0F4FF; border: 1px solid #D0DDFE; border-radius: 14px; padding: 12px 18px; margin-bottom: 20px; font-size: 13px; color: #1D2939; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 2px 6px -1px rgba(93, 118, 245, 0.08);">
             <div class="preview-notice-left" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
               <div class="preview-notice-header-row">
@@ -1960,7 +1995,7 @@ try {
                           </span>
                         </td>
                         <td style="text-align: right; white-space: nowrap !important;">
-                          <a href="<?= url('invoice-view') ?>?id=<?= $inv['id'] ?>&portal=client&_slot=client" class="btn btn-secondary btn-sm" style="font-size: 11.5px; font-weight: 700;">
+                          <a href="<?= url('invoice-view') ?>?id=<?= $inv['id'] ?><?= $role === 'client' ? '&portal=client&_slot=client' : '&_slot=internal' ?>" class="btn btn-secondary btn-sm" style="font-size: 11.5px; font-weight: 700;">
                             Lihat / Cetak PDF
                           </a>
                         </td>

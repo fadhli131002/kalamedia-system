@@ -387,7 +387,7 @@ $isAdmin = is_admin();
       </a>
 
       <!-- 10. Portal Klien (Preview) -->
-      <a href="<?= url('client-portal?portal=client&_slot=internal&mode=preview') ?>" class="owner-menu-grid-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 16px; padding: 14px 6px 12px; text-decoration: none; text-align: center; gap: 8px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+      <a href="<?= url('client-portal?preview=1&portal=internal&_slot=internal') ?>" class="owner-menu-grid-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 16px; padding: 14px 6px 12px; text-decoration: none; text-align: center; gap: 8px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <div style="width: 44px; height: 44px; border-radius: 14px; background: #EEF2FF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </div>
@@ -402,12 +402,12 @@ $isAdmin = is_admin();
         <span style="font-size: 11px; font-weight: 600; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Pengaturan Agensi</span>
       </a>
 
-      <!-- 12. Inbox Room Chat -->
-      <a href="<?= url('tasks?tab=discussions&_slot=internal') ?>" class="owner-menu-grid-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 16px; padding: 14px 6px 12px; text-decoration: none; text-align: center; gap: 8px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+      <!-- 12. Rekap Pekerjaan Tim -->
+      <a href="<?= url('tasks?tab=recap&_slot=internal') ?>" class="owner-menu-grid-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 16px; padding: 14px 6px 12px; text-decoration: none; text-align: center; gap: 8px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <div style="width: 44px; height: 44px; border-radius: 14px; background: #EEF2FF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
         </div>
-        <span style="font-size: 11px; font-weight: 600; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Inbox Room Chat</span>
+        <span style="font-size: 11px; font-weight: 600; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Rekap Kerja Tim</span>
       </a>
 
     </div>

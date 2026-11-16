@@ -1926,6 +1926,20 @@ if ($isWorkerUser) {
 
       <div class="content-body">
 
+        <?php if ($isAdminUser): ?>
+        <!-- Quick Sub-Tab Switcher: Pembagian Tugas & Saldo Ads | Kalender Konten Sosmed -->
+        <div class="quick-subtab-bar" style="margin-bottom: 14px;">
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
+            <a href="<?= url('tasks?_slot=internal') ?>" class="quick-subtab-btn active" style="display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 700; text-decoration: none; text-align: center; white-space: nowrap; background: #5B3DF5; color: #FFFFFF; box-shadow: 0 2px 6px rgba(91,61,245,0.25);">
+              Pembagian Tugas &amp; Saldo Ads
+            </a>
+            <a href="<?= url('content-calendar?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
+              Kalender Konten Sosmed
+            </a>
+          </div>
+        </div>
+        <?php endif; ?>
+
         <!-- Header Card -->
         <!-- Header Card (Admin / PM Only) -->
         <?php if ($isAdminUser): ?>
@@ -5447,14 +5461,18 @@ if ($isWorkerUser) {
         return;
       }
 
+      const allTopups = (data.topup_transactions || []).slice().reverse();
       let html = '';
       projects.forEach(p => {
+        const pId = p.project_id || p.id;
         const contract = Number(p.total_kontrak_klien || p.contract_value || 0);
         const margin = Number(p.margin_bersih_agensi || 0);
         const pagu = Number(p.total_pagu_ads_klien || p.allocated_ads_budget || 0);
         const transferred = Number(p.total_ditransfer_ke_tim_ads || 0);
         const sisaPaguOwner = Number(p.sisa_pagu_di_owner || 0);
         const sisaSaldoTimAds = Number(p.sisa_saldo_di_tim_ads || 0);
+        const projTx = allTopups.filter(tx => Number(tx.project_id) === Number(pId));
+        const pctTransfer = pagu > 0 ? Math.min(100, Math.round((transferred / pagu) * 1000) / 10) : (transferred > 0 ? 100 : 0);
 
         let stBadge = '<span class="badge" style="background: #ECFDF3; color: #027A48; font-weight: 700;">🟢 Iklan Jalan</span>';
         if (sisaSaldoTimAds <= 0 && transferred > 0) {
@@ -5463,11 +5481,52 @@ if ($isWorkerUser) {
           stBadge = '<span class="badge" style="background: #EFF8FF; color: #175CD3; font-weight: 700;">Menunggu Transfer</span>';
         }
 
+        let subRowsHtml = '';
+        if (projTx.length === 0) {
+          subRowsHtml = `<tr><td colspan="6" style="text-align: center; padding: 18px; color: #98A2B3; font-style: italic;">Belum ada riwayat pencairan saldo iklan untuk proyek ini.</td></tr>`;
+        } else {
+          projTx.forEach((tx, idx) => {
+            const tfAmt = Number(tx.transfer_amount_owner || tx.topup_amount || 0);
+            const spAmt = Number(tx.ad_spend_amount || tx.spend_installed || 0);
+            const proofFile = tx.transfer_proof_owner || tx.platform_topup_proof || tx.receipt_file || '';
+            subRowsHtml += `
+              <tr class="inv-terms-row-border">
+                <td style="padding: 10px 12px; font-weight: 700;">
+                  <span class="inv-terms-num-badge">${idx + 1}</span>
+                  <span class="inv-terms-name">${escapeHtml(tx.stage_label || 'Pencairan Saldo Ads')}</span>
+                </td>
+                <td class="inv-terms-text" style="padding: 10px 12px;">${escapeHtml(tx.transaction_date || '-')}</td>
+                <td style="padding: 10px 12px;">
+                  <span class="inv-terms-method-badge">${escapeHtml(tx.platform || 'Meta Ads')}</span>
+                </td>
+                <td style="padding: 10px 12px; font-weight: 800; color: #12B76A; font-size: 13px;">
+                  Rp ${tfAmt.toLocaleString('id-ID')} ${spAmt > 0 ? `<span style="font-size: 11px; color: #B42318; font-weight: 600;">(Spend: Rp ${spAmt.toLocaleString('id-ID')})</span>` : ''}
+                </td>
+                <td style="padding: 10px 12px;">
+                  ${proofFile ? `
+                    <button type="button" class="inv-terms-btn-receipt" onclick="previewAdsProof('${escapeHtml(proofFile)}')">
+                      <span>Lihat Bukti</span>
+                    </button>
+                  ` : `<span style="color: #98A2B3; font-size: 11.5px; font-style: italic;">Tanpa Bukti</span>`}
+                </td>
+                <td class="inv-terms-subtitle" style="padding: 10px 12px; font-size: 12px;">${escapeHtml(tx.notes || '-')}</td>
+              </tr>
+            `;
+          });
+        }
+
         html += `
           <tr>
             <td>
-              <div style="font-weight: 800; color: #101828;">${escapeHtml(p.client_company)}</div>
-              <span style="font-size: 11.5px; color: var(--text-secondary);">${escapeHtml(p.project_name)}</span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button type="button" class="btn-toggle-terms" onclick="toggleAdsHistoryRow('proj', ${pId})" id="btn-toggle-ads-proj-${pId}" title="Lihat Riwayat Pencairan Saldo Ads Proyek">
+                  <svg id="arrow-icon-ads-proj-${pId}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#344054" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s ease;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div>
+                  <div style="font-weight: 800; color: #101828;">${escapeHtml(p.client_company)}</div>
+                  <span style="font-size: 11.5px; color: var(--text-secondary);">${escapeHtml(p.project_name)} &bull; ${projTx.length}x tahap</span>
+                </div>
+              </div>
             </td>
             <td style="font-weight: 800; color: #101828; white-space: nowrap;">
               Rp ${contract.toLocaleString('id-ID')}
@@ -5489,17 +5548,64 @@ if ($isWorkerUser) {
             </td>
             <td class="td-actions" style="text-align: right; white-space: nowrap;">
               <div class="table-actions" style="display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap;">
-                <button type="button" class="btn btn-primary btn-sm" onclick="openTransferToWorkerModal(${p.project_id}, ${sisaPaguOwner})" style="font-size: 11px; font-weight: 700; background: #175CD3; border-color: #175CD3;">
+                <button type="button" class="btn btn-primary btn-sm" onclick="openTransferToWorkerModal(${pId}, ${sisaPaguOwner})" style="font-size: 11px; font-weight: 700; background: #175CD3; border-color: #175CD3;">
                   + Transfer Saldo
                 </button>
                 ${sisaPaguOwner <= 0 ? `
-                  <button type="button" class="btn btn-secondary btn-sm" onclick="openRequestLimitOwnerModal(${p.project_id})" style="font-size: 11px; font-weight: 700; color: #B54708; border-color: #FDB022; background: #FFF9F2;">
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="openRequestLimitOwnerModal(${pId})" style="font-size: 11px; font-weight: 700; color: #B54708; border-color: #FDB022; background: #FFF9F2;">
                     🔔 Ajukan Limit ke Klien
                   </button>
                 ` : ''}
-                <button type="button" class="btn btn-secondary btn-sm" onclick="openAllocateAdsModal(${p.project_id}, ${pagu})" style="font-size: 11px; font-weight: 600;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openAllocateAdsModal(${pId}, ${pagu})" style="font-size: 11px; font-weight: 600;">
                   Atur Pagu
                 </button>
+              </div>
+            </td>
+          </tr>
+          <tr id="ads-hist-row-proj-${pId}" class="invoice-terms-row" style="display: none; background: #F8F9FC;">
+            <td colspan="8" style="padding: 16px 20px; border-top: 1px dashed #D0D5DD; border-bottom: 2px solid #EAECF0;">
+              <div class="inv-terms-card">
+                <div class="inv-terms-header-border" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding-bottom: 14px;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 32px; height: 32px; border-radius: 8px; background: #EEF4FF; color: #3538CD; display: flex; align-items: center; justify-content: center;">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                    </div>
+                    <div>
+                      <div class="inv-terms-title" style="font-size: 14px; font-weight: 700;">Riwayat Pencairan &amp; Realisasi Saldo Ads Klien</div>
+                      <div class="inv-terms-subtitle" style="font-size: 12px;">Proyek: <strong class="inv-terms-title">${escapeHtml(p.project_name)}</strong> (${escapeHtml(p.client_company)}) &bull; Pagu Ads: <strong class="inv-terms-title">Rp ${pagu.toLocaleString('id-ID')}</strong></div>
+                    </div>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div class="inv-terms-stat-received"><span>Dicairkan:</span> <strong>Rp ${transferred.toLocaleString('id-ID')}</strong></div>
+                    <div class="${sisaPaguOwner > 0 ? 'inv-terms-stat-remaining-due' : 'inv-terms-stat-remaining-zero'}"><span>Sisa Pagu:</span> <strong>Rp ${sisaPaguOwner.toLocaleString('id-ID')}</strong></div>
+                  </div>
+                </div>
+                <div style="margin-bottom: 16px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 11.5px; margin-bottom: 5px; font-weight: 600;">
+                    <span class="inv-terms-subtitle">Progres Penyerapan Pagu Saldo Ads</span>
+                    <span class="inv-terms-title">${pctTransfer}% Dicairkan</span>
+                  </div>
+                  <div style="width: 100%; height: 8px; background: rgba(148, 163, 184, 0.2); border-radius: 999px; overflow: hidden;">
+                    <div style="width: ${pctTransfer}%; height: 100%; background: ${pctTransfer >= 100 ? '#12B76A' : '#5B3DF5'}; border-radius: 999px;"></div>
+                  </div>
+                </div>
+                <div style="overflow-x: auto;">
+                  <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+                    <thead>
+                      <tr class="inv-terms-thead" style="text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.04em;">
+                        <th style="padding: 8px 12px; text-align: left;">Tahap / Keterangan</th>
+                        <th style="padding: 8px 12px; text-align: left;">Tanggal</th>
+                        <th style="padding: 8px 12px; text-align: left;">Platform</th>
+                        <th style="padding: 8px 12px; text-align: left;">Nominal Saldo &amp; Spend</th>
+                        <th style="padding: 8px 12px; text-align: left;">Bukti Transfer</th>
+                        <th style="padding: 8px 12px; text-align: left;">Catatan</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${subRowsHtml}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </td>
           </tr>
@@ -5607,18 +5713,91 @@ if ($isWorkerUser) {
           </div>
         `;
 
+        const pctSpend = transferOwner > 0 ? Math.min(100, Math.round((spend / transferOwner) * 1000) / 10) : 0;
+        const txHistoryRowHtml = `
+          <tr id="ads-hist-row-tx-${t.id}" class="invoice-terms-row" style="display: none; background: #F8F9FC;">
+            <td colspan="7" style="padding: 16px 20px; border-top: 1px dashed #D0D5DD; border-bottom: 2px solid #EAECF0;">
+              <div class="inv-terms-card">
+                <div class="inv-terms-header-border" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; padding-bottom: 14px;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="width: 32px; height: 32px; border-radius: 8px; background: #EEF4FF; color: #3538CD; display: flex; align-items: center; justify-content: center;">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                    </div>
+                    <div>
+                      <div class="inv-terms-title" style="font-size: 14px; font-weight: 700;">Riwayat Alur 2 Tahap &amp; Realisasi Saldo Ads</div>
+                      <div class="inv-terms-subtitle" style="font-size: 12px;">${escapeHtml(t.client_company || 'Klien')} &bull; ${escapeHtml(t.project_name || 'Proyek')} &bull; Ditransfer: <strong class="inv-terms-title">Rp ${transferOwner.toLocaleString('id-ID')}</strong></div>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <div class="inv-terms-stat-received"><span>Terpakai (Spend):</span> <strong>Rp ${spend.toLocaleString('id-ID')}</strong></div>
+                    <div class="${sisa > 0 ? 'inv-terms-stat-remaining-due' : 'inv-terms-stat-remaining-zero'}"><span>Sisa Saldo:</span> <strong>Rp ${sisa.toLocaleString('id-ID')}</strong></div>
+                  </div>
+                </div>
+                <div style="margin-bottom: 16px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 11.5px; margin-bottom: 5px; font-weight: 600;">
+                    <span class="inv-terms-subtitle">Progres Pemakaian Saldo (Spend vs Transfer)</span>
+                    <span class="inv-terms-title">${pctSpend}% Terpakai</span>
+                  </div>
+                  <div style="width: 100%; height: 8px; background: rgba(148, 163, 184, 0.2); border-radius: 999px; overflow: hidden;">
+                    <div style="width: ${pctSpend}%; height: 100%; background: ${pctSpend >= 100 ? '#12B76A' : '#5B3DF5'}; border-radius: 999px;"></div>
+                  </div>
+                </div>
+                <div style="overflow-x: auto;">
+                  <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
+                    <thead>
+                      <tr class="inv-terms-thead" style="text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.04em;">
+                        <th style="padding: 8px 12px; text-align: left;">Tahap / Alur Dana</th>
+                        <th style="padding: 8px 12px; text-align: left;">Tanggal</th>
+                        <th style="padding: 8px 12px; text-align: left;">Metode / Platform</th>
+                        <th style="padding: 8px 12px; text-align: left;">Nominal</th>
+                        <th style="padding: 8px 12px; text-align: left;">Bukti Transfer</th>
+                        <th style="padding: 8px 12px; text-align: left;">Catatan</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="inv-terms-row-border">
+                        <td style="padding: 10px 12px; font-weight: 700;"><span class="inv-terms-num-badge">1</span><span class="inv-terms-name">Tahap 1: Pencairan Owner &rarr; Tim Ads (${escapeHtml(t.stage_label || 'Tahap 1')})</span></td>
+                        <td class="inv-terms-text" style="padding: 10px 12px;">${escapeHtml(t.transaction_date || '-')}</td>
+                        <td style="padding: 10px 12px;"><span class="inv-terms-method-badge">Transfer Internal &bull; ${escapeHtml(t.assigned_user_name || 'Tim Ads')}</span></td>
+                        <td style="padding: 10px 12px; font-weight: 800; color: #175CD3;">Rp ${transferOwner.toLocaleString('id-ID')}</td>
+                        <td style="padding: 10px 12px;">${t.transfer_proof_owner ? `<button type="button" class="inv-terms-btn-receipt" onclick="previewAdsProof('${escapeHtml(t.transfer_proof_owner)}')"><span>Lihat Bukti</span></button>` : `<span style="color:#98A2B3;font-style:italic;font-size:11.5px;">Tanpa Bukti</span>`}</td>
+                        <td class="inv-terms-subtitle" style="padding: 10px 12px; font-size: 12px;">${escapeHtml(t.notes || '-')}</td>
+                      </tr>
+                      <tr class="inv-terms-row-border">
+                        <td style="padding: 10px 12px; font-weight: 700;"><span class="inv-terms-num-badge">2</span><span class="inv-terms-name">Tahap 2: Top-Up Platform &amp; Realisasi Spend</span></td>
+                        <td class="inv-terms-text" style="padding: 10px 12px;">${escapeHtml(t.transaction_date || '-')}</td>
+                        <td style="padding: 10px 12px;"><span class="inv-terms-method-badge">${escapeHtml(t.platform || 'Meta Ads')}</span></td>
+                        <td style="padding: 10px 12px; font-weight: 800; color: #12B76A;">Top-Up: Rp ${topupPlatform.toLocaleString('id-ID')} &bull; Spend: Rp ${spend.toLocaleString('id-ID')}</td>
+                        <td style="padding: 10px 12px;">${t.platform_topup_proof ? `<button type="button" class="inv-terms-btn-receipt" onclick="previewAdsProof('${escapeHtml(t.platform_topup_proof)}')"><span>Lihat Bukti</span></button>` : `<span style="color:#98A2B3;font-style:italic;font-size:11.5px;">Tanpa Bukti</span>`}</td>
+                        <td class="inv-terms-subtitle" style="padding: 10px 12px; font-size: 12px;">Sisa Saldo: Rp ${sisa.toLocaleString('id-ID')}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </td>
+          </tr>
+        `;
+
         if (isPrivileged) {
           // OWNER / ADMIN VIEW: 7 Columns with full internal metrics
           html += `
             <tr>
               <td style="min-width: 190px; white-space: nowrap;">
-                <div style="font-weight: 800; color: #101828;">${formatDate(t.transaction_date)}</div>
-                <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 1px;">
-                  Oleh: <b>${escapeHtml(t.assigned_user_name || t.uploader_name || 'Tim Ads')}</b>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <button type="button" class="btn-toggle-terms" onclick="toggleAdsHistoryRow('tx', ${t.id})" id="btn-toggle-ads-tx-${t.id}" title="Lihat Riwayat Alur 2 Tahap Saldo Ads">
+                    <svg id="arrow-icon-ads-tx-${t.id}" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#344054" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.2s ease;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </button>
+                  <div>
+                    <div style="font-weight: 800; color: #101828;">${formatDate(t.transaction_date)}</div>
+                    <div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 1px;">
+                      Oleh: <b>${escapeHtml(t.assigned_user_name || t.uploader_name || 'Tim Ads')}</b>
+                    </div>
+                    <span class="badge" style="background: #F2F4F7; color: #344054; font-size: 10px; font-weight: 700; margin-top: 3px;">
+                      ${escapeHtml(t.stage_label || 'Tahap 1')}
+                    </span>
+                  </div>
                 </div>
-                <span class="badge" style="background: #F2F4F7; color: #344054; font-size: 10px; font-weight: 700; margin-top: 3px;">
-                  ${escapeHtml(t.stage_label || 'Tahap 1')}
-                </span>
               </td>
 
               <td style="white-space: nowrap;">
@@ -5701,6 +5880,7 @@ if ($isWorkerUser) {
                 </div>
               </td>
             </tr>
+            ${txHistoryRowHtml}
           `;
         } else {
           // KARYAWAN / FREELANCER (TIM ADS) TABLE (Desktop Fallback)
@@ -5787,6 +5967,23 @@ if ($isWorkerUser) {
       if (tbody) tbody.innerHTML = html;
       if (appifyEl) appifyEl.innerHTML = appifyCardsHtml;
     }
+
+    window.toggleAdsHistoryRow = function(type, id) {
+      const row = document.getElementById(`ads-hist-row-${type}-${id}`);
+      const btn = document.getElementById(`btn-toggle-ads-${type}-${id}`);
+      const arrow = document.getElementById(`arrow-icon-ads-${type}-${id}`);
+      if (!row) return;
+      const isHidden = (row.style.display === 'none' || !row.style.display);
+      if (isHidden) {
+        row.style.display = 'table-row';
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
+        if (btn) btn.style.background = '#E0EAFF';
+      } else {
+        row.style.display = 'none';
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+        if (btn) btn.style.background = '#F2F4F7';
+      }
+    };
 
     function renderAdsLogsFeed(data) {
       const container = document.getElementById('ads-logs-feed-container');

@@ -404,7 +404,7 @@ $totalUnpaid = max(0, $totalBilled - $totalPaid);
 
           <!-- Invoices Data Table -->
           <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 0;">
-            <table class="table-custom" id="invoice-table" style="min-width: 980px !important; width: 100%;">
+            <table class="table-custom" id="invoice-table" style="min-width: 740px; width: 100%;">
               <thead>
                 <tr>
                   <th style="white-space: nowrap !important;">NO. INVOICE</th>

@@ -138,6 +138,39 @@ aside.sidebar,
               width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
+@media (min-width: 1025px) {
+  html,
+  body,
+  .app-container {
+    transform: none !important;
+    filter: none !important;
+    perspective: none !important;
+    backdrop-filter: none !important;
+    overflow-x: clip !important;
+  }
+  .sidebar,
+  aside.sidebar,
+  #app-sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 250px !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    z-index: 200 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  .main-wrapper {
+    margin-left: 250px !important;
+    width: calc(100% - 250px) !important;
+    max-width: calc(100% - 250px) !important;
+  }
+}
+
 .sidebar-nav {
   position: relative;
 }

@@ -944,24 +944,20 @@ if ($isWorkerUser) {
         box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
       }
 
-      /* Segmented Controls Chips (bg-slate-100 p-1 rounded-xl) */
-      .bento-segmented-control,
-      .task-services-track,
+      /* Segmented Controls Chips (5-Column Equal Fit on Mobile so Selesai never clips) */
       #status-filter-group.task-status-grid,
       .task-status-grid {
-        display: flex !important;
-        flex-direction: row !important;
-        overflow-x: auto !important;
-        white-space: nowrap !important;
-        gap: 4px !important;
+        display: grid !important;
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+        gap: 3px !important;
         width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
         box-sizing: border-box !important;
-        -webkit-overflow-scrolling: touch !important;
-        scrollbar-width: none !important;
         background: #F1F5F9 !important;
-        padding: 4px !important;
-        border-radius: 12px !important;
-        flex-wrap: nowrap !important;
+        padding: 3px !important;
+        border-radius: 10px !important;
+        overflow: hidden !important;
       }
       .bento-segmented-control::-webkit-scrollbar,
       .task-services-track::-webkit-scrollbar,
@@ -972,17 +968,23 @@ if ($isWorkerUser) {
 
       .task-service-pill,
       .task-status-grid .filter-btn {
-        width: auto !important;
-        flex-shrink: 0 !important;
-        padding: 7px 14px !important;
-        font-size: 12px !important;
-        font-weight: 500 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        padding: 7px 2px !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
         color: #64748B !important;
         background: transparent !important;
         border: none !important;
         border-radius: 8px !important;
         cursor: pointer !important;
         white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        text-align: center !important;
+        justify-content: center !important;
+        display: inline-flex !important;
+        align-items: center !important;
         transition: all 0.15s ease !important;
         box-sizing: border-box !important;
       }
@@ -1929,12 +1931,14 @@ if ($isWorkerUser) {
         <?php if ($isAdminUser): ?>
         <!-- Quick Sub-Tab Switcher: Pembagian Tugas & Saldo Ads | Kalender Konten Sosmed -->
         <div class="quick-subtab-bar" style="margin-bottom: 14px;">
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
-            <a href="<?= url('tasks?_slot=internal') ?>" class="quick-subtab-btn active" style="display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 700; text-decoration: none; text-align: center; white-space: nowrap; background: #5B3DF5; color: #FFFFFF; box-shadow: 0 2px 6px rgba(91,61,245,0.25);">
-              Pembagian Tugas &amp; Saldo Ads
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
+            <a href="<?= url('tasks?_slot=internal') ?>" class="quick-subtab-btn active" style="display: flex; align-items: center; justify-content: center; padding: 8px 8px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; text-align: center; min-width: 0; background: #5B3DF5; color: #FFFFFF; box-shadow: 0 2px 6px rgba(91,61,245,0.25);">
+              <span class="desktop-text">Pembagian Tugas &amp; Saldo Ads</span>
+              <span class="mobile-text">Tugas &amp; Saldo Ads</span>
             </a>
-            <a href="<?= url('content-calendar?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
-              Kalender Konten Sosmed
+            <a href="<?= url('content-calendar?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; min-width: 0; color: #64748B;">
+              <span class="desktop-text">Kalender Konten Sosmed</span>
+              <span class="mobile-text">Kalender Konten</span>
             </a>
           </div>
         </div>
@@ -1944,8 +1948,8 @@ if ($isWorkerUser) {
         <!-- Header Card (Admin / PM Only) -->
         <?php if ($isAdminUser): ?>
         <div class="tasks-header-card">
-          <div>
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+          <div style="min-width: 0; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap;">
               <span class="badge badge-workspace-role">
                 ADMIN &amp; PM WORKSPACE
               </span>
@@ -2428,7 +2432,7 @@ if ($isWorkerUser) {
             </div>
 
             <!-- Dynamic 4 KPI Summary Cards -->
-            <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr) !important; gap: 14px; margin-bottom: 22px;">
+            <div class="kpi-grid worker-recap-kpi-grid" style="gap: 14px; margin-bottom: 22px;">
               <div class="kpi-card" style="border-top: 3px solid #2563EB;">
                 <div class="kpi-header">
                   <span class="kpi-title" style="color: #2563EB; font-weight: 700;">Total Pekerjaan</span>

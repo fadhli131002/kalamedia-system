@@ -435,7 +435,7 @@ $initialChartData = [
         <!-- Owner Executive Control Bar: Time Range Filter & Actions -->
         <div class="owner-control-bar" style="margin-top: 0; margin-bottom: 14px;">
           <!-- Baris 1: Segmented Filter (Bulan Ini | Kuartal Ini | Tahun Ini | Semua) -->
-          <div class="owner-period-filter-segmented" style="width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box;">
+          <div class="owner-period-filter-segmented" style="width: 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box;">
             <button type="button" class="filter-btn active" onclick="changeTimeRange('month', this)">Bulan Ini</button>
             <button type="button" class="filter-btn" onclick="changeTimeRange('quarter', this)">Kuartal Ini</button>
             <button type="button" class="filter-btn" onclick="changeTimeRange('year', this)">Tahun Ini</button>
@@ -513,7 +513,7 @@ $initialChartData = [
               <p style="font-size: 12px; color: var(--text-secondary); margin-top: 3px;">Tren riwayat arus kas masuk dan biaya operasional 6 bulan terakhir</p>
             </div>
             <!-- Interactive Legend Indicators matching Slide 2 reference -->
-            <div style="display: flex; align-items: center; gap: 12px; font-size: 12px; font-weight: 600;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 12px; font-weight: 600;">
               <div onclick="toggleChartDataset(0, this)" class="chart-legend-inflow" style="display: flex; align-items: center; gap: 6px; color: #0284C7; cursor: pointer; padding: 4px 10px; background: #F0F9FF; border-radius: 6px; border: 1px solid #BAE6FD; transition: all 0.2s ease;" title="Klik untuk sembunyikan/tampilkan Inflow">
                 <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #06B6D4; box-shadow: 0 0 0 2px rgba(6,182,212,0.25);"></span>
                 <span>Total Inflow (Revenue)</span>

@@ -447,17 +447,17 @@ $totalClientsCount = count($allClients);
       <div class="content-body">
         
         <?php if (is_owner() || is_admin()): ?>
-        <!-- Quick Sub-Tab Switcher: Database Klien & Proyek | Tim & Karyawan | Preview Portal Klien -->
+        <!-- Quick Sub-Tab Switcher: Klien & Proyek | Tim & SDM | Portal Klien -->
         <div class="quick-subtab-bar" style="margin-bottom: 14px;">
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
-            <a href="<?= url('clients?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
-              Database Klien &amp; Proyek
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
+            <a href="<?= url('clients?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; min-width: 0; color: #64748B;">
+              Klien &amp; Proyek
             </a>
-            <a href="<?= url('team?_slot=internal') ?>" class="quick-subtab-btn active" style="display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 700; text-decoration: none; text-align: center; white-space: nowrap; background: #5B3DF5; color: #FFFFFF; box-shadow: 0 2px 6px rgba(91,61,245,0.25);">
-              Tim &amp; Karyawan
+            <a href="<?= url('team?_slot=internal') ?>" class="quick-subtab-btn active" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; text-align: center; min-width: 0; background: #5B3DF5; color: #FFFFFF; box-shadow: 0 2px 6px rgba(91,61,245,0.25);">
+              Tim &amp; SDM
             </a>
-            <a href="<?= url('client-portal?preview=1&portal=internal&_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 600; text-decoration: none; text-align: center; white-space: nowrap; color: #64748B;">
-              Preview Portal Klien
+            <a href="<?= url('client-portal?preview=1&portal=internal&_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 6px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; min-width: 0; color: #64748B;">
+              Portal Klien
             </a>
           </div>
         </div>

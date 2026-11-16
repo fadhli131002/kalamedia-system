@@ -6704,3 +6704,103 @@ html.dark-mode .inv-terms-btn-receipt {
   border-color: rgba(59, 130, 246, 0.4) !important;
   background: rgba(37, 99, 235, 0.18) !important;
 }
+
+/* ==========================================================================
+   GLOBAL MOBILE OFFSIDE & HORIZONTAL OVERFLOW GUARD (<= 768px)
+   ========================================================================== */
+.quick-subtab-bar {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+}
+.quick-subtab-bar > div {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+.quick-subtab-btn {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+@media (max-width: 768px) {
+  html,
+  body,
+  .app-container,
+  .main-wrapper,
+  .content-body {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .quick-subtab-bar > div {
+    padding: 3px !important;
+    gap: 3px !important;
+  }
+  .quick-subtab-btn {
+    padding: 7px 4px !important;
+    font-size: 11.5px !important;
+    line-height: 1.25 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .owner-period-filter-segmented {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    padding: 3px !important;
+    gap: 3px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .owner-period-filter-segmented .filter-btn {
+    min-width: 0 !important;
+    padding: 7px 3px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .date-filter-group {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    box-sizing: border-box !important;
+  }
+  .date-filter-group::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .worker-recap-filter-bar > div {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  .worker-recap-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .slide2-quick-cols {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+  .slide2-quick-col {
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: 8px 10px !important;
+    box-sizing: border-box !important;
+  }
+}

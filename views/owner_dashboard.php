@@ -544,8 +544,8 @@ $initialChartData = [
               <button class="btn btn-secondary btn-sm kala-btn-new-project" onclick="openModal('modal-create-project')">+ Proyek Baru</button>
             </div>
 
-            <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;">
-              <table class="table-custom" style="min-width: 640px; width: 100%;">
+            <div class="table-scroll-wrapper kala-table-scroll table-responsive">
+              <table class="table-custom">
                 <thead>
                   <tr>
                     <th>Rank &amp; Nama Proyek</th>
@@ -920,8 +920,8 @@ $initialChartData = [
             <?php endif; ?>
 
             <!-- Table Riwayat Top-up Terbaru dengan 2 Tahap Bukti Transaksi -->
-            <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
-              <table class="table-custom" style="min-width: 950px; width: 100%;">
+            <div class="table-scroll-wrapper kala-table-scroll table-responsive">
+              <table class="table-custom">
                 <thead>
                   <tr>
                     <th style="min-width: 180px; white-space: nowrap;">TANGGAL &amp; PETUGAS ADS</th>
@@ -1141,7 +1141,7 @@ $initialChartData = [
             </div>
 
             <!-- Users Table -->
-            <div class="table-responsive">
+            <div class="table-scroll-wrapper kala-table-scroll table-responsive">
               <table class="table-custom">
                 <thead>
                   <tr>

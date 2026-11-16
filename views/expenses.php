@@ -743,8 +743,8 @@ try {
 
           <?php if ($tab === 'freelancers'): ?>
             <!-- 4. Freelancer Payouts Table -->
-            <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; margin: 0; padding-bottom: 6px;">
-              <table class="untitled-table" id="payout-table" style="min-width: 760px; width: 100%;">
+            <div class="table-scroll-wrapper kala-table-scroll table-responsive">
+              <table class="untitled-table" id="payout-table">
                 <thead>
                   <tr>
                     <th style="white-space: nowrap !important;">NAMA FREELANCER &amp; REKENING</th>
@@ -973,8 +973,8 @@ try {
 
           <?php else: ?>
             <!-- 4b. Ads Top-Up Table -->
-            <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; margin: 0; padding-bottom: 6px;">
-              <table class="untitled-table" id="ads-table" style="min-width: 760px; width: 100%;">
+            <div class="table-scroll-wrapper kala-table-scroll table-responsive">
+              <table class="untitled-table" id="ads-table">
                 <thead>
                   <tr>
                     <th style="white-space: nowrap !important;">PLATFORM &amp; ID AKUN</th>

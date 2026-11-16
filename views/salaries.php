@@ -560,8 +560,8 @@ $totalSalarySelected = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) 
             </div>
 
             <!-- Payroll Table -->
-            <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 0;">
-              <table class="table-custom" id="salaries-table" style="min-width: 760px; width: 100%;">
+            <div class="table-scroll-wrapper kala-table-scroll table-responsive">
+              <table class="table-custom" id="salaries-table">
                 <thead>
                   <tr>
                     <th style="white-space: nowrap !important;">Periode &amp; Tanggal</th>
@@ -778,8 +778,8 @@ $totalSalarySelected = floatval($db->query("SELECT COALESCE(SUM(net_salary), 0) 
             </div>
           <?php elseif ($tab === 'employees'): ?>
             <!-- Master Karyawan Table -->
-            <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 0;">
-              <table class="table-custom" id="employees-table" style="min-width: 760px; width: 100%;">
+            <div class="table-scroll-wrapper kala-table-scroll table-responsive">
+              <table class="table-custom" id="employees-table">
                 <thead>
                   <tr>
                     <th style="white-space: nowrap !important;">Nama Karyawan</th>

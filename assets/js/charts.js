@@ -30,6 +30,10 @@ function initCashflowChart(chartData) {
     return;
   }
 
+  if (Chart.defaults && Chart.defaults.font) {
+    Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, sans-serif";
+  }
+
   // Ensure canvas is properly sized and context is ready
   requestAnimationFrame(function () {
     const targetCanvas = document.getElementById('cashflowChart');

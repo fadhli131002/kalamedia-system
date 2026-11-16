@@ -579,8 +579,8 @@ $totalClientsCount = count($allClients);
             </div>
           </div>
 
-          <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
-            <table class="table-custom" style="min-width: 960px; width: 100%;">
+          <div class="table-scroll-wrapper kala-table-scroll table-responsive">
+            <table class="table-custom">
               <thead>
                 <tr>
                   <th style="min-width: 220px; white-space: nowrap;">NAMA &amp; KONTAK</th>

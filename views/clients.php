@@ -491,8 +491,8 @@ $projects = $db->query("
             </div>
           </div>
 
-          <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
-            <table class="table-custom" style="min-width: 960px !important; width: 100%;">
+          <div class="table-scroll-wrapper kala-table-scroll table-responsive">
+            <table class="table-custom">
               <thead>
                 <tr>
                   <th style="white-space: nowrap !important;">NAMA PERUSAHAAN &amp; PIC</th>
@@ -683,8 +683,8 @@ $projects = $db->query("
             </button>
           </div>
 
-          <div class="kala-table-scroll table-responsive" style="width: 100%; max-width: 100%; overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; display: block !important; padding-bottom: 6px;">
-            <table class="table-custom" style="min-width: 960px !important; width: 100%;">
+          <div class="table-scroll-wrapper kala-table-scroll table-responsive">
+            <table class="table-custom">
               <thead>
                 <tr>
                   <th style="white-space: nowrap !important;">NAMA PROYEK &amp; KLIEN</th>

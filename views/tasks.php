@@ -855,24 +855,34 @@ if ($isWorkerUser) {
         text-align: center !important;
       }
 
-      /* Workspace Tabs Bar: 2 Columns Side-by-Side */
+      /* Workspace Tabs Bar: Smooth Horizontal Touch-Scroll on Mobile */
       .workspace-sliding-pill {
         display: none !important;
       }
       .workspace-tabs-bar {
-        display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
         width: 100% !important;
+        max-width: 100% !important;
         gap: 6px !important;
         padding: 5px !important;
         border-radius: 14px !important;
         box-sizing: border-box !important;
         margin-bottom: 16px !important;
       }
+      .workspace-tabs-bar::-webkit-scrollbar {
+        display: none !important;
+      }
       .workspace-tab-btn {
-        width: 100% !important;
-        padding: 9px 6px !important;
-        font-size: 11.5px !important;
+        flex: 1 0 auto !important;
+        width: auto !important;
+        min-width: max-content !important;
+        padding: 9px 12px !important;
+        font-size: 12px !important;
         border-radius: 9px !important;
         justify-content: center !important;
         text-align: center !important;
@@ -1930,13 +1940,13 @@ if ($isWorkerUser) {
 
         <?php if ($isAdminUser): ?>
         <!-- Quick Sub-Tab Switcher: Pembagian Tugas & Saldo Ads | Kalender Konten Sosmed -->
-        <div class="quick-subtab-bar" style="margin-bottom: 14px;">
-          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: #F0F1F7; padding: 4px; border-radius: 12px; gap: 4px; box-sizing: border-box; width: 100%;">
-            <a href="<?= url('tasks?_slot=internal') ?>" class="quick-subtab-btn active" style="display: flex; align-items: center; justify-content: center; padding: 8px 8px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; text-align: center; min-width: 0; background: #5B3DF5; color: #FFFFFF; box-shadow: 0 2px 6px rgba(91,61,245,0.25);">
+        <div class="quick-subtab-bar">
+          <div class="quick-subtab-track">
+            <a href="<?= url('tasks?_slot=internal') ?>" class="quick-subtab-btn active">
               <span class="desktop-text">Pembagian Tugas &amp; Saldo Ads</span>
               <span class="mobile-text">Tugas &amp; Saldo Ads</span>
             </a>
-            <a href="<?= url('content-calendar?_slot=internal') ?>" class="quick-subtab-btn" style="display: flex; align-items: center; justify-content: center; padding: 8px 8px; border-radius: 8px; font-size: 12px; font-weight: 600; text-decoration: none; text-align: center; min-width: 0; color: #64748B;">
+            <a href="<?= url('content-calendar?_slot=internal') ?>" class="quick-subtab-btn">
               <span class="desktop-text">Kalender Konten Sosmed</span>
               <span class="mobile-text">Kalender Konten</span>
             </a>
@@ -2202,8 +2212,8 @@ if ($isWorkerUser) {
               </button>
             </div>
 
-            <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
-              <table class="table-custom" id="table-ads-topups" style="min-width: 980px; width: 100%;">
+            <div class="table-scroll-wrapper kala-table-scroll table-responsive">
+              <table class="table-custom" id="table-ads-topups">
                 <thead>
                   <tr>
                     <th style="min-width: 190px; white-space: nowrap;">TANGGAL &amp; PETUGAS ADS</th>
@@ -2233,8 +2243,8 @@ if ($isWorkerUser) {
               </div>
             </div>
 
-            <div class="kala-table-scroll table-responsive" style="width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch; display:block;">
-              <table class="table-custom" id="table-ads-projects" style="min-width: 980px; width: 100%;">
+            <div class="table-scroll-wrapper kala-table-scroll table-responsive">
+              <table class="table-custom" id="table-ads-projects">
                 <thead>
                   <tr id="thead-ads-projects-row">
                     <th>PROYEK &amp; KLIEN</th>
@@ -2471,8 +2481,8 @@ if ($isWorkerUser) {
             </div>
 
             <!-- Detailed Table of Work Logs -->
-            <div id="printable-worker-recap-table" class="kala-table-scroll table-responsive" style="width: 100%; overflow-x: auto;">
-              <table class="table-custom" style="min-width: 900px; width: 100%;">
+            <div id="printable-worker-recap-table" class="table-scroll-wrapper kala-table-scroll table-responsive">
+              <table class="table-custom">
                 <thead>
                   <tr>
                     <th>TANGGAL</th>

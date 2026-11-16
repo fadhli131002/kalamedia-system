@@ -78,7 +78,7 @@ $isAdmin = is_admin();
     <!-- CLIENT PORTAL BOTTOM NAV -->
     <a href="<?= url('client-portal?tab=deliverables&portal=client&_slot=client') ?>" class="mob-nav-item <?= ($currentPage === 'client-portal' && (!isset($_GET['tab']) || $_GET['tab'] === 'deliverables')) ? 'active' : '' ?>">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        <?= renderItshoverIcon('deliverables', 22) ?>
       </div>
       <span class="mob-nav-label">Deliverable</span>
     </a>
@@ -86,7 +86,7 @@ $isAdmin = is_admin();
     <?php if ($clientHasSosmed): ?>
       <a href="<?= url('client-portal?tab=calendar&portal=client&_slot=client') ?>" class="mob-nav-item <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'calendar') || in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
         <div class="mob-nav-icon">
-          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <?= renderItshoverIcon('calendar', 22) ?>
         </div>
         <span class="mob-nav-label">Kalender</span>
       </a>
@@ -94,21 +94,21 @@ $isAdmin = is_admin();
 
     <a href="<?= url('client-portal?tab=invoices&portal=client&_slot=client') ?>" class="mob-nav-item <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'invoices') || in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <?= renderItshoverIcon('invoices', 22) ?>
       </div>
       <span class="mob-nav-label">Tagihan</span>
     </a>
 
     <a href="<?= url('client-portal?tab=reports&portal=client&_slot=client') ?>" class="mob-nav-item <?= ($currentPage === 'client-portal' && in_array(($_GET['tab'] ?? ''), ['reports', 'ads'])) || in_array($currentPage, ['reports', 'report-deck']) ? 'active' : '' ?>">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <?= renderItshoverIcon('reports', 22) ?>
       </div>
       <span class="mob-nav-label">Laporan</span>
     </a>
 
     <button type="button" class="mob-nav-item" onclick="toggleMobileSidebar()" aria-label="Buka Menu Lainnya">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        <?= renderItshoverIcon('menu', 22) ?>
       </div>
       <span class="mob-nav-label">Menu</span>
     </button>
@@ -121,7 +121,7 @@ $isAdmin = is_admin();
     <!-- TIM ADS / FREELANCER / KARYAWAN BOTTOM NAV (SLIDE 2 DARK PILL STYLE) -->
     <a href="<?= url('tasks?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['tasks', 'team-workspace']) && (empty($workerCurrentTab) || $workerCurrentTab === 'tasks') ? 'active' : '' ?>" id="mob-nav-tasks-item" onclick="handleWorkerBottomNavTasks(event)">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <?= renderItshoverIcon('tasks', 22) ?>
       </div>
       <span class="mob-nav-label">Tugas Saya</span>
     </a>
@@ -130,14 +130,14 @@ $isAdmin = is_admin();
       <!-- ORANG ADS: Saldo Ads + Report Ads -->
       <a href="<?= url('tasks?tab=ads_tracker&_slot=internal') ?>" class="mob-nav-item <?= ($currentPage === 'tasks' && in_array($workerCurrentTab, ['ads', 'ads_tracker'])) ? 'active' : '' ?>" id="mob-nav-ads-item" onclick="handleWorkerBottomNavAds(event)">
         <div class="mob-nav-icon">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="12 6 12 12 16 14"/></svg>
+          <?= renderItshoverIcon('ads', 22) ?>
         </div>
         <span class="mob-nav-label">Saldo Ads</span>
       </a>
 
       <a href="<?= url('reports?tab=ads_report&_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
         <div class="mob-nav-icon">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <?= renderItshoverIcon('reports', 22) ?>
         </div>
         <span class="mob-nav-label">Report Ads</span>
       </a>
@@ -145,7 +145,7 @@ $isAdmin = is_admin();
       <!-- TIM KREATIF: Rekap Kerja Bulanan / Per Proyek + Kalender (Jika ada Sosmed) -->
       <a href="<?= url('tasks?tab=recap&_slot=internal') ?>" class="mob-nav-item <?= ($currentPage === 'tasks' && $workerCurrentTab === 'recap') ? 'active' : '' ?>" id="mob-nav-recap-item" onclick="handleWorkerBottomNavRecap(event)">
         <div class="mob-nav-icon">
-          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <?= renderItshoverIcon('invoices', 22) ?>
         </div>
         <span class="mob-nav-label">Rekap Kerja</span>
       </a>
@@ -153,7 +153,7 @@ $isAdmin = is_admin();
       <?php if ($workerHasSosmed): ?>
         <a href="<?= url('content-calendar?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
           <div class="mob-nav-icon">
-            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <?= renderItshoverIcon('calendar', 22) ?>
           </div>
           <span class="mob-nav-label">Kalender</span>
         </a>
@@ -163,7 +163,7 @@ $isAdmin = is_admin();
     <!-- ITEM 4: PROFILE KARYAWAN (Menggantikan Menu) -->
     <a href="<?= url('tasks?tab=profile&_slot=internal') ?>" class="mob-nav-item <?= ($currentPage === 'tasks' && $workerCurrentTab === 'profile') ? 'active' : '' ?>" id="mob-nav-profile-item" onclick="handleWorkerBottomNavProfile(event)" aria-label="Buka Profile Karyawan">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <?= renderItshoverIcon('profile', 22) ?>
       </div>
       <span class="mob-nav-label">Profile</span>
     </a>
@@ -173,7 +173,7 @@ $isAdmin = is_admin();
     <!-- Tab 1: Eksekutif -->
     <a href="<?= url('owner-dashboard?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['owner-dashboard', 'dashboard']) ? 'active' : '' ?>" title="Executive Dashboard">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        <?= renderItshoverIcon('dashboard', 22) ?>
       </div>
       <span class="mob-nav-label">Eksekutif</span>
     </a>
@@ -181,7 +181,7 @@ $isAdmin = is_admin();
     <!-- Tab 2: Operasional -->
     <a href="<?= url('tasks?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['tasks', 'team-workspace']) ? 'active' : '' ?>" title="Pembagian Tugas Tim & Saldo Ads">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <?= renderItshoverIcon('tasks', 22) ?>
       </div>
       <span class="mob-nav-label">Operasional</span>
     </a>
@@ -189,7 +189,7 @@ $isAdmin = is_admin();
     <!-- Tab 3: Keuangan -->
     <a href="<?= url('invoices?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['invoices', 'invoice-view', 'expenses', 'salaries', 'salary-view', 'payroll']) ? 'active' : '' ?>" title="Invoice, Pengeluaran & Penggajian">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/><circle cx="17" cy="14" r="1.5"/></svg>
+        <?= renderItshoverIcon('wallet', 22) ?>
       </div>
       <span class="mob-nav-label">Keuangan</span>
     </a>
@@ -197,7 +197,7 @@ $isAdmin = is_admin();
     <!-- Tab 4: Klien & Tim -->
     <a href="<?= url('clients?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['clients', 'team', 'employees-management']) ? 'active' : '' ?>" title="Database Klien, Proyek & Tim">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <?= renderItshoverIcon('team', 22) ?>
       </div>
       <span class="mob-nav-label">Klien &amp; Tim</span>
     </a>
@@ -205,7 +205,7 @@ $isAdmin = is_admin();
     <!-- Tab 5: Semua (Buka Bottom Sheet Launcher) -->
     <button type="button" class="mob-nav-item" onclick="openOwnerBottomSheet()" aria-label="Buka Semua Menu Owner" title="Pusat Seluruh Menu Eksekutif">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/></svg>
+        <?= renderItshoverIcon('all-menu', 22) ?>
       </div>
       <span class="mob-nav-label">Semua</span>
     </button>
@@ -214,35 +214,35 @@ $isAdmin = is_admin();
     <!-- ADMIN BOTTOM NAV -->
     <a href="<?= url('admin-dashboard?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['admin-dashboard']) ? 'active' : '' ?>">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+        <?= renderItshoverIcon('dashboard', 22) ?>
       </div>
       <span class="mob-nav-label">Dashboard</span>
     </a>
 
     <a href="<?= url('tasks?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['tasks', 'team-workspace']) ? 'active' : '' ?>">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        <?= renderItshoverIcon('tasks', 22) ?>
       </div>
       <span class="mob-nav-label">Tugas Tim</span>
     </a>
 
     <a href="<?= url('invoices?_slot=internal') ?>" class="mob-nav-item <?= in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <?= renderItshoverIcon('invoices', 22) ?>
       </div>
       <span class="mob-nav-label">Invoice</span>
     </a>
 
     <a href="<?= url('clients?_slot=internal') ?>" class="mob-nav-item <?= $currentPage === 'clients' ? 'active' : '' ?>">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <?= renderItshoverIcon('team', 22) ?>
       </div>
       <span class="mob-nav-label">Klien</span>
     </a>
 
     <button type="button" class="mob-nav-item" onclick="toggleMobileSidebar()" aria-label="Buka Menu Lainnya">
       <div class="mob-nav-icon">
-        <svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+        <?= renderItshoverIcon('menu', 22) ?>
       </div>
       <span class="mob-nav-label">Menu</span>
     </button>
@@ -317,7 +317,7 @@ $isAdmin = is_admin();
       <!-- 1. Dashboard Eksekutif -->
       <a href="<?= url('owner-dashboard?_slot=internal') ?>" class="owner-menu-grid-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 16px; padding: 14px 6px 12px; text-decoration: none; text-align: center; gap: 8px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <div style="width: 44px; height: 44px; border-radius: 14px; background: #EEF2FF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          <?= renderItshoverIcon('dashboard', 22) ?>
         </div>
         <span style="font-size: 11px; font-weight: 600; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Dashboard Eksekutif</span>
       </a>
@@ -325,7 +325,7 @@ $isAdmin = is_admin();
       <!-- 2. Tugas & Saldo Ads -->
       <a href="<?= url('tasks?_slot=internal') ?>" class="owner-menu-grid-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 16px; padding: 14px 6px 12px; text-decoration: none; text-align: center; gap: 8px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <div style="width: 44px; height: 44px; border-radius: 14px; background: #EEF2FF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          <?= renderItshoverIcon('tasks', 22) ?>
         </div>
         <span style="font-size: 11px; font-weight: 600; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Tugas &amp; Saldo Ads</span>
       </a>
@@ -333,7 +333,7 @@ $isAdmin = is_admin();
       <!-- 3. Tim & Karyawan -->
       <a href="<?= url('team?_slot=internal') ?>" class="owner-menu-grid-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 16px; padding: 14px 6px 12px; text-decoration: none; text-align: center; gap: 8px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <div style="width: 44px; height: 44px; border-radius: 14px; background: #EEF2FF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <?= renderItshoverIcon('team', 22) ?>
         </div>
         <span style="font-size: 11px; font-weight: 600; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Tim &amp; Karyawan</span>
       </a>
@@ -341,7 +341,7 @@ $isAdmin = is_admin();
       <!-- 4. Klien & Proyek -->
       <a href="<?= url('clients?_slot=internal') ?>" class="owner-menu-grid-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 16px; padding: 14px 6px 12px; text-decoration: none; text-align: center; gap: 8px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <div style="width: 44px; height: 44px; border-radius: 14px; background: #EEF2FF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          <?= renderItshoverIcon('briefcase', 22) ?>
         </div>
         <span style="font-size: 11px; font-weight: 600; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Klien &amp; Proyek</span>
       </a>
@@ -349,7 +349,7 @@ $isAdmin = is_admin();
       <!-- 5. Invoice & Tagihan -->
       <a href="<?= url('invoices?_slot=internal') ?>" class="owner-menu-grid-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 16px; padding: 14px 6px 12px; text-decoration: none; text-align: center; gap: 8px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <div style="width: 44px; height: 44px; border-radius: 14px; background: #EEF2FF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <?= renderItshoverIcon('invoices', 22) ?>
         </div>
         <span style="font-size: 11px; font-weight: 600; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Invoice &amp; Tagihan</span>
       </a>
@@ -357,7 +357,7 @@ $isAdmin = is_admin();
       <!-- 6. Pengeluaran & Fee -->
       <a href="<?= url('expenses?_slot=internal') ?>" class="owner-menu-grid-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 16px; padding: 14px 6px 12px; text-decoration: none; text-align: center; gap: 8px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <div style="width: 44px; height: 44px; border-radius: 14px; background: #EEF2FF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          <?= renderItshoverIcon('expenses', 22) ?>
         </div>
         <span style="font-size: 11px; font-weight: 600; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Pengeluaran &amp; Fee</span>
       </a>
@@ -365,7 +365,7 @@ $isAdmin = is_admin();
       <!-- 7. Penggajian & Slip -->
       <a href="<?= url('salaries?_slot=internal') ?>" class="owner-menu-grid-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 16px; padding: 14px 6px 12px; text-decoration: none; text-align: center; gap: 8px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <div style="width: 44px; height: 44px; border-radius: 14px; background: #EEF2FF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="8"/><line x1="12" y1="16" x2="12" y2="18"/></svg>
+          <?= renderItshoverIcon('payroll', 22) ?>
         </div>
         <span style="font-size: 11px; font-weight: 600; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Penggajian &amp; Slip</span>
       </a>
@@ -373,7 +373,7 @@ $isAdmin = is_admin();
       <!-- 8. Laporan Performa -->
       <a href="<?= url('reports?_slot=internal') ?>" class="owner-menu-grid-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 16px; padding: 14px 6px 12px; text-decoration: none; text-align: center; gap: 8px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <div style="width: 44px; height: 44px; border-radius: 14px; background: #EEF2FF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <?= renderItshoverIcon('reports', 22) ?>
         </div>
         <span style="font-size: 11px; font-weight: 600; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Laporan Performa</span>
       </a>
@@ -381,7 +381,7 @@ $isAdmin = is_admin();
       <!-- 9. Kalender Konten -->
       <a href="<?= url('content-calendar?_slot=internal') ?>" class="owner-menu-grid-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 16px; padding: 14px 6px 12px; text-decoration: none; text-align: center; gap: 8px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <div style="width: 44px; height: 44px; border-radius: 14px; background: #EEF2FF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <?= renderItshoverIcon('calendar', 22) ?>
         </div>
         <span style="font-size: 11px; font-weight: 600; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Kalender Konten</span>
       </a>
@@ -389,7 +389,7 @@ $isAdmin = is_admin();
       <!-- 10. Portal Klien (Preview) -->
       <a href="<?= url('client-portal?preview=1&portal=internal&_slot=internal') ?>" class="owner-menu-grid-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 16px; padding: 14px 6px 12px; text-decoration: none; text-align: center; gap: 8px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <div style="width: 44px; height: 44px; border-radius: 14px; background: #EEF2FF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <?= renderItshoverIcon('portal', 22) ?>
         </div>
         <span style="font-size: 11px; font-weight: 600; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Portal Klien (Preview)</span>
       </a>
@@ -397,7 +397,7 @@ $isAdmin = is_admin();
       <!-- 11. Pengaturan Agensi -->
       <a href="<?= url('settings?_slot=internal') ?>" class="owner-menu-grid-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 16px; padding: 14px 6px 12px; text-decoration: none; text-align: center; gap: 8px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <div style="width: 44px; height: 44px; border-radius: 14px; background: #EEF2FF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <?= renderItshoverIcon('settings', 22) ?>
         </div>
         <span style="font-size: 11px; font-weight: 600; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Pengaturan Agensi</span>
       </a>
@@ -405,7 +405,7 @@ $isAdmin = is_admin();
       <!-- 12. Rekap Pekerjaan Tim -->
       <a href="<?= url('tasks?tab=recap&_slot=internal') ?>" class="owner-menu-grid-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: #FFFFFF; border: 1px solid #ECEEF5; border-radius: 16px; padding: 14px 6px 12px; text-decoration: none; text-align: center; gap: 8px; transition: all 0.15s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <div style="width: 44px; height: 44px; border-radius: 14px; background: #EEF2FF; color: #5B3DF5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          <?= renderItshoverIcon('tasks', 22) ?>
         </div>
         <span style="font-size: 11px; font-weight: 600; color: #1E293B; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">Rekap Kerja Tim</span>
       </a>

@@ -833,7 +833,9 @@ $initialChartData = [
               <?php foreach ($pendingWorkerRequests as $pwr): ?>
                 <div style="background: #FFF9F2; border: 1.5px solid #FDB022; border-radius: 12px; padding: 16px 20px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);">
                   <div style="display: flex; align-items: flex-start; gap: 14px;">
-                    <span style="font-size: 28px; line-height: 1;">🔔</span>
+                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: #FEF0C7; color: #B54708; flex-shrink: 0;">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    </span>
                     <div>
                       <div style="font-weight: 800; font-size: 14px; color: #B54708;">
                         Permintaan Pencairan Saldo Ads dari Tim Ads (<?= htmlspecialchars($pwr['requester_name']) ?>)
@@ -980,7 +982,8 @@ $initialChartData = [
                           </div>
                           <?php if (!empty($tfOwnerProof)): ?>
                             <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($tfOwnerProof)) ?>', 'Bukti Transfer Manajemen ke Tim Ads - <?= htmlspecialchars(addslashes($rt['client_company'] ?? '')) ?>')" style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; margin-top: 3px; display: inline-flex; align-items: center; gap: 4px; color: #175CD3; border-color: #B2CCFF; background: #EFF8FF;">
-                              📄 Bukti Transfer Manajemen
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                              <span>Bukti Transfer Manajemen</span>
                             </button>
                           <?php else: ?>
                             <span style="font-size: 10.5px; color: var(--text-muted); font-style: italic;">Belum ada lampiran</span>
@@ -992,16 +995,17 @@ $initialChartData = [
                           </div>
                           <?php if (!empty($topupPlatformProof)): ?>
                             <button type="button" class="btn btn-secondary btn-sm" onclick="previewTransactionReceipt('<?= htmlspecialchars(addslashes($topupPlatformProof)) ?>', 'Bukti Top-Up Platform <?= htmlspecialchars(addslashes($rt['platform'])) ?>')" style="font-size: 10.5px; font-weight: 700; padding: 3px 8px; margin-top: 3px; display: inline-flex; align-items: center; gap: 4px; color: #027A48; border-color: #A6F4C5; background: #ECFDF3;">
-                              📈 Bukti Top-Up Ads
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                              <span>Bukti Top-Up Ads</span>
                             </button>
                           <?php else: ?>
-                            <span class="badge" style="background: #FEF3F2; color: #B42318; font-size: 10px; font-weight: 700; margin-top: 3px;">⏳ Menunggu Top-Up</span>
+                            <span class="badge" style="background: #FEF3F2; color: #B42318; font-size: 10px; font-weight: 700; margin-top: 3px;">Menunggu Top-Up</span>
                           <?php endif; ?>
                         </td>
                         <td style="white-space: nowrap;">
                           <div style="font-size: 12px; color: var(--text-primary, #101828);">Spend: <b><?= format_rupiah($spendAmount) ?></b></div>
                           <span class="badge" style="background: <?= ($rt['campaign_status'] === 'running' || empty($rt['campaign_status'])) ? '#ECFDF3' : '#F2F4F7' ?>; color: <?= ($rt['campaign_status'] === 'running' || empty($rt['campaign_status'])) ? '#027A48' : '#344054' ?>; font-size: 10px; font-weight: 700; margin-top: 2px;">
-                            <?= ($rt['campaign_status'] === 'running' || empty($rt['campaign_status'])) ? '🟢 Iklan Jalan' : '⏸️ Dijeda' ?>
+                            <?= ($rt['campaign_status'] === 'running' || empty($rt['campaign_status'])) ? 'Iklan Jalan' : 'Dijeda' ?>
                           </span>
                         </td>
                         <td>

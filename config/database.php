@@ -80,10 +80,10 @@ class Database {
             }
 
             // High Performance: Only run migrations if lock file does not exist (0ms overhead on requests)
-            $lockFile = BASE_PATH . '/database/.schema_v16.lock';
+            $lockFile = BASE_PATH . '/database/.schema_v17.lock';
             if (!file_exists($lockFile)) {
                 self::runMigrations(self::$instance, self::$driver);
-                @file_put_contents($lockFile, "Schema v16 initialized at " . date('Y-m-d H:i:s'));
+                @file_put_contents($lockFile, "Schema v17 initialized at " . date('Y-m-d H:i:s'));
             }
 
             // Ensure core system accounts (Owner & Admin) always exist
@@ -845,10 +845,11 @@ class Database {
         try {
             $db->exec("DELETE FROM task_feedbacks WHERE task_id IN (SELECT id FROM tasks WHERE title LIKE '%Copywriting Meta Ads%' OR title LIKE '%Setup Kampanye Meta Ads%' OR title LIKE '%Desain Feed Carousel%' OR title LIKE '%Shooting Video Reels%')");
             $db->exec("DELETE FROM tasks WHERE title LIKE '%Copywriting Meta Ads%' OR title LIKE '%Setup Kampanye Meta Ads%' OR title LIKE '%Desain Feed Carousel%' OR title LIKE '%Shooting Video Reels%'");
-            $db->exec("DELETE FROM projects WHERE name LIKE '%Grand BSD%' OR name LIKE '%Horizon%' OR client_id IN (SELECT id FROM clients WHERE company LIKE '%Grand BSD%' OR name LIKE '%Clarissa Tan%')");
-            $db->exec("DELETE FROM clients WHERE company LIKE '%Grand BSD%' OR name LIKE '%Clarissa Tan%'");
-            $db->exec("DELETE FROM users WHERE email IN ('annisa@kalamedia.id', 'dimas@kalamedia.id', 'clarissa@grandbsd.com', 'kevin@kalamedia.id') OR name IN ('Annisa Nuraini', 'Dimas Prasetyo', 'Clarissa Tan', 'Kevin Wijaya')");
-            $db->exec("DELETE FROM employees WHERE email IN ('annisa@kalamedia.id', 'dimas@kalamedia.id', 'clarissa@grandbsd.com', 'kevin@kalamedia.id') OR name IN ('Annisa Nuraini', 'Dimas Prasetyo', 'Kevin Wijaya')");
+            $db->exec("DELETE FROM projects WHERE name LIKE '%Grand BSD%' OR name LIKE '%Horizon%' OR name LIKE '%Prima Pasir%' OR name LIKE '%Gallardo%' OR client_id IN (SELECT id FROM clients WHERE company LIKE '%Grand BSD%' OR company LIKE '%Prima Pasir%' OR company LIKE '%Gallardo%' OR name LIKE '%Clarissa Tan%' OR name LIKE '%Akbar%' OR name LIKE '%budi%')");
+            $db->exec("DELETE FROM clients WHERE company LIKE '%Grand BSD%' OR company LIKE '%Prima Pasir%' OR company LIKE '%Gallardo%' OR name LIKE '%Clarissa Tan%' OR name LIKE '%Akbar%' OR name LIKE '%budi%'");
+            $db->exec("DELETE FROM users WHERE email IN ('akbar@kalamedia.id', 'budi@kalamedia.id', 'annisa@kalamedia.id', 'dimas@kalamedia.id', 'clarissa@grandbsd.com', 'kevin@kalamedia.id', 'rony@kalamedia.id') OR name IN ('Akbar', 'budi', 'Annisa Nuraini', 'Dimas Prasetyo', 'Clarissa Tan', 'Kevin Wijaya', 'Rony Umbara')");
+            $db->exec("DELETE FROM employees WHERE email IN ('akbar@kalamedia.id', 'budi@kalamedia.id', 'annisa@kalamedia.id', 'dimas@kalamedia.id', 'clarissa@grandbsd.com', 'kevin@kalamedia.id', 'rony@kalamedia.id') OR name IN ('Akbar', 'budi', 'Annisa Nuraini', 'Dimas Prasetyo', 'Kevin Wijaya', 'Rony Umbara')");
+            $db->exec("DELETE FROM ads_balance_requests WHERE requester_name LIKE '%Rony%' OR requester_name LIKE '%Dimas%' OR requester_name LIKE '%Kevin%'");
         } catch (Exception $e) {
             // Ignore if tables do not exist yet
         }

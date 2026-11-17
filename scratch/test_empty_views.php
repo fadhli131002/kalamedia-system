@@ -30,7 +30,8 @@ $views = [
     'tasks.php',
     'content_dashboard.php',
     'reports.php',
-    'settings.php'
+    'settings.php',
+    'client_portal.php'
 ];
 
 $_SESSION = $ownerSession;

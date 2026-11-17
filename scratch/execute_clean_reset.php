@@ -1,7 +1,7 @@
 <?php
 /**
  * Clean Total Reset Script
- * Clears all financial transactions, dummy clients, projects, tasks, and non-core accounts.
+ * Clears all dummy clients, projects, tasks, invoices, ads logs/topups/requests, and non-core accounts.
  * Retains only official Owner and Admin accounts.
  */
 
@@ -15,20 +15,25 @@ echo "=== MEMULAI RESET TOTAL DATA DUMMY & TRANSAKSI ===\n\n";
 try {
     $db->beginTransaction();
 
-    // 1. Hapus semua data transaksi finansial & operasional
+    // 1. Hapus semua data transaksi finansial, ads, operasional, & laporan
     $tablesToEmpty = [
         'invoices',
         'invoice_items',
+        'invoice_payments',
         'freelancer_payouts',
         'ads_spend',
         'ads_budget_logs',
         'ads_topup_transactions',
+        'ads_balance_requests',
         'salaries',
         'performance_reports',
         'client_reports',
+        'client_monthly_reports',
+        'brand_ai_audits',
         'tasks',
         'task_feedbacks',
         'content_planner',
+        'content_calendar',
         'activities',
         'employee_clients',
         'employees',
@@ -37,12 +42,12 @@ try {
     ];
 
     foreach ($tablesToEmpty as $table) {
-        $db->exec("DELETE FROM {$table}");
+        $db->exec("DELETE FROM `{$table}`");
         echo "[OK] Tabel `{$table}` dikosongkan.\n";
     }
 
     // 2. Reset akun users: hanya pertahankan Owner dan Admin resmi
-    $db->exec("DELETE FROM users WHERE email NOT IN ('owner@kalamedia.id', 'admin@kalamedia.id')");
+    $db->exec("DELETE FROM users WHERE role NOT IN ('owner', 'admin') AND email NOT IN ('owner@kalamedia.id', 'admin@kalamedia.id')");
     echo "[OK] Akun pengguna dummy dihapus, hanya akun resmi Owner dan Admin yang dipertahankan.\n";
 
     // Pastikan akun Owner dan Admin ada & ter-update
@@ -57,29 +62,48 @@ try {
     } catch (\Throwable $e) {}
 
     $db->commit();
-    echo "\n=== SEMUA TRANSAKSI DATABASE BERHASIL DI-RESET ===\n\n";
+    echo "\n=== SEMUA DATA TRANSAKSI BERHASIL DI-RESET ===\n\n";
 
-    // 4. Bersihkan file bukti transfer/receipt yang diunggah (kecuali sample default)
+    // 4. Bersihkan file bukti transfer/receipt yang diunggah (kecuali sample default & .htaccess)
     $uploadDir = dirname(__DIR__) . '/assets/uploads/receipts';
     $cleanedFiles = 0;
     if (is_dir($uploadDir)) {
         $files = glob($uploadDir . '/*');
         foreach ($files as $f) {
-            if (is_file($f) && basename($f) !== 'sample_receipt.svg') {
+            $base = basename($f);
+            if (is_file($f) && $base !== 'sample_receipt.svg' && $base !== '.htaccess') {
                 @unlink($f);
                 $cleanedFiles++;
             }
         }
     }
-    echo "[OK] Membersihkan {$cleanedFiles} berkas bukti transfer upload dummy.\n\n";
+    echo "[OK] Membersihkan {$cleanedFiles} berkas bukti transfer upload dummy.\n";
+
+    $reportDir = dirname(__DIR__) . '/assets/uploads/reports';
+    $cleanedReports = 0;
+    if (is_dir($reportDir)) {
+        $files = glob($reportDir . '/*');
+        foreach ($files as $f) {
+            $base = basename($f);
+            if (is_file($f) && $base !== '.htaccess' && !str_ends_with($base, '.svg')) {
+                @unlink($f);
+                $cleanedReports++;
+            }
+        }
+    }
+    echo "[OK] Membersihkan {$cleanedReports} berkas laporan/screenshot upload dummy.\n\n";
 
     // 5. Verifikasi sisa data akhir
     echo "=== REKAP STATUS DATABASE TERBARU ===\n";
     $verifyTables = [
         'invoices' => 'Invoices / Tagihan',
+        'invoice_items' => 'Item Invoice',
+        'invoice_payments' => 'Pembayaran Invoice',
         'freelancer_payouts' => 'Payout Freelancer',
         'ads_spend' => 'Pengeluaran Ads',
+        'ads_budget_logs' => 'Log Anggaran Ads',
         'ads_topup_transactions' => 'Transaksi Top-Up Ads',
+        'ads_balance_requests' => 'Permintaan Saldo Ads',
         'salaries' => 'Penggajian / Payroll',
         'clients' => 'Klien',
         'projects' => 'Proyek',
@@ -91,7 +115,7 @@ try {
     ];
 
     foreach ($verifyTables as $tbl => $label) {
-        $cnt = $db->query("SELECT COUNT(*) FROM {$tbl}")->fetchColumn();
+        $cnt = $db->query("SELECT COUNT(*) FROM `{$tbl}`")->fetchColumn();
         echo " - {$label} (`{$tbl}`): {$cnt} data\n";
     }
 

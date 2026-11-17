@@ -67,11 +67,10 @@ if ($isAdminUser || $isOwnerUser) {
 }
 
 // 100% Robust Cartoon SVG Fallback (URL-encoded data URI so quotes/special characters never break)
-$fallbackSvgData = "data:image/svg+xml;utf8," . rawurlencode('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#EEF2FF"/><circle cx="50" cy="44" r="22" fill="#FFDFBA"/><path d="M32 38 Q50 16 68 38 Q50 26 32 38 Z" fill="#3D2645"/><circle cx="42" cy="42" r="3" fill="#1F2937"/><circle cx="58" cy="42" r="3" fill="#1F2937"/><circle cx="38" cy="47" r="2.5" fill="#FFB5A7" opacity="0.6"/><circle cx="62" cy="47" r="2.5" fill="#FFB5A7" opacity="0.6"/><path d="M45 50 Q50 54 55 50" stroke="#D95D39" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M25 94 C28 72 40 66 50 66 C60 66 72 72 75 94 Z" fill="#6366F1"/><circle cx="50" cy="68" r="5" fill="#FFDFBA"/></svg>');
+$fallbackSvgData = get_kala_cartoon_avatar_data_uri($user['name'] ?? 'Kalamedia', $user['role'] ?? 'karyawan');
 
-// Current User's cartoon avatar (Dicebear Adventurer)
-$currentUserSeed = urlencode(trim($user['name'] ?? 'Kalamedia'));
-$workerAvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed={$currentUserSeed}&backgroundColor=ffd5dc,c0aede,d1d4f9,b6e3f4";
+// Current User's cartoon avatar (0ms local SVG)
+$workerAvatarUrl = $fallbackSvgData;
 
 // Null-safe initialization
 $workerProfile = [];
@@ -125,8 +124,7 @@ if ($isAdminUser || $isOwnerUser) {
             $mClients = $stmtMClients->fetchAll(PDO::FETCH_ASSOC);
             $mClientNames = array_map(function($c) { return $c['company']; }, $mClients);
 
-            $mSeed = urlencode(trim($m['name'] ?? 'Staff'));
-            $mAvatar = "https://api.dicebear.com/7.x/adventurer/svg?seed={$mSeed}&backgroundColor=ffd5dc,c0aede,d1d4f9,b6e3f4";
+            $mAvatar = get_kala_cartoon_avatar_data_uri($m['name'] ?? 'Staff', $m['role'] ?? 'karyawan');
 
             $teamDirectory[] = [
                 'id' => $mId,

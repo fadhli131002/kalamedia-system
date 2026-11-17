@@ -1110,6 +1110,90 @@ if (!function_exists('renderItshoverIcon')) {
     }
 }
 
+if (!function_exists('get_kala_cartoon_avatar_data_uri')) {
+    /**
+     * Generates an instant 0ms local Cartoon/Adventurer SVG Data URI for profile avatars
+     * Eliminates external CDN latency/timeouts from api.dicebear.com
+     */
+    function get_kala_cartoon_avatar_data_uri(string $seed = 'Owner', string $role = ''): string {
+        $roleClean = strtolower(trim($role));
+        $seedClean = trim($seed ?: 'User');
+
+        // Official Executive Owner Adventurer Illustration (0ms local vector)
+        if ($roleClean === 'owner' || strtolower($seedClean) === 'owner') {
+            $ownerSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">'
+                . '<rect width="120" height="120" rx="60" fill="#D1D4F9"/>'
+                . '<circle cx="60" cy="60" r="56" fill="url(#bgGrad)"/>'
+                . '<defs><linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#E0E7FF"/><stop offset="50%" stop-color="#D1D4F9"/><stop offset="100%" stop-color="#C4B5FD"/></linearGradient></defs>'
+                // Shoulders / Executive Blazer & Shirt
+                . '<path d="M22 118 C25 88 40 80 60 80 C80 80 95 88 98 118 Z" fill="#312E81"/>'
+                . '<path d="M46 80 L60 105 L74 80 Z" fill="#FFFFFF"/>'
+                . '<path d="M57 86 L63 86 L64 114 L56 114 Z" fill="#5B3DF5"/>'
+                . '<path d="M38 82 L54 112 L44 116 L28 92 Z" fill="#4338CA" opacity="0.5"/>'
+                . '<path d="M82 82 L66 112 L76 116 L92 92 Z" fill="#4338CA" opacity="0.5"/>'
+                // Neck & Ears
+                . '<rect x="52" y="68" width="16" height="16" rx="6" fill="#F2D3B1"/>'
+                . '<circle cx="31" cy="54" r="6" fill="#F2D3B1"/>'
+                . '<circle cx="89" cy="54" r="6" fill="#F2D3B1"/>'
+                // Face
+                . '<rect x="33" y="28" width="54" height="48" rx="24" fill="#F7DEC3"/>'
+                // Stylish Hair
+                . '<path d="M30 48 C28 26 44 16 62 17 C80 17 92 27 90 48 C87 36 78 30 62 30 C45 30 35 36 30 48 Z" fill="#1E1B4B"/>'
+                . '<path d="M38 24 C48 16 74 16 84 26 C72 22 52 22 38 24 Z" fill="#312E81"/>'
+                // Eyebrows
+                . '<path d="M41 44 Q47 41 53 44" stroke="#1E1B4B" stroke-width="2.6" stroke-linecap="round" fill="none"/>'
+                . '<path d="M67 44 Q73 41 79 44" stroke="#1E1B4B" stroke-width="2.6" stroke-linecap="round" fill="none"/>'
+                // Glasses (Executive Frame)
+                . '<rect x="38" y="46" width="18" height="13" rx="4" fill="#FFFFFF" fill-opacity="0.35" stroke="#1E1B4B" stroke-width="2.5"/>'
+                . '<rect x="64" y="46" width="18" height="13" rx="4" fill="#FFFFFF" fill-opacity="0.35" stroke="#1E1B4B" stroke-width="2.5"/>'
+                . '<line x1="56" y1="51" x2="64" y2="51" stroke="#1E1B4B" stroke-width="2.5"/>'
+                // Eyes
+                . '<circle cx="47" cy="52.5" r="2.8" fill="#1E1B4B"/>'
+                . '<circle cx="73" cy="52.5" r="2.8" fill="#1E1B4B"/>'
+                . '<circle cx="48" cy="51.5" r="1" fill="#FFFFFF"/>'
+                . '<circle cx="74" cy="51.5" r="1" fill="#FFFFFF"/>'
+                // Cheeks & Confident Smile
+                . '<circle cx="40" cy="61" r="3.5" fill="#FDA4AF" opacity="0.55"/>'
+                . '<circle cx="80" cy="61" r="3.5" fill="#FDA4AF" opacity="0.55"/>'
+                . '<path d="M52 64 Q60 70 68 64" stroke="#9A3412" stroke-width="2.6" stroke-linecap="round" fill="none"/>'
+                . '</svg>';
+            return 'data:image/svg+xml;utf8,' . rawurlencode($ownerSvg);
+        }
+
+        // Deterministic multi-variant cartoon character for Staff, Freelancers, Admin & Clients
+        $palettes = [
+            ['bg' => '#FFD5DC', 'shirt' => '#6C5CE7', 'hair' => '#2D1B36', 'skin' => '#F7DEC3'],
+            ['bg' => '#D1D4F9', 'shirt' => '#2563EB', 'hair' => '#1E293B', 'skin' => '#F5D6B8'],
+            ['bg' => '#B6E3F4', 'shirt' => '#0D9488', 'hair' => '#3B2314', 'skin' => '#F7DEC3'],
+            ['bg' => '#C0AEDE', 'shirt' => '#7C3AED', 'hair' => '#1F2937', 'skin' => '#F3CFB3'],
+            ['bg' => '#FDE68A', 'shirt' => '#EA580C', 'hair' => '#27272A', 'skin' => '#F7DEC3'],
+            ['bg' => '#CCFBF1', 'shirt' => '#059669', 'hair' => '#1E1B4B', 'skin' => '#F5D6B8'],
+        ];
+        $idx = abs(crc32($seedClean)) % count($palettes);
+        $p = $palettes[$idx];
+
+        $workerSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">'
+            . '<rect width="120" height="120" rx="60" fill="' . $p['bg'] . '"/>'
+            . '<path d="M24 118 C28 86 42 78 60 78 C78 78 92 86 96 118 Z" fill="' . $p['shirt'] . '"/>'
+            . '<circle cx="60" cy="80" r="8" fill="' . $p['skin'] . '"/>'
+            . '<circle cx="32" cy="54" r="6" fill="' . $p['skin'] . '"/>'
+            . '<circle cx="88" cy="54" r="6" fill="' . $p['skin'] . '"/>'
+            . '<rect x="34" y="28" width="52" height="47" rx="23" fill="' . $p['skin'] . '"/>'
+            . '<path d="M30 48 C30 24 44 16 60 16 C76 16 90 24 90 48 C84 35 74 30 60 30 C46 30 36 35 30 48 Z" fill="' . $p['hair'] . '"/>'
+            . '<path d="M42 45 Q48 42 53 45" stroke="' . $p['hair'] . '" stroke-width="2.4" stroke-linecap="round" fill="none"/>'
+            . '<path d="M67 45 Q72 42 78 45" stroke="' . $p['hair'] . '" stroke-width="2.4" stroke-linecap="round" fill="none"/>'
+            . '<circle cx="48" cy="52" r="3.2" fill="#1F2937"/>'
+            . '<circle cx="72" cy="52" r="3.2" fill="#1F2937"/>'
+            . '<circle cx="49" cy="51" r="1.1" fill="#FFFFFF"/>'
+            . '<circle cx="73" cy="51" r="1.1" fill="#FFFFFF"/>'
+            . '<circle cx="41" cy="59" r="3.5" fill="#FFB5A7" opacity="0.6"/>'
+            . '<circle cx="79" cy="59" r="3.5" fill="#FFB5A7" opacity="0.6"/>'
+            . '<path d="M53 63 Q60 69 67 63" stroke="#C2410C" stroke-width="2.5" stroke-linecap="round" fill="none"/>'
+            . '</svg>';
+        return 'data:image/svg+xml;utf8,' . rawurlencode($workerSvg);
+    }
+}
+
 
 
 

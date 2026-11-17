@@ -53,9 +53,8 @@ $isWorker = ($userRole === 'karyawan' || $userRole === 'freelancer');
 </script>
 
 <?php if ($isWorker): 
-  $workerAvatarSeed = urlencode($currentUser['name'] ?? 'Worker');
-  $workerAvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed={$workerAvatarSeed}&backgroundColor=ffd5dc,c0aede,d1d4f9,b6e3f4";
-  $fallbackSvgData = "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23FDE2E4%22/><circle cx=%2250%22 cy=%2244%22 r=%2222%22 fill=%22%23FFDFBA%22/><path d=%22M32 38 Q50 16 68 38 Q50 26 32 38 Z%22 fill=%22%233D2645%22/><circle cx=%2242%22 cy=%2242%22 r=%223%22 fill=%22%231F2937%22/><circle cx=%2258%22 cy=%2242%22 r=%223%22 fill=%22%231F2937%22/><circle cx=%2238%22 cy=%2247%22 r=%222.5%22 fill=%22%23FFB5A7%22 opacity=%220.6%22/><circle cx=%2262%22 cy=%2247%22 r=%222.5%22 fill=%22%23FFB5A7%22 opacity=%220.6%22/><path d=%22M45 50 Q50 54 55 50%22 stroke=%22%23D95D39%22 stroke-width=%222%22 fill=%22none%22 stroke-linecap=%22round%22/><path d=%22M25 94 C28 72 40 66 50 66 C60 66 72 72 75 94 Z%22 fill=%22%236C5CE7%22/><circle cx=%2250%22 cy=%2268%22 r=%225%22 fill=%22%23FFDFBA%22/></svg>";
+  $workerAvatarUrl = get_kala_cartoon_avatar_data_uri($currentUser['name'] ?? 'Worker', $userRole);
+  $fallbackSvgData = $workerAvatarUrl;
 ?>
 <header class="topbar appify-topbar">
   <div class="topbar-left-group">
@@ -70,8 +69,7 @@ $isWorker = ($userRole === 'karyawan' || $userRole === 'freelancer');
     <div class="cartoon-avatar-wrapper size-40" onclick="navigateToWorkerProfile(event)" title="Buka Profil Saya">
       <img src="<?= $workerAvatarUrl ?>" 
            alt="<?= htmlspecialchars($currentUser['name'] ?? 'Worker') ?>" 
-           width="40" height="40"
-           onerror="this.onerror=null; this.src='<?= $fallbackSvgData ?>';">
+           width="40" height="40">
     </div>
 
     <div class="topbar-user-meta" onclick="navigateToWorkerProfile(event)" title="Buka Profil">
@@ -105,9 +103,7 @@ $isWorker = ($userRole === 'karyawan' || $userRole === 'freelancer');
   }
 </script>
 <?php elseif ($userRole === 'owner'): 
-  $ownerAvatarSeed = urlencode($currentUser['name'] ?? 'Owner');
-  $ownerAvatarUrl = "https://api.dicebear.com/7.x/adventurer/svg?seed={$ownerAvatarSeed}&backgroundColor=d1d4f9,c0aede,b6e3f4";
-  $ownerFallbackSvgData = "data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2250%22 fill=%22%23EEF2FF%22/><text x=%2250%22 y=%2258%22 font-size=%2234%22 font-weight=%22700%22 fill=%22%235B3DF5%22 text-anchor=%22middle%22 font-family=%22Inter, sans-serif%22>OW</text></svg>";
+  $ownerAvatarUrl = get_kala_cartoon_avatar_data_uri('Owner', 'owner');
 ?>
 <header class="topbar appify-topbar owner-topbar">
   <div class="topbar-left-group">
@@ -122,8 +118,7 @@ $isWorker = ($userRole === 'karyawan' || $userRole === 'freelancer');
     <div class="cartoon-avatar-wrapper size-40" onclick="if(window.innerWidth<=768 && typeof openOwnerBottomSheet==='function'){openOwnerBottomSheet();}else{window.location.href='<?= url('owner-dashboard?_slot=internal') ?>';}" title="Pusat Menu Owner">
       <img src="<?= $ownerAvatarUrl ?>" 
            alt="Owner" 
-           width="40" height="40"
-           onerror="this.onerror=null; this.src='<?= $ownerFallbackSvgData ?>';">
+           width="40" height="40">
     </div>
 
     <div class="topbar-user-meta">
@@ -151,7 +146,14 @@ $isWorker = ($userRole === 'karyawan' || $userRole === 'freelancer');
     </span>
   </div>
 </header>
-<?php else: ?>
+<?php else: 
+  if ($userRole === 'admin') {
+      $greetingDisplayName = 'Admin';
+  } else {
+      $greetingDisplayName = htmlspecialchars($currentUser['name'] ?? 'User Kalamedia');
+  }
+  $generalAvatarUrl = get_kala_cartoon_avatar_data_uri($greetingDisplayName, $userRole);
+?>
 <header class="topbar">
   <div class="greeting-text topbar-left-group">
     <button class="sidebar-toggle-btn" id="sidebar-toggle" onclick="toggleMobileSidebar()" aria-label="Buka Menu Navigasi" title="Buka Menu">
@@ -161,19 +163,15 @@ $isWorker = ($userRole === 'karyawan' || $userRole === 'freelancer');
         <line x1="3" y1="18" x2="21" y2="18"></line>
       </svg>
     </button>
+    <div class="cartoon-avatar-wrapper size-40" title="Profil <?= $greetingDisplayName ?>">
+      <img src="<?= $generalAvatarUrl ?>" alt="<?= $greetingDisplayName ?>" width="40" height="40">
+    </div>
     <div class="greeting-info topbar-user-meta">
       <div class="topbar-breadcrumb">
         <span class="breadcrumb-root"><?= htmlspecialchars($currentPageInfo['parent']) ?></span>
         <span class="breadcrumb-sep">/</span>
         <span class="breadcrumb-current"><?= htmlspecialchars($currentPageInfo['name']) ?></span>
       </div>
-      <?php
-        if ($userRole === 'admin') {
-            $greetingDisplayName = 'Admin';
-        } else {
-            $greetingDisplayName = htmlspecialchars($currentUser['name'] ?? 'User Kalamedia');
-        }
-      ?>
       <h1 class="greeting-heading">
         <span class="greeting-name">Halo, <?= $greetingDisplayName ?></span>
         <span class="greeting-date">(<?= date('d M Y') ?>)</span>

@@ -55,84 +55,6 @@ if ($role === 'owner') {
     $sidebarBadge = strtoupper($role ?: 'USER');
 }
 $badgeLabel = $sidebarBadge;
-
-// Real-Time Notification Counter Badges (Lightweight PDO COUNT Queries)
-$notifTasksCount = 0;
-$notifInvoicesCount = 0;
-$notifAdsPendingCount = 0;
-
-try {
-    $sbDb = Database::getConnection();
-    $todayYmd = date('Y-m-d');
-
-    // 1. Pembagian Tugas Tim / Tugas Saya: Status 'Revisi' atau Lewat Deadline (Overdue)
-    if ($isWorker) {
-        $workerId = (int)($currentUser['id'] ?? 0);
-        $stmtTasksBadge = $sbDb->prepare("
-            SELECT COUNT(*) FROM tasks
-            WHERE COALESCE(is_deleted, 0) = 0
-              AND assigned_to_user_id = :uid
-              AND (
-                LOWER(TRIM(status)) IN ('revision', 'revisi')
-                OR (
-                  due_date IS NOT NULL AND TRIM(due_date) != ''
-                  AND SUBSTR(due_date, 1, 10) < :today
-                  AND LOWER(TRIM(status)) NOT IN ('approved', 'done', 'completed', 'selesai')
-                )
-              )
-        ");
-        $stmtTasksBadge->execute([':uid' => $workerId, ':today' => $todayYmd]);
-        $notifTasksCount = (int)$stmtTasksBadge->fetchColumn();
-    } elseif ($isOwner || $isAdmin) {
-        $stmtTasksBadge = $sbDb->prepare("
-            SELECT COUNT(*) FROM tasks
-            WHERE COALESCE(is_deleted, 0) = 0
-              AND (
-                LOWER(TRIM(status)) IN ('revision', 'revisi')
-                OR (
-                  due_date IS NOT NULL AND TRIM(due_date) != ''
-                  AND SUBSTR(due_date, 1, 10) < :today
-                  AND LOWER(TRIM(status)) NOT IN ('approved', 'done', 'completed', 'selesai')
-                )
-              )
-        ");
-        $stmtTasksBadge->execute([':today' => $todayYmd]);
-        $notifTasksCount = (int)$stmtTasksBadge->fetchColumn();
-    }
-
-    // 2. Invoice & Penagihan: Status 'Unpaid' / Belum Lunas
-    if ($isClient) {
-        $clientCidBadge = (int)current_user_client_id();
-        if ($clientCidBadge > 0) {
-            $stmtInvBadge = $sbDb->prepare("
-                SELECT COUNT(*) FROM invoices
-                WHERE COALESCE(is_deleted, 0) = 0
-                  AND client_id = :cid
-                  AND LOWER(TRIM(status)) NOT IN ('paid', 'lunas', 'draft', 'cancelled')
-            ");
-            $stmtInvBadge->execute([':cid' => $clientCidBadge]);
-            $notifInvoicesCount = (int)$stmtInvBadge->fetchColumn();
-        }
-    } elseif ($isOwner || $isAdmin) {
-        $stmtInvBadge = $sbDb->query("
-            SELECT COUNT(*) FROM invoices
-            WHERE COALESCE(is_deleted, 0) = 0
-              AND LOWER(TRIM(status)) NOT IN ('paid', 'lunas', 'cancelled')
-        ");
-        $notifInvoicesCount = (int)$stmtInvBadge->fetchColumn();
-    }
-
-    // 3. Klien & Proyek / Saldo Ads: Permintaan Top-Up / Transfer Saldo Ads berstatus 'Pending'
-    if ($isOwner || $isAdmin || $isWorker) {
-        $stmtAdsBadge = $sbDb->query("
-            SELECT COUNT(*) FROM ads_balance_requests
-            WHERE LOWER(TRIM(status)) = 'pending'
-        ");
-        $notifAdsPendingCount = (int)$stmtAdsBadge->fetchColumn();
-    }
-} catch (Throwable $e) {
-    // Fail-safe: keep badge counts at 0 if table/column is still initializing
-}
 ?>
 
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
@@ -177,9 +99,6 @@ try {
       <a href="<?= url('client-portal?tab=invoices&portal=client&_slot=client') ?>" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'invoices') || in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('invoices', 24) ?></span>
         <span class="nav-label-text">Tagihan / Invoices</span>
-        <?php if ($notifInvoicesCount > 0): ?>
-          <span class="badge-notification" title="<?= $notifInvoicesCount ?> Tagihan Belum Lunas"><?= $notifInvoicesCount ?></span>
-        <?php endif; ?>
       </a>
 
       <a href="<?= url('client-portal?tab=reports&portal=client&_slot=client') ?>" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && in_array(($_GET['tab'] ?? ''), ['reports', 'ads'])) || in_array($currentPage, ['reports', 'report-deck']) ? 'active' : '' ?>">
@@ -194,18 +113,12 @@ try {
       <a href="<?= url('tasks?_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && (empty($_GET['tab']) || $_GET['tab'] === 'tasks')) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('tasks', 24) ?></span>
         <span class="nav-label-text">Tugas Saya &amp; Progres</span>
-        <?php if ($notifTasksCount > 0): ?>
-          <span class="badge-notification" title="<?= $notifTasksCount ?> Tugas Revisi / Overdue"><?= $notifTasksCount ?></span>
-        <?php endif; ?>
       </a>
 
       <?php if (is_ads_specialist($currentUser)): ?>
         <a href="<?= url('tasks?tab=ads&_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && in_array(($_GET['tab'] ?? ''), ['ads', 'ads_tracker'])) ? 'active' : '' ?>">
           <span class="nav-icon-wrap"><?= renderItshoverIcon('ads', 24) ?></span>
           <span class="nav-label-text">Saldo Ads</span>
-          <?php if ($notifAdsPendingCount > 0): ?>
-            <span class="badge-notification" title="<?= $notifAdsPendingCount ?> Permintaan Saldo Ads Pending"><?= $notifAdsPendingCount ?></span>
-          <?php endif; ?>
         </a>
 
         <a href="<?= url('reports?tab=ads_report&_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
@@ -257,27 +170,18 @@ try {
       <a href="<?= url('tasks?_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['tasks', 'team-workspace', 'content-calendar', 'content-planner']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('tasks', 24) ?></span>
         <span class="nav-label-text">Tugas &amp; Operasional</span>
-        <?php if ($notifTasksCount > 0): ?>
-          <span class="badge-notification" title="<?= $notifTasksCount ?> Tugas Revisi / Overdue"><?= $notifTasksCount ?></span>
-        <?php endif; ?>
       </a>
 
       <!-- 2. Klien & Tim -->
       <a href="<?= url('clients?_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['clients', 'team', 'employees-management', 'client-portal']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('clients', 24) ?></span>
         <span class="nav-label-text">Klien &amp; Tim</span>
-        <?php if ($notifAdsPendingCount > 0): ?>
-          <span class="badge-notification" title="<?= $notifAdsPendingCount ?> Permintaan Saldo Ads Pending"><?= $notifAdsPendingCount ?></span>
-        <?php endif; ?>
       </a>
 
       <!-- 3. Keuangan & Invoice -->
       <a href="<?= url('invoices?_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['invoices', 'invoice-view', 'expenses', 'salaries', 'salary-view']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('invoices', 24) ?></span>
         <span class="nav-label-text">Keuangan &amp; Invoice</span>
-        <?php if ($notifInvoicesCount > 0): ?>
-          <span class="badge-notification" title="<?= $notifInvoicesCount ?> Invoice Belum Lunas"><?= $notifInvoicesCount ?></span>
-        <?php endif; ?>
       </a>
 
       <!-- 4. Laporan Klien -->

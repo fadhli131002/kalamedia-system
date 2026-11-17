@@ -14114,25 +14114,8 @@ body.dark-mode .sidebar .nav-link.active svg {
   filter: none !important;
 }
 
-/* Badge Notifikasi (Instant, Tanpa Animasi) */
 .badge-notification {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: auto;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: 9999px;
-  background-color: #ef4444 !important;
-  color: #ffffff !important;
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-  flex-shrink: 0;
-  transition: none !important;
-  transform: none !important;
-  animation: none !important;
+  display: none !important;
 }
 
 /* PWA & Theme Switcher Semantic Classes */

@@ -369,28 +369,6 @@ body.dark-mode {
 
 
 
-/* 1. View Transition Otomatis Antar Halaman */
-
-@view-transition {
-
-  navigation: auto;
-
-}
-
-::view-transition-old(root) {
-
-  animation: kalaFadeOut 140ms cubic-bezier(0.4, 0, 1, 1) both;
-
-}
-
-::view-transition-new(root) {
-
-  animation: kalaSlideUpIn 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
-
-}
-
-
-
 /* 2. Keyframes Masuk & Keluar Halaman/Tab */
 
 @keyframes kalaFadeOut {
@@ -1637,14 +1615,14 @@ table td,
 .sidebar-link.active,
 .nav-link.active,
 .sidebar-nav .nav-link.active {
-  background-color: #5B3DF5 !important;
-  background: #5B3DF5 !important;
-  color: #ffffff !important;
-  border-radius: 8px !important;
+  background-color: #2563EB !important;
+  background: #2563EB !important;
+  color: #FFFFFF !important;
+  border-radius: 12px !important;
   font-weight: 600 !important;
   box-shadow: none !important;
   border-left: none !important;
-  padding-left: 12px !important;
+  padding-left: 16px !important;
   transition: none !important;
   transform: none !important;
 }
@@ -13960,24 +13938,20 @@ html:not([data-theme="dark"]):not(.dark-mode) body:not(.dark-mode) .bento-stat-s
    SIDEBAR INSTANT NAVIGATION (ZERO ANIMATION) & HIGH-CONTRAST LIGHT FROST
    ========================================================================== */
 .sidebar,
-aside.sidebar,
-#app-sidebar,
-.sidebar-header,
+.sidebar *,
 .sidebar-nav,
-.sidebar-footer,
-.sidebar-overlay,
-.sidebar a,
-.sidebar .nav-item,
-.sidebar .nav-link,
-.sidebar .sidebar-link,
-.sidebar .sidebar-menu-item,
-.sidebar .nav-icon-wrap,
-.sidebar .nav-label-text,
-.sidebar .nav-link svg,
-.sidebar .badge-notification {
+.sidebar-link,
+.sidebar-link::before,
+.sidebar-link::after,
+.sidebar-link.active,
+.sidebar-link:hover,
+.sidebar-link:active,
+.sidebar-menu-item,
+.sidebar-menu-item.active {
   transition: none !important;
-  transform: none !important;
   animation: none !important;
+  transform: none !important;
+  view-transition-name: none !important;
 }
 
 .sidebar-brand-link {
@@ -14038,14 +14012,21 @@ aside.sidebar,
   opacity: 1 !important;
 }
 
-/* 1. Menu Tidak Aktif (Idle) - Kontras Tinggi Slate (#475569) */
-html:not([data-theme="dark"]):not(.dark-mode) body:not(.dark-mode) .sidebar .nav-item:not(.active),
-html:not([data-theme="dark"]):not(.dark-mode) body:not(.dark-mode) .sidebar .nav-link:not(.active),
-html:not([data-theme="dark"]):not(.dark-mode) body:not(.dark-mode) .sidebar .sidebar-link:not(.active),
-html:not([data-theme="dark"]):not(.dark-mode) body:not(.dark-mode) .sidebar .sidebar-menu-item:not(.active) {
+/* 1. Menu Normal (.sidebar-link) - Kontras Tinggi Slate (#475569) */
+.sidebar-link,
+.sidebar .nav-item,
+.sidebar .nav-link,
+.sidebar .sidebar-menu-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 11px 16px !important;
+  border-radius: 12px !important;
   color: #475569 !important;
-  background-color: transparent !important;
-  border-radius: 8px !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
   opacity: 1 !important;
 }
 
@@ -14066,11 +14047,10 @@ html:not([data-theme="dark"]):not(.dark-mode) body:not(.dark-mode) .sidebar .nav
 html:not([data-theme="dark"]):not(.dark-mode) body:not(.dark-mode) .sidebar .nav-link:hover:not(.active),
 html:not([data-theme="dark"]):not(.dark-mode) body:not(.dark-mode) .sidebar .sidebar-link:hover:not(.active),
 html:not([data-theme="dark"]):not(.dark-mode) body:not(.dark-mode) .sidebar .sidebar-menu-item:hover:not(.active) {
+  background: #f1f5f9 !important;
   background-color: #f1f5f9 !important;
   color: #475569 !important;
-  border-radius: 8px !important;
-  transition: none !important;
-  transform: none !important;
+  border-radius: 12px !important;
 }
 
 html:not([data-theme="dark"]):not(.dark-mode) body:not(.dark-mode) .sidebar .nav-link:hover:not(.active):not(.nav-link-logout) span,
@@ -14089,39 +14069,47 @@ html:not([data-theme="dark"]):not(.dark-mode) body:not(.dark-mode) .sidebar .nav
 }
 
 html:not([data-theme="dark"]):not(.dark-mode) body:not(.dark-mode) .sidebar .nav-link.nav-link-logout:hover {
+  background: #f1f5f9 !important;
   background-color: #f1f5f9 !important;
   color: #e11d48 !important;
-  border-radius: 8px !important;
+  border-radius: 12px !important;
 }
 
-/* 3. Menu Aktif (Active Pill) - Teks Putih Tegas di Atas Warna Aksen */
+/* 3. Menu Aktif (.sidebar-link.active) - Solid Biru Tegas (#2563EB) & Teks Putih (#FFFFFF) */
+.sidebar-link.active,
 .sidebar .nav-item.active,
 .sidebar .nav-link.active,
 .sidebar .sidebar-link.active,
-.sidebar .sidebar-menu-item.active {
-  background-color: #5B3DF5 !important;
-  background: #5B3DF5 !important;
-  color: #ffffff !important;
-  border-radius: 8px !important;
+.sidebar .sidebar-menu-item.active,
+html[data-theme="dark"] .sidebar .nav-link.active,
+body.dark-mode .sidebar .nav-link.active {
+  background: #2563EB !important;
+  background-color: #2563EB !important;
+  color: #FFFFFF !important;
+  border-radius: 12px !important;
   font-weight: 600 !important;
+  box-shadow: none !important;
   opacity: 1 !important;
-  transition: none !important;
-  transform: none !important;
 }
 
+.sidebar-link.active span,
+.sidebar-link.active .nav-label-text,
 .sidebar .nav-link.active span,
 .sidebar .nav-link.active .nav-label-text,
 .sidebar .sidebar-menu-item.active span,
 .sidebar .sidebar-menu-item.active .nav-label-text {
-  color: #ffffff !important;
+  color: #FFFFFF !important;
   opacity: 1 !important;
 }
 
+.sidebar-link.active svg,
 .sidebar .nav-link.active svg,
 .sidebar .sidebar-link.active svg,
-.sidebar .sidebar-menu-item.active svg {
-  stroke: #ffffff !important;
-  color: #ffffff !important;
+.sidebar .sidebar-menu-item.active svg,
+html[data-theme="dark"] .sidebar .nav-link.active svg,
+body.dark-mode .sidebar .nav-link.active svg {
+  stroke: #FFFFFF !important;
+  color: #FFFFFF !important;
   opacity: 1 !important;
   filter: none !important;
 }

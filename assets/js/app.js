@@ -259,35 +259,6 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// 100% Rock-Solid Stable Sidebar Controller (Instant Navigation)
-function initSidebarController() {
-  const sidebarNav = document.getElementById('app-sidebar-nav') || document.querySelector('.sidebar-nav');
-  if (sidebarNav) {
-    // Synchronously restore scroll position from sessionStorage
-    const savedPos = sessionStorage.getItem('kala_sidebar_scroll');
-    if (savedPos !== null) {
-      sidebarNav.scrollTop = parseInt(savedPos, 10);
-    }
-
-    // Persist scroll position whenever scrolled
-    sidebarNav.addEventListener('scroll', () => {
-      sessionStorage.setItem('kala_sidebar_scroll', sidebarNav.scrollTop);
-    }, { passive: true });
-  }
-}
-
-// Restore on DOM ready and bfcache / pageshow
-document.addEventListener('DOMContentLoaded', initSidebarController);
-window.addEventListener('pageshow', () => {
-  const sidebarNav = document.getElementById('app-sidebar-nav') || document.querySelector('.sidebar-nav');
-  if (sidebarNav) {
-    const savedPos = sessionStorage.getItem('kala_sidebar_scroll');
-    if (savedPos !== null) {
-      sidebarNav.scrollTop = parseInt(savedPos, 10);
-    }
-  }
-});
-
 // Universal Lightbox Preview for Receipts (Images & PDFs)
 function previewTransactionReceipt(fileUrl, title = 'Bukti Transaksi Saldo Iklan') {
   if (!fileUrl) {

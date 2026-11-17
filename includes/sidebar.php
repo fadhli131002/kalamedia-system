@@ -158,8 +158,8 @@ try {
       <!-- CLIENT PORTAL NAVIGATION -->
       <div class="nav-section-title">Client Portal</div>
 
-      <a href="<?= url('client-portal?tab=deliverables&portal=client&_slot=client') ?>" data-nav-key="client-deliverables" title="Progress & Deliverables" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && (!isset($_GET['tab']) || $_GET['tab'] === 'deliverables')) ? 'active' : '' ?>">
-        <span class="nav-icon-wrap"><?= renderItshoverIcon('deliverables', 20) ?></span>
+      <a href="<?= url('client-portal?tab=deliverables&portal=client&_slot=client') ?>" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && (!isset($_GET['tab']) || $_GET['tab'] === 'deliverables')) ? 'active' : '' ?>">
+        <span class="nav-icon-wrap"><?= renderItshoverIcon('deliverables', 24) ?></span>
         <span class="nav-label-text">Progress &amp; Deliverables</span>
       </a>
 
@@ -168,22 +168,22 @@ try {
         $clientHasSosmed = $clientCId ? client_has_sosmed_service($clientCId) : true;
         if ($clientHasSosmed): 
       ?>
-      <a href="<?= url('client-portal?tab=calendar&portal=client&_slot=client') ?>" data-nav-key="client-calendar" title="Kalender Konten" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'calendar') || in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
-        <span class="nav-icon-wrap"><?= renderItshoverIcon('calendar', 20) ?></span>
+      <a href="<?= url('client-portal?tab=calendar&portal=client&_slot=client') ?>" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'calendar') || in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
+        <span class="nav-icon-wrap"><?= renderItshoverIcon('calendar', 24) ?></span>
         <span class="nav-label-text">Kalender Konten</span>
       </a>
       <?php endif; ?>
 
-      <a href="<?= url('client-portal?tab=invoices&portal=client&_slot=client') ?>" data-nav-key="client-invoices" title="Tagihan / Invoices" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'invoices') || in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
-        <span class="nav-icon-wrap"><?= renderItshoverIcon('invoices', 20) ?></span>
+      <a href="<?= url('client-portal?tab=invoices&portal=client&_slot=client') ?>" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'invoices') || in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
+        <span class="nav-icon-wrap"><?= renderItshoverIcon('invoices', 24) ?></span>
         <span class="nav-label-text">Tagihan / Invoices</span>
         <?php if ($notifInvoicesCount > 0): ?>
           <span class="badge-notification" title="<?= $notifInvoicesCount ?> Tagihan Belum Lunas"><?= $notifInvoicesCount ?></span>
         <?php endif; ?>
       </a>
 
-      <a href="<?= url('client-portal?tab=reports&portal=client&_slot=client') ?>" data-nav-key="client-reports" title="Laporan Performa" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && in_array(($_GET['tab'] ?? ''), ['reports', 'ads'])) || in_array($currentPage, ['reports', 'report-deck']) ? 'active' : '' ?>">
-        <span class="nav-icon-wrap"><?= renderItshoverIcon('reports', 20) ?></span>
+      <a href="<?= url('client-portal?tab=reports&portal=client&_slot=client') ?>" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && in_array(($_GET['tab'] ?? ''), ['reports', 'ads'])) || in_array($currentPage, ['reports', 'report-deck']) ? 'active' : '' ?>">
+        <span class="nav-icon-wrap"><?= renderItshoverIcon('reports', 24) ?></span>
         <span class="nav-label-text">Laporan Performa</span>
       </a>
 
@@ -191,8 +191,8 @@ try {
       <!-- WORKER & FREELANCER NAVIGATION (SMART SPECIALIZATION ADAPTIVE) -->
       <div class="nav-section-title">Workspace Tim</div>
 
-      <a href="<?= url('tasks?_slot=internal') ?>" data-nav-key="worker-tasks" title="Tugas Saya & Progres" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && (empty($_GET['tab']) || $_GET['tab'] === 'tasks')) ? 'active' : '' ?>">
-        <span class="nav-icon-wrap"><?= renderItshoverIcon('tasks', 20) ?></span>
+      <a href="<?= url('tasks?_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && (empty($_GET['tab']) || $_GET['tab'] === 'tasks')) ? 'active' : '' ?>">
+        <span class="nav-icon-wrap"><?= renderItshoverIcon('tasks', 24) ?></span>
         <span class="nav-label-text">Tugas Saya &amp; Progres</span>
         <?php if ($notifTasksCount > 0): ?>
           <span class="badge-notification" title="<?= $notifTasksCount ?> Tugas Revisi / Overdue"><?= $notifTasksCount ?></span>
@@ -200,21 +200,21 @@ try {
       </a>
 
       <?php if (is_ads_specialist($currentUser)): ?>
-        <a href="<?= url('tasks?tab=ads&_slot=internal') ?>" data-nav-key="worker-ads" title="Saldo Ads" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && in_array(($_GET['tab'] ?? ''), ['ads', 'ads_tracker'])) ? 'active' : '' ?>">
-          <span class="nav-icon-wrap"><?= renderItshoverIcon('ads', 20) ?></span>
+        <a href="<?= url('tasks?tab=ads&_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && in_array(($_GET['tab'] ?? ''), ['ads', 'ads_tracker'])) ? 'active' : '' ?>">
+          <span class="nav-icon-wrap"><?= renderItshoverIcon('ads', 24) ?></span>
           <span class="nav-label-text">Saldo Ads</span>
           <?php if ($notifAdsPendingCount > 0): ?>
             <span class="badge-notification" title="<?= $notifAdsPendingCount ?> Permintaan Saldo Ads Pending"><?= $notifAdsPendingCount ?></span>
           <?php endif; ?>
         </a>
 
-        <a href="<?= url('reports?tab=ads_report&_slot=internal') ?>" data-nav-key="worker-reports" title="Report Ads" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
-          <span class="nav-icon-wrap"><?= renderItshoverIcon('reports', 20) ?></span>
+        <a href="<?= url('reports?tab=ads_report&_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
+          <span class="nav-icon-wrap"><?= renderItshoverIcon('reports', 24) ?></span>
           <span class="nav-label-text">Report Ads</span>
         </a>
       <?php else: ?>
-        <a href="<?= url('tasks?tab=work_recap&_slot=internal') ?>" data-nav-key="worker-recap" title="Report Pekerjaan" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'tasks' && ($_GET['tab'] ?? '') === 'work_recap') ? 'active' : '' ?>">
-          <span class="nav-icon-wrap"><?= renderItshoverIcon('invoices', 20) ?></span>
+        <a href="<?= url('tasks?tab=work_recap&_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'tasks' && ($_GET['tab'] ?? '') === 'work_recap') ? 'active' : '' ?>">
+          <span class="nav-icon-wrap"><?= renderItshoverIcon('invoices', 24) ?></span>
           <span class="nav-label-text">Report Pekerjaan</span>
         </a>
 
@@ -223,15 +223,15 @@ try {
           $hasSosmedProj = worker_has_sosmed_projects($workerUid);
           if ($hasSosmedProj): 
         ?>
-        <a href="<?= url('content-calendar?_slot=internal') ?>" data-nav-key="worker-calendar" title="Kalender Konten" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
-          <span class="nav-icon-wrap"><?= renderItshoverIcon('calendar', 20) ?></span>
+        <a href="<?= url('content-calendar?_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
+          <span class="nav-icon-wrap"><?= renderItshoverIcon('calendar', 24) ?></span>
           <span class="nav-label-text">Kalender Konten</span>
         </a>
         <?php endif; ?>
       <?php endif; ?>
 
-      <a href="<?= url('tasks?tab=profile&_slot=internal') ?>" data-nav-key="worker-profile" title="Profil Saya" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && ($_GET['tab'] ?? '') === 'profile') ? 'active' : '' ?>">
-        <span class="nav-icon-wrap"><?= renderItshoverIcon('profile', 20) ?></span>
+      <a href="<?= url('tasks?tab=profile&_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && ($_GET['tab'] ?? '') === 'profile') ? 'active' : '' ?>">
+        <span class="nav-icon-wrap"><?= renderItshoverIcon('profile', 24) ?></span>
         <span class="nav-label-text">Profil Saya</span>
       </a>
 
@@ -240,13 +240,13 @@ try {
       <div class="nav-section-title">Menu Utama</div>
 
       <?php if ($isOwner): ?>
-        <a href="<?= url('owner-dashboard?_slot=internal') ?>" data-nav-key="owner-dashboard" title="Executive Dashboard" class="nav-link sidebar-link sidebar-menu-item <?= $currentPage === 'owner-dashboard' ? 'active' : '' ?>">
-          <span class="nav-icon-wrap"><?= renderItshoverIcon('dashboard', 20) ?></span>
+        <a href="<?= url('owner-dashboard?_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= $currentPage === 'owner-dashboard' ? 'active' : '' ?>">
+          <span class="nav-icon-wrap"><?= renderItshoverIcon('dashboard', 24) ?></span>
           <span class="nav-label-text">Executive Dashboard</span>
         </a>
       <?php else: ?>
-        <a href="<?= url('admin-dashboard?_slot=internal') ?>" data-nav-key="admin-dashboard" title="Admin Dashboard" class="nav-link sidebar-link sidebar-menu-item <?= $currentPage === 'admin-dashboard' ? 'active' : '' ?>">
-          <span class="nav-icon-wrap"><?= renderItshoverIcon('dashboard', 20) ?></span>
+        <a href="<?= url('admin-dashboard?_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= $currentPage === 'admin-dashboard' ? 'active' : '' ?>">
+          <span class="nav-icon-wrap"><?= renderItshoverIcon('dashboard', 24) ?></span>
           <span class="nav-label-text">Admin Dashboard</span>
         </a>
       <?php endif; ?>
@@ -254,8 +254,8 @@ try {
       <div class="nav-section-title">Operasional &amp; Bisnis</div>
 
       <!-- 1. Tugas & Operasional -->
-      <a href="<?= url('tasks?_slot=internal') ?>" data-nav-key="tasks-ops" title="Tugas & Operasional" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['tasks', 'team-workspace', 'content-calendar', 'content-planner']) ? 'active' : '' ?>">
-        <span class="nav-icon-wrap"><?= renderItshoverIcon('tasks', 20) ?></span>
+      <a href="<?= url('tasks?_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['tasks', 'team-workspace', 'content-calendar', 'content-planner']) ? 'active' : '' ?>">
+        <span class="nav-icon-wrap"><?= renderItshoverIcon('tasks', 24) ?></span>
         <span class="nav-label-text">Tugas &amp; Operasional</span>
         <?php if ($notifTasksCount > 0): ?>
           <span class="badge-notification" title="<?= $notifTasksCount ?> Tugas Revisi / Overdue"><?= $notifTasksCount ?></span>
@@ -263,8 +263,8 @@ try {
       </a>
 
       <!-- 2. Klien & Tim -->
-      <a href="<?= url('clients?_slot=internal') ?>" data-nav-key="clients-team" title="Klien & Tim" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['clients', 'team', 'employees-management', 'client-portal']) ? 'active' : '' ?>">
-        <span class="nav-icon-wrap"><?= renderItshoverIcon('clients', 20) ?></span>
+      <a href="<?= url('clients?_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['clients', 'team', 'employees-management', 'client-portal']) ? 'active' : '' ?>">
+        <span class="nav-icon-wrap"><?= renderItshoverIcon('clients', 24) ?></span>
         <span class="nav-label-text">Klien &amp; Tim</span>
         <?php if ($notifAdsPendingCount > 0): ?>
           <span class="badge-notification" title="<?= $notifAdsPendingCount ?> Permintaan Saldo Ads Pending"><?= $notifAdsPendingCount ?></span>
@@ -272,8 +272,8 @@ try {
       </a>
 
       <!-- 3. Keuangan & Invoice -->
-      <a href="<?= url('invoices?_slot=internal') ?>" data-nav-key="finance-invoices" title="Keuangan & Invoice" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['invoices', 'invoice-view', 'expenses', 'salaries', 'salary-view']) ? 'active' : '' ?>">
-        <span class="nav-icon-wrap"><?= renderItshoverIcon('invoices', 20) ?></span>
+      <a href="<?= url('invoices?_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['invoices', 'invoice-view', 'expenses', 'salaries', 'salary-view']) ? 'active' : '' ?>">
+        <span class="nav-icon-wrap"><?= renderItshoverIcon('invoices', 24) ?></span>
         <span class="nav-label-text">Keuangan &amp; Invoice</span>
         <?php if ($notifInvoicesCount > 0): ?>
           <span class="badge-notification" title="<?= $notifInvoicesCount ?> Invoice Belum Lunas"><?= $notifInvoicesCount ?></span>
@@ -281,15 +281,15 @@ try {
       </a>
 
       <!-- 4. Laporan Klien -->
-      <a href="<?= url('reports?_slot=internal') ?>" data-nav-key="reports" title="Laporan Klien" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
-        <span class="nav-icon-wrap"><?= renderItshoverIcon('reports', 20) ?></span>
+      <a href="<?= url('reports?_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
+        <span class="nav-icon-wrap"><?= renderItshoverIcon('reports', 24) ?></span>
         <span class="nav-label-text">Laporan Klien</span>
       </a>
 
       <?php if ($isOwner || $isAdmin): ?>
         <div class="nav-section-title">Sistem</div>
-        <a href="<?= url('settings?_slot=internal') ?>" data-nav-key="settings" title="Pengaturan Agensi" class="nav-link sidebar-link sidebar-menu-item <?= $currentPage === 'settings' ? 'active' : '' ?>">
-          <span class="nav-icon-wrap"><?= renderItshoverIcon('settings', 20) ?></span>
+        <a href="<?= url('settings?_slot=internal') ?>" class="nav-link sidebar-link sidebar-menu-item <?= $currentPage === 'settings' ? 'active' : '' ?>">
+          <span class="nav-icon-wrap"><?= renderItshoverIcon('settings', 24) ?></span>
           <span class="nav-label-text">Pengaturan Agensi</span>
         </a>
       <?php endif; ?>
@@ -299,8 +299,8 @@ try {
     <?php
       $sbLogoutContext = is_client() ? 'client' : 'internal';
     ?>
-    <a href="<?= url('logout') ?>?context=<?= $sbLogoutContext ?>" data-nav-key="logout" title="Keluar (Logout)" onclick="if(window.handleKalaLogout){handleKalaLogout(this.href);return false;}else{sessionStorage.removeItem('kala_tab_uid');}" class="nav-link sidebar-link sidebar-menu-item nav-link-logout">
-      <span class="nav-icon-wrap"><?= renderItshoverIcon('logout', 20) ?></span>
+    <a href="<?= url('logout') ?>?context=<?= $sbLogoutContext ?>" onclick="if(window.handleKalaLogout){handleKalaLogout(this.href);return false;}else{sessionStorage.removeItem('kala_tab_uid');}" class="nav-link sidebar-link sidebar-menu-item nav-link-logout">
+      <span class="nav-icon-wrap"><?= renderItshoverIcon('logout', 24) ?></span>
       <span class="nav-label-text">Keluar (Logout)</span>
     </a>
   </nav>

@@ -259,7 +259,7 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// 100% Rock-Solid Stable Sidebar Controller & Smooth Content Swap
+// 100% Rock-Solid Stable Sidebar Controller (Instant Navigation)
 function initSidebarController() {
   const sidebarNav = document.getElementById('app-sidebar-nav') || document.querySelector('.sidebar-nav');
   if (sidebarNav) {
@@ -274,46 +274,6 @@ function initSidebarController() {
       sessionStorage.setItem('kala_sidebar_scroll', sidebarNav.scrollTop);
     }, { passive: true });
   }
-
-  // Smooth Sidebar Link Interception (Sidebar stays 100% stationary + FLIP Gliding Pill!)
-  document.querySelectorAll('.sidebar-nav a.nav-link').forEach(link => {
-    link.addEventListener('click', function(e) {
-      const href = this.getAttribute('href');
-      if (!href || href.startsWith('#') || href.startsWith('javascript:')) return;
-      if (e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
-      if (this.getAttribute('target') === '_blank') return;
-      if (href.includes('logout')) return;
-
-      // 1. Capture First (Old Active Item) state for FLIP before changing .active class
-      if (sidebarNav) {
-        const prevActive = sidebarNav.querySelector('.nav-link.active') || this;
-        sessionStorage.setItem('kala_sidebar_scroll', sidebarNav.scrollTop);
-        sessionStorage.setItem('kala_sidebar_motion', JSON.stringify({
-          top: prevActive.offsetTop,
-          height: prevActive.offsetHeight,
-          scroll: sidebarNav.scrollTop,
-          key: prevActive.getAttribute('data-nav-key') || ''
-        }));
-      }
-
-      // 2. Instant active state switch + start 60fps pill glide
-      document.querySelectorAll('.sidebar-nav a.nav-link').forEach(l => l.classList.remove('active'));
-      this.classList.add('active');
-      if (typeof window.updateSidebarSlidingPill === 'function') {
-        window.updateSidebarSlidingPill(this, true);
-      }
-
-      // 3. Only transition the right content area (.content-body) while Sidebar & Topbar stay fixed
-      const contentBody = document.querySelector('.content-body');
-      if (contentBody) {
-        e.preventDefault();
-        contentBody.classList.add('kala-page-leaving');
-        setTimeout(() => {
-          window.location.href = this.href || href;
-        }, 120);
-      }
-    });
-  });
 }
 
 // Restore on DOM ready and bfcache / pageshow
@@ -325,11 +285,6 @@ window.addEventListener('pageshow', () => {
     if (savedPos !== null) {
       sidebarNav.scrollTop = parseInt(savedPos, 10);
     }
-  }
-  const mainWrapper = document.querySelector('.main-wrapper') || document.querySelector('.content-body');
-  if (mainWrapper) {
-    mainWrapper.style.opacity = '1';
-    mainWrapper.style.transform = 'none';
   }
 });
 

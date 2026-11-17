@@ -55,6 +55,84 @@ if ($role === 'owner') {
     $sidebarBadge = strtoupper($role ?: 'USER');
 }
 $badgeLabel = $sidebarBadge;
+
+// Real-Time Notification Counter Badges (Lightweight PDO COUNT Queries)
+$notifTasksCount = 0;
+$notifInvoicesCount = 0;
+$notifAdsPendingCount = 0;
+
+try {
+    $sbDb = Database::getConnection();
+    $todayYmd = date('Y-m-d');
+
+    // 1. Pembagian Tugas Tim / Tugas Saya: Status 'Revisi' atau Lewat Deadline (Overdue)
+    if ($isWorker) {
+        $workerId = (int)($currentUser['id'] ?? 0);
+        $stmtTasksBadge = $sbDb->prepare("
+            SELECT COUNT(*) FROM tasks
+            WHERE COALESCE(is_deleted, 0) = 0
+              AND assigned_to_user_id = :uid
+              AND (
+                LOWER(TRIM(status)) IN ('revision', 'revisi')
+                OR (
+                  due_date IS NOT NULL AND TRIM(due_date) != ''
+                  AND SUBSTR(due_date, 1, 10) < :today
+                  AND LOWER(TRIM(status)) NOT IN ('approved', 'done', 'completed', 'selesai')
+                )
+              )
+        ");
+        $stmtTasksBadge->execute([':uid' => $workerId, ':today' => $todayYmd]);
+        $notifTasksCount = (int)$stmtTasksBadge->fetchColumn();
+    } elseif ($isOwner || $isAdmin) {
+        $stmtTasksBadge = $sbDb->prepare("
+            SELECT COUNT(*) FROM tasks
+            WHERE COALESCE(is_deleted, 0) = 0
+              AND (
+                LOWER(TRIM(status)) IN ('revision', 'revisi')
+                OR (
+                  due_date IS NOT NULL AND TRIM(due_date) != ''
+                  AND SUBSTR(due_date, 1, 10) < :today
+                  AND LOWER(TRIM(status)) NOT IN ('approved', 'done', 'completed', 'selesai')
+                )
+              )
+        ");
+        $stmtTasksBadge->execute([':today' => $todayYmd]);
+        $notifTasksCount = (int)$stmtTasksBadge->fetchColumn();
+    }
+
+    // 2. Invoice & Penagihan: Status 'Unpaid' / Belum Lunas
+    if ($isClient) {
+        $clientCidBadge = (int)current_user_client_id();
+        if ($clientCidBadge > 0) {
+            $stmtInvBadge = $sbDb->prepare("
+                SELECT COUNT(*) FROM invoices
+                WHERE COALESCE(is_deleted, 0) = 0
+                  AND client_id = :cid
+                  AND LOWER(TRIM(status)) NOT IN ('paid', 'lunas', 'draft', 'cancelled')
+            ");
+            $stmtInvBadge->execute([':cid' => $clientCidBadge]);
+            $notifInvoicesCount = (int)$stmtInvBadge->fetchColumn();
+        }
+    } elseif ($isOwner || $isAdmin) {
+        $stmtInvBadge = $sbDb->query("
+            SELECT COUNT(*) FROM invoices
+            WHERE COALESCE(is_deleted, 0) = 0
+              AND LOWER(TRIM(status)) NOT IN ('paid', 'lunas', 'cancelled')
+        ");
+        $notifInvoicesCount = (int)$stmtInvBadge->fetchColumn();
+    }
+
+    // 3. Klien & Proyek / Saldo Ads: Permintaan Top-Up / Transfer Saldo Ads berstatus 'Pending'
+    if ($isOwner || $isAdmin || $isWorker) {
+        $stmtAdsBadge = $sbDb->query("
+            SELECT COUNT(*) FROM ads_balance_requests
+            WHERE LOWER(TRIM(status)) = 'pending'
+        ");
+        $notifAdsPendingCount = (int)$stmtAdsBadge->fetchColumn();
+    }
+} catch (Throwable $e) {
+    // Fail-safe: keep badge counts at 0 if table/column is still initializing
+}
 ?>
 
 <style>
@@ -136,6 +214,100 @@ aside.sidebar,
 #app-sidebar {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
               width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  will-change: transform, width;
+}
+
+/* Collapse Toggle Button (Desktop Only) */
+.sidebar-collapse-btn {
+  display: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  background: rgba(255, 255, 255, 0.82);
+  color: #475569;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.sidebar-collapse-btn:hover {
+  background: rgba(91, 61, 245, 0.1);
+  color: #5B3DF5;
+  border-color: rgba(91, 61, 245, 0.3);
+}
+.sidebar-collapse-btn:active {
+  transform: scale(0.94);
+}
+.sidebar-collapse-btn svg {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+html[data-theme="dark"] .sidebar-collapse-btn,
+body.dark-mode .sidebar-collapse-btn {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(71, 85, 105, 0.6);
+  color: #CBD5E1;
+}
+html[data-theme="dark"] .sidebar-collapse-btn:hover,
+body.dark-mode .sidebar-collapse-btn:hover {
+  background: rgba(99, 102, 241, 0.2);
+  color: #A5B4FC;
+  border-color: rgba(99, 102, 241, 0.45);
+}
+
+/* Spring Badge Notification Pop */
+@keyframes badgeSpringPop {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.badge-notification {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  background: #EF4444;
+  color: #FFFFFF !important;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.38);
+  animation: badgeSpringPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease;
+  flex-shrink: 0;
+  z-index: 3;
+}
+.sidebar-menu-item:hover .badge-notification,
+.sidebar-nav .nav-link:hover .badge-notification {
+  transform: scale(1.12);
+}
+.sidebar-nav .nav-link.active .badge-notification {
+  background: #EF4444;
+  color: #FFFFFF !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 2px 6px rgba(239, 68, 68, 0.45);
+}
+
+.nav-label-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity 0.2s ease, max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (min-width: 1025px) {
@@ -147,6 +319,9 @@ aside.sidebar,
     perspective: none !important;
     backdrop-filter: none !important;
     overflow-x: clip !important;
+  }
+  .sidebar-collapse-btn {
+    display: inline-flex !important;
   }
   .sidebar,
   aside.sidebar,
@@ -168,6 +343,87 @@ aside.sidebar,
     margin-left: 250px !important;
     width: calc(100% - 250px) !important;
     max-width: calc(100% - 250px) !important;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  /* Mode Collapsed Desktop (78px) */
+  .sidebar.collapsed,
+  aside.sidebar.collapsed,
+  #app-sidebar.collapsed,
+  body.sidebar-collapsed .sidebar,
+  body.sidebar-collapsed #app-sidebar {
+    width: 78px !important;
+  }
+  body.sidebar-collapsed .main-wrapper {
+    margin-left: 78px !important;
+    width: calc(100% - 78px) !important;
+    max-width: calc(100% - 78px) !important;
+  }
+  .sidebar.collapsed .sidebar-header {
+    padding: 14px 8px !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+  .sidebar.collapsed .sidebar-header > a {
+    justify-content: center !important;
+    width: auto !important;
+  }
+  .sidebar.collapsed .sidebar-header > a > div:first-child {
+    justify-content: center !important;
+    flex: 0 0 auto !important;
+  }
+  .sidebar.collapsed .sidebar-brand-name,
+  .sidebar.collapsed .role-badge-sidebar,
+  .sidebar.collapsed .nav-section-title,
+  .sidebar.collapsed .nav-label-text,
+  .sidebar.collapsed .user-details,
+  .sidebar.collapsed #pwa-install-wrap span,
+  .sidebar.collapsed .track-icon-ambient {
+    opacity: 0 !important;
+    width: 0 !important;
+    max-width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    pointer-events: none !important;
+  }
+  .sidebar.collapsed .sidebar-collapse-btn svg {
+    transform: rotate(180deg);
+  }
+  .sidebar.collapsed .sidebar-nav .nav-link,
+  .sidebar.collapsed .sidebar-menu-item {
+    justify-content: center !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    gap: 0 !important;
+  }
+  .sidebar.collapsed .badge-notification {
+    position: absolute !important;
+    top: 4px !important;
+    right: 8px !important;
+    min-width: 17px !important;
+    height: 17px !important;
+    padding: 0 4px !important;
+    font-size: 9.5px !important;
+    margin-left: 0 !important;
+  }
+  .sidebar.collapsed .sidebar-user .user-profile {
+    justify-content: center !important;
+    padding: 6px !important;
+  }
+  .sidebar.collapsed .theme-switch-pill {
+    width: 44px !important;
+    margin: 0 auto !important;
+  }
+  html[data-theme="dark"] .sidebar.collapsed .theme-switch-knob,
+  body.dark-mode .sidebar.collapsed .theme-switch-knob {
+    left: calc(100% - 36px) !important;
   }
 }
 
@@ -299,7 +555,7 @@ body.dark-mode .sidebar-hover-pill {
 
 <aside class="sidebar" id="app-sidebar">
   <div class="sidebar-header">
-    <a href="<?= $homeUrl ?>" style="display: flex; align-items: center; justify-content: space-between; width: 100%; text-decoration: none; color: inherit; gap: 8px;">
+    <a href="<?= $homeUrl ?>" style="display: flex; align-items: center; justify-content: space-between; width: 100%; text-decoration: none; color: inherit; gap: 6px; min-width: 0; flex: 1;">
       <div style="display: flex; align-items: center; gap: 9px; min-width: 0; flex: 1;">
         <img src="assets/img/Logo-1.webp" alt="PT Kala Kausa Prima" class="sidebar-brand-img" width="32" height="32" style="height: 32px; width: 32px; object-fit: contain; flex-shrink: 0;">
         <span class="sidebar-brand-name" style="font-weight: 800; font-size: 13.5px; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Kala Kausa Prima</span>
@@ -310,6 +566,11 @@ body.dark-mode .sidebar-hover-pill {
         </span>
       </div>
     </a>
+    <button type="button" id="btn-collapse-sidebar" class="sidebar-collapse-btn" onclick="toggleCollapseSidebar(event)" aria-label="Ciutkan / Perluas Sidebar" title="Ciutkan / Perluas Sidebar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
     <button class="sidebar-close-btn" onclick="closeMobileSidebar()" aria-label="Close Sidebar">&times;</button>
   </div>
 
@@ -321,9 +582,9 @@ body.dark-mode .sidebar-hover-pill {
       <!-- CLIENT PORTAL NAVIGATION -->
       <div class="nav-section-title">Client Portal</div>
 
-      <a href="<?= url('client-portal?tab=deliverables&portal=client&_slot=client') ?>" data-nav-key="client-deliverables" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && (!isset($_GET['tab']) || $_GET['tab'] === 'deliverables')) ? 'active' : '' ?>">
+      <a href="<?= url('client-portal?tab=deliverables&portal=client&_slot=client') ?>" data-nav-key="client-deliverables" title="Progress & Deliverables" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && (!isset($_GET['tab']) || $_GET['tab'] === 'deliverables')) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('deliverables', 20) ?></span>
-        <span>Progress &amp; Deliverables</span>
+        <span class="nav-label-text">Progress &amp; Deliverables</span>
       </a>
 
       <?php 
@@ -331,45 +592,54 @@ body.dark-mode .sidebar-hover-pill {
         $clientHasSosmed = $clientCId ? client_has_sosmed_service($clientCId) : true;
         if ($clientHasSosmed): 
       ?>
-      <a href="<?= url('client-portal?tab=calendar&portal=client&_slot=client') ?>" data-nav-key="client-calendar" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'calendar') || in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
+      <a href="<?= url('client-portal?tab=calendar&portal=client&_slot=client') ?>" data-nav-key="client-calendar" title="Kalender Konten" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'calendar') || in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('calendar', 20) ?></span>
-        <span>Kalender Konten</span>
+        <span class="nav-label-text">Kalender Konten</span>
       </a>
       <?php endif; ?>
 
-      <a href="<?= url('client-portal?tab=invoices&portal=client&_slot=client') ?>" data-nav-key="client-invoices" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'invoices') || in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
+      <a href="<?= url('client-portal?tab=invoices&portal=client&_slot=client') ?>" data-nav-key="client-invoices" title="Tagihan / Invoices" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && ($_GET['tab'] ?? '') === 'invoices') || in_array($currentPage, ['invoices', 'invoice-view']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('invoices', 20) ?></span>
-        <span>Tagihan / Invoices</span>
+        <span class="nav-label-text">Tagihan / Invoices</span>
+        <?php if ($notifInvoicesCount > 0): ?>
+          <span class="badge-notification" title="<?= $notifInvoicesCount ?> Tagihan Belum Lunas"><?= $notifInvoicesCount ?></span>
+        <?php endif; ?>
       </a>
 
-      <a href="<?= url('client-portal?tab=reports&portal=client&_slot=client') ?>" data-nav-key="client-reports" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && in_array(($_GET['tab'] ?? ''), ['reports', 'ads'])) || in_array($currentPage, ['reports', 'report-deck']) ? 'active' : '' ?>">
+      <a href="<?= url('client-portal?tab=reports&portal=client&_slot=client') ?>" data-nav-key="client-reports" title="Laporan Performa" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'client-portal' && in_array(($_GET['tab'] ?? ''), ['reports', 'ads'])) || in_array($currentPage, ['reports', 'report-deck']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('reports', 20) ?></span>
-        <span>Laporan Performa</span>
+        <span class="nav-label-text">Laporan Performa</span>
       </a>
 
     <?php elseif ($isWorker): ?>
       <!-- WORKER & FREELANCER NAVIGATION (SMART SPECIALIZATION ADAPTIVE) -->
       <div class="nav-section-title">Workspace Tim</div>
 
-      <a href="<?= url('tasks?_slot=internal') ?>" data-nav-key="worker-tasks" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && (empty($_GET['tab']) || $_GET['tab'] === 'tasks')) ? 'active' : '' ?>">
+      <a href="<?= url('tasks?_slot=internal') ?>" data-nav-key="worker-tasks" title="Tugas Saya & Progres" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && (empty($_GET['tab']) || $_GET['tab'] === 'tasks')) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('tasks', 20) ?></span>
-        <span>Tugas Saya &amp; Progres</span>
+        <span class="nav-label-text">Tugas Saya &amp; Progres</span>
+        <?php if ($notifTasksCount > 0): ?>
+          <span class="badge-notification" title="<?= $notifTasksCount ?> Tugas Revisi / Overdue"><?= $notifTasksCount ?></span>
+        <?php endif; ?>
       </a>
 
       <?php if (is_ads_specialist($currentUser)): ?>
-        <a href="<?= url('tasks?tab=ads&_slot=internal') ?>" data-nav-key="worker-ads" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && in_array(($_GET['tab'] ?? ''), ['ads', 'ads_tracker'])) ? 'active' : '' ?>">
+        <a href="<?= url('tasks?tab=ads&_slot=internal') ?>" data-nav-key="worker-ads" title="Saldo Ads" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && in_array(($_GET['tab'] ?? ''), ['ads', 'ads_tracker'])) ? 'active' : '' ?>">
           <span class="nav-icon-wrap"><?= renderItshoverIcon('ads', 20) ?></span>
-          <span>Saldo Ads</span>
+          <span class="nav-label-text">Saldo Ads</span>
+          <?php if ($notifAdsPendingCount > 0): ?>
+            <span class="badge-notification" title="<?= $notifAdsPendingCount ?> Permintaan Saldo Ads Pending"><?= $notifAdsPendingCount ?></span>
+          <?php endif; ?>
         </a>
 
-        <a href="<?= url('reports?tab=ads_report&_slot=internal') ?>" data-nav-key="worker-reports" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
+        <a href="<?= url('reports?tab=ads_report&_slot=internal') ?>" data-nav-key="worker-reports" title="Report Ads" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
           <span class="nav-icon-wrap"><?= renderItshoverIcon('reports', 20) ?></span>
-          <span>Report Ads</span>
+          <span class="nav-label-text">Report Ads</span>
         </a>
       <?php else: ?>
-        <a href="<?= url('tasks?tab=work_recap&_slot=internal') ?>" data-nav-key="worker-recap" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'tasks' && ($_GET['tab'] ?? '') === 'work_recap') ? 'active' : '' ?>">
+        <a href="<?= url('tasks?tab=work_recap&_slot=internal') ?>" data-nav-key="worker-recap" title="Report Pekerjaan" class="nav-link sidebar-link sidebar-menu-item <?= ($currentPage === 'tasks' && ($_GET['tab'] ?? '') === 'work_recap') ? 'active' : '' ?>">
           <span class="nav-icon-wrap"><?= renderItshoverIcon('invoices', 20) ?></span>
-          <span>Report Pekerjaan</span>
+          <span class="nav-label-text">Report Pekerjaan</span>
         </a>
 
         <?php 
@@ -377,16 +647,16 @@ body.dark-mode .sidebar-hover-pill {
           $hasSosmedProj = worker_has_sosmed_projects($workerUid);
           if ($hasSosmedProj): 
         ?>
-        <a href="<?= url('content-calendar?_slot=internal') ?>" data-nav-key="worker-calendar" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
+        <a href="<?= url('content-calendar?_slot=internal') ?>" data-nav-key="worker-calendar" title="Kalender Konten" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['content-calendar', 'content-planner']) ? 'active' : '' ?>">
           <span class="nav-icon-wrap"><?= renderItshoverIcon('calendar', 20) ?></span>
-          <span>Kalender Konten</span>
+          <span class="nav-label-text">Kalender Konten</span>
         </a>
         <?php endif; ?>
       <?php endif; ?>
 
-      <a href="<?= url('tasks?tab=profile&_slot=internal') ?>" data-nav-key="worker-profile" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && ($_GET['tab'] ?? '') === 'profile') ? 'active' : '' ?>">
+      <a href="<?= url('tasks?tab=profile&_slot=internal') ?>" data-nav-key="worker-profile" title="Profil Saya" class="nav-link sidebar-link sidebar-menu-item <?= (in_array($currentPage, ['tasks', 'team-workspace']) && ($_GET['tab'] ?? '') === 'profile') ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('profile', 20) ?></span>
-        <span>Profil Saya</span>
+        <span class="nav-label-text">Profil Saya</span>
       </a>
 
     <?php else: ?>
@@ -394,48 +664,57 @@ body.dark-mode .sidebar-hover-pill {
       <div class="nav-section-title">Menu Utama</div>
 
       <?php if ($isOwner): ?>
-        <a href="<?= url('owner-dashboard?_slot=internal') ?>" data-nav-key="owner-dashboard" class="nav-link sidebar-link sidebar-menu-item <?= $currentPage === 'owner-dashboard' ? 'active' : '' ?>">
+        <a href="<?= url('owner-dashboard?_slot=internal') ?>" data-nav-key="owner-dashboard" title="Executive Dashboard" class="nav-link sidebar-link sidebar-menu-item <?= $currentPage === 'owner-dashboard' ? 'active' : '' ?>">
           <span class="nav-icon-wrap"><?= renderItshoverIcon('dashboard', 20) ?></span>
-          <span>Executive Dashboard</span>
+          <span class="nav-label-text">Executive Dashboard</span>
         </a>
       <?php else: ?>
-        <a href="<?= url('admin-dashboard?_slot=internal') ?>" data-nav-key="admin-dashboard" class="nav-link sidebar-link sidebar-menu-item <?= $currentPage === 'admin-dashboard' ? 'active' : '' ?>">
+        <a href="<?= url('admin-dashboard?_slot=internal') ?>" data-nav-key="admin-dashboard" title="Admin Dashboard" class="nav-link sidebar-link sidebar-menu-item <?= $currentPage === 'admin-dashboard' ? 'active' : '' ?>">
           <span class="nav-icon-wrap"><?= renderItshoverIcon('dashboard', 20) ?></span>
-          <span>Admin Dashboard</span>
+          <span class="nav-label-text">Admin Dashboard</span>
         </a>
       <?php endif; ?>
 
       <div class="nav-section-title">Operasional &amp; Bisnis</div>
 
       <!-- 1. Tugas & Operasional -->
-      <a href="<?= url('tasks?_slot=internal') ?>" data-nav-key="tasks-ops" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['tasks', 'team-workspace', 'content-calendar', 'content-planner']) ? 'active' : '' ?>">
+      <a href="<?= url('tasks?_slot=internal') ?>" data-nav-key="tasks-ops" title="Tugas & Operasional" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['tasks', 'team-workspace', 'content-calendar', 'content-planner']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('tasks', 20) ?></span>
-        <span>Tugas &amp; Operasional</span>
+        <span class="nav-label-text">Tugas &amp; Operasional</span>
+        <?php if ($notifTasksCount > 0): ?>
+          <span class="badge-notification" title="<?= $notifTasksCount ?> Tugas Revisi / Overdue"><?= $notifTasksCount ?></span>
+        <?php endif; ?>
       </a>
 
       <!-- 2. Klien & Tim -->
-      <a href="<?= url('clients?_slot=internal') ?>" data-nav-key="clients-team" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['clients', 'team', 'employees-management', 'client-portal']) ? 'active' : '' ?>">
+      <a href="<?= url('clients?_slot=internal') ?>" data-nav-key="clients-team" title="Klien & Tim" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['clients', 'team', 'employees-management', 'client-portal']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('clients', 20) ?></span>
-        <span>Klien &amp; Tim</span>
+        <span class="nav-label-text">Klien &amp; Tim</span>
+        <?php if ($notifAdsPendingCount > 0): ?>
+          <span class="badge-notification" title="<?= $notifAdsPendingCount ?> Permintaan Saldo Ads Pending"><?= $notifAdsPendingCount ?></span>
+        <?php endif; ?>
       </a>
 
       <!-- 3. Keuangan & Invoice -->
-      <a href="<?= url('invoices?_slot=internal') ?>" data-nav-key="finance-invoices" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['invoices', 'invoice-view', 'expenses', 'salaries', 'salary-view']) ? 'active' : '' ?>">
+      <a href="<?= url('invoices?_slot=internal') ?>" data-nav-key="finance-invoices" title="Keuangan & Invoice" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['invoices', 'invoice-view', 'expenses', 'salaries', 'salary-view']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('invoices', 20) ?></span>
-        <span>Keuangan &amp; Invoice</span>
+        <span class="nav-label-text">Keuangan &amp; Invoice</span>
+        <?php if ($notifInvoicesCount > 0): ?>
+          <span class="badge-notification" title="<?= $notifInvoicesCount ?> Invoice Belum Lunas"><?= $notifInvoicesCount ?></span>
+        <?php endif; ?>
       </a>
 
       <!-- 4. Laporan Klien -->
-      <a href="<?= url('reports?_slot=internal') ?>" data-nav-key="reports" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
+      <a href="<?= url('reports?_slot=internal') ?>" data-nav-key="reports" title="Laporan Klien" class="nav-link sidebar-link sidebar-menu-item <?= in_array($currentPage, ['reports', 'reports-form', 'report-view', 'report-deck']) ? 'active' : '' ?>">
         <span class="nav-icon-wrap"><?= renderItshoverIcon('reports', 20) ?></span>
-        <span>Laporan Klien</span>
+        <span class="nav-label-text">Laporan Klien</span>
       </a>
 
       <?php if ($isOwner || $isAdmin): ?>
         <div class="nav-section-title">Sistem</div>
-        <a href="<?= url('settings?_slot=internal') ?>" data-nav-key="settings" class="nav-link sidebar-link sidebar-menu-item <?= $currentPage === 'settings' ? 'active' : '' ?>">
+        <a href="<?= url('settings?_slot=internal') ?>" data-nav-key="settings" title="Pengaturan Agensi" class="nav-link sidebar-link sidebar-menu-item <?= $currentPage === 'settings' ? 'active' : '' ?>">
           <span class="nav-icon-wrap"><?= renderItshoverIcon('settings', 20) ?></span>
-          <span>Pengaturan Agensi</span>
+          <span class="nav-label-text">Pengaturan Agensi</span>
         </a>
       <?php endif; ?>
     <?php endif; ?>
@@ -444,9 +723,9 @@ body.dark-mode .sidebar-hover-pill {
     <?php
       $sbLogoutContext = is_client() ? 'client' : 'internal';
     ?>
-    <a href="<?= url('logout') ?>?context=<?= $sbLogoutContext ?>" data-nav-key="logout" onclick="if(window.handleKalaLogout){handleKalaLogout(this.href);return false;}else{sessionStorage.removeItem('kala_tab_uid');}" class="nav-link sidebar-link sidebar-menu-item nav-link-logout" style="margin-top: 6px;">
+    <a href="<?= url('logout') ?>?context=<?= $sbLogoutContext ?>" data-nav-key="logout" title="Keluar (Logout)" onclick="if(window.handleKalaLogout){handleKalaLogout(this.href);return false;}else{sessionStorage.removeItem('kala_tab_uid');}" class="nav-link sidebar-link sidebar-menu-item nav-link-logout" style="margin-top: 6px;">
       <span class="nav-icon-wrap"><?= renderItshoverIcon('logout', 20) ?></span>
-      <span>Keluar (Logout)</span>
+      <span class="nav-label-text">Keluar (Logout)</span>
     </a>
   </nav>
 
@@ -673,6 +952,33 @@ body.dark-mode .sidebar-hover-pill {
       }
       if (overlay) overlay.classList.remove('active');
     };
+
+    window.toggleCollapseSidebar = function(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      var sidebar = document.getElementById('app-sidebar') || document.querySelector('.sidebar');
+      if (!sidebar) return;
+      var isCollapsed = sidebar.classList.toggle('collapsed');
+      document.body.classList.toggle('sidebar-collapsed', isCollapsed);
+      try {
+        localStorage.setItem('kala_sidebar_collapsed', isCollapsed ? '1' : '0');
+      } catch(err) {}
+      setTimeout(function() {
+        window.updateSidebarSlidingPill(null, true);
+      }, 310);
+    };
+
+    (function() {
+      try {
+        var sidebar = document.getElementById('app-sidebar') || document.querySelector('.sidebar');
+        if (sidebar && window.innerWidth >= 1025 && localStorage.getItem('kala_sidebar_collapsed') === '1') {
+          sidebar.classList.add('collapsed');
+          document.body.classList.add('sidebar-collapsed');
+        }
+      } catch(err) {}
+    })();
 
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {

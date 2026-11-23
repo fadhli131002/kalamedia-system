@@ -236,7 +236,7 @@ if ($action === 'update_client') {
     }
 }
 
-// 3b. RENEW CLIENT CONTRACT
+// 3b. RENEW CLIENT CONTRACT (With Automatic Renewal Draft Invoice Generation)
 if ($action === 'renew_contract') {
     if (!is_admin()) {
         echo json_encode(['success' => false, 'message' => 'Hanya Owner dan Admin yang dapat memperpanjang kontrak klien.']);
@@ -245,6 +245,8 @@ if ($action === 'renew_contract') {
     $id = intval($_POST['client_id'] ?? ($_POST['id'] ?? 0));
     $startDate = !empty($_POST['contract_start_date']) ? trim($_POST['contract_start_date']) : date('Y-m-d');
     $endDate = !empty($_POST['contract_end_date']) ? trim($_POST['contract_end_date']) : '';
+    $autoCreateInvoice = !isset($_POST['auto_create_invoice']) || $_POST['auto_create_invoice'] == '1';
+    $customRenewalAmount = isset($_POST['renewal_amount']) && $_POST['renewal_amount'] !== '' ? parse_client_amount($_POST['renewal_amount']) : null;
 
     if ($id <= 0 || empty($endDate)) {
         echo json_encode(['success' => false, 'message' => 'Tanggal akhir perpanjangan kontrak wajib diisi.']);
@@ -252,10 +254,13 @@ if ($action === 'renew_contract') {
     }
 
     try {
-        $stmt = $db->prepare("SELECT company, email FROM clients WHERE id = ?");
+        $db->beginTransaction();
+
+        $stmt = $db->prepare("SELECT * FROM clients WHERE id = ?");
         $stmt->execute([$id]);
         $client = $stmt->fetch();
         if (!$client) {
+            if ($db->inTransaction()) $db->rollBack();
             echo json_encode(['success' => false, 'message' => 'Klien tidak ditemukan.']);
             exit;
         }
@@ -273,24 +278,148 @@ if ($action === 'renew_contract') {
 
         $db->prepare("
             UPDATE projects 
-            SET contract_start_date = ?, contract_end_date = ?, contract_status = ?
-            WHERE client_id = ?
-        ")->execute([$startDate, $endDate, $contractStatus, $id]);
+            SET contract_start_date = ?, contract_end_date = ?, contract_status = ?, start_date = ?, end_date = ?
+            WHERE client_id = ? AND COALESCE(is_deleted, 0) = 0
+        ")->execute([$startDate, $endDate, $contractStatus, $startDate, $endDate, $id]);
 
         // Reactivate user portal login
         $db->prepare("
             UPDATE users SET is_active = ?, is_deleted = 0 WHERE client_id = ? OR email = ?
         ")->execute([$userActive, $id, $client['email']]);
 
-        log_activity('client', "Kontrak Klien Diperpanjang: {$client['company']}", "Masa baru: $startDate s/d $endDate (Status: $contractStatus)");
+        // Automatically generate a new Draft Invoice for this renewal period
+        $createdInvoiceNumber = null;
+        if ($autoCreateInvoice) {
+            // Find the client's latest invoice to clone items/nominal from
+            $lastInvStmt = $db->prepare("
+                SELECT * FROM invoices 
+                WHERE client_id = ? AND COALESCE(is_deleted, 0) = 0 
+                ORDER BY id DESC LIMIT 1
+            ");
+            $lastInvStmt->execute([$id]);
+            $lastInv = $lastInvStmt->fetch(PDO::FETCH_ASSOC);
+
+            // Find active project for client
+            $projStmt = $db->prepare("SELECT * FROM projects WHERE client_id = ? AND COALESCE(is_deleted, 0) = 0 ORDER BY id DESC LIMIT 1");
+            $projStmt->execute([$id]);
+            $activeProj = $projStmt->fetch(PDO::FETCH_ASSOC);
+            $projectId = $activeProj ? (int)$activeProj['id'] : ($lastInv ? (int)$lastInv['project_id'] : null);
+
+            // Generate collision-free invoice number: INV-KMC-YYMMXXX
+            $ym = date('ym', strtotime($startDate ?: 'now'));
+            $prefix = 'INV-KMC-' . $ym;
+            $countStmt = $db->query("SELECT COUNT(*) FROM invoices WHERE invoice_number LIKE '$prefix%' OR invoice_number LIKE 'INV%'");
+            $counter = intval($countStmt->fetchColumn()) + 1;
+            $invoiceNumber = '';
+            do {
+                $seq = str_pad($counter, 3, '0', STR_PAD_LEFT);
+                $candidate = $prefix . $seq;
+                $check = $db->prepare("SELECT COUNT(*) FROM invoices WHERE invoice_number = ?");
+                $check->execute([$candidate]);
+                if ($check->fetchColumn() == 0) {
+                    $invoiceNumber = $candidate;
+                    break;
+                }
+                $counter++;
+            } while ($counter < 9999);
+
+            $issueDate = $startDate;
+            $dueDate = date('Y-m-d', strtotime($startDate . ' +3 days'));
+            $periodLabel = date('d M Y', strtotime($startDate)) . ' s/d ' . date('d M Y', strtotime($endDate));
+
+            $itemsToInsert = [];
+            $subtotal = 0;
+            $discountPercent = 0;
+            $discountAmount = 0;
+            $taxPercent = 0;
+            $taxAmount = 0;
+            $totalAmount = 0;
+            $notes = "Tagihan Perpanjangan Kontrak Periode {$periodLabel}";
+
+            if ($lastInv && ($customRenewalAmount === null || $customRenewalAmount == floatval($lastInv['total_amount']))) {
+                $lastItemsStmt = $db->prepare("SELECT service_name, quantity, unit_price, total_price FROM invoice_items WHERE invoice_id = ? ORDER BY id ASC");
+                $lastItemsStmt->execute([(int)$lastInv['id']]);
+                $lastItems = $lastItemsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                if (!empty($lastItems)) {
+                    foreach ($lastItems as $li) {
+                        $itemsToInsert[] = [
+                            'service_name' => $li['service_name'],
+                            'quantity' => floatval($li['quantity']),
+                            'unit_price' => floatval($li['unit_price']),
+                            'total_price' => floatval($li['total_price'])
+                        ];
+                        $subtotal += floatval($li['total_price']);
+                    }
+                }
+                $discountPercent = floatval($lastInv['discount_percent'] ?? 0);
+                $discountAmount = ($subtotal * $discountPercent) / 100;
+                $afterDiscount = $subtotal - $discountAmount;
+                $taxPercent = floatval($lastInv['tax_percent'] ?? 0);
+                $taxAmount = ($afterDiscount * $taxPercent) / 100;
+                $totalAmount = $afterDiscount + $taxAmount;
+                if (!empty($lastInv['notes'])) {
+                    $notes = $lastInv['notes'];
+                }
+            }
+
+            if (empty($itemsToInsert)) {
+                $fallbackTotal = ($customRenewalAmount !== null && $customRenewalAmount > 0)
+                    ? $customRenewalAmount
+                    : ($lastInv ? floatval($lastInv['total_amount']) : ($activeProj ? floatval($activeProj['total_contract_value'] ?: $activeProj['contract_value']) : 0));
+                $serviceName = !empty($client['service_type']) ? ("Perpanjangan Layanan: " . $client['service_type']) : "Perpanjangan Kontrak Layanan Agensi";
+                $itemsToInsert[] = [
+                    'service_name' => $serviceName,
+                    'quantity' => 1,
+                    'unit_price' => $fallbackTotal,
+                    'total_price' => $fallbackTotal
+                ];
+                $subtotal = $fallbackTotal;
+                $totalAmount = $fallbackTotal;
+            }
+
+            $insInv = $db->prepare("
+                INSERT INTO invoices (
+                    invoice_number, client_id, project_id, issue_date, due_date,
+                    subtotal, discount_percent, discount_amount, tax_percent, tax_amount,
+                    total_amount, status, notes, is_deleted
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Draft', ?, 0)
+            ");
+            $insInv->execute([
+                $invoiceNumber, $id, $projectId, $issueDate, $dueDate,
+                $subtotal, $discountPercent, $discountAmount, $taxPercent, $taxAmount,
+                $totalAmount, $notes
+            ]);
+            $newInvoiceId = (int)$db->lastInsertId();
+
+            $insItem = $db->prepare("
+                INSERT INTO invoice_items (invoice_id, service_name, quantity, unit_price, total_price)
+                VALUES (?, ?, ?, ?, ?)
+            ");
+            foreach ($itemsToInsert as $it) {
+                $insItem->execute([$newInvoiceId, $it['service_name'], $it['quantity'], $it['unit_price'], $it['total_price']]);
+            }
+
+            $createdInvoiceNumber = $invoiceNumber;
+        }
+
+        $db->commit();
+
+        $logDesc = "Masa baru: $startDate s/d $endDate (Status: $contractStatus)" . ($createdInvoiceNumber ? " | Invoice Draft Baru: #{$createdInvoiceNumber}" : "");
+        log_activity('client', "Kontrak Klien Diperpanjang: {$client['company']}", $logDesc);
 
         $formattedEnd = date('d M Y', strtotime($endDate));
+        $msg = "Masa kontrak {$client['company']} berhasil diperpanjang hingga {$formattedEnd}"
+             . ($createdInvoiceNumber ? " dan Invoice Draft baru (#{$createdInvoiceNumber}) otomatis diterbitkan!" : " dan akun portal aktif kembali!");
+
         echo json_encode([
             'success' => true,
-            'message' => "Masa kontrak {$client['company']} berhasil diperpanjang hingga {$formattedEnd} dan akun portal aktif kembali!"
+            'message' => $msg,
+            'invoice_number' => $createdInvoiceNumber
         ]);
         exit;
     } catch (Exception $e) {
+        if ($db->inTransaction()) $db->rollBack();
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         exit;
     }

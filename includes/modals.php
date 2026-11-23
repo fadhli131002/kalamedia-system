@@ -1487,6 +1487,18 @@ document.addEventListener('DOMContentLoaded', () => {
             <button type="button" class="btn btn-secondary btn-sm" onclick="setRenewDurationDays(365)">+1 Tahun (365 Hari)</button>
           </div>
         </div>
+
+        <div style="margin-top: 14px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 12px 14px;">
+          <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer; margin: 0;">
+            <input type="checkbox" name="auto_create_invoice" id="renew-auto-create-invoice" value="1" checked style="margin-top: 3px; width: 16px; height: 16px; accent-color: #2563EB;">
+            <div>
+              <div style="font-size: 12.5px; font-weight: 700; color: #1E3A8A;">Otomatis Terbitkan Invoice Baru (Status: Draft)</div>
+              <div style="font-size: 11.5px; color: #3B82F6; line-height: 1.4; margin-top: 2px;">
+                Membuat tagihan periode perpanjangan baru di tab <b>Draft</b> dengan menyalin rincian layanan dari invoice terakhir klien.
+              </div>
+            </div>
+          </label>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="closeModal('modal-renew-client-contract')">Batal</button>

@@ -6,12 +6,16 @@
 require_admin();
 $db = Database::getConnection();
 
-// Fetch all active clients with project count and total invoiced
+// Fetch all active clients with project count, current/latest invoice status, and total actual payments
 $clients = $db->query("
     SELECT c.*,
            (SELECT COUNT(*) FROM projects WHERE client_id = c.id AND COALESCE(is_deleted, 0) = 0) as total_projects,
            (SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE client_id = c.id AND COALESCE(is_deleted, 0) = 0) as total_invoiced,
-           (SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE client_id = c.id AND status = 'Paid' AND COALESCE(is_deleted, 0) = 0) as total_paid,
+           (SELECT COALESCE(SUM(ip.amount), 0) FROM invoice_payments ip JOIN invoices i ON ip.invoice_id = i.id WHERE i.client_id = c.id AND COALESCE(ip.is_deleted, 0) = 0 AND COALESCE(i.is_deleted, 0) = 0) as total_paid,
+           (SELECT invoice_number FROM invoices WHERE client_id = c.id AND COALESCE(is_deleted, 0) = 0 ORDER BY id DESC LIMIT 1) as latest_invoice_number,
+           (SELECT total_amount FROM invoices WHERE client_id = c.id AND COALESCE(is_deleted, 0) = 0 ORDER BY id DESC LIMIT 1) as latest_invoice_amount,
+           (SELECT status FROM invoices WHERE client_id = c.id AND COALESCE(is_deleted, 0) = 0 ORDER BY id DESC LIMIT 1) as latest_invoice_status,
+           (SELECT COALESCE(SUM(ip.amount), 0) FROM invoice_payments ip WHERE ip.invoice_id = (SELECT id FROM invoices WHERE client_id = c.id AND COALESCE(is_deleted, 0) = 0 ORDER BY id DESC LIMIT 1) AND COALESCE(ip.is_deleted, 0) = 0) as latest_invoice_paid,
            (SELECT COALESCE(SUM(amount), 0) FROM freelancer_payouts WHERE project_id IN (SELECT id FROM projects WHERE client_id = c.id) AND status = 'Paid' AND COALESCE(is_deleted, 0) = 0) as total_freelancer_paid
     FROM clients c
     WHERE COALESCE(c.is_deleted, 0) = 0
@@ -609,11 +613,24 @@ $projects = $db->query("
                       </td>
 
                       <td style="white-space: nowrap;">
+                        <?php
+                          $latestAmt = floatval($c['latest_invoice_amount'] ?? $c['total_invoiced'] ?? 0);
+                          $latestPaid = floatval($c['latest_invoice_paid'] ?? 0);
+                          $latestStatus = $c['latest_invoice_status'] ?? '';
+                          $latestUnpaid = max(0, $latestAmt - $latestPaid);
+                        ?>
                         <span class="kala-project-count-pill">
                           <?= $c['total_projects'] ?> Proyek
                         </span>
-                        <div style="font-weight: 800; color: var(--text-primary); font-size: 12.5px;"><?= format_rupiah($c['total_invoiced']) ?></div>
-                        <div style="font-size: 11px; color: var(--success-text); font-weight: 700;">Lunas: <?= format_rupiah($c['total_paid']) ?></div>
+                        <div style="font-weight: 800; color: var(--text-primary); font-size: 12.5px;"><?= format_rupiah($latestAmt) ?></div>
+                        <?php if ($latestStatus === 'Draft' || ($latestAmt > 0 && $latestPaid <= 0)): ?>
+                          <div style="font-size: 11px; color: #D97706; font-weight: 700;">Draft (Belum Dibayar): <?= format_rupiah($latestAmt) ?></div>
+                        <?php elseif ($latestUnpaid > 0): ?>
+                          <div style="font-size: 11px; color: var(--success-text); font-weight: 700;">Terbayar: <?= format_rupiah($latestPaid) ?></div>
+                          <div style="font-size: 10.5px; color: #D97706; font-weight: 700;">Sisa Tagihan: <?= format_rupiah($latestUnpaid) ?></div>
+                        <?php else: ?>
+                          <div style="font-size: 11px; color: var(--success-text); font-weight: 700;">Lunas: <?= format_rupiah($latestPaid) ?></div>
+                        <?php endif; ?>
                         <?php if (!empty($c['total_freelancer_paid']) && $c['total_freelancer_paid'] > 0): ?>
                           <div style="font-size: 10.5px; color: #027A48; font-weight: 700; margin-top: 2px;">Freelancer Terbayar: <?= format_rupiah($c['total_freelancer_paid']) ?></div>
                         <?php endif; ?>

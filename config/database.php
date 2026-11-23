@@ -80,10 +80,10 @@ class Database {
             }
 
             // High Performance: Only run migrations if lock file does not exist (0ms overhead on requests)
-            $lockFile = BASE_PATH . '/database/.schema_v17.lock';
+            $lockFile = BASE_PATH . '/database/.schema_v18.lock';
             if (!file_exists($lockFile)) {
                 self::runMigrations(self::$instance, self::$driver);
-                @file_put_contents($lockFile, "Schema v17 initialized at " . date('Y-m-d H:i:s'));
+                @file_put_contents($lockFile, "Schema v18 initialized at " . date('Y-m-d H:i:s'));
             }
 
             // Ensure core system accounts (Owner & Admin) always exist
@@ -841,15 +841,44 @@ class Database {
             }
         }
 
-        // 5. Auto-purge legacy dummy tasks, projects, clients, and demo accounts across SQLite & MySQL
+        // 5. Auto-purge all dummy/seed data & orphaned transactions across SQLite & MySQL (Clean Production State v18)
         try {
-            $db->exec("DELETE FROM task_feedbacks WHERE task_id IN (SELECT id FROM tasks WHERE title LIKE '%Copywriting Meta Ads%' OR title LIKE '%Setup Kampanye Meta Ads%' OR title LIKE '%Desain Feed Carousel%' OR title LIKE '%Shooting Video Reels%')");
-            $db->exec("DELETE FROM tasks WHERE title LIKE '%Copywriting Meta Ads%' OR title LIKE '%Setup Kampanye Meta Ads%' OR title LIKE '%Desain Feed Carousel%' OR title LIKE '%Shooting Video Reels%'");
-            $db->exec("DELETE FROM projects WHERE name LIKE '%Grand BSD%' OR name LIKE '%Horizon%' OR name LIKE '%Prima Pasir%' OR name LIKE '%Gallardo%' OR client_id IN (SELECT id FROM clients WHERE company LIKE '%Grand BSD%' OR company LIKE '%Prima Pasir%' OR company LIKE '%Gallardo%' OR name LIKE '%Clarissa Tan%' OR name LIKE '%Akbar%' OR name LIKE '%budi%')");
-            $db->exec("DELETE FROM clients WHERE company LIKE '%Grand BSD%' OR company LIKE '%Prima Pasir%' OR company LIKE '%Gallardo%' OR name LIKE '%Clarissa Tan%' OR name LIKE '%Akbar%' OR name LIKE '%budi%'");
-            $db->exec("DELETE FROM users WHERE email IN ('akbar@kalamedia.id', 'budi@kalamedia.id', 'annisa@kalamedia.id', 'dimas@kalamedia.id', 'clarissa@grandbsd.com', 'kevin@kalamedia.id', 'rony@kalamedia.id') OR name IN ('Akbar', 'budi', 'Annisa Nuraini', 'Dimas Prasetyo', 'Clarissa Tan', 'Kevin Wijaya', 'Rony Umbara')");
-            $db->exec("DELETE FROM employees WHERE email IN ('akbar@kalamedia.id', 'budi@kalamedia.id', 'annisa@kalamedia.id', 'dimas@kalamedia.id', 'clarissa@grandbsd.com', 'kevin@kalamedia.id', 'rony@kalamedia.id') OR name IN ('Akbar', 'budi', 'Annisa Nuraini', 'Dimas Prasetyo', 'Kevin Wijaya', 'Rony Umbara')");
-            $db->exec("DELETE FROM ads_balance_requests WHERE requester_name LIKE '%Rony%' OR requester_name LIKE '%Dimas%' OR requester_name LIKE '%Kevin%'");
+            $tablesToPurge = [
+                'invoices',
+                'invoice_items',
+                'invoice_payments',
+                'freelancer_payouts',
+                'ads_spend',
+                'ads_budget_logs',
+                'ads_topup_transactions',
+                'ads_balance_requests',
+                'salaries',
+                'performance_reports',
+                'client_reports',
+                'client_monthly_reports',
+                'brand_ai_audits',
+                'tasks',
+                'task_feedbacks',
+                'content_planner',
+                'content_calendar',
+                'activities',
+                'employee_clients',
+                'employees',
+                'projects',
+                'clients'
+            ];
+            foreach ($tablesToPurge as $tbl) {
+                try {
+                    $db->exec("DELETE FROM `{$tbl}`");
+                } catch (Throwable $e) {}
+            }
+            $db->exec("DELETE FROM users WHERE role NOT IN ('owner', 'admin') AND email NOT IN ('owner@kalamedia.id', 'admin@kalamedia.id')");
+            if ($driver === 'sqlite') {
+                $seqList = implode("','", array_merge($tablesToPurge, ['users']));
+                try {
+                    $db->exec("DELETE FROM sqlite_sequence WHERE name IN ('{$seqList}')");
+                } catch (Throwable $e) {}
+            }
         } catch (Exception $e) {
             // Ignore if tables do not exist yet
         }

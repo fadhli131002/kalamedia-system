@@ -34,17 +34,23 @@ $invoices = $db->query("
     ORDER BY i.id DESC
 ")->fetchAll();
 
-// Statistics (Scoped if client)
-$statClientWhere = ($isClientUser && $clientId) ? " AND client_id = " . intval($clientId) : "";
-$totalBilled = floatval($db->query("SELECT COALESCE(SUM(total_amount), 0) FROM invoices WHERE COALESCE(is_deleted, 0) = 0" . $statClientWhere)->fetchColumn());
+// Statistics (Scoped if client & strictly joined to active clients so KPI totals always match the table)
+$statClientWhere = ($isClientUser && $clientId) ? " AND i.client_id = " . intval($clientId) : "";
+$totalBilled = floatval($db->query("
+    SELECT COALESCE(SUM(i.total_amount), 0)
+    FROM invoices i
+    JOIN clients c ON i.client_id = c.id
+    WHERE COALESCE(i.is_deleted, 0) = 0 AND COALESCE(c.is_deleted, 0) = 0" . $statClientWhere
+)->fetchColumn());
 
 // Calculate total actual cash paid (including partial installments)
 $paySumQuery = "
     SELECT COALESCE(SUM(p.amount), 0) 
     FROM invoice_payments p 
     JOIN invoices i ON p.invoice_id = i.id 
-    WHERE COALESCE(p.is_deleted, 0) = 0 AND COALESCE(i.is_deleted, 0) = 0
-" . (($isClientUser && $clientId) ? " AND i.client_id = " . intval($clientId) : "");
+    JOIN clients c ON i.client_id = c.id
+    WHERE COALESCE(p.is_deleted, 0) = 0 AND COALESCE(i.is_deleted, 0) = 0 AND COALESCE(c.is_deleted, 0) = 0
+" . $statClientWhere;
 $totalPaid = floatval($db->query($paySumQuery)->fetchColumn());
 $totalUnpaid = max(0, $totalBilled - $totalPaid);
 ?>

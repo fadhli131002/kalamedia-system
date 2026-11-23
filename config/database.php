@@ -80,10 +80,10 @@ class Database {
             }
 
             // High Performance: Only run migrations if lock file does not exist (0ms overhead on requests)
-            $lockFile = BASE_PATH . '/database/.schema_v18.lock';
+            $lockFile = BASE_PATH . '/database/.schema_v19.lock';
             if (!file_exists($lockFile)) {
                 self::runMigrations(self::$instance, self::$driver);
-                @file_put_contents($lockFile, "Schema v18 initialized at " . date('Y-m-d H:i:s'));
+                @file_put_contents($lockFile, "Schema v19 initialized at " . date('Y-m-d H:i:s'));
             }
 
             // Ensure core system accounts (Owner & Admin) always exist
@@ -838,6 +838,23 @@ class Database {
                 try {
                     $db->exec("ALTER TABLE {$t} ADD COLUMN is_deleted INT DEFAULT 0");
                 } catch (Exception $e) {}
+            }
+        }
+
+        // 4b. Migrate `invoices` columns for Contract Period tracking (period_start, period_end, period_label)
+        $invCols = $getTableCols('invoices');
+        if (!empty($invCols)) {
+            $neededInvCols = [
+                'period_start' => 'DATE DEFAULT NULL',
+                'period_end'   => 'DATE DEFAULT NULL',
+                'period_label' => 'VARCHAR(150) DEFAULT NULL'
+            ];
+            foreach ($neededInvCols as $cName => $cDef) {
+                if (!in_array($cName, $invCols)) {
+                    try {
+                        $db->exec("ALTER TABLE invoices ADD COLUMN {$cName} {$cDef}");
+                    } catch (Throwable $e) {}
+                }
             }
         }
 

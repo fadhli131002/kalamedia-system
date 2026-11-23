@@ -379,14 +379,23 @@ if ($action === 'renew_contract') {
             }
 
             $insInv = $db->prepare("
+                SELECT COUNT(*) FROM invoices WHERE client_id = ? AND COALESCE(is_deleted, 0) = 0
+            ");
+            $insInv->execute([$id]);
+            $nextPeriodNum = intval($insInv->fetchColumn()) + 1;
+            $periodLabelVal = "Periode {$nextPeriodNum} (Perpanjangan)";
+
+            $insInv = $db->prepare("
                 INSERT INTO invoices (
                     invoice_number, client_id, project_id, issue_date, due_date,
+                    period_start, period_end, period_label,
                     subtotal, discount_percent, discount_amount, tax_percent, tax_amount,
                     total_amount, status, notes, is_deleted
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Draft', ?, 0)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Draft', ?, 0)
             ");
             $insInv->execute([
                 $invoiceNumber, $id, $projectId, $issueDate, $dueDate,
+                $startDate, $endDate, $periodLabelVal,
                 $subtotal, $discountPercent, $discountAmount, $taxPercent, $taxAmount,
                 $totalAmount, $notes
             ]);

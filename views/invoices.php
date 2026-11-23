@@ -18,9 +18,12 @@ if ($filterStatus !== 'all') {
 }
 
 $invoices = $db->query("
-    SELECT i.*, c.name as client_name, c.company as client_company, c.phone as client_phone, p.name as project_name,
+    SELECT i.*, c.name as client_name, c.company as client_company, c.phone as client_phone,
+           c.contract_start_date as client_contract_start, c.contract_end_date as client_contract_end,
+           p.name as project_name,
            COALESCE(p_sum.total_paid, 0) as paid_amount,
-           COALESCE(p_sum.payments_count, 0) as payments_count
+           COALESCE(p_sum.payments_count, 0) as payments_count,
+           (SELECT COUNT(*) FROM invoices i2 WHERE i2.client_id = i.client_id AND COALESCE(i2.is_deleted, 0) = 0 AND i2.id <= i.id) as client_period_seq
     FROM invoices i
     JOIN clients c ON i.client_id = c.id
     LEFT JOIN projects p ON i.project_id = p.id
@@ -416,6 +419,7 @@ $totalUnpaid = max(0, $totalBilled - $totalPaid);
                   <th style="white-space: nowrap !important;">NO. INVOICE</th>
                   <th style="white-space: nowrap !important;">KLIEN &amp; PERUSAHAAN</th>
                   <th style="white-space: nowrap !important;">PROYEK TERKAIT</th>
+                  <th style="white-space: nowrap !important;">PERIODE KONTRAK</th>
                   <th style="white-space: nowrap !important;">TANGGAL TERBIT</th>
                   <th style="white-space: nowrap !important;">JATUH TEMPO</th>
                   <th style="white-space: nowrap !important;">TOTAL TAGIHAN</th>
@@ -425,7 +429,7 @@ $totalUnpaid = max(0, $totalBilled - $totalPaid);
               </thead>
               <tbody>
                 <?php if (empty($invoices)): ?>
-                  <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 32px; white-space: nowrap !important;">Tidak ada invoice ditemukan.</td></tr>
+                  <tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 32px; white-space: nowrap !important;">Tidak ada invoice ditemukan.</td></tr>
                 <?php else: ?>
                   <?php foreach ($invoices as $inv): ?>
                     <?php
@@ -489,6 +493,33 @@ $totalUnpaid = max(0, $totalBilled - $totalPaid);
                       </td>
                       <td style="color: var(--text-secondary); font-size: 13px; white-space: nowrap !important;">
                         <?= $inv['project_name'] ? htmlspecialchars($inv['project_name']) : '<span style="color:var(--text-muted);">-</span>' ?>
+                      </td>
+                      <td style="white-space: nowrap !important;">
+                        <?php
+                          $pSeq = max(1, intval($inv['client_period_seq'] ?? 1));
+                          $pLabel = !empty($inv['period_label'])
+                              ? $inv['period_label']
+                              : ($pSeq > 1 ? "Periode {$pSeq} (Perpanjangan)" : "Periode 1");
+                          $pStart = !empty($inv['period_start']) ? $inv['period_start'] : $inv['issue_date'];
+                          if (!empty($inv['period_end'])) {
+                              $pEnd = $inv['period_end'];
+                          } elseif ($pSeq === 1 && stripos($inv['notes'] ?? '', '3 bulan') !== false) {
+                              $pEnd = date('Y-m-d', strtotime($pStart . ' +89 days'));
+                          } elseif (!empty($inv['client_contract_start']) && $inv['client_contract_start'] === $pStart && !empty($inv['client_contract_end'])) {
+                              $pEnd = $inv['client_contract_end'];
+                          } else {
+                              $pEnd = date('Y-m-d', strtotime($pStart . ' +30 days'));
+                          }
+                          $isRenewalBadge = ($pSeq > 1 || stripos($pLabel, 'Perpanjangan') !== false);
+                        ?>
+                        <div>
+                          <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 700; background: <?= $isRenewalBadge ? '#EFF6FF' : '#F3E8FF' ?>; color: <?= $isRenewalBadge ? '#1D4ED8' : '#6D28D9' ?>; border: 1px solid <?= $isRenewalBadge ? '#BFDBFE' : '#DDD6FE' ?>;">
+                            <?= htmlspecialchars($pLabel) ?>
+                          </span>
+                        </div>
+                        <div style="font-size: 11.5px; font-weight: 600; color: var(--text-secondary); margin-top: 3px;">
+                          <?= date('d M Y', strtotime($pStart)) ?> &ndash; <?= date('d M Y', strtotime($pEnd)) ?>
+                        </div>
                       </td>
                       <td style="color: var(--text-secondary); white-space: nowrap !important;"><?= format_date($inv['issue_date']) ?></td>
                       <td style="color: var(--text-secondary); white-space: nowrap !important;"><?= format_date($inv['due_date']) ?></td>
@@ -570,7 +601,7 @@ $totalUnpaid = max(0, $totalBilled - $totalPaid);
 
                     <!-- ACCORDION EXPANDABLE ROW (RIWAYAT TERMIN PEMBAYARAN) -->
                     <tr id="inv-terms-row-<?= $inv['id'] ?>" class="invoice-terms-row" style="display: none; background: #F8F9FC;">
-                      <td colspan="8" style="padding: 16px 20px; border-top: 1px dashed #D0D5DD; border-bottom: 2px solid #EAECF0;">
+                      <td colspan="9" style="padding: 16px 20px; border-top: 1px dashed #D0D5DD; border-bottom: 2px solid #EAECF0;">
                         <div id="inv-terms-container-<?= $inv['id'] ?>">
                           <div style="display: flex; align-items: center; justify-content: center; padding: 20px; color: #667085; font-size: 12.5px;">
                             <span class="spinner-border spinner-border-sm" style="margin-right: 8px;"></span> Memuat riwayat termin pembayaran...

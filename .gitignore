@@ -10,3 +10,8 @@ scratch/
 .DS_Store
 Thumbs.db
 
+assets/uploads/receipts/
+assets/uploads/uploads/
+.env
+*.sqlite
+*.db

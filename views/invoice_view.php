@@ -16,7 +16,9 @@ if ($invoiceId <= 0) {
 
 $stmt = $db->prepare("
     SELECT i.*, c.name as client_name, c.company as client_company, c.email as client_email, c.phone as client_phone, c.address as client_address,
-           p.name as project_name
+           c.contract_start_date as client_contract_start, c.contract_end_date as client_contract_end,
+           p.name as project_name,
+           (SELECT COUNT(*) FROM invoices i2 WHERE i2.client_id = i.client_id AND COALESCE(i2.is_deleted, 0) = 0 AND i2.id <= i.id) as client_period_seq
     FROM invoices i
     JOIN clients c ON i.client_id = c.id
     LEFT JOIN projects p ON i.project_id = p.id
@@ -61,6 +63,23 @@ $isPartiallyPaid = (!$isFullyPaid && $totalPaid > 0);
 // Date formatting for template (d/m/Y or j/n/Y like in sample 16/8/2026)
 $issueDateFormatted = date('j/n/Y', strtotime($invoice['issue_date']));
 $dueDateFormatted = date('j/n/Y', strtotime($invoice['due_date']));
+
+// Resolve Period Start, End & Label
+$pSeq = max(1, intval($invoice['client_period_seq'] ?? 1));
+$periodLabelDisplay = !empty($invoice['period_label'])
+    ? $invoice['period_label']
+    : ($pSeq > 1 ? "Periode {$pSeq} - Perpanjangan" : "Periode 1");
+$pStartRaw = !empty($invoice['period_start']) ? $invoice['period_start'] : $invoice['issue_date'];
+if (!empty($invoice['period_end'])) {
+    $pEndRaw = $invoice['period_end'];
+} elseif ($pSeq === 1 && stripos($invoice['notes'] ?? '', '3 bulan') !== false) {
+    $pEndRaw = date('Y-m-d', strtotime($pStartRaw . ' +89 days'));
+} elseif (!empty($invoice['client_contract_start']) && $invoice['client_contract_start'] === $pStartRaw && !empty($invoice['client_contract_end'])) {
+    $pEndRaw = $invoice['client_contract_end'];
+} else {
+    $pEndRaw = date('Y-m-d', strtotime($pStartRaw . ' +30 days'));
+}
+$periodDateRangeFormatted = date('j/n/Y', strtotime($pStartRaw)) . ' – ' . date('j/n/Y', strtotime($pEndRaw));
 
 // Default Note if empty
 $defaultNote = "Lingkup pekerjaan meliputi manajemen & monitoring konten untuk periode 1 bulan (30 hari). Pekerjaan akan mulai berjalan setelah pembayaran down payment (DP) sebesar 50% berhasil dikonfirmasi.";
@@ -264,6 +283,9 @@ $qrData = file_exists($qrPath) ? 'data:image/svg+xml;base64,' . base64_encode(fi
         <div class="km-dates-row" style="display: flex !important; justify-content: flex-end !important; gap: 24px !important; font-size: 12px !important; color: #000000 !important; white-space: nowrap !important;">
           <div>Date : <span class="val"><?= $issueDateFormatted ?></span></div>
           <div>Due date: <span class="val"><?= $dueDateFormatted ?></span></div>
+        </div>
+        <div class="km-period-row" style="display: flex !important; justify-content: flex-end !important; align-items: center !important; gap: 6px !important; font-size: 12px !important; color: #000000 !important; white-space: nowrap !important; margin-top: 6px !important;">
+          <div>Periode : <span class="val" style="font-weight: 700 !important;"><?= htmlspecialchars($periodDateRangeFormatted) ?></span> <span style="font-size: 11px !important; color: #4B5563 !important; font-weight: 600 !important;">(<?= htmlspecialchars($periodLabelDisplay) ?>)</span></div>
         </div>
       </div>
     </div>

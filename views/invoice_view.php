@@ -66,9 +66,8 @@ $dueDateFormatted = date('j/n/Y', strtotime($invoice['due_date']));
 
 // Resolve Period Start, End & Label
 $pSeq = max(1, intval($invoice['client_period_seq'] ?? 1));
-$periodLabelDisplay = !empty($invoice['period_label'])
-    ? $invoice['period_label']
-    : ($pSeq > 1 ? "Periode {$pSeq} - Perpanjangan" : "Periode 1");
+$rawPeriodLabel = !empty($invoice['period_label']) ? $invoice['period_label'] : "Periode {$pSeq}";
+$periodLabelDisplay = trim(preg_replace('/\s*\(?Perpanjangan\)?/i', '', $rawPeriodLabel)) ?: "Periode {$pSeq}";
 $pStartRaw = !empty($invoice['period_start']) ? $invoice['period_start'] : $invoice['issue_date'];
 if (!empty($invoice['period_end'])) {
     $pEndRaw = $invoice['period_end'];

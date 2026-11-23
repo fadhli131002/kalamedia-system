@@ -383,7 +383,7 @@ if ($action === 'renew_contract') {
             ");
             $insInv->execute([$id]);
             $nextPeriodNum = intval($insInv->fetchColumn()) + 1;
-            $periodLabelVal = "Periode {$nextPeriodNum} (Perpanjangan)";
+            $periodLabelVal = "Periode {$nextPeriodNum}";
 
             $insInv = $db->prepare("
                 INSERT INTO invoices (

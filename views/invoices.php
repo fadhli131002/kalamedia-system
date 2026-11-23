@@ -497,9 +497,8 @@ $totalUnpaid = max(0, $totalBilled - $totalPaid);
                       <td style="white-space: nowrap !important;">
                         <?php
                           $pSeq = max(1, intval($inv['client_period_seq'] ?? 1));
-                          $pLabel = !empty($inv['period_label'])
-                              ? $inv['period_label']
-                              : ($pSeq > 1 ? "Periode {$pSeq} (Perpanjangan)" : "Periode 1");
+                          $rawPLabel = !empty($inv['period_label']) ? $inv['period_label'] : "Periode {$pSeq}";
+                          $pLabel = trim(preg_replace('/\s*\(?Perpanjangan\)?/i', '', $rawPLabel)) ?: "Periode {$pSeq}";
                           $pStart = !empty($inv['period_start']) ? $inv['period_start'] : $inv['issue_date'];
                           if (!empty($inv['period_end'])) {
                               $pEnd = $inv['period_end'];

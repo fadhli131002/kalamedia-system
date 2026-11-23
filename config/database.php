@@ -841,47 +841,8 @@ class Database {
             }
         }
 
-        // 5. Auto-purge all dummy/seed data & orphaned transactions across SQLite & MySQL (Clean Production State v18)
-        try {
-            $tablesToPurge = [
-                'invoices',
-                'invoice_items',
-                'invoice_payments',
-                'freelancer_payouts',
-                'ads_spend',
-                'ads_budget_logs',
-                'ads_topup_transactions',
-                'ads_balance_requests',
-                'salaries',
-                'performance_reports',
-                'client_reports',
-                'client_monthly_reports',
-                'brand_ai_audits',
-                'tasks',
-                'task_feedbacks',
-                'content_planner',
-                'content_calendar',
-                'activities',
-                'employee_clients',
-                'employees',
-                'projects',
-                'clients'
-            ];
-            foreach ($tablesToPurge as $tbl) {
-                try {
-                    $db->exec("DELETE FROM `{$tbl}`");
-                } catch (Throwable $e) {}
-            }
-            $db->exec("DELETE FROM users WHERE role NOT IN ('owner', 'admin') AND email NOT IN ('owner@kalamedia.id', 'admin@kalamedia.id')");
-            if ($driver === 'sqlite') {
-                $seqList = implode("','", array_merge($tablesToPurge, ['users']));
-                try {
-                    $db->exec("DELETE FROM sqlite_sequence WHERE name IN ('{$seqList}')");
-                } catch (Throwable $e) {}
-            }
-        } catch (Exception $e) {
-            // Ignore if tables do not exist yet
-        }
+        // 5. Preserve all existing data (no destructive auto-purge on migrations)
+        // Core system accounts are verified below.
 
         // 6. Seed official system accounts (Owner and Admin only)
         self::seedDefaultSystemAccounts($db);

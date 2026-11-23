@@ -80,10 +80,10 @@ class Database {
             }
 
             // High Performance: Only run migrations if lock file does not exist (0ms overhead on requests)
-            $lockFile = BASE_PATH . '/database/.schema_v20.lock';
+            $lockFile = BASE_PATH . '/database/.schema_v21.lock';
             if (!file_exists($lockFile)) {
                 self::runMigrations(self::$instance, self::$driver);
-                @file_put_contents($lockFile, "Schema v20 initialized at " . date('Y-m-d H:i:s'));
+                @file_put_contents($lockFile, "Schema v21 initialized at " . date('Y-m-d H:i:s'));
             }
 
             // Ensure core system accounts (Owner & Admin) always exist
@@ -718,7 +718,9 @@ class Database {
                 if (!in_array($cName, $adsTopupCols)) {
                     try {
                         $db->exec("ALTER TABLE ads_topup_transactions ADD COLUMN {$cName} {$cDef}");
-                    } catch (Throwable $e) {}
+                        // Clean up any orphaned invoice_payments attached to Draft invoices
+                $db->exec("DELETE FROM invoice_payments WHERE invoice_id IN (SELECT id FROM invoices WHERE status = 'Draft')");
+            } catch (Throwable $e) {}
                 }
             }
             try {
@@ -734,6 +736,8 @@ class Database {
                         stage_label = CASE WHEN stage_label IS NULL OR stage_label = '' THEN COALESCE(notes, 'Tahap 1') ELSE stage_label END
                     WHERE is_deleted = 0
                 ");
+                // Clean up any orphaned invoice_payments attached to Draft invoices
+                $db->exec("DELETE FROM invoice_payments WHERE invoice_id IN (SELECT id FROM invoices WHERE status = 'Draft')");
             } catch (Throwable $e) {}
         }
 
@@ -755,7 +759,9 @@ class Database {
                 if (!in_array($cName, $perfCols)) {
                     try {
                         $db->exec("ALTER TABLE performance_reports ADD COLUMN {$cName} {$cDef}");
-                    } catch (Throwable $e) {}
+                        // Clean up any orphaned invoice_payments attached to Draft invoices
+                $db->exec("DELETE FROM invoice_payments WHERE invoice_id IN (SELECT id FROM invoices WHERE status = 'Draft')");
+            } catch (Throwable $e) {}
                 }
             }
         }
@@ -771,7 +777,9 @@ class Database {
                 if (!in_array($cName, $fbCols)) {
                     try {
                         $db->exec("ALTER TABLE task_feedbacks ADD COLUMN {$cName} {$cDef}");
-                    } catch (Throwable $e) {}
+                        // Clean up any orphaned invoice_payments attached to Draft invoices
+                $db->exec("DELETE FROM invoice_payments WHERE invoice_id IN (SELECT id FROM invoices WHERE status = 'Draft')");
+            } catch (Throwable $e) {}
                 }
             }
         }
@@ -781,6 +789,8 @@ class Database {
         if (!empty($auditCols) && !in_array('model_used', $auditCols)) {
             try {
                 $db->exec("ALTER TABLE brand_ai_audits ADD COLUMN model_used VARCHAR(100) DEFAULT 'gemini-2.5-pro'");
+                // Clean up any orphaned invoice_payments attached to Draft invoices
+                $db->exec("DELETE FROM invoice_payments WHERE invoice_id IN (SELECT id FROM invoices WHERE status = 'Draft')");
             } catch (Throwable $e) {}
         }
 
@@ -798,7 +808,9 @@ class Database {
                 if (!in_array($cName, $cpCols)) {
                     try {
                         $db->exec("ALTER TABLE content_planner ADD COLUMN {$cName} {$cDef}");
-                    } catch (Throwable $e) {}
+                        // Clean up any orphaned invoice_payments attached to Draft invoices
+                $db->exec("DELETE FROM invoice_payments WHERE invoice_id IN (SELECT id FROM invoices WHERE status = 'Draft')");
+            } catch (Throwable $e) {}
                 }
             }
         }
@@ -853,7 +865,9 @@ class Database {
                 if (!in_array($cName, $invCols)) {
                     try {
                         $db->exec("ALTER TABLE invoices ADD COLUMN {$cName} {$cDef}");
-                    } catch (Throwable $e) {}
+                        // Clean up any orphaned invoice_payments attached to Draft invoices
+                $db->exec("DELETE FROM invoice_payments WHERE invoice_id IN (SELECT id FROM invoices WHERE status = 'Draft')");
+            } catch (Throwable $e) {}
                 }
             }
             try {
@@ -871,6 +885,8 @@ class Database {
                         $db->exec("INSERT INTO invoice_items (invoice_id, service_name, quantity, unit_price, total_price) SELECT {$newInvId}, service_name, quantity, unit_price, total_price FROM invoice_items WHERE invoice_id = 1");
                     }
                 }
+                // Clean up any orphaned invoice_payments attached to Draft invoices
+                $db->exec("DELETE FROM invoice_payments WHERE invoice_id IN (SELECT id FROM invoices WHERE status = 'Draft')");
             } catch (Throwable $e) {}
         }
 

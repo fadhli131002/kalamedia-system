@@ -397,42 +397,6 @@ $qrData = file_exists($qrPath) ? 'data:image/svg+xml;base64,' . base64_encode(fi
 
   </div>
 
-  <!-- Riwayat Termin Pembayaran (Khusus Preview Layar / Tidak Dicetak ke PDF) -->
-  <?php if (!empty($payments)): ?>
-    <div class="no-print" data-html2canvas-ignore="true" style="max-width: 794px; margin: 24px auto 0; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 12px; padding: 20px 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.04);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-        <div style="font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: #1E293B;">
-          Riwayat Pembayaran Termin (Payment History)
-        </div>
-        <span style="font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; background: <?= $isFullyPaid ? '#ECFDF3' : '#FEF0C7' ?>; color: <?= $isFullyPaid ? '#027A48' : '#B54708' ?>;">
-          <?= $isFullyPaid ? 'LUNAS (PAID)' : 'DIBAYAR SEBAGIAN (PARTIALLY PAID)' ?>
-        </span>
-      </div>
-      <table style="width: 100%; border-collapse: collapse; font-size: 12.5px;">
-        <thead>
-          <tr style="border-bottom: 1.5px solid #E2E8F0; color: #64748B; text-align: left; font-size: 11px; text-transform: uppercase; font-weight: 700;">
-            <th style="padding: 8px 10px; width: 36px;">#</th>
-            <th style="padding: 8px 10px;">Keterangan / Tahap</th>
-            <th style="padding: 8px 10px;">Tanggal</th>
-            <th style="padding: 8px 10px;">Metode</th>
-            <th style="padding: 8px 10px; text-align: right;">Nominal</th>
-          </tr>
-        </thead>
-        <tbody>
-          <?php foreach ($payments as $idx => $p): ?>
-            <tr style="border-bottom: 1px solid #F1F5F9;">
-              <td style="padding: 9px 10px; color: #94A3B8;"><?= $idx + 1 ?></td>
-              <td style="padding: 9px 10px; font-weight: 700; color: #0F172A;"><?= htmlspecialchars($p['term_name']) ?></td>
-              <td style="padding: 9px 10px; color: #475569;"><?= date('d/m/Y', strtotime($p['payment_date'])) ?></td>
-              <td style="padding: 9px 10px; color: #475569;"><?= htmlspecialchars($p['payment_method'] ?: 'Transfer') ?></td>
-              <td style="padding: 9px 10px; text-align: right; font-weight: 700; color: #027A48;"><?= format_rupiah($p['amount']) ?></td>
-            </tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
-    </div>
-  <?php endif; ?>
-
   <?php require_once BASE_PATH . '/includes/modals.php'; ?>
 
   <!-- Scripts -->

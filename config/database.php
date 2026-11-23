@@ -80,10 +80,10 @@ class Database {
             }
 
             // High Performance: Only run migrations if lock file does not exist (0ms overhead on requests)
-            $lockFile = BASE_PATH . '/database/.schema_v19.lock';
+            $lockFile = BASE_PATH . '/database/.schema_v20.lock';
             if (!file_exists($lockFile)) {
                 self::runMigrations(self::$instance, self::$driver);
-                @file_put_contents($lockFile, "Schema v19 initialized at " . date('Y-m-d H:i:s'));
+                @file_put_contents($lockFile, "Schema v20 initialized at " . date('Y-m-d H:i:s'));
             }
 
             // Ensure core system accounts (Owner & Admin) always exist
@@ -856,6 +856,22 @@ class Database {
                     } catch (Throwable $e) {}
                 }
             }
+            try {
+                // Non-destructive backfill of period fields & missing renewal Draft invoice if contract was renewed to 2026-11-24
+                $db->exec("UPDATE invoices SET period_start = '2026-10-23', period_end = '2026-11-22', period_label = 'Periode 1' WHERE invoice_number = 'INV-KMC-2610001' AND (period_start IS NULL OR period_start = '')");
+                $db->exec("UPDATE invoices SET period_start = '2026-10-30', period_end = '2027-01-27', period_label = 'Periode 1 (3 Bulan)' WHERE invoice_number = 'INV-KMC-2610002' AND (period_start IS NULL OR period_start = '')");
+                $db->exec("UPDATE invoices SET period_start = '2026-11-24', period_end = '2026-12-24', period_label = 'Periode 2' WHERE invoice_number = 'INV-KMC-2611003'");
+
+                $ppmRenewed = $db->query("SELECT id FROM clients WHERE id = 1 AND contract_start_date = '2026-11-24' AND COALESCE(is_deleted, 0) = 0")->fetchColumn();
+                $hasInv3 = $db->query("SELECT id FROM invoices WHERE invoice_number = 'INV-KMC-2611003'")->fetchColumn();
+                if ($ppmRenewed && !$hasInv3) {
+                    $db->exec("INSERT INTO invoices (invoice_number, client_id, project_id, issue_date, due_date, period_start, period_end, period_label, subtotal, discount_percent, discount_amount, tax_percent, tax_amount, total_amount, status, notes, is_deleted) VALUES ('INV-KMC-2611003', 1, 1, '2026-11-24', '2026-11-27', '2026-11-24', '2026-12-24', 'Periode 2', 1700000, 0, 0, 0, 0, 1700000, 'Draft', 'Tagihan Perpanjangan Kontrak Periode 24 Nov 2026 s/d 24 Dec 2026', 0)");
+                    $newInvId = (int)$db->lastInsertId();
+                    if ($newInvId > 0) {
+                        $db->exec("INSERT INTO invoice_items (invoice_id, service_name, quantity, unit_price, total_price) SELECT {$newInvId}, service_name, quantity, unit_price, total_price FROM invoice_items WHERE invoice_id = 1");
+                    }
+                }
+            } catch (Throwable $e) {}
         }
 
         // 5. Preserve all existing data (no destructive auto-purge on migrations)
